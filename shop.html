@@ -22,7 +22,6 @@
 
     <div class="w-full max-w-sm flex flex-col h-full relative">
         
-        <!-- CABEÇALHO -->
         <header class="flex justify-between items-center mb-6 mt-2">
             <button onclick="window.location.href='menu.html'" class="bg-[#dca3e8] hover:bg-[#bc7bd4] transition-colors rounded-full flex items-center justify-center w-10 h-10 shadow-md text-[#7a32a8] font-black text-xl z-50">
                 ←
@@ -38,20 +37,15 @@
 
         <main class="flex flex-col flex-grow gap-4 overflow-y-auto pb-4 no-scrollbar">
             
-            <!-- BÔNUS DIÁRIO -->
             <div onclick="window.resgatarBonus()" class="bg-gradient-to-br from-[#bc7bd4] to-[#7a32a8] rounded-3xl p-4 shadow-xl border-2 border-[#dca3e8] flex flex-col items-center relative overflow-hidden cursor-pointer transform active:scale-95 transition-transform z-10 w-full">
-                
                 <h2 class="text-white font-black text-xl mb-1 drop-shadow-md pointer-events-none">Bônus Diário</h2>
                 <p class="text-[#7a32a8] bg-[#dca3e8] px-3 py-0.5 rounded-full text-xs font-black mb-2 shadow-sm pointer-events-none">1 Pacote Básico Grátis</p>
-                
                 <img src="pacote1.png" alt="Pacote Diário" class="w-20 h-28 object-contain drop-shadow-2xl pointer-events-none mb-3">
-                
                 <div id="status-bonus" class="bg-[#22c55e] text-white font-black py-2 w-full text-center rounded-full shadow-md pointer-events-none text-sm">
                     PEGAR PACOTE
                 </div>
             </div>
 
-            <!-- PACOTE BÁSICO -->
             <div class="bg-[#dca3e8]/90 backdrop-blur-sm rounded-3xl p-4 shadow-lg flex items-center gap-4 border border-[#dca3e8]/50">
                 <img src="pacote1.png" class="w-16 h-24 object-contain drop-shadow-lg pointer-events-none">
                 <div class="flex flex-col flex-grow">
@@ -63,7 +57,6 @@
                 </div>
             </div>
 
-            <!-- PACOTE PREMIUM -->
             <div class="bg-gradient-to-r from-[#ffd700]/80 to-[#ffaa00]/80 backdrop-blur-sm rounded-3xl p-4 shadow-lg flex items-center gap-4 border border-[#ffd700]">
                 <img src="pacote2.png" class="w-16 h-24 object-contain drop-shadow-lg pointer-events-none">
                 <div class="flex flex-col flex-grow">
@@ -77,7 +70,6 @@
         </main>
     </div>
 
-    <!-- MODAL DE COMPRA -->
     <div id="modal-confirmacao" class="hidden fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 max-w-xs w-full text-center shadow-2xl">
             <h2 class="text-[#7a32a8] font-black text-xl mb-4" id="texto-confirmacao">Confirmar compra?</h2>
@@ -88,11 +80,22 @@
         </div>
     </div>
 
-    <!-- SCRIPT DO FIREBASE -->
+    <!-- MODAL DE ALERTA EM FILA CUSTOMIZADO (Semelhante ao Menu) -->
+    <div id="modal-alerta-custom" class="hidden fixed inset-0 bg-black/80 z-[110] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 max-w-xs w-full text-center shadow-2xl">
+            <h2 class="text-[#7a32a8] font-black text-xl mb-4">Aviso</h2>
+            <p id="mensagem-alerta-custom" class="text-black font-bold mb-6 text-sm leading-relaxed">Mensagem aqui</p>
+            <button id="btn-fechar-alerta-custom" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-2 px-8 rounded-full shadow-md transition-transform hover:scale-105">
+                OK
+            </button>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        // NOVO: Importamos o arrayUnion para salvar a lista de notificações no banco!
+        import { getFirestore, doc, getDoc, setDoc, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyCU3lFTgfrDMaD9jwR7X7ivYPmGQh4VE1g",
@@ -116,13 +119,37 @@
         window.mostrarMensagem = function(texto, tipo) {
             msgAlerta.textContent = texto;
             msgAlerta.classList.remove('hidden', 'bg-red-500', 'bg-green-500', 'bg-yellow-500', 'text-white', 'text-black');
-            
             if (tipo === 'erro') msgAlerta.classList.add('bg-red-500', 'text-white');
             if (tipo === 'sucesso') msgAlerta.classList.add('bg-green-500', 'text-white');
             if (tipo === 'aviso') msgAlerta.classList.add('bg-yellow-500', 'text-black');
-            
             setTimeout(() => msgAlerta.classList.add('hidden'), 4000); 
         };
+
+        // --- SISTEMA DE ALERTAS POP-UP CUSTOMIZADO ---
+        let filaAlertas = [];
+        let alertaAberto = false;
+        const modalAlerta = document.getElementById('modal-alerta-custom');
+        const msgAlertaCustom = document.getElementById('mensagem-alerta-custom');
+
+        function mostrarAlertaPopup(mensagem) {
+            filaAlertas.push(mensagem);
+            processarFilaAlertas();
+        }
+
+        function processarFilaAlertas() {
+            if (alertaAberto || filaAlertas.length === 0) return;
+            alertaAberto = true;
+            msgAlertaCustom.innerHTML = filaAlertas[0]; 
+            modalAlerta.classList.remove('hidden');
+        }
+
+        document.getElementById('btn-fechar-alerta-custom').addEventListener('click', () => {
+            modalAlerta.classList.add('hidden');
+            filaAlertas.shift(); 
+            alertaAberto = false;
+            setTimeout(processarFilaAlertas, 300); 
+        });
+        // ---------------------------------------------
 
         window.obterGameDay = function() {
             let agora = new Date();
@@ -137,7 +164,6 @@
                 if (snap.exists()) {
                     window.saldoMoedas = snap.data().moedas || 0;
                     document.getElementById('player-coins').innerText = window.saldoMoedas;
-                    
                     const hoje = window.obterGameDay();
                     if (snap.data().ultimoResgateDiario === hoje) {
                         const statusDiv = document.getElementById('status-bonus');
@@ -150,17 +176,12 @@
             }
         });
 
-        // ----------------------------------------------------
-        // LÓGICA DO BÔNUS DIÁRIO
-        // ----------------------------------------------------
         window.resgatarBonus = async function() {
             const statusDiv = document.getElementById('status-bonus');
-            
             if (statusDiv.innerText === "JÁ PEGOU HOJE" || statusDiv.innerText === "PROCESSANDO...") {
                 window.mostrarMensagem("Você já pegou hoje ou a transação está em andamento!", "aviso");
                 return;
             }
-
             if (!auth.currentUser) return;
             
             statusDiv.innerText = "PROCESSANDO...";
@@ -169,7 +190,6 @@
             try {
                 const uid = auth.currentUser.uid;
                 const ref = doc(db, "users", uid);
-                
                 const snap = await getDoc(ref);
                 let dados = snap.exists() ? snap.data() : {};
                 const hoje = window.obterGameDay();
@@ -198,9 +218,6 @@
             }
         };
 
-        // ----------------------------------------------------
-        // LÓGICA DE COMPRA DOS PACOTES
-        // ----------------------------------------------------
         window.iniciarCompra = function(tipo, preco) {
             if (window.saldoMoedas < preco) {
                 window.mostrarMensagem("Você não tem moedas suficientes!", "erro");
@@ -217,7 +234,6 @@
             window.pacotePendente = null;
         };
 
-        // --- SISTEMA INTELIGENTE DE PROGRESSÃO NA COMPRA ---
         window.confirmarCompra = async function() {
             document.getElementById('modal-confirmacao').classList.add('hidden');
             if (!window.pacotePendente || !auth.currentUser) return;
@@ -227,33 +243,41 @@
                 const pacoteCampo = window.pacotePendente === 'basico' ? 'pacoteBasico' : 'pacotePremium';
                 const precoGasto = window.precoPendente;
                 
-                // 1. Lê os dados atuais do jogador
                 const snap = await getDoc(ref);
                 const dados = snap.exists() ? snap.data() : {};
                 
-                // 2. Calcula total de moedas gastas e verifica Badge 007
                 let moedasGastas = (dados.estatisticas?.moedasGastas || 0) + precoGasto;
                 let badgesJogador = dados.badges || {};
                 
                 let ganhouBadge = false;
                 let bonusXp = 0;
                 let bonusMoedas = 0;
+                let notificacoesNovas = []; // Lista para salvar as notificações no banco
                 
                 if (moedasGastas >= 3000 && !badgesJogador["badge-007"]) {
                     badgesJogador["badge-007"] = true;
                     ganhouBadge = true;
                     bonusXp += 50;
                     bonusMoedas += 50;
+                    
+                    // Empacota a mensagem de notificação da Badge
+                    notificacoesNovas.push({
+                        id: "notif_" + Date.now() + "_badge007",
+                        titulo: "🏆 Conquista: Consumidor compulsivo",
+                        texto: "Você gastou 3000 moedas na loja!\nRecompensas: 50 XP e 50 Moedas.",
+                        lida: false,
+                        data: new Date().toISOString()
+                    });
                 }
                 
-                // 3. Lógica de Level Up (caso ele tenha ganho os 50 XP da badge)
                 let nivelAtual = dados.nivel || 1;
                 let xpAtual = dados.xp || 0;
                 let novoXp = xpAtual + bonusXp;
                 let subiuNivel = false;
                 let pacotesBasicosGanhos = 0;
                 let pacotesPremiumGanhos = 0;
-                let msgLevelUp = "";
+                let msgLevelUpPopup = "";
+                let textoRecompensaNotificacao = "";
                 
                 function calcularXPMaximo(nivel) {
                     if (nivel >= 1 && nivel <= 5) return 200;
@@ -268,21 +292,30 @@
                     novoXp -= xpMaximo;
                     nivelAtual++;
                     subiuNivel = true;
-                    bonusMoedas += 30; // +30 moedas do level up
+                    bonusMoedas += 30; 
                     pacotesBasicosGanhos++;
                     
                     if (nivelAtual === 10 || nivelAtual === 20 || nivelAtual === 30) {
                         pacotesPremiumGanhos++;
-                        msgLevelUp = `🎉 LEVEL UP! Nível ${nivelAtual} alcançado!\nRecompensas: 1 Pacote Básico, 1 Pacote Premium e 30 Moedas!`;
+                        msgLevelUpPopup = `🎉 LEVEL UP! Nível ${nivelAtual} alcançado!<br><span class="text-xs">Recompensas: 1 Pacote Básico, 1 Pacote Premium e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom"></span>`;
+                        textoRecompensaNotificacao = "1 Pacote Básico, 1 Pacote Premium e 30 Moedas";
                     } else {
-                        msgLevelUp = `🎉 LEVEL UP! Nível ${nivelAtual} alcançado!\nRecompensas: 1 Pacote Básico e 30 Moedas!`;
+                        msgLevelUpPopup = `🎉 LEVEL UP! Nível ${nivelAtual} alcançado!<br><span class="text-xs">Recompensas: 1 Pacote Básico e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom"></span>`;
+                        textoRecompensaNotificacao = "1 Pacote Básico e 30 Moedas";
                     }
+                    
+                    // Empacota a mensagem de notificação do Level Up
+                    notificacoesNovas.push({
+                        id: "notif_" + Date.now() + "_nivel" + nivelAtual,
+                        titulo: `🎉 Level Up: Nível ${nivelAtual}`,
+                        texto: `Parabéns! Você alcançou o Nível ${nivelAtual}.\nRecompensas recebidas: ${textoRecompensaNotificacao}.`,
+                        lida: false,
+                        data: new Date().toISOString()
+                    });
                 }
                 
-                // 4. Prepara as quantidades de pacotes a adicionar na mochila
                 let deltaBasico = (pacoteCampo === 'pacoteBasico') ? 1 : 0;
                 let deltaPremium = (pacoteCampo === 'pacotePremium') ? 1 : 0;
-                
                 deltaBasico += pacotesBasicosGanhos;
                 deltaPremium += pacotesPremiumGanhos;
                 
@@ -290,27 +323,32 @@
                 if (deltaBasico > 0) atualizacaoInventario.pacoteBasico = increment(deltaBasico);
                 if (deltaPremium > 0) atualizacaoInventario.pacotePremium = increment(deltaPremium);
                 
-                // 5. Envia o pacote completo de atualizações para o Firebase
-                await setDoc(ref, {
+                let pacoteAtualizacao = {
                     moedas: increment(-precoGasto + bonusMoedas),
                     inventario: atualizacaoInventario,
                     estatisticas: { moedasGastas: increment(precoGasto) },
                     badges: badgesJogador,
                     xp: novoXp,
                     nivel: nivelAtual
-                }, { merge: true });
+                };
+
+                // Despeja as notificações no banco de dados, se houver
+                if (notificacoesNovas.length > 0) {
+                    pacoteAtualizacao.notificacoes = arrayUnion(...notificacoesNovas);
+                }
                 
-                // Atualiza tela localmente
+                await setDoc(ref, pacoteAtualizacao, { merge: true });
+                
                 window.saldoMoedas = window.saldoMoedas - precoGasto + bonusMoedas;
                 document.getElementById('player-coins').innerText = window.saldoMoedas;
                 window.mostrarMensagem("Compra realizada com sucesso!", "sucesso");
                 
-                // 6. Dispara os avisos se o jogador bateu as metas
+                // Dispara os avisos bonitos na tela
                 if (ganhouBadge) {
-                    setTimeout(() => alert(`🏆 NOVA CONQUISTA!\nBadge: Consumidor compulsivo (Gastou 3000 moedas).\nRecompensa: +50 XP / +50 Moedas`), 800);
+                    mostrarAlertaPopup(`🏆 NOVA CONQUISTA!<br><span class="text-xs font-normal">Badge: Consumidor compulsivo (Gastou 3000 moedas).</span><br><span class="text-sm">Recompensa: +50 XP e +50 <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`);
                 }
                 if (subiuNivel) {
-                    setTimeout(() => alert(msgLevelUp), 1500);
+                    mostrarAlertaPopup(msgLevelUpPopup);
                 }
                 
             } catch (e) {
@@ -320,24 +358,17 @@
             window.pacotePendente = null;
         };
 
-        // CHEAT DE DESENVOLVEDOR 
         window.ativarCheat = async function() {
             if (!auth.currentUser) return;
             try {
                 const ref = doc(db, "users", auth.currentUser.uid);
-                await setDoc(ref, { 
-                    moedas: increment(1000),
-                    ultimoResgateDiario: "" 
-                }, { merge: true });
-                
+                await setDoc(ref, { moedas: increment(1000), ultimoResgateDiario: "" }, { merge: true });
                 window.saldoMoedas += 1000;
                 document.getElementById('player-coins').innerText = window.saldoMoedas;
-                
                 const statusDiv = document.getElementById('status-bonus');
                 statusDiv.innerText = "PEGAR PACOTE";
                 statusDiv.classList.remove('bg-gray-500', 'bg-yellow-500');
                 statusDiv.classList.add('bg-[#22c55e]');
-                
                 window.mostrarMensagem("DEV: +1000 Moedas e Relógio Resetado!", "sucesso");
             } catch (e) {
                 console.error(e);

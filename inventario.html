@@ -85,12 +85,24 @@
             </div>
         </div>
 
+        <!-- MODAL DE ALERTA EM FILA CUSTOMIZADO -->
+        <div id="modal-alerta-custom" class="hidden fixed inset-0 bg-black/80 z-[110] flex items-center justify-center p-4 backdrop-blur-sm">
+            <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 max-w-xs w-full text-center shadow-2xl">
+                <h2 class="text-[#7a32a8] font-black text-xl mb-4">Aviso</h2>
+                <p id="mensagem-alerta-custom" class="text-black font-bold mb-6 text-sm leading-relaxed">Mensagem aqui</p>
+                <button id="btn-fechar-alerta-custom" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-2 px-8 rounded-full shadow-md transition-transform hover:scale-105">
+                    OK
+                </button>
+            </div>
+        </div>
+
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        // NOVO: Importamos o arrayUnion para salvar as notificações
+        import { getFirestore, doc, getDoc, setDoc, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         import { INFO_CARTAS } from './cartas.js';
 
         const firebaseConfig = {
@@ -113,6 +125,32 @@
 
         let arrayCartasRevelar = [];
         let indiceAtualRevelacao = 0;
+
+        // --- SISTEMA DE ALERTAS POP-UP CUSTOMIZADO ---
+        let filaAlertas = [];
+        let alertaAberto = false;
+        const modalAlerta = document.getElementById('modal-alerta-custom');
+        const msgAlertaCustom = document.getElementById('mensagem-alerta-custom');
+
+        function mostrarAlertaPopup(mensagem) {
+            filaAlertas.push(mensagem);
+            processarFilaAlertas();
+        }
+
+        function processarFilaAlertas() {
+            if (alertaAberto || filaAlertas.length === 0) return;
+            alertaAberto = true;
+            msgAlertaCustom.innerHTML = filaAlertas[0]; 
+            modalAlerta.classList.remove('hidden');
+        }
+
+        document.getElementById('btn-fechar-alerta-custom').addEventListener('click', () => {
+            modalAlerta.classList.add('hidden');
+            filaAlertas.shift(); 
+            alertaAberto = false;
+            setTimeout(processarFilaAlertas, 300); 
+        });
+        // ---------------------------------------------
 
         // --- SISTEMA DE DROP RATE ---
         const bancoRaridades = { 'Comum': [], 'Rara': [], 'Épica': [], 'Lendária': [] };
@@ -266,7 +304,7 @@
         modalRevelar.addEventListener('click', mostrarProximaCarta);
 
         // ----------------------------------------------------------------
-        // CLICOU EM "SIM" (Sorteio + Estatísticas + Nível)
+        // CLICOU EM "SIM" (Sorteio + Estatísticas + Nível + Notificações)
         // ----------------------------------------------------------------
         document.getElementById('btn-confirmar-abrir').addEventListener('click', async () => {
             modalConfirmacaoAbrir.classList.add('hidden');
@@ -301,7 +339,6 @@
                     atualizacaoColecao[id] = increment(contagemParaSalvar[id]);
                 }
 
-                // --- INÍCIO DA LÓGICA CORRIGIDA DE PROGRESSÃO ---
                 const docRef = doc(db, "users", currentUser.uid);
                 const snap = await getDoc(docRef);
                 const dadosAtuais = snap.exists() ? snap.data() : {};
@@ -314,21 +351,30 @@
                 let bonusMoedas = 0;
                 let pacotesBasicosGanhos = 0;
                 let pacotesPremiumGanhos = 0;
+                let notificacoesNovas = [];
 
                 // Verifica a Badge-008: Pacotinhos! (30 pacotes abertos)
                 if (pacotesAbertos >= 30 && !badgesJogador["badge-008"]) {
                     badgesJogador["badge-008"] = true;
                     ganhouBadgePacote = true;
-                    bonusXp += 50;     // Badge dá 50 XP
-                    bonusMoedas += 50; // Badge dá 50 Moedas
+                    bonusXp += 50;
+                    bonusMoedas += 50;
+
+                    notificacoesNovas.push({
+                        id: "notif_" + Date.now() + "_badge008",
+                        titulo: "🏆 Conquista: Pacotinhos!",
+                        texto: "Você abriu 30 pacotes!\nRecompensas: 50 XP e 50 Moedas.",
+                        lida: false,
+                        data: new Date().toISOString()
+                    });
                 }
 
-                // Lógica de XP e Level Up (Somente acionado se ganhou XP da Badge)
                 let nivelAtual = dadosAtuais.nivel || 1;
                 let xpAtual = dadosAtuais.xp || 0;
                 let novoXp = xpAtual + bonusXp; 
                 let subiuNivel = false;
-                let msgLevelUp = "";
+                let msgLevelUpPopup = "";
+                let textoRecompensaNotificacao = "";
 
                 function calcularXPMaximo(nivel) {
                     if (nivel >= 1 && nivel <= 5) return 200;
@@ -339,29 +385,33 @@
 
                 let xpMaximo = calcularXPMaximo(nivelAtual);
                 
-                // Se bater o XP necessário, sobe de nível (Limitado ao Nível 30)
                 if (novoXp >= xpMaximo && nivelAtual < 30) {
                     novoXp = novoXp - xpMaximo; 
                     nivelAtual += 1;
                     subiuNivel = true;
-
-                    // Recompensas Padrão
                     bonusMoedas += 30;
                     pacotesBasicosGanhos += 1;
 
-                    // Recompensas de Nível Fechado
                     if (nivelAtual === 10 || nivelAtual === 20 || nivelAtual === 30) {
                         pacotesPremiumGanhos += 1;
-                        msgLevelUp = `🎉 LEVEL UP! Você alcançou o Nível ${nivelAtual}!\nRecompensas: 1 Pacote Básico, 1 Pacote Premium e 30 Moedas!`;
+                        msgLevelUpPopup = `🎉 LEVEL UP! Nível ${nivelAtual} alcançado!<br><span class="text-xs">Recompensas: 1 Pacote Básico, 1 Pacote Premium e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom"></span>`;
+                        textoRecompensaNotificacao = "1 Pacote Básico, 1 Pacote Premium e 30 Moedas";
                     } else {
-                        msgLevelUp = `🎉 LEVEL UP! Você alcançou o Nível ${nivelAtual}!\nRecompensas: 1 Pacote Básico e 30 Moedas!`;
+                        msgLevelUpPopup = `🎉 LEVEL UP! Nível ${nivelAtual} alcançado!<br><span class="text-xs">Recompensas: 1 Pacote Básico e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom"></span>`;
+                        textoRecompensaNotificacao = "1 Pacote Básico e 30 Moedas";
                     }
+
+                    notificacoesNovas.push({
+                        id: "notif_" + Date.now() + "_nivel" + nivelAtual,
+                        titulo: `🎉 Level Up: Nível ${nivelAtual}`,
+                        texto: `Parabéns! Você alcançou o Nível ${nivelAtual}.\nRecompensas recebidas: ${textoRecompensaNotificacao}.`,
+                        lida: false,
+                        data: new Date().toISOString()
+                    });
                 }
 
-                // Balanceamento da Mochila para salvar tudo de uma vez
                 let deltaBasico = (pacoteParaAbrir === 'pacoteBasico') ? -1 : 0;
                 let deltaPremium = (pacoteParaAbrir === 'pacotePremium') ? -1 : 0;
-                
                 deltaBasico += pacotesBasicosGanhos;
                 deltaPremium += pacotesPremiumGanhos;
 
@@ -369,8 +419,7 @@
                 if (deltaBasico !== 0) atualizacaoInventario.pacoteBasico = increment(deltaBasico);
                 if (deltaPremium !== 0) atualizacaoInventario.pacotePremium = increment(deltaPremium);
 
-                // SALVA TUDO NO BANCO DE DADOS
-                await setDoc(docRef, {
+                let pacoteAtualizacao = {
                     inventario: atualizacaoInventario,
                     colecao: atualizacaoColecao,
                     estatisticas: { 
@@ -381,16 +430,22 @@
                     xp: novoXp,
                     nivel: nivelAtual,
                     badges: badgesJogador
-                }, { merge: true });
+                };
 
-                // Dispara os alertas
+                if (notificacoesNovas.length > 0) {
+                    pacoteAtualizacao.notificacoes = arrayUnion(...notificacoesNovas);
+                }
+
+                // SALVA TUDO NO BANCO DE DADOS
+                await setDoc(docRef, pacoteAtualizacao, { merge: true });
+
+                // Dispara os alertas bonitos (Com um leve atraso para dar tempo de começar o suspense)
                 if (ganhouBadgePacote) {
-                    setTimeout(() => alert(`🏆 NOVA CONQUISTA! Badge 'Pacotinhos!' (Abriu 30 pacotes).\nRecompensa: +50 XP / +50 Moedas`), 1000);
+                    setTimeout(() => mostrarAlertaPopup(`🏆 NOVA CONQUISTA!<br><span class="text-xs font-normal">Badge: Pacotinhos! (Abriu 30 pacotes).</span><br><span class="text-sm">Recompensa: +50 XP e +50 <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`), 800);
                 }
                 if (subiuNivel) {
-                    setTimeout(() => alert(msgLevelUp), 1500);
+                    setTimeout(() => mostrarAlertaPopup(msgLevelUpPopup), 1200);
                 }
-                // --- FIM DA LÓGICA DE PROGRESSÃO ---
 
                 // Inicia visual das cartas sorteadas
                 divCartasTiradas.innerHTML = "";

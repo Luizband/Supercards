@@ -33,17 +33,18 @@
             </div>
         </header>
 
-        <div id="mensagem-alerta" class="hidden w-full p-3 mb-4 text-center text-sm font-bold rounded-lg shadow-lg z-50 relative"></div>
+        <div id="mensagem-alerta" class="hidden w-full p-3 mb-4 text-center text-sm font-bold rounded-lg shadow-lg z-50"></div>
 
         <main class="flex flex-col flex-grow gap-4 overflow-y-auto pb-4 no-scrollbar">
+            
             <!-- BÔNUS DIÁRIO -->
             <div class="bg-gradient-to-br from-[#bc7bd4] to-[#7a32a8] rounded-3xl p-4 shadow-xl border-2 border-[#dca3e8] flex flex-col items-center relative overflow-hidden">
                 <h2 class="text-white font-black text-xl mb-1 drop-shadow-md z-10">Bônus Diário</h2>
                 <p class="text-[#7a32a8] bg-[#dca3e8] px-3 py-0.5 rounded-full text-xs font-black mb-3 z-10 shadow-sm">1 Pacote Básico Grátis</p>
                 <img src="pacote1.png" alt="Pacote Diário" class="w-24 h-32 object-contain drop-shadow-2xl z-10">
-                <!-- O Botão agora é 100% controlado pelo JavaScript -->
-                <button id="btn-resgatar-diario" class="mt-4 bg-[#22c55e] hover:bg-[#16a34a] text-white font-black py-2 px-8 rounded-full shadow-lg transition-transform hover:-translate-y-1 cursor-pointer z-10 relative">
-                    RESGATAR
+                <!-- Botão Simplificado: Sempre verde e clicável -->
+                <button id="btn-novo-bonus" class="mt-4 bg-[#22c55e] hover:bg-[#16a34a] text-white font-black py-3 px-10 rounded-full shadow-lg transition-transform hover:-translate-y-1 z-10">
+                    PEGAR PACOTE
                 </button>
             </div>
 
@@ -53,7 +54,7 @@
                 <div class="flex flex-col flex-grow">
                     <h2 class="text-[#7a32a8] font-black text-lg leading-tight">Pacote Básico</h2>
                     <p class="text-gray-700 text-xs font-bold mb-2">5 Cartas Aleatórias</p>
-                    <button id="btn-comprar-basico" class="bg-gray-700 hover:bg-gray-600 text-white font-black py-2 px-4 rounded-xl shadow-md transition-transform hover:-translate-y-1 flex items-center justify-center gap-1 cursor-pointer">
+                    <button id="btn-comprar-basico" class="bg-gray-700 hover:bg-gray-600 text-white font-black py-2 px-4 rounded-xl shadow-md transition-transform hover:-translate-y-1 flex items-center justify-center gap-1">
                         100 <img src="moedas.png" class="w-4 h-4">
                     </button>
                 </div>
@@ -65,7 +66,7 @@
                 <div class="flex flex-col flex-grow">
                     <h2 class="text-[#996600] font-black text-lg leading-tight">Pacote Premium</h2>
                     <p class="text-[#805500] text-[10px] font-bold mb-2 leading-tight">Garante 1 Rara ou superior</p>
-                    <button id="btn-comprar-premium" class="bg-[#996600] hover:bg-[#805500] text-white font-black py-2 px-4 rounded-xl shadow-md transition-transform hover:-translate-y-1 flex items-center justify-center gap-1 cursor-pointer">
+                    <button id="btn-comprar-premium" class="bg-[#996600] hover:bg-[#805500] text-white font-black py-2 px-4 rounded-xl shadow-md transition-transform hover:-translate-y-1 flex items-center justify-center gap-1">
                         300 <img src="moedas.png" class="w-4 h-4">
                     </button>
                 </div>
@@ -104,55 +105,35 @@
 
         let saldoMoedas = 0;
         let dbUserRef = null;
-        let gameDayAtual = "";
 
         const msgAlerta = document.getElementById('mensagem-alerta');
-        const btnDiario = document.getElementById('btn-resgatar-diario');
-
+        
         function mostrarMensagem(texto, tipo) {
             msgAlerta.textContent = texto;
-            msgAlerta.classList.remove('hidden', 'bg-red-500', 'bg-green-500', 'text-white');
+            msgAlerta.classList.remove('hidden', 'bg-red-500', 'bg-green-500', 'bg-yellow-500', 'text-white', 'text-black');
+            
             if (tipo === 'erro') msgAlerta.classList.add('bg-red-500', 'text-white');
             if (tipo === 'sucesso') msgAlerta.classList.add('bg-green-500', 'text-white');
+            if (tipo === 'aviso') msgAlerta.classList.add('bg-yellow-500', 'text-black');
+            
             setTimeout(() => msgAlerta.classList.add('hidden'), 4000); 
         }
 
         function obterGameDay() {
             let agora = new Date();
+            // Reseta às 06:00 da manhã
             if (agora.getHours() < 6) agora.setDate(agora.getDate() - 1);
             return `${agora.getFullYear()}-${agora.getMonth() + 1}-${agora.getDate()}`;
-        }
-
-        // Função BRUTA que troca as classes CSS do botão para evitar bugs
-        function atualizarVisualBotaoDiario(estaResgatado) {
-            if (estaResgatado) {
-                btnDiario.innerText = "RESGATADO";
-                btnDiario.disabled = true;
-                btnDiario.className = "mt-4 bg-gray-500 text-white font-black py-2 px-8 rounded-full shadow-lg opacity-70 cursor-not-allowed z-10 relative";
-            } else {
-                btnDiario.innerText = "RESGATAR";
-                btnDiario.disabled = false;
-                btnDiario.className = "mt-4 bg-[#22c55e] hover:bg-[#16a34a] text-white font-black py-2 px-8 rounded-full shadow-lg transition-transform hover:-translate-y-1 cursor-pointer z-10 relative";
-            }
         }
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 dbUserRef = doc(db, "users", user.uid);
-                gameDayAtual = obterGameDay();
-                
                 const docSnap = await getDoc(dbUserRef);
+                
                 if (docSnap.exists()) {
-                    const dados = docSnap.data();
-                    saldoMoedas = dados.moedas || 0;
+                    saldoMoedas = docSnap.data().moedas || 0;
                     document.getElementById('player-coins').innerText = saldoMoedas;
-                    
-                    // Verifica se já pegou hoje e trava/destrava o botão visualmente
-                    atualizarVisualBotaoDiario(dados.ultimoResgateDiario === gameDayAtual);
-                } else {
-                    // CONTA NOVA! Se não existe dados, garante que o botão vai funcionar!
-                    document.getElementById('player-coins').innerText = "0";
-                    atualizarVisualBotaoDiario(false);
                 }
             } else {
                 window.location.href = "index.html";
@@ -160,52 +141,56 @@
         });
 
         // ----------------------------------------------------
-        // O NOVO CÓDIGO DO BÔNUS DIÁRIO
+        // NOVA LÓGICA DO BÔNUS DIÁRIO (Simples e Direta)
         // ----------------------------------------------------
-        btnDiario.addEventListener('click', async () => {
-            if (btnDiario.disabled) return;
-            
+        const btnNovoBonus = document.getElementById('btn-novo-bonus');
+
+        btnNovoBonus.addEventListener('click', async () => {
             if (!dbUserRef) {
                 mostrarMensagem("Aguarde a conexão com o servidor...", "erro");
                 return;
             }
-            
-            // FEEDBACK VISUAL IMEDIATO PARA PROVAR QUE O CLIQUE FUNCIONOU
-            btnDiario.disabled = true;
-            btnDiario.innerText = "PROCESSANDO...";
-            btnDiario.className = "mt-4 bg-yellow-500 text-white font-black py-2 px-8 rounded-full shadow-lg cursor-wait z-10 relative";
-            
+
+            // Efeito visual imediato de carregamento
+            btnNovoBonus.innerText = "PROCESSANDO...";
+            btnNovoBonus.disabled = true;
+
             try {
-                const hoje = obterGameDay(); 
-                
-                // Validação de segurança
+                // Lê o banco na hora do clique
                 const docSnap = await getDoc(dbUserRef);
-                const dados = docSnap.exists() ? docSnap.data() : {};
+                let ultimoResgate = "";
                 
-                if (dados.ultimoResgateDiario === hoje) {
-                    mostrarMensagem("Você já resgatou o bônus hoje!", "erro");
-                    atualizarVisualBotaoDiario(true);
-                    return;
+                if (docSnap.exists()) {
+                    ultimoResgate = docSnap.data().ultimoResgateDiario || "";
                 }
 
-                // Efetua o resgate
-                await setDoc(dbUserRef, {
-                    inventario: { pacoteBasico: increment(1) },
-                    ultimoResgateDiario: hoje
-                }, { merge: true });
-                
-                gameDayAtual = hoje; 
-                mostrarMensagem("Bônus resgatado! +1 Pacote", "sucesso");
-                atualizarVisualBotaoDiario(true);
+                const dataDeHoje = obterGameDay();
 
-            } catch (e) {
-                console.error("ERRO FIREBASE:", e);
+                // Verifica a trava
+                if (ultimoResgate === dataDeHoje) {
+                    mostrarMensagem("Você já pegou seu pacote hoje! Volte amanhã.", "aviso");
+                } else {
+                    // Entrega o pacote
+                    await setDoc(dbUserRef, {
+                        inventario: { pacoteBasico: increment(1) },
+                        ultimoResgateDiario: dataDeHoje
+                    }, { merge: true });
+                    
+                    mostrarMensagem("🎁 PACOTE RESGATADO COM SUCESSO!", "sucesso");
+                }
+            } catch (error) {
                 mostrarMensagem("Falha na conexão.", "erro");
-                atualizarVisualBotaoDiario(false); // Devolve o botão ao estado clicável se der erro
+                console.error(error);
             }
+
+            // Devolve o botão ao normal após 1 segundo
+            setTimeout(() => {
+                btnNovoBonus.innerText = "PEGAR PACOTE";
+                btnNovoBonus.disabled = false;
+            }, 1000);
         });
 
-        // LÓGICA DO MODAL DE COMPRA DOS OUTROS PACOTES
+        // LÓGICA DO MODAL DE COMPRA (Inalterada)
         let pacotePendente = null;
         let precoPendente = 0;
         const modalConfirmacao = document.getElementById('modal-confirmacao');
@@ -249,7 +234,7 @@
         document.getElementById('btn-comprar-basico').addEventListener('click', () => comprarPacote('basico', 100));
         document.getElementById('btn-comprar-premium').addEventListener('click', () => comprarPacote('premium', 300));
 
-        // CHEAT DE DESENVOLVEDOR (Clicar na palavra "LOJA")
+        // CHEAT DE DESENVOLVEDOR 
         document.getElementById('dev-moedas').addEventListener('click', async () => {
             if (!dbUserRef) return;
             try {
@@ -260,10 +245,6 @@
                 
                 saldoMoedas += 1000;
                 document.getElementById('player-coins').innerText = saldoMoedas;
-                gameDayAtual = ""; 
-                
-                // Usando a nova função para destravar na marra
-                atualizarVisualBotaoDiario(false);
                 
                 mostrarMensagem("DEV: +1000 Moedas e Relógio Resetado!", "sucesso");
             } catch (e) {

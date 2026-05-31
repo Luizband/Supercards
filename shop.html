@@ -27,7 +27,7 @@
             <button onclick="window.location.href='menu.html'" class="bg-[#dca3e8] hover:bg-[#bc7bd4] transition-colors rounded-full flex items-center justify-center w-10 h-10 shadow-md text-[#7a32a8] font-black text-xl">
                 ←
             </button>
-            <h1 class="text-white font-black text-2xl drop-shadow-md">LOJA</h1>
+            <h1 id="dev-moedas" class="text-white font-black text-2xl drop-shadow-md cursor-pointer">LOJA</h1>
             <div class="bg-[#dca3e8] rounded-full px-3 py-1.5 flex items-center justify-center gap-1 shadow-md">
                 <span id="player-coins" class="text-black font-black text-sm">0</span>
                 <img src="moedas.png" alt="Moedas" class="w-5 h-5 object-contain drop-shadow-sm">
@@ -171,6 +171,29 @@
             } catch (e) {
                 mostrarMensagem("Erro ao resgatar.", "erro");
             }
+
+        // CHEAT DE DESENVOLVEDOR: Clicar na palavra LOJA dá 1000 moedas e reseta o relógio
+        document.getElementById('dev-moedas').addEventListener('click', async () => {
+            if (!dbUserRef) return;
+            try {
+                await setDoc(dbUserRef, { 
+                    moedas: increment(1000),
+                    ultimoResgateDiario: "" // Isso apaga a trava de tempo do banco de dados!
+                }, { merge: true });
+                
+                // Atualiza a tela na hora
+                saldoMoedas += 1000;
+                document.getElementById('player-coins').innerText = saldoMoedas;
+                
+                // Destrava o botão do bônus
+                btnDiario.innerText = "RESGATAR";
+                btnDiario.disabled = false;
+                
+                mostrarMensagem("DEV: +1000 Moedas e Relógio Resetado!", "sucesso");
+            } catch (e) {
+                mostrarMensagem("Erro no cheat.", "erro");
+            }
+    
         });
     </script>
 </body>

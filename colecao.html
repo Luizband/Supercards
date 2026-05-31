@@ -17,7 +17,6 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* Filtro para deixar as cartas que não possui em cinza/sombra */
         .carta-bloqueada {
             filter: grayscale(100%) brightness(0.4);
             pointer-events: none;
@@ -28,8 +27,8 @@
 
     <div class="w-full max-w-sm flex flex-col h-full relative">
         
+        <!-- CABEÇALHO COM XP -->
         <header class="flex items-center gap-3 mt-4 mb-4">
-            
             <div class="flex-shrink-0">
                 <div class="bg-[#dca3e8] w-24 h-24 rounded-full flex items-center justify-center text-[#7a32a8] font-bold shadow-lg border-4 border-transparent">
                     foto
@@ -38,7 +37,7 @@
 
             <div class="flex flex-col flex-grow gap-2 justify-center">
                 <div class="bg-[#dca3e8] rounded-full px-4 py-2 flex items-center justify-center shadow-md">
-                    <span id="player-name" class="text-white font-black text-sm drop-shadow-md">NOME DO JOGADOR</span>
+                    <span id="player-name" class="text-[#7a32a8] font-black text-sm drop-shadow-md truncate max-w-[150px]">NOME DO JOGADOR</span>
                 </div>
                 
                 <div class="flex flex-col items-center">
@@ -54,23 +53,25 @@
             </div>
         </header>
 
+        <!-- CAIXA DA COLEÇÃO -->
         <main class="bg-[#dca3e8] rounded-[2rem] flex flex-col flex-grow p-4 shadow-xl overflow-hidden mb-2 relative">
-            <h1 class="text-black font-black text-xl text-center mb-4">COLEÇÃO</h1>
+            <h1 class="text-[#7a32a8] font-black text-xl text-center mb-4 drop-shadow-sm">COLEÇÃO</h1>
             
             <div id="grid-cartas" class="grid grid-cols-4 gap-2 overflow-y-auto no-scrollbar pb-10">
-                </div>
+                <!-- As cartas serão injetadas via JavaScript aqui -->
+            </div>
         </main>
 
+        <!-- BOTÃO VOLTAR -->
         <footer class="mt-auto flex justify-center pb-2 z-10 absolute bottom-4 left-0 w-full pointer-events-none">
             <button onclick="window.location.href='menu.html'" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-2 px-8 rounded-full shadow-lg transition-transform hover:-translate-y-1 pointer-events-auto border-2 border-[#dca3e8]">
                 VOLTAR
             </button>
         </footer>
 
+        <!-- MODAL DA CARTA -->
         <div id="modal-carta" class="hidden fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-center p-4 backdrop-blur-sm">
-            
             <h2 id="modal-titulo" class="text-white font-black text-2xl mb-4 text-center drop-shadow-lg px-4">TÍTULO DA CARTA</h2>
-            
             <img id="modal-imagem" src="" alt="Carta" class="w-[80%] max-w-xs object-contain drop-shadow-2xl mb-6 rounded-lg">
             
             <div class="flex gap-2 w-[80%] max-w-xs justify-center">
@@ -88,6 +89,7 @@
             </div>
         </div>
 
+        <!-- NOVO MODAL DE ALERTA EM FILA -->
         <div id="modal-alerta-custom" class="hidden fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
             <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 max-w-xs w-full text-center shadow-2xl">
                 <h2 class="text-[#7a32a8] font-black text-xl mb-4">Aviso</h2>
@@ -100,6 +102,7 @@
 
     </div>
 
+    <!-- SCRIPT DO FIREBASE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -123,23 +126,34 @@
         let dbUserRef = null;
         let colecaoJogador = {}; 
         let cartaAtivaNoModal = null;
-
         const TOTAL_CARTAS = 52;
 
-        // Funções do Novo Modal de Alerta
+        // --- SISTEMA DE ALERTAS EM FILA ---
+        let filaAlertas = [];
+        let alertaAberto = false;
         const modalAlerta = document.getElementById('modal-alerta-custom');
         const msgAlertaCustom = document.getElementById('mensagem-alerta-custom');
 
         function mostrarAlerta(mensagem) {
-            msgAlertaCustom.innerText = mensagem;
+            filaAlertas.push(mensagem);
+            processarFilaAlertas();
+        }
+
+        function processarFilaAlertas() {
+            if (alertaAberto || filaAlertas.length === 0) return;
+            alertaAberto = true;
+            msgAlertaCustom.innerText = filaAlertas[0]; // Pega o primeiro da fila
             modalAlerta.classList.remove('hidden');
         }
 
         document.getElementById('btn-fechar-alerta-custom').addEventListener('click', () => {
             modalAlerta.classList.add('hidden');
+            filaAlertas.shift(); // Remove o que acabou de ser lido
+            alertaAberto = false;
+            setTimeout(processarFilaAlertas, 300); // Espera 0.3s antes de mostrar o próximo (se houver)
         });
 
-        // Lógica da Barra de XP
+        // --- LÓGICA DE XP E NÍVEL ---
         function calcularXPMaximo(nivel) {
             if (nivel >= 1 && nivel <= 5) return 200;
             if (nivel >= 6 && nivel <= 15) return 750;
@@ -147,6 +161,15 @@
             return 3000;
         }
 
+        function atualizarVisualBarraXP(xpAtual, nivelAtual) {
+            const xpMaximo = calcularXPMaximo(nivelAtual);
+            const porcentagem = Math.min((xpAtual / xpMaximo) * 100, 100);
+            document.getElementById('player-level').innerText = `NÍVEL ${nivelAtual}`;
+            document.getElementById('texto-xp').innerText = `${xpAtual}/${xpMaximo} xp`;
+            document.getElementById('barra-xp').style.width = `${porcentagem}%`;
+        }
+
+        // --- RENDERIZAÇÃO DA COLEÇÃO ---
         function renderizarGridCartas() {
             const grid = document.getElementById('grid-cartas');
             grid.innerHTML = ""; 
@@ -181,6 +204,7 @@
             }
         }
 
+        // --- CONTROLE DO MODAL DE CARTAS ---
         const modal = document.getElementById('modal-carta');
         
         function abrirModal(id, info, quantidade) {
@@ -196,7 +220,87 @@
             cartaAtivaNoModal = null;
         });
 
-        // Lógica de Reciclar Atualizada com o Novo Alerta
+        // --- CHECAGEM AUTOMÁTICA DE BADGES DE COLEÇÃO (AO ABRIR A PÁGINA) ---
+        async function checarBadgesDeColecao(dados) {
+            const badgesJogador = dados.badges || {};
+            let ganhouBadge = false;
+            let qtdBadges = 0;
+
+            // Badge 001: Starter Pack (1 a 52)
+            if (!badgesJogador["badge-001"]) {
+                let temTodas = true;
+                for (let i = 1; i <= 52; i++) {
+                    let id = String(i).padStart(3, '0');
+                    if (!colecaoJogador[id] || colecaoJogador[id] <= 0) { temTodas = false; break; }
+                }
+                if (temTodas) { badgesJogador["badge-001"] = true; ganhouBadge = true; qtdBadges++; }
+            }
+
+            // Badge 002: Coleção SP (020, 036, 045)
+            if (!badgesJogador["badge-002"]) {
+                if (colecaoJogador["020"] > 0 && colecaoJogador["036"] > 0 && colecaoJogador["045"] > 0) {
+                    badgesJogador["badge-002"] = true; ganhouBadge = true; qtdBadges++;
+                }
+            }
+
+            // Badge 009: Coleção Natal (009, 027)
+            if (!badgesJogador["badge-009"]) {
+                if (colecaoJogador["009"] > 0 && colecaoJogador["027"] > 0) {
+                    badgesJogador["badge-009"] = true; ganhouBadge = true; qtdBadges++;
+                }
+            }
+
+            // Se ganhou alguma das badges acima, calcula XP e salva no banco
+            if (ganhouBadge) {
+                let xpAtual = dados.xp || 0;
+                let nivelAtual = dados.nivel || 1;
+                let novoXp = xpAtual + (50 * qtdBadges);
+                let bonusMoedas = (50 * qtdBadges);
+                
+                let subiuNivel = false;
+                let pacotesBasicos = 0;
+                let pacotesPremium = 0;
+
+                let xpMaximo = calcularXPMaximo(nivelAtual);
+                
+                while (novoXp >= xpMaximo && nivelAtual < 30) {
+                    novoXp -= xpMaximo;
+                    nivelAtual++;
+                    subiuNivel = true;
+                    bonusMoedas += 30;
+                    pacotesBasicos++;
+                    if (nivelAtual === 10 || nivelAtual === 20 || nivelAtual === 30) {
+                        pacotesPremium++;
+                    }
+                    xpMaximo = calcularXPMaximo(nivelAtual);
+                }
+
+                let docAtualizacao = {
+                    badges: badgesJogador,
+                    xp: novoXp,
+                    nivel: nivelAtual,
+                    moedas: increment(bonusMoedas)
+                };
+
+                if (pacotesBasicos > 0 || pacotesPremium > 0) {
+                    docAtualizacao.inventario = dados.inventario || {};
+                    if (pacotesBasicos > 0) docAtualizacao.inventario.pacoteBasico = increment(pacotesBasicos);
+                    if (pacotesPremium > 0) docAtualizacao.inventario.pacotePremium = increment(pacotesPremium);
+                }
+
+                await setDoc(dbUserRef, docAtualizacao, { merge: true });
+                atualizarVisualBarraXP(novoXp, nivelAtual);
+
+                // Dispara os alertas
+                mostrarAlerta(`🏆 NOVA(S) CONQUISTA(S)!\nVocê completou coleções e ganhou ${qtdBadges} badge(s).\n+${50 * qtdBadges} XP / +${50 * qtdBadges} Moedas`);
+                if (subiuNivel) {
+                    let msg = (pacotesPremium > 0) ? "1 Pacote Básico, 1 Pacote Premium e 30 Moedas" : "1 Pacote Básico e 30 Moedas";
+                    mostrarAlerta(`🎉 LEVEL UP! Nível ${nivelAtual} alcançado!\nRecompensas: ${msg}!`);
+                }
+            }
+        }
+
+        // --- LÓGICA DE RECICLAR COM BADGE E XP ---
         document.getElementById('btn-reciclar').addEventListener('click', async () => {
             if (!cartaAtivaNoModal) return;
 
@@ -207,22 +311,82 @@
             const ganhoFragmentos = TABELA_FRAGMENTOS[info.raridade];
 
             try {
-                await setDoc(dbUserRef, {
-                    colecao: {
-                        [cartaAtivaNoModal]: increment(-1)
-                    },
-                    fragmentos: increment(ganhoFragmentos)
-                }, { merge: true });
+                // Puxa os dados fresquinhos do banco para ver as estatísticas
+                const docSnap = await getDoc(dbUserRef);
+                const dados = docSnap.exists() ? docSnap.data() : {};
+                
+                let cartasRecicladas = (dados.estatisticas?.cartasRecicladas || 0) + 1; // Soma a reciclagem de agora
+                let badgesJogador = dados.badges || {};
+                let ganhouBadgeReciclagem = false;
 
-                // AQUI ESTÁ A DIFERENÇA: Usa o nosso modal bonito no lugar do alerta do navegador!
-                mostrarAlerta(`Carta reciclada! Você ganhou ${ganhoFragmentos} fragmentos.`);
+                // Checa a Badge 006: Reciclador (30 cartas)
+                if (cartasRecicladas >= 30 && !badgesJogador["badge-006"]) {
+                    badgesJogador["badge-006"] = true;
+                    ganhouBadgeReciclagem = true;
+                }
 
+                let subiuNivel = false;
+                let msgLevelUp = "";
+                let nivelAtual = dados.nivel || 1;
+                let xpAtual = dados.xp || 0;
+
+                // Objeto principal de salvamento
+                let docAtualizacao = {
+                    colecao: { [cartaAtivaNoModal]: increment(-1) },
+                    fragmentos: increment(ganhoFragmentos),
+                    estatisticas: { cartasRecicladas: increment(1) },
+                    badges: badgesJogador
+                };
+
+                // Se ganhou a badge, processa XP e Recompensas
+                if (ganhouBadgeReciclagem) {
+                    let novoXp = xpAtual + 50;
+                    let bonusMoedas = 50;
+                    
+                    let xpMaximo = calcularXPMaximo(nivelAtual);
+                    if (novoXp >= xpMaximo && nivelAtual < 30) {
+                        novoXp -= xpMaximo;
+                        nivelAtual++;
+                        subiuNivel = true;
+                        bonusMoedas += 30;
+                        
+                        docAtualizacao.inventario = { pacoteBasico: increment(1) };
+                        if (nivelAtual === 10 || nivelAtual === 20 || nivelAtual === 30) {
+                            docAtualizacao.inventario.pacotePremium = increment(1);
+                            msgLevelUp = `🎉 LEVEL UP! Nível ${nivelAtual} alcançado!\nRecompensas: 1 Pacote Básico, 1 Pacote Premium e 30 Moedas!`;
+                        } else {
+                            msgLevelUp = `🎉 LEVEL UP! Nível ${nivelAtual} alcançado!\nRecompensas: 1 Pacote Básico e 30 Moedas!`;
+                        }
+                    }
+
+                    docAtualizacao.xp = novoXp;
+                    docAtualizacao.nivel = nivelAtual;
+                    docAtualizacao.moedas = increment(bonusMoedas);
+                    
+                    // Atualiza a barra de XP e Nível na tela imediatamente
+                    atualizarVisualBarraXP(novoXp, nivelAtual);
+                }
+
+                // Salva tudo no banco de uma vez só!
+                await setDoc(dbUserRef, docAtualizacao, { merge: true });
+
+                // Atualiza a interface da coleção localmente
                 colecaoJogador[cartaAtivaNoModal] -= 1;
                 document.getElementById('modal-copias').innerText = colecaoJogador[cartaAtivaNoModal];
-
+                
                 if (colecaoJogador[cartaAtivaNoModal] === 0) {
                     modal.classList.add('hidden');
                     renderizarGridCartas();
+                }
+
+                // Avisos na tela (O sistema de fila organiza tudo)
+                mostrarAlerta(`Carta reciclada! Você ganhou ${ganhoFragmentos} fragmento(s).`);
+                
+                if (ganhouBadgeReciclagem) {
+                    mostrarAlerta(`🏆 NOVA CONQUISTA!\nBadge: Reciclador (Reciclou 30 cartas).\nRecompensa: +50 XP / +50 Moedas`);
+                }
+                if (subiuNivel) {
+                    mostrarAlerta(msgLevelUp);
                 }
 
             } catch (error) {
@@ -231,6 +395,7 @@
             }
         });
 
+        // --- INICIALIZAÇÃO ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('player-name').innerText = user.displayName?.toUpperCase() || "JOGADOR";
@@ -240,18 +405,13 @@
 
                 if (docSnap.exists()) {
                     const dados = docSnap.data();
+                    atualizarVisualBarraXP(dados.xp || 0, dados.nivel || 1);
                     
-                    const xpAtual = dados.xp || 0;
-                    const nivelAtual = dados.nivel || 1;
-                    const xpMaximo = calcularXPMaximo(nivelAtual);
-                    const porcentagem = Math.min((xpAtual / xpMaximo) * 100, 100);
-
-                    document.getElementById('player-level').innerText = `NÍVEL ${nivelAtual}`;
-                    document.getElementById('texto-xp').innerText = `${xpAtual}/${xpMaximo} xp`;
-                    document.getElementById('barra-xp').style.width = `${porcentagem}%`;
-
                     colecaoJogador = dados.colecao || {};
                     renderizarGridCartas();
+                    
+                    // Roda a checagem das badges de coleção assim que carregar!
+                    checarBadgesDeColecao(dados);
                 } else {
                     renderizarGridCartas();
                 }

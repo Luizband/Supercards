@@ -145,6 +145,7 @@
             }
         });
 
+        // LÓGICA DO MODAL DE COMPRA
         let pacotePendente = null;
         let precoPendente = 0;
         const modalConfirmacao = document.getElementById('modal-confirmacao');
@@ -154,14 +155,12 @@
                 mostrarMensagem(`Você não tem moedas suficientes!`, "erro");
                 return;
             }
-            // Abre o modal personalizado
             pacotePendente = tipo;
             precoPendente = preco;
             document.getElementById('texto-confirmacao').innerText = `Comprar por ${preco} moedas?`;
             modalConfirmacao.classList.remove('hidden');
         }
 
-        // Lógica dos botões de dentro do Modal
         document.getElementById('btn-cancelar-compra').addEventListener('click', () => {
             modalConfirmacao.classList.add('hidden');
             pacotePendente = null;
@@ -180,7 +179,7 @@
                 
                 saldoMoedas -= precoPendente;
                 document.getElementById('player-coins').innerText = saldoMoedas;
-                mostrarMensagem("Compra realizada com sucesso!", "sucesso");
+                mostrarMensagem("Compra realizada!", "sucesso");
             } catch (e) {
                 mostrarMensagem("Erro ao processar compra.", "erro");
             }
@@ -190,6 +189,7 @@
         document.getElementById('btn-comprar-basico').addEventListener('click', () => comprarPacote('basico', 100));
         document.getElementById('btn-comprar-premium').addEventListener('click', () => comprarPacote('premium', 300));
 
+        // LÓGICA DO BÔNUS DIÁRIO
         btnDiario.addEventListener('click', async () => {
             try {
                 await setDoc(dbUserRef, {
@@ -202,23 +202,20 @@
             } catch (e) {
                 mostrarMensagem("Erro ao resgatar.", "erro");
             }
-
         });
 
-        // CHEAT DE DESENVOLVEDOR: Clicar na palavra LOJA dá 1000 moedas e reseta o relógio
+        // CHEAT DE DESENVOLVEDOR (Clicar em "LOJA")
         document.getElementById('dev-moedas').addEventListener('click', async () => {
             if (!dbUserRef) return;
             try {
                 await setDoc(dbUserRef, { 
                     moedas: increment(1000),
-                    ultimoResgateDiario: "" // Isso apaga a trava de tempo do banco de dados!
+                    ultimoResgateDiario: "" 
                 }, { merge: true });
                 
-                // Atualiza a tela na hora
                 saldoMoedas += 1000;
                 document.getElementById('player-coins').innerText = saldoMoedas;
                 
-                // Destrava o botão do bônus
                 btnDiario.innerText = "RESGATAR";
                 btnDiario.disabled = false;
                 
@@ -226,7 +223,6 @@
             } catch (e) {
                 mostrarMensagem("Erro no cheat.", "erro");
             }
-    
         });
     </script>
 </body>

@@ -22,14 +22,12 @@
 
     <div class="w-full max-w-sm flex flex-col h-full relative gap-4">
         
-        <!-- CABEÇALHO -->
-        <header class="flex items-center mt-4">
-            <button onclick="window.location.href='menu.html'" class="bg-[#dca3e8] hover:bg-[#bc7bd4] transition-colors rounded-full flex items-center justify-center w-10 h-10 shadow-md text-[#7a32a8] font-black text-xl z-50">
+        <!-- CABEÇALHO CORRIGIDO E ALINHADO -->
+        <header class="relative flex items-center justify-center mt-4 mb-2 min-h-[40px]">
+            <button onclick="window.location.href='menu.html'" class="absolute left-0 bg-[#dca3e8] hover:bg-[#bc7bd4] transition-colors rounded-full flex items-center justify-center w-10 h-10 shadow-md text-[#7a32a8] font-black text-xl z-50">
                 ←
             </button>
-            <div class="flex-grow flex justify-center pr-10">
-                <h1 class="text-white font-black text-2xl drop-shadow-md">CAIXA DE ENTRADA</h1>
-            </div>
+            <h1 class="text-white font-black text-xl drop-shadow-md text-center px-12 leading-tight">CAIXA DE ENTRADA</h1>
         </header>
 
         <!-- LISTA DE NOTIFICAÇÕES -->
@@ -39,7 +37,7 @@
                 <!-- As mensagens serão injetadas aqui -->
             </div>
 
-            <!-- MENSAGEM DE CAIXA VAZIA (Oculta por padrão) -->
+            <!-- MENSAGEM DE CAIXA VAZIA -->
             <div id="mensagem-vazia" class="hidden flex-col items-center justify-center h-full text-center opacity-70">
                 <span class="text-[#7a32a8] text-4xl mb-2">📭</span>
                 <p class="text-[#7a32a8] font-black text-sm uppercase">Caixa Vazia</p>
@@ -121,7 +119,6 @@
             // Renderiza cada mensagem na tela
             notificacoesJogador.forEach((notif, index) => {
                 const item = document.createElement('div');
-                // Se a mensagem não foi lida, usamos um fundo mais forte e texto branco. Se já foi lida, fundo mais claro.
                 const bgClass = notif.lida ? 'bg-white/50 border-[#bc7bd4]' : 'bg-[#7a32a8] border-[#7a32a8]';
                 const titleClass = notif.lida ? 'text-[#7a32a8]' : 'text-white';
                 const dateClass = notif.lida ? 'text-[#7a32a8]/70' : 'text-white/70';
@@ -135,7 +132,7 @@
                         <span class="${titleClass} font-black text-sm truncate">${notif.titulo}</span>
                         <span class="${dateClass} font-bold text-[10px]">${formatarData(notif.data)}</span>
                     </div>
-                    ${!notif.lida ? '<div class="w-3 h-3 bg-[#ffd700] rounded-full shadow-md mr-1"></div>' : ''}
+                    ${!notif.lida ? '<div class="w-3 h-3 bg-[#ffd700] rounded-full shadow-md mr-1 flex-shrink-0"></div>' : ''}
                 `;
 
                 item.addEventListener('click', () => abrirMensagem(index));
@@ -149,7 +146,9 @@
             // Preenche o modal
             mTitulo.innerText = notif.titulo;
             mData.innerText = formatarData(notif.data);
-            mTexto.innerText = notif.texto;
+            
+            // Permite usar a tag da imagem da moeda no HTML se houver
+            mTexto.innerHTML = notif.texto.replace(/<img[^>]*>/g, match => match); 
             
             // Exibe o modal
             modalLeitura.classList.remove('hidden');
@@ -157,7 +156,7 @@
             // Se não estava lida, marca como lida e salva no Firebase
             if (!notif.lida) {
                 notificacoesJogador[index].lida = true;
-                renderizarLista(); // Atualiza a tela imediatamente (some a bolinha amarela)
+                renderizarLista(); // Atualiza a tela imediatamente
                 
                 try {
                     await setDoc(dbUserRef, { notificacoes: notificacoesJogador }, { merge: true });
@@ -178,7 +177,6 @@
                 
                 if (snap.exists()) {
                     const dados = snap.data();
-                    // Pega as notificações e inverte a ordem para a mais nova aparecer primeiro
                     notificacoesJogador = (dados.notificacoes || []).sort((a, b) => new Date(b.data) - new Date(a.data));
                     renderizarLista();
                 }

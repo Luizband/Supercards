@@ -22,7 +22,7 @@
 
     <div class="w-full max-w-sm flex flex-col h-full relative gap-4">
         
-        <!-- CABEÇALHO CORRIGIDO E ALINHADO -->
+        <!-- CABEÇALHO -->
         <header class="relative flex items-center justify-center mt-4 mb-2 min-h-[40px]">
             <button onclick="window.location.href='menu.html'" class="absolute left-0 bg-[#dca3e8] hover:bg-[#bc7bd4] transition-colors rounded-full flex items-center justify-center w-10 h-10 shadow-md text-[#7a32a8] font-black text-xl z-50">
                 ←
@@ -54,13 +54,19 @@
                 <span id="modal-data" class="text-gray-600 font-bold text-[10px] mb-4 border-b border-[#bc7bd4] pb-2">00/00/0000</span>
                 
                 <div class="overflow-y-auto no-scrollbar mb-6 flex-grow">
-                    <!-- O 'whitespace-pre-wrap' é crucial aqui para respeitar as quebras de linha (\n) do texto -->
                     <p id="modal-texto" class="text-black font-bold text-sm leading-relaxed whitespace-pre-wrap">Conteúdo da mensagem aqui.</p>
                 </div>
                 
-                <button id="btn-fechar-leitura" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-3 w-full rounded-full shadow-md transition-transform hover:scale-105 mt-auto">
-                    FECHAR
-                </button>
+                <!-- BOTOES DE AÇÃO (EXCLUIR E FECHAR) -->
+                <div class="flex gap-2 mt-auto">
+                    <button id="btn-excluir-leitura" class="bg-red-600 hover:bg-red-700 text-white font-black py-3 px-6 rounded-full shadow-md transition-transform hover:scale-105 flex items-center justify-center">
+                        🗑️
+                    </button>
+                    <button id="btn-fechar-leitura" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-3 flex-grow rounded-full shadow-md transition-transform hover:scale-105">
+                        FECHAR
+                    </button>
+                </div>
+
             </div>
         </div>
 
@@ -94,11 +100,13 @@
         const mData = document.getElementById('modal-data');
         const mTexto = document.getElementById('modal-texto');
         const btnFechar = document.getElementById('btn-fechar-leitura');
+        const btnExcluir = document.getElementById('btn-excluir-leitura'); // NOVO BOTAO
 
         let notificacoesJogador = [];
         let dbUserRef = null;
+        let indiceMensagemAberta = null; // Guarda qual mensagem estamos lendo
 
-        // Formata a data de ISO "2026-05-31T22:30:00.000Z" para "31/05/2026 às 19:30"
+        // Formata a data
         function formatarData(dataString) {
             const d = new Date(dataString);
             return d.toLocaleDateString('pt-BR') + ' às ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -116,7 +124,6 @@
                 msgVazia.classList.remove('flex');
             }
 
-            // Renderiza cada mensagem na tela
             notificacoesJogador.forEach((notif, index) => {
                 const item = document.createElement('div');
                 const bgClass = notif.lida ? 'bg-white/50 border-[#bc7bd4]' : 'bg-[#7a32a8] border-[#7a32a8]';
@@ -142,21 +149,17 @@
 
         async function abrirMensagem(index) {
             const notif = notificacoesJogador[index];
+            indiceMensagemAberta = index; // Registra qual mensagem está aberta
             
-            // Preenche o modal
             mTitulo.innerText = notif.titulo;
             mData.innerText = formatarData(notif.data);
-            
-            // Permite usar a tag da imagem da moeda no HTML se houver
             mTexto.innerHTML = notif.texto.replace(/<img[^>]*>/g, match => match); 
             
-            // Exibe o modal
             modalLeitura.classList.remove('hidden');
 
-            // Se não estava lida, marca como lida e salva no Firebase
             if (!notif.lida) {
                 notificacoesJogador[index].lida = true;
-                renderizarLista(); // Atualiza a tela imediatamente
+                renderizarLista(); 
                 
                 try {
                     await setDoc(dbUserRef, { notificacoes: notificacoesJogador }, { merge: true });
@@ -166,8 +169,29 @@
             }
         }
 
+        // --- SISTEMA DE EXCLUSÃO DE MENSAGEM ---
+        btnExcluir.addEventListener('click', async () => {
+            if (indiceMensagemAberta !== null) {
+                // 1. Remove 1 item a partir do índice aberto
+                notificacoesJogador.splice(indiceMensagemAberta, 1); 
+                
+                // 2. Fecha o modal e atualiza a tela
+                modalLeitura.classList.add('hidden');
+                renderizarLista();
+                indiceMensagemAberta = null;
+                
+                // 3. Salva a nova lista (sem a mensagem deletada) no Firebase
+                try {
+                    await setDoc(dbUserRef, { notificacoes: notificacoesJogador }, { merge: true });
+                } catch (error) {
+                    console.error("Erro ao deletar mensagem:", error);
+                }
+            }
+        });
+
         btnFechar.addEventListener('click', () => {
             modalLeitura.classList.add('hidden');
+            indiceMensagemAberta = null;
         });
 
         onAuthStateChanged(auth, async (user) => {

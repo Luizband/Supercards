@@ -51,12 +51,12 @@
             </button>
         </footer>
 
+        <!-- MODAL 1: REVELAÇÃO UMA POR UMA -->
         <div id="modal-revelar-carta" class="hidden fixed inset-0 bg-black/95 z-[60] flex flex-col items-center justify-center p-4 backdrop-blur-md cursor-pointer select-none">
             <h3 id="texto-contador-carta" class="text-white font-black text-xl mb-8 tracking-widest uppercase drop-shadow-lg">CARTA 1 DE 5</h3>
             
             <div class="relative w-[65%] max-w-[240px] aspect-[2.5/3.5] flex justify-center items-center">
                 <div id="brilho-raridade" class="absolute inset-0 bg-white blur-3xl opacity-60 rounded-full transition-colors duration-500"></div>
-                
                 <div id="carta-revelada-container" class="relative w-full h-full bg-gray-900 rounded-xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.8)] border-4 border-[#dca3e8] transform transition-transform duration-300 scale-0">
                     <img id="img-carta-revelada" src="" class="w-full h-full object-cover">
                 </div>
@@ -65,6 +65,7 @@
             <p class="text-white/70 font-bold mt-10 animate-pulse text-sm">Toque na tela para revelar</p>
         </div>
 
+        <!-- MODAL 2: RESUMO FINAL -->
         <div id="modal-abrir-pacote" class="hidden fixed inset-0 bg-black/90 z-50 flex flex-col items-center justify-center p-4 backdrop-blur-sm">
             <h2 class="text-white font-black text-3xl mb-8 text-center drop-shadow-[0_0_10px_rgba(220,163,232,0.8)]">NOVAS CARTAS!</h2>
             <div id="cartas-tiradas" class="flex flex-wrap justify-center gap-2 w-full max-w-sm mb-8"></div>
@@ -73,6 +74,7 @@
             </button>
         </div>
 
+        <!-- MODAL DE CONFIRMAÇÃO -->
         <div id="modal-confirmacao-abrir" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
             <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 max-w-xs w-full text-center shadow-2xl">
                 <h2 class="text-[#7a32a8] font-black text-xl mb-4" id="texto-confirmacao-abrir">Deseja abrir?</h2>
@@ -109,11 +111,10 @@
         const divCartasTiradas = document.getElementById('cartas-tiradas');
         let currentUser = null;
 
-        // Variáveis globais para o fluxo de revelação de cartas
         let arrayCartasRevelar = [];
         let indiceAtualRevelacao = 0;
 
-        // --- SISTEMA DE DROP RATE --- //
+        // --- SISTEMA DE DROP RATE ---
         const bancoRaridades = { 'Comum': [], 'Rara': [], 'Épica': [], 'Lendária': [] };
 
         function normalizarRaridade(r) {
@@ -151,7 +152,6 @@
             if (!lista || lista.length === 0) lista = bancoRaridades['Comum']; 
             return lista[Math.floor(Math.random() * lista.length)];
         }
-        // ------------------------------ //
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -220,9 +220,9 @@
             pacoteParaAbrir = null;
         });
 
-        // -----------------------------------------------------------------------------------
+        // ----------------------------------------------------------------
         // LÓGICA DE REVELAÇÃO (CLICAR NA TELA PARA PRÓXIMA CARTA)
-        // -----------------------------------------------------------------------------------
+        // ----------------------------------------------------------------
         const modalRevelar = document.getElementById('modal-revelar-carta');
         const imgCartaRevelada = document.getElementById('img-carta-revelada');
         const containerCartaRevelada = document.getElementById('carta-revelada-container');
@@ -234,27 +234,23 @@
                 const info = INFO_CARTAS[idCarta];
                 const raridade = normalizarRaridade(info.raridade);
                 
-                // Esconde a carta atual dando um "zoom out" rápido
                 containerCartaRevelada.classList.remove('scale-100');
                 containerCartaRevelada.classList.add('scale-0');
                 
-                // Pequeno delay para trocar a imagem enquanto está escondida
                 setTimeout(() => {
                     imgCartaRevelada.src = info.imagem;
                     document.getElementById('texto-contador-carta').innerText = `CARTA ${indiceAtualRevelacao + 1} DE 5`;
                     
-                    // Muda a cor do brilho baseado na raridade
-                    let corBrilho = "rgba(255, 255, 255, 0.4)"; // Comum (Branco)
+                    let corBrilho = "rgba(255, 255, 255, 0.4)"; 
                     let corBorda = "#dca3e8"; 
 
-                    if (raridade === "Rara") { corBrilho = "rgba(59, 130, 246, 0.8)"; corBorda = "#3b82f6"; } // Azul
-                    if (raridade === "Épica") { corBrilho = "rgba(147, 51, 234, 0.8)"; corBorda = "#9333ea"; } // Roxo Forte
-                    if (raridade === "Lendária") { corBrilho = "rgba(234, 179, 8, 0.9)"; corBorda = "#eab308"; } // Dourado
+                    if (raridade === "Rara") { corBrilho = "rgba(59, 130, 246, 0.8)"; corBorda = "#3b82f6"; } 
+                    if (raridade === "Épica") { corBrilho = "rgba(147, 51, 234, 0.8)"; corBorda = "#9333ea"; } 
+                    if (raridade === "Lendária") { corBrilho = "rgba(234, 179, 8, 0.9)"; corBorda = "#eab308"; } 
                     
                     brilhoRaridade.style.backgroundColor = corBrilho;
                     containerCartaRevelada.style.borderColor = corBorda;
 
-                    // Mostra a carta nova dando o "zoom in"
                     containerCartaRevelada.classList.remove('scale-0');
                     containerCartaRevelada.classList.add('scale-100');
                     
@@ -262,23 +258,22 @@
                 }, 200);
 
             } else {
-                // Acabaram as 5 cartas. Fecha a revelação e abre o resumo!
                 modalRevelar.classList.add('hidden');
                 modalPacote.classList.remove('hidden');
             }
         }
 
-        // Clicar no modal de revelação puxa a próxima carta
         modalRevelar.addEventListener('click', mostrarProximaCarta);
 
-        // -----------------------------------------------------------------------------------
-        // Clicou em "SIM" para abrir o pacote
-        // -----------------------------------------------------------------------------------
+        // ----------------------------------------------------------------
+        // CLICOU EM "SIM" (Sorteio + Estatísticas + Nível)
+        // ----------------------------------------------------------------
         document.getElementById('btn-confirmar-abrir').addEventListener('click', async () => {
             modalConfirmacaoAbrir.classList.add('hidden');
             if (!pacoteParaAbrir) return;
 
             try {
+                // 1. Sorteio de Cartas
                 const cartasSorteadas = [];
                 const contagemParaSalvar = {};
 
@@ -301,19 +296,103 @@
                     }
                 }
 
-                // Salva no banco de dados IMEDIATAMENTE por segurança
                 const atualizacaoColecao = {};
                 for (const id in contagemParaSalvar) {
                     atualizacaoColecao[id] = increment(contagemParaSalvar[id]);
                 }
 
+                // --- INÍCIO DA LÓGICA CORRIGIDA DE PROGRESSÃO ---
                 const docRef = doc(db, "users", currentUser.uid);
+                const snap = await getDoc(docRef);
+                const dadosAtuais = snap.exists() ? snap.data() : {};
+                
+                let pacotesAbertos = (dadosAtuais.estatisticas?.pacotesAbertos || 0) + 1;
+                let badgesJogador = dadosAtuais.badges || {};
+                
+                let ganhouBadgePacote = false;
+                let bonusXp = 0;
+                let bonusMoedas = 0;
+                let pacotesBasicosGanhos = 0;
+                let pacotesPremiumGanhos = 0;
+
+                // Verifica a Badge-008: Pacotinhos! (30 pacotes abertos)
+                if (pacotesAbertos >= 30 && !badgesJogador["badge-008"]) {
+                    badgesJogador["badge-008"] = true;
+                    ganhouBadgePacote = true;
+                    bonusXp += 50;     // Badge dá 50 XP
+                    bonusMoedas += 50; // Badge dá 50 Moedas
+                }
+
+                // Lógica de XP e Level Up (Somente acionado se ganhou XP da Badge)
+                let nivelAtual = dadosAtuais.nivel || 1;
+                let xpAtual = dadosAtuais.xp || 0;
+                let novoXp = xpAtual + bonusXp; 
+                let subiuNivel = false;
+                let msgLevelUp = "";
+
+                function calcularXPMaximo(nivel) {
+                    if (nivel >= 1 && nivel <= 5) return 200;
+                    if (nivel >= 6 && nivel <= 15) return 750;
+                    if (nivel >= 16 && nivel <= 25) return 1600;
+                    return 3000;
+                }
+
+                let xpMaximo = calcularXPMaximo(nivelAtual);
+                
+                // Se bater o XP necessário, sobe de nível (Limitado ao Nível 30)
+                if (novoXp >= xpMaximo && nivelAtual < 30) {
+                    novoXp = novoXp - xpMaximo; 
+                    nivelAtual += 1;
+                    subiuNivel = true;
+
+                    // Recompensas Padrão
+                    bonusMoedas += 30;
+                    pacotesBasicosGanhos += 1;
+
+                    // Recompensas de Nível Fechado
+                    if (nivelAtual === 10 || nivelAtual === 20 || nivelAtual === 30) {
+                        pacotesPremiumGanhos += 1;
+                        msgLevelUp = `🎉 LEVEL UP! Você alcançou o Nível ${nivelAtual}!\nRecompensas: 1 Pacote Básico, 1 Pacote Premium e 30 Moedas!`;
+                    } else {
+                        msgLevelUp = `🎉 LEVEL UP! Você alcançou o Nível ${nivelAtual}!\nRecompensas: 1 Pacote Básico e 30 Moedas!`;
+                    }
+                }
+
+                // Balanceamento da Mochila para salvar tudo de uma vez
+                let deltaBasico = (pacoteParaAbrir === 'pacoteBasico') ? -1 : 0;
+                let deltaPremium = (pacoteParaAbrir === 'pacotePremium') ? -1 : 0;
+                
+                deltaBasico += pacotesBasicosGanhos;
+                deltaPremium += pacotesPremiumGanhos;
+
+                let atualizacaoInventario = {};
+                if (deltaBasico !== 0) atualizacaoInventario.pacoteBasico = increment(deltaBasico);
+                if (deltaPremium !== 0) atualizacaoInventario.pacotePremium = increment(deltaPremium);
+
+                // SALVA TUDO NO BANCO DE DADOS
                 await setDoc(docRef, {
-                    inventario: { [pacoteParaAbrir]: increment(-1) },
-                    colecao: atualizacaoColecao
+                    inventario: atualizacaoInventario,
+                    colecao: atualizacaoColecao,
+                    estatisticas: { 
+                        pacotesAbertos: increment(1),
+                        totalCartas: increment(5)
+                    },
+                    moedas: increment(bonusMoedas),
+                    xp: novoXp,
+                    nivel: nivelAtual,
+                    badges: badgesJogador
                 }, { merge: true });
 
-                // Prepara a tela final de resumo por baixo dos panos
+                // Dispara os alertas
+                if (ganhouBadgePacote) {
+                    setTimeout(() => alert(`🏆 NOVA CONQUISTA! Badge 'Pacotinhos!' (Abriu 30 pacotes).\nRecompensa: +50 XP / +50 Moedas`), 1000);
+                }
+                if (subiuNivel) {
+                    setTimeout(() => alert(msgLevelUp), 1500);
+                }
+                // --- FIM DA LÓGICA DE PROGRESSÃO ---
+
+                // Inicia visual das cartas sorteadas
                 divCartasTiradas.innerHTML = "";
                 cartasSorteadas.forEach((id, index) => {
                     const info = INFO_CARTAS[id];
@@ -324,7 +403,6 @@
                     `;
                 });
 
-                // Inicia o fluxo de revelar uma por vez
                 arrayCartasRevelar = cartasSorteadas;
                 indiceAtualRevelacao = 0;
                 modalRevelar.classList.remove('hidden');
@@ -336,7 +414,6 @@
             pacoteParaAbrir = null;
         });
 
-        // Clicar em guardar na coleção fecha o resumo final e recarrega
         document.getElementById('btn-fechar-pacote').addEventListener('click', () => {
             modalPacote.classList.add('hidden');
             carregarInventario(); 

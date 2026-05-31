@@ -39,23 +39,20 @@
                     </button>
                     
                     <button onclick="window.location.href='shop.html'" class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-8 h-8 shadow-sm">
-    			<img src="shop.png" alt="Shop" class="w-4 h-4 object-contain">
-		    </button>
+                        <img src="shop.png" alt="Shop" class="w-4 h-4 object-contain">
+                    </button>
                     
                     <button class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-8 h-8 shadow-sm">
                         <img src="missao.png" alt="Missões" class="w-4 h-4 object-contain">
                     </button>
                     
-                    <!-- NOVO: Container do Menu de Configurações -->
+                    <!-- Container do Menu de Configurações -->
                     <div class="relative flex items-center">
-                        <!-- O Botão da Engrenagem -->
                         <button id="btn-config" class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-8 h-8 shadow-sm">
                             <img src="config.png" alt="Configurações" class="w-4 h-4 object-contain">
                         </button>
 
-                        <!-- O Mini Menu (Começa oculto) -->
                         <div id="dropdown-config" class="hidden absolute right-0 top-10 w-32 bg-[#bc7bd4] border-2 border-[#7a32a8] rounded-xl shadow-2xl overflow-hidden z-50">
-                            <!-- Botão Sair -->
                             <button id="btn-sair" class="w-full px-4 py-2 text-white font-bold text-sm hover:bg-[#7a32a8] transition-colors flex items-center justify-between">
                                 Sair
                                 <span>🚪</span>
@@ -115,13 +112,23 @@
             </div>
         </footer>
 
+        <!-- MODAL DE ALERTA EM FILA -->
+        <div id="modal-alerta-custom" class="hidden fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
+            <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 max-w-xs w-full text-center shadow-2xl">
+                <h2 class="text-[#7a32a8] font-black text-xl mb-4">Aviso</h2>
+                <p id="mensagem-alerta-custom" class="text-black font-bold mb-6 text-sm">Mensagem aqui</p>
+                <button id="btn-fechar-alerta-custom" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-2 px-8 rounded-full shadow-md transition-transform hover:scale-105">
+                    OK
+                </button>
+            </div>
+        </div>
+
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        // NOVO: Adicionado o "signOut" na lista de importações
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyCU3lFTgfrDMaD9jwR7X7ivYPmGQh4VE1g",
@@ -136,46 +143,179 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // ABRIR E FECHAR O MENU DE CONFIGURAÇÕES
+        // --- CONTROLES DA INTERFACE ---
         const btnConfig = document.getElementById('btn-config');
         const dropdownConfig = document.getElementById('dropdown-config');
 
-        btnConfig.addEventListener('click', () => {
-            dropdownConfig.classList.toggle('hidden');
-        });
-
-        // FECHAR O MENU SE CLICAR FORA DELE
+        btnConfig.addEventListener('click', () => { dropdownConfig.classList.toggle('hidden'); });
+        
         document.addEventListener('click', (event) => {
             if (!btnConfig.contains(event.target) && !dropdownConfig.contains(event.target)) {
                 dropdownConfig.classList.add('hidden');
             }
         });
 
-        // BOTÃO SAIR
         document.getElementById('btn-sair').addEventListener('click', () => {
-            signOut(auth).catch((error) => {
-                console.error("Erro ao sair da conta: ", error);
-            });
+            signOut(auth).catch((error) => console.error("Erro ao sair: ", error));
         });
 
-        // RADAR DE LOGIN (Redireciona automaticamente ao sair)
+        // --- SISTEMA DE ALERTAS EM FILA ---
+        let filaAlertas = [];
+        let alertaAberto = false;
+        const modalAlerta = document.getElementById('modal-alerta-custom');
+        const msgAlertaCustom = document.getElementById('mensagem-alerta-custom');
+
+        function mostrarAlerta(mensagem) {
+            filaAlertas.push(mensagem);
+            processarFilaAlertas();
+        }
+
+        function processarFilaAlertas() {
+            if (alertaAberto || filaAlertas.length === 0) return;
+            alertaAberto = true;
+            msgAlertaCustom.innerText = filaAlertas[0]; 
+            modalAlerta.classList.remove('hidden');
+        }
+
+        document.getElementById('btn-fechar-alerta-custom').addEventListener('click', () => {
+            modalAlerta.classList.add('hidden');
+            filaAlertas.shift(); 
+            alertaAberto = false;
+            setTimeout(processarFilaAlertas, 300); 
+        });
+
+        // --- FUNÇÕES DE DATA (COM RESET ÀS 06:00) ---
+        function obterGameDay(offsetDias = 0) {
+            let d = new Date();
+            if (d.getHours() < 6) d.setDate(d.getDate() - 1);
+            d.setDate(d.getDate() + offsetDias);
+            return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+        }
+
+        function calcularXPMaximo(nivel) {
+            if (nivel >= 1 && nivel <= 5) return 200;
+            if (nivel >= 6 && nivel <= 15) return 750;
+            if (nivel >= 16 && nivel <= 25) return 1600;
+            return 3000;
+        }
+
+        // --- RADAR DE LOGIN & LÓGICA DE DIAS SEGUIDOS ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                document.getElementById('player-name').innerText = user.displayName || "Jogador";
+                document.getElementById('player-name').innerText = user.displayName?.toUpperCase() || "JOGADOR";
 
                 const docRef = doc(db, "users", user.uid);
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
                     const dados = docSnap.data();
-                    document.getElementById('player-coins').innerText = dados.moedas;
-                    document.getElementById('player-level').innerText = dados.nivel;
+                    
+                    const hoje = obterGameDay(0);
+                    const ontem = obterGameDay(-1);
+                    
+                    let ultimoLogin = dados.ultimoLogin || "";
+                    let diasSeguidos = dados.estatisticas?.diasSeguidos || 0;
+                    
+                    let atualizouLogin = false;
+                    let docAtualizacao = {};
+
+                    // 1. CHECA A OFENSIVA DE DIAS
+                    if (ultimoLogin !== hoje) {
+                        atualizouLogin = true;
+                        
+                        if (ultimoLogin === ontem) {
+                            diasSeguidos += 1; // Logou ontem e hoje, continua a ofensiva!
+                        } else {
+                            diasSeguidos = 1; // Pulou um dia, reseta a ofensiva.
+                        }
+                        
+                        docAtualizacao.ultimoLogin = hoje;
+                        docAtualizacao.estatisticas = { diasSeguidos: diasSeguidos }; 
+                    }
+
+                    // 2. CHECA A BADGE 003 (20 DIAS)
+                    let badgesJogador = dados.badges || {};
+                    let ganhouBadge = false;
+                    let bonusXp = 0;
+                    let bonusMoedas = 0;
+
+                    if (diasSeguidos >= 20 && !badgesJogador["badge-003"]) {
+                        badgesJogador["badge-003"] = true;
+                        ganhouBadge = true;
+                        bonusXp += 50;
+                        bonusMoedas += 50;
+                    }
+
+                    // 3. MATEMÁTICA DE LEVEL UP
+                    let nivelAtual = dados.nivel || 1;
+                    let xpAtual = dados.xp || 0;
+                    let subiuNivel = false;
+                    let msgLevelUp = "";
+
+                    if (ganhouBadge) {
+                        let novoXp = xpAtual + bonusXp;
+                        let xpMaximo = calcularXPMaximo(nivelAtual);
+                        let pacotesBasicos = 0;
+                        let pacotesPremium = 0;
+
+                        if (novoXp >= xpMaximo && nivelAtual < 30) {
+                            novoXp -= xpMaximo;
+                            nivelAtual++;
+                            subiuNivel = true;
+                            bonusMoedas += 30;
+                            pacotesBasicos++;
+                            
+                            if (nivelAtual === 10 || nivelAtual === 20 || nivelAtual === 30) {
+                                pacotesPremium++;
+                                msgLevelUp = `🎉 LEVEL UP! Nível ${nivelAtual} alcançado!\nRecompensas: 1 Pacote Básico, 1 Pacote Premium e 30 Moedas!`;
+                            } else {
+                                msgLevelUp = `🎉 LEVEL UP! Nível ${nivelAtual} alcançado!\nRecompensas: 1 Pacote Básico e 30 Moedas!`;
+                            }
+                        }
+
+                        docAtualizacao.badges = badgesJogador;
+                        docAtualizacao.xp = novoXp;
+                        docAtualizacao.nivel = nivelAtual;
+                        docAtualizacao.moedas = increment(bonusMoedas);
+                        
+                        let invUpdates = {};
+                        if (pacotesBasicos > 0) invUpdates.pacoteBasico = increment(pacotesBasicos);
+                        if (pacotesPremium > 0) invUpdates.pacotePremium = increment(pacotesPremium);
+                        if (Object.keys(invUpdates).length > 0) docAtualizacao.inventario = invUpdates;
+                    }
+
+                    // SALVA TUDO SE HOUVE MUDANÇA
+                    if (atualizouLogin || ganhouBadge) {
+                        await setDoc(docRef, docAtualizacao, { merge: true });
+                    }
+
+                    // 4. ATUALIZA A TELA
+                    document.getElementById('player-coins').innerText = (dados.moedas || 0) + bonusMoedas;
+                    document.getElementById('player-level').innerText = nivelAtual;
+
+                    // 5. DISPARA ALERTAS
+                    if (ganhouBadge) {
+                        mostrarAlerta(`🏆 NOVA CONQUISTA!\nBadge: Jogador Viciado (Logou 20 dias seguidos).\nRecompensa: +50 XP / +50 Moedas`);
+                    }
+                    if (subiuNivel) {
+                        mostrarAlerta(msgLevelUp);
+                    }
+
                 } else {
+                    // CONTA TOTALMENTE NOVA (Primeiro login da vida)
+                    const hoje = obterGameDay(0);
+                    await setDoc(docRef, {
+                        ultimoLogin: hoje,
+                        estatisticas: { diasSeguidos: 1 },
+                        moedas: 0,
+                        nivel: 1,
+                        xp: 0
+                    }, { merge: true });
+                    
                     document.getElementById('player-coins').innerText = "0";
                     document.getElementById('player-level').innerText = "1";
                 }
             } else {
-                // Se o radar detectar que não tem usuário (como quando clicamos em sair), ele manda pra tela de login
                 window.location.href = "index.html";
             }
         });

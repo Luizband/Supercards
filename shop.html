@@ -37,18 +37,20 @@
 
         <main class="flex flex-col flex-grow gap-4 overflow-y-auto pb-4 no-scrollbar">
             
-            <div class="bg-gradient-to-br from-[#bc7bd4] to-[#7a32a8] rounded-3xl p-4 shadow-xl border-2 border-[#dca3e8] flex flex-col items-center relative overflow-hidden">
-                <h2 class="text-white font-black text-xl mb-1 drop-shadow-md pointer-events-none">Bônus Diário</h2>
-                <p class="text-[#7a32a8] bg-[#dca3e8] px-3 py-0.5 rounded-full text-xs font-black mb-3 shadow-sm pointer-events-none">1 Pacote Básico Grátis</p>
-                <img src="pacote1.png" alt="Pacote Diário" class="w-24 h-32 object-contain drop-shadow-2xl pointer-events-none">
+            <div onclick="window.resgatarBonus()" class="bg-gradient-to-br from-[#bc7bd4] to-[#7a32a8] rounded-3xl p-4 shadow-xl border-2 border-[#dca3e8] flex flex-col items-center relative overflow-hidden cursor-pointer transform active:scale-95 transition-transform z-10 w-full">
                 
-                <button id="btn-bonus-diario" onclick="window.resgatarBonus()" class="mt-4 bg-[#22c55e] hover:bg-[#16a34a] text-white font-black py-4 px-10 rounded-full shadow-2xl transform active:scale-95 z-50 relative pointer-events-auto cursor-pointer">
+                <h2 class="text-white font-black text-xl mb-1 drop-shadow-md pointer-events-none">Bônus Diário</h2>
+                <p class="text-[#7a32a8] bg-[#dca3e8] px-3 py-0.5 rounded-full text-xs font-black mb-2 shadow-sm pointer-events-none">1 Pacote Básico Grátis</p>
+                
+                <img src="pacote1.png" alt="Pacote Diário" class="w-20 h-28 object-contain drop-shadow-2xl pointer-events-none mb-3">
+                
+                <div id="status-bonus" class="bg-[#22c55e] text-white font-black py-2 w-full text-center rounded-full shadow-md pointer-events-none text-sm">
                     PEGAR PACOTE
-                </button>
+                </div>
             </div>
 
             <div class="bg-[#dca3e8]/90 backdrop-blur-sm rounded-3xl p-4 shadow-lg flex items-center gap-4 border border-[#dca3e8]/50">
-                <img src="pacote1.png" class="w-20 h-28 object-contain drop-shadow-lg pointer-events-none">
+                <img src="pacote1.png" class="w-16 h-24 object-contain drop-shadow-lg pointer-events-none">
                 <div class="flex flex-col flex-grow">
                     <h2 class="text-[#7a32a8] font-black text-lg leading-tight pointer-events-none">Pacote Básico</h2>
                     <p class="text-gray-700 text-xs font-bold mb-2 pointer-events-none">5 Cartas Aleatórias</p>
@@ -59,7 +61,7 @@
             </div>
 
             <div class="bg-gradient-to-r from-[#ffd700]/80 to-[#ffaa00]/80 backdrop-blur-sm rounded-3xl p-4 shadow-lg flex items-center gap-4 border border-[#ffd700]">
-                <img src="pacote2.png" class="w-20 h-28 object-contain drop-shadow-lg pointer-events-none">
+                <img src="pacote2.png" class="w-16 h-24 object-contain drop-shadow-lg pointer-events-none">
                 <div class="flex flex-col flex-grow">
                     <h2 class="text-[#996600] font-black text-lg leading-tight pointer-events-none">Pacote Premium</h2>
                     <p class="text-[#805500] text-[10px] font-bold mb-2 leading-tight pointer-events-none">Garante 1 Rara ou superior</p>
@@ -99,7 +101,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Transformamos as variáveis em Globais para o HTML conseguir ler
         window.saldoMoedas = 0;
         window.pacotePendente = null;
         window.precoPendente = 0;
@@ -131,10 +132,12 @@
                     window.saldoMoedas = snap.data().moedas || 0;
                     document.getElementById('player-coins').innerText = window.saldoMoedas;
                     
-                    // Verifica o bônus no carregamento
+                    // Checa se já pegou e atualiza a faixinha verde para cinza
                     const hoje = window.obterGameDay();
                     if (snap.data().ultimoResgateDiario === hoje) {
-                        document.getElementById('btn-bonus-diario').innerText = "JÁ PEGOU HOJE";
+                        const statusDiv = document.getElementById('status-bonus');
+                        statusDiv.innerText = "JÁ PEGOU HOJE";
+                        statusDiv.classList.replace('bg-[#22c55e]', 'bg-gray-500');
                     }
                 }
             } else {
@@ -143,53 +146,58 @@
         });
 
         // ----------------------------------------------------
-        // LÓGICA DO BÔNUS DIÁRIO (Conexão Direta e Bruta)
+        // LÓGICA DO BÔNUS DIÁRIO NO CARD GIGANTE
         // ----------------------------------------------------
         window.resgatarBonus = async function() {
-            const btn = document.getElementById('btn-bonus-diario');
+            const statusDiv = document.getElementById('status-bonus');
             
-            // Verificação Rápida
-            if (btn.innerText === "JÁ PEGOU HOJE" || btn.innerText === "PROCESSANDO...") {
+            if (statusDiv.innerText === "JÁ PEGOU HOJE" || statusDiv.innerText === "PROCESSANDO...") {
                 window.mostrarMensagem("Você já pegou hoje ou a transação está em andamento!", "aviso");
                 return;
             }
 
             if (!auth.currentUser) {
-                window.mostrarMensagem("Aguarde a conexão...", "erro");
+                window.mostrarMensagem("Aguarde a conexão com o servidor...", "erro");
                 return;
             }
             
-            // FEEDBACK VISUAL INSTANTÂNEO PARA PROVAR QUE CLICOU
-            btn.innerText = "PROCESSANDO...";
+            // Muda a faixa pra amarelo e avisa que tá processando
+            statusDiv.innerText = "PROCESSANDO...";
+            statusDiv.classList.replace('bg-[#22c55e]', 'bg-yellow-500');
             
             try {
                 const uid = auth.currentUser.uid;
                 const ref = doc(db, "users", uid);
                 
-                // Vai no banco na mesma hora
                 const snap = await getDoc(ref);
                 let dados = snap.exists() ? snap.data() : {};
                 const hoje = window.obterGameDay();
                 
                 if (dados.ultimoResgateDiario === hoje) {
                     window.mostrarMensagem("Você já pegou o bônus hoje!", "aviso");
-                    btn.innerText = "JÁ PEGOU HOJE";
+                    statusDiv.innerText = "JÁ PEGOU HOJE";
+                    statusDiv.classList.replace('bg-yellow-500', 'bg-gray-500');
                     return;
                 }
                 
-                // Força a inserção no banco
+                // Manda pro banco de dados
                 await setDoc(ref, {
                     inventario: { pacoteBasico: increment(1) },
                     ultimoResgateDiario: hoje
                 }, { merge: true });
                 
                 window.mostrarMensagem("🎁 PACOTE RESGATADO COM SUCESSO!", "sucesso");
-                btn.innerText = "JÁ PEGOU HOJE";
+                
+                // Muda a faixa para cinza
+                statusDiv.innerText = "JÁ PEGOU HOJE";
+                statusDiv.classList.replace('bg-yellow-500', 'bg-gray-500');
                 
             } catch (error) {
                 console.error(error);
                 window.mostrarMensagem("Falha na conexão.", "erro");
-                btn.innerText = "TENTAR DE NOVO";
+                // Volta a faixa pra verde se der erro pra tentar de novo
+                statusDiv.innerText = "PEGAR PACOTE";
+                statusDiv.classList.replace('bg-yellow-500', 'bg-[#22c55e]');
             }
         };
 
@@ -236,23 +244,24 @@
             window.pacotePendente = null;
         };
 
-        // ----------------------------------------------------
         // CHEAT DE DESENVOLVEDOR (Clicar na palavra "LOJA")
-        // ----------------------------------------------------
         window.ativarCheat = async function() {
             if (!auth.currentUser) return;
             try {
                 const ref = doc(db, "users", auth.currentUser.uid);
                 await setDoc(ref, { 
                     moedas: increment(1000),
-                    ultimoResgateDiario: "" // Limpa a data de hoje!
+                    ultimoResgateDiario: "" 
                 }, { merge: true });
                 
                 window.saldoMoedas += 1000;
                 document.getElementById('player-coins').innerText = window.saldoMoedas;
                 
-                // Destrava o botão na força bruta para você testar
-                document.getElementById('btn-bonus-diario').innerText = "PEGAR PACOTE";
+                // Reseta a cor da faixa do Bônus pra verde na hora
+                const statusDiv = document.getElementById('status-bonus');
+                statusDiv.innerText = "PEGAR PACOTE";
+                statusDiv.classList.remove('bg-gray-500', 'bg-yellow-500');
+                statusDiv.classList.add('bg-[#22c55e]');
                 
                 window.mostrarMensagem("DEV: +1000 Moedas e Relógio Resetado!", "sucesso");
             } catch (e) {

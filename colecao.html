@@ -27,7 +27,7 @@
 
     <div class="w-full max-w-sm flex flex-col h-full relative">
         
-        <!-- CABEÇALHO COM XP -->
+        <!-- CABEÇALHO -->
         <header class="flex items-center gap-3 mt-4 mb-4">
             <div class="flex-shrink-0">
                 <div class="bg-[#dca3e8] w-24 h-24 rounded-full flex items-center justify-center text-[#7a32a8] font-bold shadow-lg border-4 border-transparent">
@@ -89,11 +89,11 @@
             </div>
         </div>
 
-        <!-- NOVO MODAL DE ALERTA EM FILA -->
+        <!-- MODAL DE ALERTA EM FILA -->
         <div id="modal-alerta-custom" class="hidden fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
             <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 max-w-xs w-full text-center shadow-2xl">
                 <h2 class="text-[#7a32a8] font-black text-xl mb-4">Aviso</h2>
-                <p id="mensagem-alerta-custom" class="text-black font-bold mb-6 text-sm">Mensagem aqui</p>
+                <p id="mensagem-alerta-custom" class="text-black font-bold mb-6 text-sm leading-relaxed">Mensagem aqui</p>
                 <button id="btn-fechar-alerta-custom" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-2 px-8 rounded-full shadow-md transition-transform hover:scale-105">
                     OK
                 </button>
@@ -106,7 +106,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        // NOVO: Importamos o arrayUnion
+        import { getFirestore, doc, getDoc, setDoc, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         
         import { INFO_CARTAS, TABELA_FRAGMENTOS } from './cartas.js';
 
@@ -142,18 +143,18 @@
         function processarFilaAlertas() {
             if (alertaAberto || filaAlertas.length === 0) return;
             alertaAberto = true;
-            msgAlertaCustom.innerText = filaAlertas[0]; // Pega o primeiro da fila
+            // ATUALIZADO: Agora usa innerHTML para renderizar as imagens das moedas
+            msgAlertaCustom.innerHTML = filaAlertas[0]; 
             modalAlerta.classList.remove('hidden');
         }
 
         document.getElementById('btn-fechar-alerta-custom').addEventListener('click', () => {
             modalAlerta.classList.add('hidden');
-            filaAlertas.shift(); // Remove o que acabou de ser lido
+            filaAlertas.shift();
             alertaAberto = false;
-            setTimeout(processarFilaAlertas, 300); // Espera 0.3s antes de mostrar o próximo (se houver)
+            setTimeout(processarFilaAlertas, 300);
         });
 
-        // --- LÓGICA DE XP E NÍVEL ---
         function calcularXPMaximo(nivel) {
             if (nivel >= 1 && nivel <= 5) return 200;
             if (nivel >= 6 && nivel <= 15) return 750;
@@ -169,7 +170,6 @@
             document.getElementById('barra-xp').style.width = `${porcentagem}%`;
         }
 
-        // --- RENDERIZAÇÃO DA COLEÇÃO ---
         function renderizarGridCartas() {
             const grid = document.getElementById('grid-cartas');
             grid.innerHTML = ""; 
@@ -204,7 +204,6 @@
             }
         }
 
-        // --- CONTROLE DO MODAL DE CARTAS ---
         const modal = document.getElementById('modal-carta');
         
         function abrirModal(id, info, quantidade) {
@@ -220,13 +219,13 @@
             cartaAtivaNoModal = null;
         });
 
-        // --- CHECAGEM AUTOMÁTICA DE BADGES DE COLEÇÃO (AO ABRIR A PÁGINA) ---
+        // --- CHECAGEM AUTOMÁTICA DE BADGES ---
         async function checarBadgesDeColecao(dados) {
             const badgesJogador = dados.badges || {};
             let ganhouBadge = false;
             let qtdBadges = 0;
+            let notificacoesNovas = [];
 
-            // Badge 001: Starter Pack (1 a 52)
             if (!badgesJogador["badge-001"]) {
                 let temTodas = true;
                 for (let i = 1; i <= 52; i++) {
@@ -236,21 +235,18 @@
                 if (temTodas) { badgesJogador["badge-001"] = true; ganhouBadge = true; qtdBadges++; }
             }
 
-            // Badge 002: Coleção SP (020, 036, 045)
             if (!badgesJogador["badge-002"]) {
                 if (colecaoJogador["020"] > 0 && colecaoJogador["036"] > 0 && colecaoJogador["045"] > 0) {
                     badgesJogador["badge-002"] = true; ganhouBadge = true; qtdBadges++;
                 }
             }
 
-            // Badge 009: Coleção Natal (009, 027)
             if (!badgesJogador["badge-009"]) {
                 if (colecaoJogador["009"] > 0 && colecaoJogador["027"] > 0) {
                     badgesJogador["badge-009"] = true; ganhouBadge = true; qtdBadges++;
                 }
             }
 
-            // Se ganhou alguma das badges acima, calcula XP e salva no banco
             if (ganhouBadge) {
                 let xpAtual = dados.xp || 0;
                 let nivelAtual = dados.nivel || 1;
@@ -260,6 +256,15 @@
                 let subiuNivel = false;
                 let pacotesBasicos = 0;
                 let pacotesPremium = 0;
+
+                // Empacota notificação da Badge
+                notificacoesNovas.push({
+                    id: "notif_" + Date.now() + "_badgescolecao",
+                    titulo: "🏆 Conquistas de Coleção",
+                    texto: `Você completou coleções e ganhou ${qtdBadges} badge(s)!\nRecompensas: ${50 * qtdBadges} XP e ${50 * qtdBadges} Moedas.`,
+                    lida: false,
+                    data: new Date().toISOString()
+                });
 
                 let xpMaximo = calcularXPMaximo(nivelAtual);
                 
@@ -275,6 +280,17 @@
                     xpMaximo = calcularXPMaximo(nivelAtual);
                 }
 
+                if (subiuNivel) {
+                    let msgNotif = (pacotesPremium > 0) ? "1 Pacote Básico, 1 Pacote Premium e 30 Moedas" : "1 Pacote Básico e 30 Moedas";
+                    notificacoesNovas.push({
+                        id: "notif_" + Date.now() + "_nivel" + nivelAtual,
+                        titulo: `🎉 Level Up: Nível ${nivelAtual}`,
+                        texto: `Parabéns! Você alcançou o Nível ${nivelAtual}.\nRecompensas recebidas: ${msgNotif}.`,
+                        lida: false,
+                        data: new Date().toISOString()
+                    });
+                }
+
                 let docAtualizacao = {
                     badges: badgesJogador,
                     xp: novoXp,
@@ -287,20 +303,24 @@
                     if (pacotesBasicos > 0) docAtualizacao.inventario.pacoteBasico = increment(pacotesBasicos);
                     if (pacotesPremium > 0) docAtualizacao.inventario.pacotePremium = increment(pacotesPremium);
                 }
+                
+                if (notificacoesNovas.length > 0) {
+                    docAtualizacao.notificacoes = arrayUnion(...notificacoesNovas);
+                }
 
                 await setDoc(dbUserRef, docAtualizacao, { merge: true });
                 atualizarVisualBarraXP(novoXp, nivelAtual);
 
-                // Dispara os alertas
-                mostrarAlerta(`🏆 NOVA(S) CONQUISTA(S)!\nVocê completou coleções e ganhou ${qtdBadges} badge(s).\n+${50 * qtdBadges} XP / +${50 * qtdBadges} Moedas`);
+                // ATUALIZADO: Alertas com HTML de imagem
+                mostrarAlerta(`🏆 NOVA(S) CONQUISTA(S)!<br><span class="text-xs font-normal">Você completou coleções e ganhou ${qtdBadges} badge(s).</span><br><span class="text-sm">Recompensa: +${50 * qtdBadges} XP e +${50 * qtdBadges} <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`);
                 if (subiuNivel) {
-                    let msg = (pacotesPremium > 0) ? "1 Pacote Básico, 1 Pacote Premium e 30 Moedas" : "1 Pacote Básico e 30 Moedas";
-                    mostrarAlerta(`🎉 LEVEL UP! Nível ${nivelAtual} alcançado!\nRecompensas: ${msg}!`);
+                    let htmlRecompensa = (pacotesPremium > 0) ? `1 Pacote Básico, 1 Pacote Premium e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom">` : `1 Pacote Básico e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom">`;
+                    mostrarAlerta(`🎉 LEVEL UP! Nível ${nivelAtual} alcançado!<br><span class="text-xs">Recompensas: ${htmlRecompensa}</span>`);
                 }
             }
         }
 
-        // --- LÓGICA DE RECICLAR COM BADGE E XP ---
+        // --- LÓGICA DE RECICLAR ---
         document.getElementById('btn-reciclar').addEventListener('click', async () => {
             if (!cartaAtivaNoModal) return;
 
@@ -311,18 +331,25 @@
             const ganhoFragmentos = TABELA_FRAGMENTOS[info.raridade];
 
             try {
-                // Puxa os dados fresquinhos do banco para ver as estatísticas
                 const docSnap = await getDoc(dbUserRef);
                 const dados = docSnap.exists() ? docSnap.data() : {};
                 
-                let cartasRecicladas = (dados.estatisticas?.cartasRecicladas || 0) + 1; // Soma a reciclagem de agora
+                let cartasRecicladas = (dados.estatisticas?.cartasRecicladas || 0) + 1;
                 let badgesJogador = dados.badges || {};
                 let ganhouBadgeReciclagem = false;
+                let notificacoesNovas = [];
 
-                // Checa a Badge 006: Reciclador (30 cartas)
                 if (cartasRecicladas >= 30 && !badgesJogador["badge-006"]) {
                     badgesJogador["badge-006"] = true;
                     ganhouBadgeReciclagem = true;
+                    
+                    notificacoesNovas.push({
+                        id: "notif_" + Date.now() + "_badge006",
+                        titulo: "🏆 Conquista: Reciclador",
+                        texto: "Você reciclou 30 cartas!\nRecompensas: 50 XP e 50 Moedas.",
+                        lida: false,
+                        data: new Date().toISOString()
+                    });
                 }
 
                 let subiuNivel = false;
@@ -330,7 +357,6 @@
                 let nivelAtual = dados.nivel || 1;
                 let xpAtual = dados.xp || 0;
 
-                // Objeto principal de salvamento
                 let docAtualizacao = {
                     colecao: { [cartaAtivaNoModal]: increment(-1) },
                     fragmentos: increment(ganhoFragmentos),
@@ -338,7 +364,6 @@
                     badges: badgesJogador
                 };
 
-                // Se ganhou a badge, processa XP e Recompensas
                 if (ganhouBadgeReciclagem) {
                     let novoXp = xpAtual + 50;
                     let bonusMoedas = 50;
@@ -351,26 +376,37 @@
                         bonusMoedas += 30;
                         
                         docAtualizacao.inventario = { pacoteBasico: increment(1) };
+                        let textoRecompensaNotif = "1 Pacote Básico e 30 Moedas";
+
                         if (nivelAtual === 10 || nivelAtual === 20 || nivelAtual === 30) {
                             docAtualizacao.inventario.pacotePremium = increment(1);
-                            msgLevelUp = `🎉 LEVEL UP! Nível ${nivelAtual} alcançado!\nRecompensas: 1 Pacote Básico, 1 Pacote Premium e 30 Moedas!`;
+                            textoRecompensaNotif = "1 Pacote Básico, 1 Pacote Premium e 30 Moedas";
+                            msgLevelUp = `🎉 LEVEL UP! Nível ${nivelAtual} alcançado!<br><span class="text-xs">Recompensas: 1 Pacote Básico, 1 Pacote Premium e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom"></span>`;
                         } else {
-                            msgLevelUp = `🎉 LEVEL UP! Nível ${nivelAtual} alcançado!\nRecompensas: 1 Pacote Básico e 30 Moedas!`;
+                            msgLevelUp = `🎉 LEVEL UP! Nível ${nivelAtual} alcançado!<br><span class="text-xs">Recompensas: 1 Pacote Básico e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom"></span>`;
                         }
+                        
+                        notificacoesNovas.push({
+                            id: "notif_" + Date.now() + "_nivel" + nivelAtual,
+                            titulo: `🎉 Level Up: Nível ${nivelAtual}`,
+                            texto: `Parabéns! Você alcançou o Nível ${nivelAtual}.\nRecompensas recebidas: ${textoRecompensaNotif}.`,
+                            lida: false,
+                            data: new Date().toISOString()
+                        });
                     }
 
                     docAtualizacao.xp = novoXp;
                     docAtualizacao.nivel = nivelAtual;
                     docAtualizacao.moedas = increment(bonusMoedas);
-                    
-                    // Atualiza a barra de XP e Nível na tela imediatamente
                     atualizarVisualBarraXP(novoXp, nivelAtual);
                 }
 
-                // Salva tudo no banco de uma vez só!
+                if (notificacoesNovas.length > 0) {
+                    docAtualizacao.notificacoes = arrayUnion(...notificacoesNovas);
+                }
+
                 await setDoc(dbUserRef, docAtualizacao, { merge: true });
 
-                // Atualiza a interface da coleção localmente
                 colecaoJogador[cartaAtivaNoModal] -= 1;
                 document.getElementById('modal-copias').innerText = colecaoJogador[cartaAtivaNoModal];
                 
@@ -379,11 +415,11 @@
                     renderizarGridCartas();
                 }
 
-                // Avisos na tela (O sistema de fila organiza tudo)
                 mostrarAlerta(`Carta reciclada! Você ganhou ${ganhoFragmentos} fragmento(s).`);
                 
                 if (ganhouBadgeReciclagem) {
-                    mostrarAlerta(`🏆 NOVA CONQUISTA!\nBadge: Reciclador (Reciclou 30 cartas).\nRecompensa: +50 XP / +50 Moedas`);
+                    // ATUALIZADO: HTML da imagem inserido aqui também!
+                    mostrarAlerta(`🏆 NOVA CONQUISTA!<br><span class="text-xs font-normal">Badge: Reciclador (Reciclou 30 cartas).</span><br><span class="text-sm">Recompensa: +50 XP e +50 <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`);
                 }
                 if (subiuNivel) {
                     mostrarAlerta(msgLevelUp);
@@ -395,7 +431,6 @@
             }
         });
 
-        // --- INICIALIZAÇÃO ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('player-name').innerText = user.displayName?.toUpperCase() || "JOGADOR";
@@ -410,7 +445,6 @@
                     colecaoJogador = dados.colecao || {};
                     renderizarGridCartas();
                     
-                    // Roda a checagem das badges de coleção assim que carregar!
                     checarBadgesDeColecao(dados);
                 } else {
                     renderizarGridCartas();

@@ -168,7 +168,7 @@
 
         document.getElementById('btn-confirmar-compra').addEventListener('click', async () => {
             modalConfirmacao.classList.add('hidden');
-            if (!pacotePendente) return;
+            if (!pacotePendente || !dbUserRef) return;
             
             try {
                 const pacoteCampo = pacotePendente === 'basico' ? 'pacoteBasico' : 'pacotePremium';
@@ -179,8 +179,9 @@
                 
                 saldoMoedas -= precoPendente;
                 document.getElementById('player-coins').innerText = saldoMoedas;
-                mostrarMensagem("Compra realizada!", "sucesso");
+                mostrarMensagem("Compra realizada com sucesso!", "sucesso");
             } catch (e) {
+                console.error(e);
                 mostrarMensagem("Erro ao processar compra.", "erro");
             }
             pacotePendente = null;
@@ -189,17 +190,25 @@
         document.getElementById('btn-comprar-basico').addEventListener('click', () => comprarPacote('basico', 100));
         document.getElementById('btn-comprar-premium').addEventListener('click', () => comprarPacote('premium', 300));
 
-        // LÓGICA DO BÔNUS DIÁRIO
+        // LÓGICA BLINDADA DO BÔNUS DIÁRIO
         btnDiario.addEventListener('click', async () => {
+            if (!dbUserRef) return;
+            
             try {
+                const hoje = obterGameDay(); // Pega a data fresquinha no momento exato do clique
+                
                 await setDoc(dbUserRef, {
                     inventario: { pacoteBasico: increment(1) },
-                    ultimoResgateDiario: gameDayAtual
+                    ultimoResgateDiario: hoje
                 }, { merge: true });
-                mostrarMensagem("Bônus resgatado!", "sucesso");
+                
+                gameDayAtual = hoje; // Atualiza a variável para o sistema saber que resgatou
+                
+                mostrarMensagem("Bônus resgatado! +1 Pacote", "sucesso");
                 btnDiario.innerText = "RESGATADO";
                 btnDiario.disabled = true;
             } catch (e) {
+                console.error(e);
                 mostrarMensagem("Erro ao resgatar.", "erro");
             }
         });
@@ -221,6 +230,7 @@
                 
                 mostrarMensagem("DEV: +1000 Moedas e Relógio Resetado!", "sucesso");
             } catch (e) {
+                console.error(e);
                 mostrarMensagem("Erro no cheat.", "erro");
             }
         });

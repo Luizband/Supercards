@@ -46,7 +46,6 @@
                         <img src="missao.png" alt="Missões" class="w-4 h-4 object-contain">
                     </button>
                     
-                    <!-- Container do Menu de Configurações -->
                     <div class="relative flex items-center">
                         <button id="btn-config" class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-8 h-8 shadow-sm">
                             <img src="config.png" alt="Configurações" class="w-4 h-4 object-contain">
@@ -116,7 +115,7 @@
         <div id="modal-alerta-custom" class="hidden fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
             <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 max-w-xs w-full text-center shadow-2xl">
                 <h2 class="text-[#7a32a8] font-black text-xl mb-4">Aviso</h2>
-                <p id="mensagem-alerta-custom" class="text-black font-bold mb-6 text-sm">Mensagem aqui</p>
+                <p id="mensagem-alerta-custom" class="text-black font-bold mb-6 text-sm leading-relaxed">Mensagem aqui</p>
                 <button id="btn-fechar-alerta-custom" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-2 px-8 rounded-full shadow-md transition-transform hover:scale-105">
                     OK
                 </button>
@@ -173,7 +172,8 @@
         function processarFilaAlertas() {
             if (alertaAberto || filaAlertas.length === 0) return;
             alertaAberto = true;
-            msgAlertaCustom.innerText = filaAlertas[0]; 
+            // Trocado innerText por innerHTML para poder renderizar a imagem da moeda!
+            msgAlertaCustom.innerHTML = filaAlertas[0]; 
             modalAlerta.classList.remove('hidden');
         }
 
@@ -184,7 +184,7 @@
             setTimeout(processarFilaAlertas, 300); 
         });
 
-        // --- FUNÇÕES DE DATA (COM RESET ÀS 06:00) ---
+        // --- FUNÇÕES DE DATA ---
         function obterGameDay(offsetDias = 0) {
             let d = new Date();
             if (d.getHours() < 6) d.setDate(d.getDate() - 1);
@@ -219,21 +219,17 @@
                     let atualizouLogin = false;
                     let docAtualizacao = {};
 
-                    // 1. CHECA A OFENSIVA DE DIAS
                     if (ultimoLogin !== hoje) {
                         atualizouLogin = true;
-                        
                         if (ultimoLogin === ontem) {
-                            diasSeguidos += 1; // Logou ontem e hoje, continua a ofensiva!
+                            diasSeguidos += 1; 
                         } else {
-                            diasSeguidos = 1; // Pulou um dia, reseta a ofensiva.
+                            diasSeguidos = 1; 
                         }
-                        
                         docAtualizacao.ultimoLogin = hoje;
                         docAtualizacao.estatisticas = { diasSeguidos: diasSeguidos }; 
                     }
 
-                    // 2. CHECA A BADGE 003 (20 DIAS)
                     let badgesJogador = dados.badges || {};
                     let ganhouBadge = false;
                     let bonusXp = 0;
@@ -246,7 +242,6 @@
                         bonusMoedas += 50;
                     }
 
-                    // 3. MATEMÁTICA DE LEVEL UP
                     let nivelAtual = dados.nivel || 1;
                     let xpAtual = dados.xp || 0;
                     let subiuNivel = false;
@@ -267,9 +262,9 @@
                             
                             if (nivelAtual === 10 || nivelAtual === 20 || nivelAtual === 30) {
                                 pacotesPremium++;
-                                msgLevelUp = `🎉 LEVEL UP! Nível ${nivelAtual} alcançado!\nRecompensas: 1 Pacote Básico, 1 Pacote Premium e 30 Moedas!`;
+                                msgLevelUp = `🎉 LEVEL UP! Nível ${nivelAtual} alcançado!<br><span class="text-xs">Recompensas: 1 Pacote Básico, 1 Pacote Premium e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom"></span>`;
                             } else {
-                                msgLevelUp = `🎉 LEVEL UP! Nível ${nivelAtual} alcançado!\nRecompensas: 1 Pacote Básico e 30 Moedas!`;
+                                msgLevelUp = `🎉 LEVEL UP! Nível ${nivelAtual} alcançado!<br><span class="text-xs">Recompensas: 1 Pacote Básico e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom"></span>`;
                             }
                         }
 
@@ -284,25 +279,22 @@
                         if (Object.keys(invUpdates).length > 0) docAtualizacao.inventario = invUpdates;
                     }
 
-                    // SALVA TUDO SE HOUVE MUDANÇA
                     if (atualizouLogin || ganhouBadge) {
                         await setDoc(docRef, docAtualizacao, { merge: true });
                     }
 
-                    // 4. ATUALIZA A TELA
                     document.getElementById('player-coins').innerText = (dados.moedas || 0) + bonusMoedas;
                     document.getElementById('player-level').innerText = nivelAtual;
 
-                    // 5. DISPARA ALERTAS
+                    // 5. DISPARA ALERTAS (Agora formatados com HTML e a Imagem da Moeda)
                     if (ganhouBadge) {
-                        mostrarAlerta(`🏆 NOVA CONQUISTA!\nBadge: Jogador Viciado (Logou 20 dias seguidos).\nRecompensa: +50 XP / +50 Moedas`);
+                        mostrarAlerta(`🏆 NOVA CONQUISTA!<br><span class="text-xs font-normal">Badge: Jogador Viciado (Logou 20 dias seguidos).</span><br><span class="text-sm">Recompensa: +50 XP e +50 <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`);
                     }
                     if (subiuNivel) {
                         mostrarAlerta(msgLevelUp);
                     }
 
                 } else {
-                    // CONTA TOTALMENTE NOVA (Primeiro login da vida)
                     const hoje = obterGameDay(0);
                     await setDoc(docRef, {
                         ultimoLogin: hoje,

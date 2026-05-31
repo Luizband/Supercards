@@ -155,7 +155,7 @@
                 }
             }
         }
-
+        
         document.getElementById('btn-comprar-basico').addEventListener('click', () => comprarPacote('basico', 100));
         document.getElementById('btn-comprar-premium').addEventListener('click', () => comprarPacote('premium', 300));
 
@@ -171,6 +171,8 @@
             } catch (e) {
                 mostrarMensagem("Erro ao resgatar.", "erro");
             }
+
+        });
 
         // CHEAT DE DESENVOLVEDOR: Clicar na palavra LOJA dá 1000 moedas e reseta o relógio
         document.getElementById('dev-moedas').addEventListener('click', async () => {

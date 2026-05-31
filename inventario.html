@@ -51,7 +51,20 @@
             </button>
         </footer>
 
-        <!-- MODAL DE CARTAS TIRADAS -->
+        <div id="modal-revelar-carta" class="hidden fixed inset-0 bg-black/95 z-[60] flex flex-col items-center justify-center p-4 backdrop-blur-md cursor-pointer select-none">
+            <h3 id="texto-contador-carta" class="text-white font-black text-xl mb-8 tracking-widest uppercase drop-shadow-lg">CARTA 1 DE 5</h3>
+            
+            <div class="relative w-[65%] max-w-[240px] aspect-[2.5/3.5] flex justify-center items-center">
+                <div id="brilho-raridade" class="absolute inset-0 bg-white blur-3xl opacity-60 rounded-full transition-colors duration-500"></div>
+                
+                <div id="carta-revelada-container" class="relative w-full h-full bg-gray-900 rounded-xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.8)] border-4 border-[#dca3e8] transform transition-transform duration-300 scale-0">
+                    <img id="img-carta-revelada" src="" class="w-full h-full object-cover">
+                </div>
+            </div>
+            
+            <p class="text-white/70 font-bold mt-10 animate-pulse text-sm">Toque na tela para revelar</p>
+        </div>
+
         <div id="modal-abrir-pacote" class="hidden fixed inset-0 bg-black/90 z-50 flex flex-col items-center justify-center p-4 backdrop-blur-sm">
             <h2 class="text-white font-black text-3xl mb-8 text-center drop-shadow-[0_0_10px_rgba(220,163,232,0.8)]">NOVAS CARTAS!</h2>
             <div id="cartas-tiradas" class="flex flex-wrap justify-center gap-2 w-full max-w-sm mb-8"></div>
@@ -60,7 +73,6 @@
             </button>
         </div>
 
-        <!-- MODAL DE CONFIRMAÇÃO PARA ABRIR O PACOTE -->
         <div id="modal-confirmacao-abrir" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
             <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 max-w-xs w-full text-center shadow-2xl">
                 <h2 class="text-[#7a32a8] font-black text-xl mb-4" id="texto-confirmacao-abrir">Deseja abrir?</h2>
@@ -97,10 +109,13 @@
         const divCartasTiradas = document.getElementById('cartas-tiradas');
         let currentUser = null;
 
+        // Variáveis globais para o fluxo de revelação de cartas
+        let arrayCartasRevelar = [];
+        let indiceAtualRevelacao = 0;
+
         // --- SISTEMA DE DROP RATE --- //
         const bancoRaridades = { 'Comum': [], 'Rara': [], 'Épica': [], 'Lendária': [] };
 
-        // Normalizador de texto para evitar bugs caso a raridade esteja escrita sem acento no cartas.js
         function normalizarRaridade(r) {
             if(!r) return "Comum";
             let lower = r.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -111,7 +126,6 @@
             return "Comum";
         }
 
-        // Puxa as 52 cartas e organiza pelas raridades
         for (let i = 1; i <= 52; i++) {
             const id = String(i).padStart(3, '0');
             const carta = INFO_CARTAS[id];
@@ -122,7 +136,6 @@
             }
         }
 
-        // A roleta matemática
         function sortearRaridade(tabelaProbs) {
             const rand = Math.random() * 100;
             let acumulado = 0;
@@ -135,7 +148,6 @@
 
         function puxarCarta(raridade) {
             let lista = bancoRaridades[raridade];
-            // Proteção: se o jogador ainda não criou cartas dessa raridade, cai pra Comum
             if (!lista || lista.length === 0) lista = bancoRaridades['Comum']; 
             return lista[Math.floor(Math.random() * lista.length)];
         }
@@ -208,6 +220,60 @@
             pacoteParaAbrir = null;
         });
 
+        // -----------------------------------------------------------------------------------
+        // LÓGICA DE REVELAÇÃO (CLICAR NA TELA PARA PRÓXIMA CARTA)
+        // -----------------------------------------------------------------------------------
+        const modalRevelar = document.getElementById('modal-revelar-carta');
+        const imgCartaRevelada = document.getElementById('img-carta-revelada');
+        const containerCartaRevelada = document.getElementById('carta-revelada-container');
+        const brilhoRaridade = document.getElementById('brilho-raridade');
+
+        function mostrarProximaCarta() {
+            if (indiceAtualRevelacao < 5) {
+                const idCarta = arrayCartasRevelar[indiceAtualRevelacao];
+                const info = INFO_CARTAS[idCarta];
+                const raridade = normalizarRaridade(info.raridade);
+                
+                // Esconde a carta atual dando um "zoom out" rápido
+                containerCartaRevelada.classList.remove('scale-100');
+                containerCartaRevelada.classList.add('scale-0');
+                
+                // Pequeno delay para trocar a imagem enquanto está escondida
+                setTimeout(() => {
+                    imgCartaRevelada.src = info.imagem;
+                    document.getElementById('texto-contador-carta').innerText = `CARTA ${indiceAtualRevelacao + 1} DE 5`;
+                    
+                    // Muda a cor do brilho baseado na raridade
+                    let corBrilho = "rgba(255, 255, 255, 0.4)"; // Comum (Branco)
+                    let corBorda = "#dca3e8"; 
+
+                    if (raridade === "Rara") { corBrilho = "rgba(59, 130, 246, 0.8)"; corBorda = "#3b82f6"; } // Azul
+                    if (raridade === "Épica") { corBrilho = "rgba(147, 51, 234, 0.8)"; corBorda = "#9333ea"; } // Roxo Forte
+                    if (raridade === "Lendária") { corBrilho = "rgba(234, 179, 8, 0.9)"; corBorda = "#eab308"; } // Dourado
+                    
+                    brilhoRaridade.style.backgroundColor = corBrilho;
+                    containerCartaRevelada.style.borderColor = corBorda;
+
+                    // Mostra a carta nova dando o "zoom in"
+                    containerCartaRevelada.classList.remove('scale-0');
+                    containerCartaRevelada.classList.add('scale-100');
+                    
+                    indiceAtualRevelacao++;
+                }, 200);
+
+            } else {
+                // Acabaram as 5 cartas. Fecha a revelação e abre o resumo!
+                modalRevelar.classList.add('hidden');
+                modalPacote.classList.remove('hidden');
+            }
+        }
+
+        // Clicar no modal de revelação puxa a próxima carta
+        modalRevelar.addEventListener('click', mostrarProximaCarta);
+
+        // -----------------------------------------------------------------------------------
+        // Clicou em "SIM" para abrir o pacote
+        // -----------------------------------------------------------------------------------
         document.getElementById('btn-confirmar-abrir').addEventListener('click', async () => {
             modalConfirmacaoAbrir.classList.add('hidden');
             if (!pacoteParaAbrir) return;
@@ -216,7 +282,6 @@
                 const cartasSorteadas = [];
                 const contagemParaSalvar = {};
 
-                // APLICANDO AS PROBABILIDADES
                 if (pacoteParaAbrir === 'pacoteBasico') {
                     const probsBasico = { 'Comum': 80, 'Rara': 17, 'Lendária': 2.5, 'Épica': 0.5 };
                     for (let i = 0; i < 5; i++) {
@@ -236,7 +301,7 @@
                     }
                 }
 
-                // Salvando no Firebase
+                // Salva no banco de dados IMEDIATAMENTE por segurança
                 const atualizacaoColecao = {};
                 for (const id in contagemParaSalvar) {
                     atualizacaoColecao[id] = increment(contagemParaSalvar[id]);
@@ -248,6 +313,7 @@
                     colecao: atualizacaoColecao
                 }, { merge: true });
 
+                // Prepara a tela final de resumo por baixo dos panos
                 divCartasTiradas.innerHTML = "";
                 cartasSorteadas.forEach((id, index) => {
                     const info = INFO_CARTAS[id];
@@ -258,7 +324,11 @@
                     `;
                 });
 
-                modalPacote.classList.remove('hidden');
+                // Inicia o fluxo de revelar uma por vez
+                arrayCartasRevelar = cartasSorteadas;
+                indiceAtualRevelacao = 0;
+                modalRevelar.classList.remove('hidden');
+                mostrarProximaCarta();
 
             } catch (error) {
                 console.error("Erro ao abrir pacote:", error);
@@ -266,6 +336,7 @@
             pacoteParaAbrir = null;
         });
 
+        // Clicar em guardar na coleção fecha o resumo final e recarrega
         document.getElementById('btn-fechar-pacote').addEventListener('click', () => {
             modalPacote.classList.add('hidden');
             carregarInventario(); 

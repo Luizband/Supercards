@@ -29,8 +29,6 @@
 <body class="h-[100dvh] p-4 flex justify-center overflow-hidden">
 
     <div class="w-full max-w-sm flex flex-col h-full relative">
-        
-        <!-- CABEÇALHO -->
         <header class="relative w-full mt-6 mb-6 flex justify-center z-10">
             <div class="bg-[#dca3e8] w-full rounded-full flex justify-between items-center px-6 py-3 shadow-md">
                 <span id="player-level" class="text-black font-black text-sm drop-shadow-sm">NÍVEL --</span>
@@ -43,11 +41,8 @@
 
         <h1 class="text-white font-black text-2xl text-center mb-6 drop-shadow-md">Inventário</h1>
 
-        <!-- GRID DE ITENS -->
         <main class="flex-grow overflow-y-auto no-scrollbar pb-4">
-            <div id="grid-inventario" class="grid grid-cols-4 gap-3">
-                <!-- Preenchido pelo JavaScript -->
-            </div>
+            <div id="grid-inventario" class="grid grid-cols-4 gap-3"></div>
         </main>
 
         <footer class="mt-auto flex justify-center pb-2 pt-4">
@@ -56,12 +51,10 @@
             </button>
         </footer>
 
-        <!-- MODAL DE ANIMAÇÃO DE CARTAS TIRADAS -->
+        <!-- MODAL DE CARTAS TIRADAS -->
         <div id="modal-abrir-pacote" class="hidden fixed inset-0 bg-black/90 z-50 flex flex-col items-center justify-center p-4 backdrop-blur-sm">
             <h2 class="text-white font-black text-3xl mb-8 text-center drop-shadow-[0_0_10px_rgba(220,163,232,0.8)]">NOVAS CARTAS!</h2>
-            <div id="cartas-tiradas" class="flex flex-wrap justify-center gap-2 w-full max-w-sm mb-8">
-                <!-- Cartas sorteadas -->
-            </div>
+            <div id="cartas-tiradas" class="flex flex-wrap justify-center gap-2 w-full max-w-sm mb-8"></div>
             <button id="btn-fechar-pacote" class="bg-[#dca3e8] hover:bg-[#bc7bd4] text-black font-black py-3 px-10 rounded-full shadow-[0_0_15px_rgba(220,163,232,0.5)] transition-transform hover:scale-105">
                 GUARDAR NA COLEÇÃO
             </button>
@@ -102,8 +95,51 @@
         const gridInventario = document.getElementById('grid-inventario');
         const modalPacote = document.getElementById('modal-abrir-pacote');
         const divCartasTiradas = document.getElementById('cartas-tiradas');
-        const TOTAL_SLOTS = 16;
         let currentUser = null;
+
+        // --- SISTEMA DE DROP RATE --- //
+        const bancoRaridades = { 'Comum': [], 'Rara': [], 'Épica': [], 'Lendária': [] };
+
+        // Normalizador de texto para evitar bugs caso a raridade esteja escrita sem acento no cartas.js
+        function normalizarRaridade(r) {
+            if(!r) return "Comum";
+            let lower = r.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            if (lower.includes("comum")) return "Comum";
+            if (lower.includes("rara")) return "Rara";
+            if (lower.includes("lendaria")) return "Lendária";
+            if (lower.includes("epica")) return "Épica";
+            return "Comum";
+        }
+
+        // Puxa as 52 cartas e organiza pelas raridades
+        for (let i = 1; i <= 52; i++) {
+            const id = String(i).padStart(3, '0');
+            const carta = INFO_CARTAS[id];
+            if (carta && carta.raridade) {
+                bancoRaridades[normalizarRaridade(carta.raridade)].push(id);
+            } else {
+                bancoRaridades['Comum'].push(id);
+            }
+        }
+
+        // A roleta matemática
+        function sortearRaridade(tabelaProbs) {
+            const rand = Math.random() * 100;
+            let acumulado = 0;
+            for (const [raridade, chance] of Object.entries(tabelaProbs)) {
+                acumulado += chance;
+                if (rand <= acumulado) return raridade;
+            }
+            return 'Comum';
+        }
+
+        function puxarCarta(raridade) {
+            let lista = bancoRaridades[raridade];
+            // Proteção: se o jogador ainda não criou cartas dessa raridade, cai pra Comum
+            if (!lista || lista.length === 0) lista = bancoRaridades['Comum']; 
+            return lista[Math.floor(Math.random() * lista.length)];
+        }
+        // ------------------------------ //
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -139,7 +175,7 @@
                     itensNaMochila.push({ img: 'fragmento.png', qtd: dados.fragmentos, tipo: 'fragmentos', nome: 'Fragmentos' });
                 }
 
-                for (let i = 0; i < TOTAL_SLOTS; i++) {
+                for (let i = 0; i < 16; i++) {
                     const slot = document.createElement('div');
                     slot.className = "bg-[#dca3e8] aspect-square rounded-[1rem] shadow-sm relative flex items-center justify-center p-2";
 
@@ -149,18 +185,15 @@
                             <span class="absolute top-1 left-1/2 transform -translate-x-1/2 text-black font-black text-[10px] drop-shadow-sm z-10">${item.qtd}</span>
                             <img src="${item.img}" alt="${item.nome}" class="w-[80%] h-[80%] object-contain drop-shadow-md hover:scale-110 transition-transform cursor-pointer">
                         `;
-
                         if (item.tipo.includes('pacote')) {
                             slot.querySelector('img').addEventListener('click', () => abrirPacote(item.tipo, item.nome));
                         }
                     }
-                    
                     gridInventario.appendChild(slot);
                 }
             }
         }
 
-        // LÓGICA DO MODAL DE CONFIRMAÇÃO PARA ABRIR
         let pacoteParaAbrir = null;
         const modalConfirmacaoAbrir = document.getElementById('modal-confirmacao-abrir');
 
@@ -183,14 +216,27 @@
                 const cartasSorteadas = [];
                 const contagemParaSalvar = {};
 
-                for (let i = 0; i < 5; i++) {
-                    const numeroSorteado = Math.floor(Math.random() * 52) + 1;
-                    const idFormatado = String(numeroSorteado).padStart(3, '0');
-                    
-                    cartasSorteadas.push(idFormatado);
-                    contagemParaSalvar[idFormatado] = (contagemParaSalvar[idFormatado] || 0) + 1;
+                // APLICANDO AS PROBABILIDADES
+                if (pacoteParaAbrir === 'pacoteBasico') {
+                    const probsBasico = { 'Comum': 80, 'Rara': 17, 'Lendária': 2.5, 'Épica': 0.5 };
+                    for (let i = 0; i < 5; i++) {
+                        const raridade = sortearRaridade(probsBasico);
+                        const idCarta = puxarCarta(raridade);
+                        cartasSorteadas.push(idCarta);
+                        contagemParaSalvar[idCarta] = (contagemParaSalvar[idCarta] || 0) + 1;
+                    }
+                } else if (pacoteParaAbrir === 'pacotePremium') {
+                    const probsGarantida = { 'Rara': 75, 'Lendária': 20, 'Épica': 5 };
+                    const probsNormal = { 'Comum': 60, 'Rara': 30, 'Lendária': 8, 'Épica': 2 };
+                    for (let i = 0; i < 5; i++) {
+                        let raridade = (i === 0) ? sortearRaridade(probsGarantida) : sortearRaridade(probsNormal);
+                        const idCarta = puxarCarta(raridade);
+                        cartasSorteadas.push(idCarta);
+                        contagemParaSalvar[idCarta] = (contagemParaSalvar[idCarta] || 0) + 1;
+                    }
                 }
 
+                // Salvando no Firebase
                 const atualizacaoColecao = {};
                 for (const id in contagemParaSalvar) {
                     atualizacaoColecao[id] = increment(contagemParaSalvar[id]);

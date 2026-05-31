@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supercards - Menu Principal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-image: url('fundotela.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+    </style>
+</head>
+<body class="h-[100dvh] p-4 flex justify-center overflow-hidden">
+
+    <div class="w-full max-w-sm flex flex-col h-full relative">
+        
+        <header class="flex items-center mb-6 mt-2 gap-3">
+            
+            <div class="relative flex-shrink-0">
+                <div class="bg-[#dca3e8] w-20 h-20 rounded-full flex items-center justify-center text-[#7a32a8] font-bold shadow-lg">
+                    foto
+                </div>
+                <div id="player-level" class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-[#bc7bd4] text-black font-black px-3 py-0.5 rounded-full shadow-md text-sm border border-[#dca3e8]/50">
+                    ...
+                </div>
+            </div>
+
+            <div class="flex flex-col flex-grow gap-2">
+                
+                <nav class="bg-[#dca3e8] rounded-full flex justify-between items-center px-2 py-1.5 shadow-md">
+                    <button class="bg-[#7a32a8] text-white text-[11px] font-bold px-4 py-1.5 rounded-full hover:bg-purple-600 transition-colors">
+                        PERFIL
+                    </button>
+                    
+                    <button onclick="window.location.href='shop.html'" class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-8 h-8 shadow-sm">
+    			<img src="shop.png" alt="Shop" class="w-4 h-4 object-contain">
+		    </button>
+                    
+                    <button class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-8 h-8 shadow-sm">
+                        <img src="missao.png" alt="Missões" class="w-4 h-4 object-contain">
+                    </button>
+                    
+                    <!-- NOVO: Container do Menu de Configurações -->
+                    <div class="relative flex items-center">
+                        <!-- O Botão da Engrenagem -->
+                        <button id="btn-config" class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-8 h-8 shadow-sm">
+                            <img src="config.png" alt="Configurações" class="w-4 h-4 object-contain">
+                        </button>
+
+                        <!-- O Mini Menu (Começa oculto) -->
+                        <div id="dropdown-config" class="hidden absolute right-0 top-10 w-32 bg-[#bc7bd4] border-2 border-[#7a32a8] rounded-xl shadow-2xl overflow-hidden z-50">
+                            <!-- Botão Sair -->
+                            <button id="btn-sair" class="w-full px-4 py-2 text-white font-bold text-sm hover:bg-[#7a32a8] transition-colors flex items-center justify-between">
+                                Sair
+                                <span>🚪</span>
+                            </button>
+                        </div>
+                    </div>
+                </nav>
+
+                <div class="flex gap-2">
+                    <div id="player-name" class="bg-[#dca3e8] rounded-full flex-grow text-[#7a32a8] font-bold text-xs py-1.5 flex items-center justify-center shadow-md px-2 truncate">
+                        Carregando...
+                    </div>
+                    
+                    <div class="bg-[#dca3e8] rounded-full px-3 py-1.5 flex items-center justify-center gap-1 shadow-md">
+                        <span id="player-coins" class="text-black font-black text-xs">...</span>
+                        <img src="moedas.png" alt="Moedas" class="w-4 h-4 object-contain drop-shadow-sm">
+                    </div>
+                </div>
+
+            </div>
+        </header>
+
+        <main class="grid grid-cols-2 gap-x-4 gap-y-4 flex-grow content-center mb-4">
+            <div onclick="window.location.href='colecao.html'" class="flex flex-col items-center group cursor-pointer">
+                <span class="text-[#dca3e8] font-black text-lg mb-1 drop-shadow-md">Coleção</span>
+                <div class="bg-[#dca3e8] w-[80%] aspect-square rounded-[24px] flex items-center justify-center p-4 shadow-lg hover:scale-105 transition-transform border-4 border-transparent hover:border-[#8b3dff]/50">
+                    <img src="colecao.png" alt="Coleção" class="w-full h-full object-contain drop-shadow-lg">
+                </div>
+            </div>
+
+            <div onclick="window.location.href='inventario.html'" class="flex flex-col items-center group cursor-pointer">
+                <span class="text-[#dca3e8] font-black text-lg mb-1 drop-shadow-md">Inventário</span>
+                <div class="bg-[#dca3e8] w-[80%] aspect-square rounded-[24px] flex items-center justify-center p-4 shadow-lg hover:scale-105 transition-transform border-4 border-transparent hover:border-[#8b3dff]/50">
+                    <img src="inventario.png" alt="Inventário" class="w-full h-full object-contain drop-shadow-lg">
+                </div>
+            </div>
+
+            <div class="flex flex-col items-center group cursor-pointer">
+                <span class="text-[#dca3e8] font-black text-lg mb-1 drop-shadow-md">Trocas</span>
+                <div class="bg-[#dca3e8] w-[80%] aspect-square rounded-[24px] flex items-center justify-center p-4 shadow-lg hover:scale-105 transition-transform border-4 border-transparent hover:border-[#8b3dff]/50">
+                    <img src="troca.png" alt="Trocas" class="w-full h-full object-contain drop-shadow-lg">
+                </div>
+            </div>
+
+            <div class="flex flex-col items-center group cursor-pointer">
+                <span class="text-[#dca3e8] font-black text-lg mb-1 drop-shadow-md">Batalha</span>
+                <div class="bg-[#dca3e8] w-[80%] aspect-square rounded-[24px] flex items-center justify-center p-4 shadow-lg hover:scale-105 transition-transform border-4 border-transparent hover:border-[#8b3dff]/50">
+                    <img src="vs.png" alt="Batalha" class="w-full h-full object-contain drop-shadow-lg">
+                </div>
+            </div>
+        </main>
+
+        <footer class="mt-auto flex justify-center pb-2">
+            <div class="bg-[#dca3e8] rounded-full flex p-1.5 gap-2 shadow-lg w-full max-w-[280px]">
+                <button class="flex-1 bg-[#7a32a8] text-white text-xs font-bold py-2 rounded-full hover:bg-purple-600 transition-colors">Notificações</button>
+                <button class="flex-1 bg-[#7a32a8] text-white text-xs font-bold py-2 rounded-full hover:bg-purple-600 transition-colors">AMIGOS</button>
+            </div>
+        </footer>
+
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        // NOVO: Adicionado o "signOut" na lista de importações
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyCU3lFTgfrDMaD9jwR7X7ivYPmGQh4VE1g",
+          authDomain: "supercards-tcg.firebaseapp.com",
+          projectId: "supercards-tcg",
+          storageBucket: "supercards-tcg.firebasestorage.app",
+          messagingSenderId: "862316380615",
+          appId: "1:862316380615:web:b3f28056ebc967673999e2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // ABRIR E FECHAR O MENU DE CONFIGURAÇÕES
+        const btnConfig = document.getElementById('btn-config');
+        const dropdownConfig = document.getElementById('dropdown-config');
+
+        btnConfig.addEventListener('click', () => {
+            dropdownConfig.classList.toggle('hidden');
+        });
+
+        // FECHAR O MENU SE CLICAR FORA DELE
+        document.addEventListener('click', (event) => {
+            if (!btnConfig.contains(event.target) && !dropdownConfig.contains(event.target)) {
+                dropdownConfig.classList.add('hidden');
+            }
+        });
+
+        // BOTÃO SAIR
+        document.getElementById('btn-sair').addEventListener('click', () => {
+            signOut(auth).catch((error) => {
+                console.error("Erro ao sair da conta: ", error);
+            });
+        });
+
+        // RADAR DE LOGIN (Redireciona automaticamente ao sair)
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                document.getElementById('player-name').innerText = user.displayName || "Jogador";
+
+                const docRef = doc(db, "users", user.uid);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const dados = docSnap.data();
+                    document.getElementById('player-coins').innerText = dados.moedas;
+                    document.getElementById('player-level').innerText = dados.nivel;
+                } else {
+                    document.getElementById('player-coins').innerText = "0";
+                    document.getElementById('player-level').innerText = "1";
+                }
+            } else {
+                // Se o radar detectar que não tem usuário (como quando clicamos em sair), ele manda pra tela de login
+                window.location.href = "index.html";
+            }
+        });
+    </script>
+</body>
+</html>

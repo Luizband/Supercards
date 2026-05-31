@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supercards - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-image: url('fundotela.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <!-- CAIXA PRINCIPAL -->
+    <div class="bg-[#bd83d4]/20 backdrop-blur-md border border-[#bd83d4]/50 p-6 md:p-8 rounded-3xl shadow-2xl w-full max-w-md flex flex-col items-center">
+        
+        <img src="logo.png" alt="Supercards Logo" class="w-56 mb-4 drop-shadow-xl hover:scale-105 transition-transform">
+
+        <div id="mensagem-alerta" class="hidden w-full p-3 mb-4 text-center text-sm font-bold rounded-lg"></div>
+
+        <!-- FORMULÁRIO DE LOGIN -->
+        <div id="box-login" class="w-full flex flex-col gap-3">
+            <!-- Adicionado autocomplete para o navegador reconhecer -->
+            <input type="email" id="login-email" autocomplete="username" placeholder="Seu E-mail" class="w-full px-4 py-3 rounded-xl bg-white/80 border-2 border-transparent focus:border-purple-500 focus:outline-none text-purple-900 font-bold placeholder-purple-400">
+            <input type="password" id="login-senha" autocomplete="current-password" placeholder="Sua Senha" class="w-full px-4 py-3 rounded-xl bg-white/80 border-2 border-transparent focus:border-purple-500 focus:outline-none text-purple-900 font-bold placeholder-purple-400">
+            
+            <!-- NOVO: Checkbox Lembrar de Mim -->
+            <div class="flex items-center gap-2 pl-1 mt-1">
+                <input type="checkbox" id="lembrar-mim" class="w-4 h-4 accent-purple-600 cursor-pointer rounded border-transparent">
+                <label for="lembrar-mim" class="text-white text-sm font-semibold cursor-pointer">Lembrar meu e-mail</label>
+            </div>
+
+            <button id="btn-entrar" class="w-full py-3 mt-1 bg-gradient-to-r from-purple-600 to-green-500 hover:from-purple-500 hover:to-green-400 text-white font-black text-lg rounded-xl shadow-lg transform hover:-translate-y-1 transition-all">ENTRAR</button>
+            <p class="text-center text-white font-semibold mt-2">
+                Ainda não tem conta? <button id="btn-mostrar-cadastro" class="text-green-300 hover:text-green-200 underline">Crie aqui</button>
+            </p>
+        </div>
+
+        <!-- FORMULÁRIO DE CADASTRO -->
+        <div id="box-cadastro" class="hidden w-full flex flex-col gap-3">
+            <input type="text" id="cadastro-nome" autocomplete="name" placeholder="Nome de Usuário" class="w-full px-4 py-3 rounded-xl bg-white/80 border-2 border-transparent focus:border-green-500 focus:outline-none text-purple-900 font-bold placeholder-purple-400">
+            <input type="email" id="cadastro-email" autocomplete="email" placeholder="E-mail" class="w-full px-4 py-3 rounded-xl bg-white/80 border-2 border-transparent focus:border-green-500 focus:outline-none text-purple-900 font-bold placeholder-purple-400">
+            <input type="password" id="cadastro-senha" autocomplete="new-password" placeholder="Crie uma Senha (mín. 6 letras)" class="w-full px-4 py-3 rounded-xl bg-white/80 border-2 border-transparent focus:border-green-500 focus:outline-none text-purple-900 font-bold placeholder-purple-400">
+            <button id="btn-registrar" class="w-full py-3 mt-1 bg-gradient-to-r from-green-600 to-purple-600 hover:from-green-500 hover:to-purple-500 text-white font-black text-lg rounded-xl shadow-lg transform hover:-translate-y-1 transition-all">CRIAR CONTA</button>
+            <p class="text-center text-white font-semibold mt-2">
+                Já tem conta? <button id="btn-mostrar-login" class="text-purple-300 hover:text-purple-200 underline">Faça Login</button>
+            </p>
+        </div>
+    </div>
+
+    <!-- SCRIPT DO FIREBASE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyCU3lFTgfrDMaD9jwR7X7ivYPmGQh4VE1g",
+          authDomain: "supercards-tcg.firebaseapp.com",
+          projectId: "supercards-tcg",
+          storageBucket: "supercards-tcg.firebasestorage.app",
+          messagingSenderId: "862316380615",
+          appId: "1:862316380615:web:b3f28056ebc967673999e2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // NOVO: Pular a tela de login se já estiver conectado
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.location.href = "menu.html";
+            }
+        });
+
+        const boxLogin = document.getElementById('box-login');
+        const boxCadastro = document.getElementById('box-cadastro');
+        const btnMostrarCadastro = document.getElementById('btn-mostrar-cadastro');
+        const btnMostrarLogin = document.getElementById('btn-mostrar-login');
+        const msgAlerta = document.getElementById('mensagem-alerta');
+        
+        // NOVO: Preencher o e-mail automaticamente se estiver salvo no navegador
+        const emailSalvo = localStorage.getItem('supercards_email_salvo');
+        if (emailSalvo) {
+            document.getElementById('login-email').value = emailSalvo;
+            document.getElementById('lembrar-mim').checked = true;
+        }
+
+        function mostrarMensagem(texto, tipo) {
+            msgAlerta.textContent = texto;
+            msgAlerta.classList.remove('hidden', 'bg-red-500', 'bg-green-500', 'text-white');
+            if (tipo === 'erro') msgAlerta.classList.add('bg-red-500', 'text-white');
+            if (tipo === 'sucesso') msgAlerta.classList.add('bg-green-500', 'text-white');
+            setTimeout(() => msgAlerta.classList.add('hidden'), 5000); 
+        }
+
+        btnMostrarCadastro.addEventListener('click', () => {
+            boxLogin.classList.add('hidden');
+            boxCadastro.classList.remove('hidden');
+        });
+
+        btnMostrarLogin.addEventListener('click', () => {
+            boxCadastro.classList.add('hidden');
+            boxLogin.classList.remove('hidden');
+        });
+
+        document.getElementById('btn-registrar').addEventListener('click', () => {
+            const nome = document.getElementById('cadastro-nome').value;
+            const email = document.getElementById('cadastro-email').value;
+            const senha = document.getElementById('cadastro-senha').value;
+
+            if (!nome || !email || !senha) {
+                mostrarMensagem("Preencha todos os campos!", "erro");
+                return;
+            }
+
+            createUserWithEmailAndPassword(auth, email, senha)
+                .then(async (userCredential) => {
+                    const user = userCredential.user;
+                    
+                    await updateProfile(user, { displayName: nome });
+
+                    await setDoc(doc(db, "users", user.uid), {
+                        moedas: 0,
+                        fragmentos: 0,
+                        nivel: 1,
+                        xp: 0
+                    });
+
+                    // Se criou conta, vamos salvar o e-mail também pro futuro
+                    localStorage.setItem('supercards_email_salvo', email);
+
+                    mostrarMensagem("Conta criada com sucesso! Redirecionando...", "sucesso");
+                    // O onAuthStateChanged lá em cima vai cuidar do redirecionamento
+                })
+                .catch((error) => {
+                    const errorCode = error.code;
+                    if(errorCode === 'auth/email-already-in-use') mostrarMensagem("Esse e-mail já tem conta.", "erro");
+                    else if(errorCode === 'auth/weak-password') mostrarMensagem("A senha deve ter pelo menos 6 letras.", "erro");
+                    else mostrarMensagem("Erro ao criar conta: " + error.message, "erro");
+                });
+        });
+
+        document.getElementById('btn-entrar').addEventListener('click', () => {
+            const email = document.getElementById('login-email').value;
+            const senha = document.getElementById('login-senha').value;
+            const lembrar = document.getElementById('lembrar-mim').checked;
+
+            if (!email || !senha) {
+                mostrarMensagem("Preencha e-mail e senha!", "erro");
+                return;
+            }
+
+            // NOVO: Salva ou esquece o e-mail baseado na caixinha
+            if (lembrar) {
+                localStorage.setItem('supercards_email_salvo', email);
+            } else {
+                localStorage.removeItem('supercards_email_salvo');
+            }
+
+            signInWithEmailAndPassword(auth, email, senha)
+                .then((userCredential) => {
+                    mostrarMensagem("Bem-vindo de volta! Redirecionando...", "sucesso");
+                    // O onAuthStateChanged vai cuidar do redirecionamento
+                })
+                .catch((error) => {
+                    mostrarMensagem("E-mail ou senha incorretos.", "erro");
+                });
+        });
+    </script>
+</body>
+</html>

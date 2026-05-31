@@ -75,6 +75,17 @@
         </main>
     </div>
 
+    <!-- MODAL DE CONFIRMAÇÃO DE COMPRA -->
+    <div id="modal-confirmacao" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 max-w-xs w-full text-center shadow-2xl">
+            <h2 class="text-[#7a32a8] font-black text-xl mb-4" id="texto-confirmacao">Confirmar compra?</h2>
+            <div class="flex justify-center gap-4 mt-6">
+                <button id="btn-cancelar-compra" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-full shadow-md transition-transform hover:scale-105">NÃO</button>
+                <button id="btn-confirmar-compra" class="bg-[#22c55e] hover:bg-[#16a34a] text-white font-black py-2 px-6 rounded-full shadow-md transition-transform hover:scale-105">SIM</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -134,27 +145,47 @@
             }
         });
 
+        let pacotePendente = null;
+        let precoPendente = 0;
+        const modalConfirmacao = document.getElementById('modal-confirmacao');
+
         async function comprarPacote(tipo, preco) {
             if (saldoMoedas < preco) {
                 mostrarMensagem(`Você não tem moedas suficientes!`, "erro");
                 return;
             }
-            if (confirm(`Confirmar compra deste pacote?`)) {
-                try {
-                    const pacoteCampo = tipo === 'basico' ? 'pacoteBasico' : 'pacotePremium';
-                    await setDoc(dbUserRef, {
-                        moedas: increment(-preco),
-                        inventario: { [pacoteCampo]: increment(1) }
-                    }, { merge: true });
-                    
-                    saldoMoedas -= preco;
-                    document.getElementById('player-coins').innerText = saldoMoedas;
-                    mostrarMensagem("Compra realizada com sucesso!", "sucesso");
-                } catch (e) {
-                    mostrarMensagem("Erro ao processar compra.", "erro");
-                }
-            }
+            // Abre o modal personalizado
+            pacotePendente = tipo;
+            precoPendente = preco;
+            document.getElementById('texto-confirmacao').innerText = `Comprar por ${preco} moedas?`;
+            modalConfirmacao.classList.remove('hidden');
         }
+
+        // Lógica dos botões de dentro do Modal
+        document.getElementById('btn-cancelar-compra').addEventListener('click', () => {
+            modalConfirmacao.classList.add('hidden');
+            pacotePendente = null;
+        });
+
+        document.getElementById('btn-confirmar-compra').addEventListener('click', async () => {
+            modalConfirmacao.classList.add('hidden');
+            if (!pacotePendente) return;
+            
+            try {
+                const pacoteCampo = pacotePendente === 'basico' ? 'pacoteBasico' : 'pacotePremium';
+                await setDoc(dbUserRef, {
+                    moedas: increment(-precoPendente),
+                    inventario: { [pacoteCampo]: increment(1) }
+                }, { merge: true });
+                
+                saldoMoedas -= precoPendente;
+                document.getElementById('player-coins').innerText = saldoMoedas;
+                mostrarMensagem("Compra realizada com sucesso!", "sucesso");
+            } catch (e) {
+                mostrarMensagem("Erro ao processar compra.", "erro");
+            }
+            pacotePendente = null;
+        });
         
         document.getElementById('btn-comprar-basico').addEventListener('click', () => comprarPacote('basico', 100));
         document.getElementById('btn-comprar-premium').addEventListener('click', () => comprarPacote('premium', 300));

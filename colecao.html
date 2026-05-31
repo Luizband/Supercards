@@ -162,10 +162,12 @@
                     divCarta.classList.add('carta-bloqueada');
                 }
 
+                const imagemExibida = possuiCarta ? info.imagem : "fundo_carta_2.png";
+                
                 divCarta.innerHTML = `
                     <span class="text-black font-black text-[10px] mb-0.5">${idFormatado}</span>
-                    <div class="bg-gray-800 w-full aspect-[2.5/3.5] flex items-center justify-center rounded-md overflow-hidden shadow-md border-2 border-transparent hover:border-[#8b3dff]">
-                        <img src="${info.imagem}" class="w-full h-full object-cover" onerror="this.src='carta_fundo.png'">
+                    <div class="bg-gray-800 w-full aspect-[2.5/3.5] flex items-center justify-center rounded-md overflow-hidden shadow-md border-2 border-transparent ${possuiCarta ? 'hover:border-[#8b3dff]' : ''}">
+                        <img src="${imagemExibida}" class="w-full h-full object-cover">
                     </div>
                 `;
 

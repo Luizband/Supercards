@@ -22,7 +22,6 @@
 
     <div class="w-full max-w-sm flex flex-col h-full relative">
         
-        <!-- CABEÇALHO -->
         <header class="flex justify-between items-center mb-6 mt-2">
             <button onclick="window.location.href='menu.html'" class="bg-[#dca3e8] hover:bg-[#bc7bd4] transition-colors rounded-full flex items-center justify-center w-10 h-10 shadow-md text-[#7a32a8] font-black text-xl">
                 ←
@@ -36,9 +35,7 @@
 
         <div id="mensagem-alerta" class="hidden w-full p-3 mb-4 text-center text-sm font-bold rounded-lg shadow-lg z-50"></div>
 
-        <!-- VITRINE -->
         <main class="flex flex-col flex-grow gap-4 overflow-y-auto pb-4 no-scrollbar">
-            
             <!-- BÔNUS DIÁRIO -->
             <div class="bg-gradient-to-br from-[#bc7bd4] to-[#7a32a8] rounded-3xl p-4 shadow-xl border-2 border-[#dca3e8] flex flex-col items-center relative overflow-hidden">
                 <h2 class="text-white font-black text-xl mb-1 drop-shadow-md z-10">Bônus Diário</h2>
@@ -75,7 +72,7 @@
         </main>
     </div>
 
-    <!-- MODAL DE CONFIRMAÇÃO DE COMPRA -->
+    <!-- MODAL DE COMPRA -->
     <div id="modal-confirmacao" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 max-w-xs w-full text-center shadow-2xl">
             <h2 class="text-[#7a32a8] font-black text-xl mb-4" id="texto-confirmacao">Confirmar compra?</h2>
@@ -128,16 +125,20 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 dbUserRef = doc(db, "users", user.uid);
-                const docSnap = await getDoc(dbUserRef);
                 gameDayAtual = obterGameDay();
-
+                
+                const docSnap = await getDoc(dbUserRef);
                 if (docSnap.exists()) {
                     const dados = docSnap.data();
                     saldoMoedas = dados.moedas || 0;
                     document.getElementById('player-coins').innerText = saldoMoedas;
+                    
                     if (dados.ultimoResgateDiario === gameDayAtual) {
                         btnDiario.innerText = "RESGATADO";
                         btnDiario.disabled = true;
+                    } else {
+                        btnDiario.innerText = "RESGATAR";
+                        btnDiario.disabled = false;
                     }
                 }
             } else {
@@ -181,7 +182,6 @@
                 document.getElementById('player-coins').innerText = saldoMoedas;
                 mostrarMensagem("Compra realizada com sucesso!", "sucesso");
             } catch (e) {
-                console.error(e);
                 mostrarMensagem("Erro ao processar compra.", "erro");
             }
             pacotePendente = null;
@@ -192,28 +192,41 @@
 
         // LÓGICA BLINDADA DO BÔNUS DIÁRIO
         btnDiario.addEventListener('click', async () => {
-            if (!dbUserRef) return;
+            if (!dbUserRef) {
+                mostrarMensagem("Aguarde a conexão com o banco...", "erro");
+                return;
+            }
             
             try {
-                const hoje = obterGameDay(); // Pega a data fresquinha no momento exato do clique
+                // Força uma leitura em tempo real para não depender de cache
+                const docSnap = await getDoc(dbUserRef);
+                const dados = docSnap.exists() ? docSnap.data() : {};
+                const hoje = obterGameDay(); 
                 
+                if (dados.ultimoResgateDiario === hoje) {
+                    mostrarMensagem("Você já resgatou o bônus hoje!", "erro");
+                    btnDiario.innerText = "RESGATADO";
+                    btnDiario.disabled = true;
+                    return;
+                }
+
                 await setDoc(dbUserRef, {
                     inventario: { pacoteBasico: increment(1) },
                     ultimoResgateDiario: hoje
                 }, { merge: true });
                 
-                gameDayAtual = hoje; // Atualiza a variável para o sistema saber que resgatou
-                
+                gameDayAtual = hoje; 
                 mostrarMensagem("Bônus resgatado! +1 Pacote", "sucesso");
                 btnDiario.innerText = "RESGATADO";
                 btnDiario.disabled = true;
             } catch (e) {
-                console.error(e);
-                mostrarMensagem("Erro ao resgatar.", "erro");
+                console.error("ERRO FIREBASE:", e);
+                // Se der erro, joga o código do erro na tela para você ler
+                mostrarMensagem("Falha: " + e.message, "erro");
             }
         });
 
-        // CHEAT DE DESENVOLVEDOR (Clicar em "LOJA")
+        // CHEAT DE DESENVOLVEDOR 
         document.getElementById('dev-moedas').addEventListener('click', async () => {
             if (!dbUserRef) return;
             try {
@@ -230,7 +243,6 @@
                 
                 mostrarMensagem("DEV: +1000 Moedas e Relógio Resetado!", "sucesso");
             } catch (e) {
-                console.error(e);
                 mostrarMensagem("Erro no cheat.", "erro");
             }
         });

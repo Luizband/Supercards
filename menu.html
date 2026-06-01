@@ -108,7 +108,8 @@
         </header>
 
         <main class="grid grid-cols-2 gap-x-4 gap-y-4 flex-grow content-center mb-4">
-            <div onclick="window.location.href='colecao.html'" class="flex flex-col items-center group cursor-pointer">
+            
+            <div onclick="window.acionarGatilhoMissao('abrir_colecao', 'colecao.html')" class="flex flex-col items-center group cursor-pointer">
                 <span class="text-[#dca3e8] font-black text-lg mb-1 drop-shadow-md">Coleção</span>
                 <div class="bg-[#dca3e8] w-[80%] aspect-square rounded-[24px] flex items-center justify-center p-4 shadow-lg hover:scale-105 transition-transform border-4 border-transparent hover:border-[#8b3dff]/50">
                     <img src="colecao.png" alt="Coleção" class="w-full h-full object-contain drop-shadow-lg">
@@ -122,14 +123,14 @@
                 </div>
             </div>
 
-            <div class="flex flex-col items-center group cursor-pointer">
+            <div onclick="window.location.href='troca.html'" class="flex flex-col items-center group cursor-pointer">
                 <span class="text-[#dca3e8] font-black text-lg mb-1 drop-shadow-md">Trocas</span>
                 <div class="bg-[#dca3e8] w-[80%] aspect-square rounded-[24px] flex items-center justify-center p-4 shadow-lg hover:scale-105 transition-transform border-4 border-transparent hover:border-[#8b3dff]/50">
                     <img src="troca.png" alt="Trocas" class="w-full h-full object-contain drop-shadow-lg">
                 </div>
             </div>
 
-            <div class="flex flex-col items-center group cursor-pointer">
+            <div onclick="window.acionarGatilhoMissao('batalhar', '#')" class="flex flex-col items-center group cursor-pointer">
                 <span class="text-[#dca3e8] font-black text-lg mb-1 drop-shadow-md">Batalha</span>
                 <div class="bg-[#dca3e8] w-[80%] aspect-square rounded-[24px] flex items-center justify-center p-4 shadow-lg hover:scale-105 transition-transform border-4 border-transparent hover:border-[#8b3dff]/50">
                     <img src="vs.png" alt="Batalha" class="w-full h-full object-contain drop-shadow-lg">
@@ -139,8 +140,6 @@
 
         <footer class="mt-auto flex justify-center pb-2">
             <div class="bg-[#dca3e8] rounded-full flex p-1.5 gap-2 shadow-lg w-full max-w-[280px]">
-                
-                <!-- BOTÃO DE NOTIFICAÇÕES COM O INDICADOR PULSANTE -->
                 <button onclick="window.location.href='notificacoes.html'" class="relative flex-1 bg-[#7a32a8] text-white text-xs font-bold py-2 rounded-full hover:bg-purple-600 transition-colors">
                     Notificações
                     <span id="indicador-notif" class="hidden absolute -top-1 -right-1 flex h-3 w-3">
@@ -148,7 +147,6 @@
                       <span class="relative inline-flex rounded-full h-3 w-3 bg-red-600 border border-white"></span>
                     </span>
                 </button>
-
                 <button class="flex-1 bg-[#7a32a8] text-white text-xs font-bold py-2 rounded-full hover:bg-purple-600 transition-colors">AMIGOS</button>
             </div>
         </footer>
@@ -216,6 +214,58 @@
             return 3000;
         }
 
+        // --- SISTEMA INTELIGENTE DE GATILHOS DE MISSÃO ---
+        window.acionarGatilhoMissao = async function(missaoId, redirectUrl) {
+            let atrasoRedirect = 0;
+
+            if (redirectUrl === '#') {
+                window.mostrarToast("⚔️ Modo Batalha em desenvolvimento!");
+            }
+
+            if (auth.currentUser) {
+                try {
+                    const ref = doc(db, "users", auth.currentUser.uid);
+                    const snap = await getDoc(ref);
+                    
+                    if (snap.exists()) {
+                        let dados = snap.data();
+                        let pacoteMissoes = dados.missoesDiarias || {};
+                        const hoje = obterGameDay();
+
+                        // Verifica se as missões de hoje existem e procura a nossa
+                        if (pacoteMissoes.dataReset === hoje && pacoteMissoes.lista) {
+                            let atualizou = false;
+                            
+                            pacoteMissoes.lista.forEach(m => {
+                                if (m.id === missaoId && m.progresso < m.meta) {
+                                    m.progresso++;
+                                    atualizou = true;
+                                    window.mostrarToast(`🎯 Progresso: ${m.desc}`);
+                                    atrasoRedirect = 1200; // Segura um pouco a tela pra dar tempo de ler
+                                }
+                            });
+
+                            if (atualizou) {
+                                await setDoc(ref, { missoesDiarias: pacoteMissoes }, { merge: true });
+                            }
+                        }
+                    }
+                } catch(e) {
+                    console.error("Erro no gatilho da missão:", e);
+                }
+            }
+
+            // Realiza o redirecionamento
+            if (redirectUrl && redirectUrl !== '#') {
+                if (atrasoRedirect > 0) {
+                    setTimeout(() => window.location.href = redirectUrl, atrasoRedirect);
+                } else {
+                    window.location.href = redirectUrl; 
+                }
+            }
+        };
+        // ------------------------------------------------
+
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('player-name').innerText = user.displayName?.toUpperCase() || "JOGADOR";
@@ -236,7 +286,6 @@
                     let docAtualizacao = {};
                     let notificacoesNovas = [];
                     
-                    // Verifica se já tem alguma mensagem não lida no banco
                     let temNotifNaoLida = (dados.notificacoes || []).some(n => n.lida === false);
 
                     if (ultimoLogin !== hoje) {
@@ -257,7 +306,7 @@
 
                     if (diasSeguidos >= 20 && !badgesJogador["badge-003"]) {
                         badgesJogador["badge-003"] = true;
-                        ganhouBadge = true;
+                        ganhouBadge = false; // Ajustado pra teste se precisar
                         bonusXp += 50;
                         bonusMoedas += 50;
 
@@ -320,14 +369,13 @@
 
                     if (notificacoesNovas.length > 0) {
                         docAtualizacao.notificacoes = arrayUnion(...notificacoesNovas);
-                        temNotifNaoLida = true; // Acende a bolinha se gerou notificação agora!
+                        temNotifNaoLida = true;
                     }
 
                     if (atualizouLogin || ganhouBadge) {
                         await setDoc(docRef, docAtualizacao, { merge: true });
                     }
 
-                    // ATUALIZA A TELA (Moedas, Nível e Indicador de Notificação)
                     document.getElementById('player-coins').innerText = (dados.moedas || 0) + bonusMoedas;
                     document.getElementById('player-level').innerText = nivelAtual;
                     

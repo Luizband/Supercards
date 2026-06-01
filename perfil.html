@@ -16,9 +16,43 @@
         }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* CSS do Toast adicionado para as mensagens de Upload */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            width: 90%;
+            max-width: 350px;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .toast-msg {
+            background: #dca3e8;
+            color: #7a32a8;
+            border: 3px solid #7a32a8;
+            padding: 12px 20px;
+            border-radius: 9999px;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.3);
+            text-align: center;
+            font-weight: 900;
+            font-size: 0.85rem;
+            animation: slideDown 0.3s ease-out;
+            pointer-events: auto;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body class="h-[100dvh] p-4 flex justify-center overflow-hidden">
+
+    <div id="toast-container"></div>
 
     <div class="w-full max-w-sm flex flex-col h-full relative gap-4">
         
@@ -27,11 +61,29 @@
             
             <!-- Foto e Moedas (Esquerda) -->
             <div class="flex flex-col items-center relative">
-                <div class="bg-[#dca3e8] w-24 h-24 rounded-full flex items-center justify-center text-[#7a32a8] font-black text-xl shadow-lg border-2 border-[#bc7bd4]">
-                    FOTO
+                
+                <!-- ÁREA DA FOTO CLICÁVEL -->
+                <div class="relative group cursor-pointer" onclick="document.getElementById('input-foto').click()">
+                    <!-- O Círculo com overflow-hidden para a imagem ficar redonda -->
+                    <div class="bg-[#dca3e8] w-24 h-24 rounded-full flex items-center justify-center text-[#7a32a8] font-black text-xl shadow-lg border-2 border-[#bc7bd4] overflow-hidden">
+                        <span id="texto-sem-foto">FOTO</span>
+                        <img id="img-perfil" src="" class="hidden w-full h-full object-cover absolute inset-0">
+                    </div>
+                    
+                    <!-- Overlay escuro e ícone de câmera ao passar o mouse / clicar -->
+                    <div class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                        <span class="text-white font-black text-[10px] text-center drop-shadow-md">MUDAR</span>
+                    </div>
+                    <div class="absolute bottom-1 right-0 bg-[#22c55e] w-7 h-7 rounded-full border-2 border-[#dca3e8] flex items-center justify-center shadow-md text-xs z-20">
+                        📷
+                    </div>
                 </div>
+
+                <!-- Input invisível para abrir a galeria/câmera -->
+                <input type="file" id="input-foto" accept="image/*" class="hidden">
+
                 <!-- Pílula de moedas sobreposta -->
-                <div class="absolute -bottom-3 bg-[#dca3e8] rounded-full px-3 py-1 flex items-center justify-center gap-1 shadow-md border-2 border-[#bc7bd4]">
+                <div class="absolute -bottom-3 bg-[#dca3e8] rounded-full px-3 py-1 flex items-center justify-center gap-1 shadow-md border-2 border-[#bc7bd4] z-30">
                     <span id="perfil-moedas" class="text-black font-black text-xs">0</span>
                     <img src="moedas.png" class="w-3 h-3 object-contain">
                 </div>
@@ -109,7 +161,10 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        // IMPORTAÇÃO DO STORAGE PARA A FOTO
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+        
         import { INFO_BADGES } from './badges.js';
 
         const firebaseConfig = {
@@ -124,6 +179,23 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const storage = getStorage(app); // INICIALIZA O STORAGE
+
+        let currentUserUid = null;
+
+        window.mostrarToast = function(mensagem) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast-msg';
+            toast.innerHTML = mensagem;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => toast.remove(), 500); 
+            }, 3000);
+        };
 
         function calcularXPMaximo(nivel) {
             if (nivel >= 1 && nivel <= 5) return 200;
@@ -134,6 +206,7 @@
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
+                currentUserUid = user.uid; // Salva o ID para o upload da foto
                 const docRef = doc(db, "users", user.uid);
                 const docSnap = await getDoc(docRef);
 
@@ -153,6 +226,13 @@
                     document.getElementById('perfil-texto-xp').innerText = `${xpAtual}/${xpMaximo} xp`;
                     document.getElementById('perfil-barra-xp').style.width = `${porcentagem}%`;
 
+                    // LÓGICA DE EXIBIR A FOTO SE ELA EXISTIR NO BANCO
+                    if (dados.fotoPerfil) {
+                        document.getElementById('img-perfil').src = dados.fotoPerfil;
+                        document.getElementById('img-perfil').classList.remove('hidden');
+                        document.getElementById('texto-sem-foto').classList.add('hidden');
+                    }
+
                     // Preenche as Estatísticas
                     const stats = dados.estatisticas || {};
                     document.getElementById('stat-pacotes').innerText = stats.pacotesAbertos || 0;
@@ -165,7 +245,6 @@
                     const gridBadges = document.getElementById('grid-badges');
                     const msgSemBadges = document.getElementById('mensagem-sem-badges');
                     
-                    // As badges no firebase serão salvas como um objeto: { "badge-001": true, "badge-008": true }
                     const badgesConquistadas = dados.badges || {}; 
                     const chavesBadges = Object.keys(badgesConquistadas);
 
@@ -182,7 +261,6 @@
                                     <span class="text-[#7a32a8] font-black text-[9px] leading-tight">${info.nome}</span>
                                 `;
                                 
-                                // Tooltip simples para mostrar a descrição ao clicar
                                 div.addEventListener('click', () => alert(info.descricao));
                                 
                                 gridBadges.appendChild(div);
@@ -192,6 +270,42 @@
                 }
             } else {
                 window.location.href = "index.html";
+            }
+        });
+
+        // --- SISTEMA DE UPLOAD DE FOTO ---
+        const inputFoto = document.getElementById('input-foto');
+        
+        inputFoto.addEventListener('change', async (event) => {
+            const arquivo = event.target.files[0];
+            if (!arquivo) return;
+
+            window.mostrarToast("Fazendo upload da foto... ⏳");
+            document.getElementById('texto-sem-foto').innerText = "⏳";
+            document.getElementById('texto-sem-foto').classList.remove('hidden');
+            document.getElementById('img-perfil').classList.add('hidden');
+
+            try {
+                // Salva a imagem na pasta 'fotos_perfil' com o nome sendo a ID do usuário
+                const storageRef = ref(storage, `fotos_perfil/${currentUserUid}`);
+                
+                await uploadBytes(storageRef, arquivo);
+                const linkFoto = await getDownloadURL(storageRef);
+
+                // Salva a URL no banco de dados Firestore
+                await setDoc(doc(db, "users", currentUserUid), { fotoPerfil: linkFoto }, { merge: true });
+
+                // Atualiza a interface
+                document.getElementById('img-perfil').src = linkFoto;
+                document.getElementById('img-perfil').classList.remove('hidden');
+                document.getElementById('texto-sem-foto').classList.add('hidden');
+                
+                window.mostrarToast("📸 Foto atualizada com sucesso!");
+
+            } catch (error) {
+                console.error("Erro no upload:", error);
+                window.mostrarToast("Erro ao enviar a imagem.");
+                document.getElementById('texto-sem-foto').innerText = "FOTO";
             }
         });
     </script>

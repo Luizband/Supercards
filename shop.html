@@ -17,7 +17,6 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* NOVO CSS DO POP-UP (TOAST) */
         #toast-container {
             position: fixed;
             top: 20px;
@@ -52,7 +51,6 @@
 </head>
 <body class="h-[100dvh] p-4 flex justify-center overflow-hidden">
 
-    <!-- CAIXA INVISÍVEL ONDE OS TOASTS VÃO NASCER -->
     <div id="toast-container"></div>
 
     <div class="w-full max-w-sm flex flex-col h-full relative">
@@ -149,7 +147,6 @@
             setTimeout(() => msgAlerta.classList.add('hidden'), 4000); 
         };
 
-        // NOVO MOTOR DO TOAST (SUBSTITUIU O MODAL ANTIGO)
         window.mostrarToast = function(mensagem) {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -266,7 +263,8 @@
                 let bonusXp = 0;
                 let bonusMoedas = 0;
                 let notificacoesNovas = []; 
-                
+
+                // 1. CHECAGEM DA BADGE DE GASTAR MOEDAS
                 if (moedasGastas >= 3000 && !badgesJogador["badge-007"]) {
                     badgesJogador["badge-007"] = true;
                     ganhouBadge = true;
@@ -281,7 +279,24 @@
                         data: new Date().toISOString()
                     });
                 }
+
+                // 2. GATILHO DA MISSÃO DIÁRIA (Comprar algo na loja)
+                let pacoteMissoes = dados.missoesDiarias || {};
+                const hoje = window.obterGameDay();
+                let atualizouMissao = false;
+                let msgMissaoProgresso = "";
+
+                if (pacoteMissoes.dataReset === hoje && pacoteMissoes.lista) {
+                    pacoteMissoes.lista.forEach(m => {
+                        if (m.id === "comprar" && m.progresso < m.meta) {
+                            m.progresso++;
+                            atualizouMissao = true;
+                            msgMissaoProgresso = `🎯 Progresso: ${m.desc}`;
+                        }
+                    });
+                }
                 
+                // 3. MATEMÁTICA DE LEVEL UP
                 let nivelAtual = dados.nivel || 1;
                 let xpAtual = dados.xp || 0;
                 let novoXp = xpAtual + bonusXp;
@@ -343,6 +358,10 @@
                     nivel: nivelAtual
                 };
 
+                if (atualizouMissao) {
+                    pacoteAtualizacao.missoesDiarias = pacoteMissoes;
+                }
+
                 if (notificacoesNovas.length > 0) {
                     pacoteAtualizacao.notificacoes = arrayUnion(...notificacoesNovas);
                 }
@@ -353,12 +372,18 @@
                 document.getElementById('player-coins').innerText = window.saldoMoedas;
                 window.mostrarMensagem("Compra realizada com sucesso!", "sucesso");
                 
-                // DISPARA OS NOVOS TOASTS
+                // 4. CASCATA DE TOASTS
+                let tempoAtraso = 500;
+                if (atualizouMissao) {
+                    setTimeout(() => window.mostrarToast(msgMissaoProgresso), tempoAtraso);
+                    tempoAtraso += 500;
+                }
                 if (ganhouBadge) {
-                    setTimeout(() => window.mostrarToast(`🏆 NOVA CONQUISTA!<br><span class="text-xs font-normal">Badge: Consumidor compulsivo.</span><br><span class="text-sm">Recompensa: +50 XP e +50 <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`), 500);
+                    setTimeout(() => window.mostrarToast(`🏆 NOVA CONQUISTA!<br><span class="text-xs font-normal">Badge: Consumidor compulsivo.</span><br><span class="text-sm">Recompensa: +50 XP e +50 <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`), tempoAtraso);
+                    tempoAtraso += 500;
                 }
                 if (subiuNivel) {
-                    setTimeout(() => window.mostrarToast(msgLevelUpPopup), 1000);
+                    setTimeout(() => window.mostrarToast(msgLevelUpPopup), tempoAtraso);
                 }
                 
             } catch (e) {

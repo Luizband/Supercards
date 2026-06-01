@@ -24,9 +24,44 @@
         .carta-animada {
             animation: surgir 0.5s ease-out forwards;
         }
+
+        /* NOVO CSS DO POP-UP (TOAST) */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            width: 90%;
+            max-width: 350px;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .toast-msg {
+            background: #dca3e8;
+            color: #7a32a8;
+            border: 3px solid #7a32a8;
+            padding: 12px 20px;
+            border-radius: 9999px;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.3);
+            text-align: center;
+            font-weight: 900;
+            font-size: 0.85rem;
+            animation: slideDown 0.3s ease-out;
+            pointer-events: auto;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body class="h-[100dvh] p-4 flex justify-center overflow-hidden">
+
+    <!-- CAIXA INVISÍVEL ONDE OS TOASTS VÃO NASCER -->
+    <div id="toast-container"></div>
 
     <div class="w-full max-w-sm flex flex-col h-full relative">
         <header class="relative w-full mt-6 mb-6 flex justify-center z-10">
@@ -85,23 +120,11 @@
             </div>
         </div>
 
-        <!-- MODAL DE ALERTA EM FILA CUSTOMIZADO -->
-        <div id="modal-alerta-custom" class="hidden fixed inset-0 bg-black/80 z-[110] flex items-center justify-center p-4 backdrop-blur-sm">
-            <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 max-w-xs w-full text-center shadow-2xl">
-                <h2 class="text-[#7a32a8] font-black text-xl mb-4">Aviso</h2>
-                <p id="mensagem-alerta-custom" class="text-black font-bold mb-6 text-sm leading-relaxed">Mensagem aqui</p>
-                <button id="btn-fechar-alerta-custom" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-2 px-8 rounded-full shadow-md transition-transform hover:scale-105">
-                    OK
-                </button>
-            </div>
-        </div>
-
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        // NOVO: Importamos o arrayUnion para salvar as notificações
         import { getFirestore, doc, getDoc, setDoc, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         import { INFO_CARTAS } from './cartas.js';
 
@@ -126,31 +149,20 @@
         let arrayCartasRevelar = [];
         let indiceAtualRevelacao = 0;
 
-        // --- SISTEMA DE ALERTAS POP-UP CUSTOMIZADO ---
-        let filaAlertas = [];
-        let alertaAberto = false;
-        const modalAlerta = document.getElementById('modal-alerta-custom');
-        const msgAlertaCustom = document.getElementById('mensagem-alerta-custom');
+        // NOVO MOTOR DO TOAST (SUBSTITUIU A FILA DE ALERTAS)
+        window.mostrarToast = function(mensagem) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast-msg';
+            toast.innerHTML = mensagem;
+            container.appendChild(toast);
 
-        function mostrarAlertaPopup(mensagem) {
-            filaAlertas.push(mensagem);
-            processarFilaAlertas();
-        }
-
-        function processarFilaAlertas() {
-            if (alertaAberto || filaAlertas.length === 0) return;
-            alertaAberto = true;
-            msgAlertaCustom.innerHTML = filaAlertas[0]; 
-            modalAlerta.classList.remove('hidden');
-        }
-
-        document.getElementById('btn-fechar-alerta-custom').addEventListener('click', () => {
-            modalAlerta.classList.add('hidden');
-            filaAlertas.shift(); 
-            alertaAberto = false;
-            setTimeout(processarFilaAlertas, 300); 
-        });
-        // ---------------------------------------------
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => toast.remove(), 500); 
+            }, 3000);
+        };
 
         // --- SISTEMA DE DROP RATE ---
         const bancoRaridades = { 'Comum': [], 'Rara': [], 'Épica': [], 'Lendária': [] };
@@ -258,9 +270,7 @@
             pacoteParaAbrir = null;
         });
 
-        // ----------------------------------------------------------------
         // LÓGICA DE REVELAÇÃO (CLICAR NA TELA PARA PRÓXIMA CARTA)
-        // ----------------------------------------------------------------
         const modalRevelar = document.getElementById('modal-revelar-carta');
         const imgCartaRevelada = document.getElementById('img-carta-revelada');
         const containerCartaRevelada = document.getElementById('carta-revelada-container');
@@ -303,15 +313,12 @@
 
         modalRevelar.addEventListener('click', mostrarProximaCarta);
 
-        // ----------------------------------------------------------------
         // CLICOU EM "SIM" (Sorteio + Estatísticas + Nível + Notificações)
-        // ----------------------------------------------------------------
         document.getElementById('btn-confirmar-abrir').addEventListener('click', async () => {
             modalConfirmacaoAbrir.classList.add('hidden');
             if (!pacoteParaAbrir) return;
 
             try {
-                // 1. Sorteio de Cartas
                 const cartasSorteadas = [];
                 const contagemParaSalvar = {};
 
@@ -353,7 +360,6 @@
                 let pacotesPremiumGanhos = 0;
                 let notificacoesNovas = [];
 
-                // Verifica a Badge-008: Pacotinhos! (30 pacotes abertos)
                 if (pacotesAbertos >= 30 && !badgesJogador["badge-008"]) {
                     badgesJogador["badge-008"] = true;
                     ganhouBadgePacote = true;
@@ -439,12 +445,12 @@
                 // SALVA TUDO NO BANCO DE DADOS
                 await setDoc(docRef, pacoteAtualizacao, { merge: true });
 
-                // Dispara os alertas bonitos (Com um leve atraso para dar tempo de começar o suspense)
+                // DISPARA OS TOASTS COM LEVE ATRASO
                 if (ganhouBadgePacote) {
-                    setTimeout(() => mostrarAlertaPopup(`🏆 NOVA CONQUISTA!<br><span class="text-xs font-normal">Badge: Pacotinhos! (Abriu 30 pacotes).</span><br><span class="text-sm">Recompensa: +50 XP e +50 <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`), 800);
+                    setTimeout(() => window.mostrarToast(`🏆 NOVA CONQUISTA!<br><span class="text-xs font-normal">Badge: Pacotinhos!</span><br><span class="text-sm">Recompensa: +50 XP e +50 <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`), 800);
                 }
                 if (subiuNivel) {
-                    setTimeout(() => mostrarAlertaPopup(msgLevelUpPopup), 1200);
+                    setTimeout(() => window.mostrarToast(msgLevelUpPopup), 1500);
                 }
 
                 // Inicia visual das cartas sorteadas

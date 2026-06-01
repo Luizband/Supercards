@@ -21,9 +21,44 @@
             filter: grayscale(100%) brightness(0.4);
             pointer-events: none;
         }
+
+        /* NOVO CSS DO POP-UP (TOAST) */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            width: 90%;
+            max-width: 350px;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .toast-msg {
+            background: #dca3e8;
+            color: #7a32a8;
+            border: 3px solid #7a32a8;
+            padding: 12px 20px;
+            border-radius: 9999px;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.3);
+            text-align: center;
+            font-weight: 900;
+            font-size: 0.85rem;
+            animation: slideDown 0.3s ease-out;
+            pointer-events: auto;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body class="h-[100dvh] p-4 flex justify-center overflow-hidden">
+
+    <!-- CAIXA INVISÍVEL ONDE OS TOASTS VÃO NASCER -->
+    <div id="toast-container"></div>
 
     <div class="w-full max-w-sm flex flex-col h-full relative">
         
@@ -89,24 +124,12 @@
             </div>
         </div>
 
-        <!-- MODAL DE ALERTA EM FILA -->
-        <div id="modal-alerta-custom" class="hidden fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
-            <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 max-w-xs w-full text-center shadow-2xl">
-                <h2 class="text-[#7a32a8] font-black text-xl mb-4">Aviso</h2>
-                <p id="mensagem-alerta-custom" class="text-black font-bold mb-6 text-sm leading-relaxed">Mensagem aqui</p>
-                <button id="btn-fechar-alerta-custom" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-2 px-8 rounded-full shadow-md transition-transform hover:scale-105">
-                    OK
-                </button>
-            </div>
-        </div>
-
     </div>
 
     <!-- SCRIPT DO FIREBASE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        // NOVO: Importamos o arrayUnion
         import { getFirestore, doc, getDoc, setDoc, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         
         import { INFO_CARTAS, TABELA_FRAGMENTOS } from './cartas.js';
@@ -129,31 +152,20 @@
         let cartaAtivaNoModal = null;
         const TOTAL_CARTAS = 52;
 
-        // --- SISTEMA DE ALERTAS EM FILA ---
-        let filaAlertas = [];
-        let alertaAberto = false;
-        const modalAlerta = document.getElementById('modal-alerta-custom');
-        const msgAlertaCustom = document.getElementById('mensagem-alerta-custom');
+        // NOVO MOTOR DO TOAST (SUBSTITUIU A FILA DE ALERTAS)
+        window.mostrarToast = function(mensagem) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast-msg';
+            toast.innerHTML = mensagem;
+            container.appendChild(toast);
 
-        function mostrarAlerta(mensagem) {
-            filaAlertas.push(mensagem);
-            processarFilaAlertas();
-        }
-
-        function processarFilaAlertas() {
-            if (alertaAberto || filaAlertas.length === 0) return;
-            alertaAberto = true;
-            // ATUALIZADO: Agora usa innerHTML para renderizar as imagens das moedas
-            msgAlertaCustom.innerHTML = filaAlertas[0]; 
-            modalAlerta.classList.remove('hidden');
-        }
-
-        document.getElementById('btn-fechar-alerta-custom').addEventListener('click', () => {
-            modalAlerta.classList.add('hidden');
-            filaAlertas.shift();
-            alertaAberto = false;
-            setTimeout(processarFilaAlertas, 300);
-        });
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => toast.remove(), 500); 
+            }, 3000);
+        };
 
         function calcularXPMaximo(nivel) {
             if (nivel >= 1 && nivel <= 5) return 200;
@@ -257,7 +269,6 @@
                 let pacotesBasicos = 0;
                 let pacotesPremium = 0;
 
-                // Empacota notificação da Badge
                 notificacoesNovas.push({
                     id: "notif_" + Date.now() + "_badgescolecao",
                     titulo: "🏆 Conquistas de Coleção",
@@ -311,11 +322,11 @@
                 await setDoc(dbUserRef, docAtualizacao, { merge: true });
                 atualizarVisualBarraXP(novoXp, nivelAtual);
 
-                // ATUALIZADO: Alertas com HTML de imagem
-                mostrarAlerta(`🏆 NOVA(S) CONQUISTA(S)!<br><span class="text-xs font-normal">Você completou coleções e ganhou ${qtdBadges} badge(s).</span><br><span class="text-sm">Recompensa: +${50 * qtdBadges} XP e +${50 * qtdBadges} <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`);
+                // DISPARA OS NOVOS TOASTS
+                window.mostrarToast(`🏆 NOVA(S) CONQUISTA(S)!<br><span class="text-xs font-normal">Você completou coleções e ganhou ${qtdBadges} badge(s).</span><br><span class="text-sm">Recompensa: +${50 * qtdBadges} XP e +${50 * qtdBadges} <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`);
                 if (subiuNivel) {
                     let htmlRecompensa = (pacotesPremium > 0) ? `1 Pacote Básico, 1 Pacote Premium e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom">` : `1 Pacote Básico e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom">`;
-                    mostrarAlerta(`🎉 LEVEL UP! Nível ${nivelAtual} alcançado!<br><span class="text-xs">Recompensas: ${htmlRecompensa}</span>`);
+                    setTimeout(() => window.mostrarToast(`🎉 LEVEL UP! Nível ${nivelAtual} alcançado!<br><span class="text-xs">Recompensas: ${htmlRecompensa}</span>`), 600);
                 }
             }
         }
@@ -415,19 +426,19 @@
                     renderizarGridCartas();
                 }
 
-                mostrarAlerta(`Carta reciclada! Você ganhou ${ganhoFragmentos} fragmento(s).`);
+                // DISPARA OS NOVOS TOASTS COM LEVE ATRASO ENTRE ELES PARA EMPILHAR BONITO
+                window.mostrarToast(`Carta reciclada! Você ganhou ${ganhoFragmentos} fragmento(s).`);
                 
                 if (ganhouBadgeReciclagem) {
-                    // ATUALIZADO: HTML da imagem inserido aqui também!
-                    mostrarAlerta(`🏆 NOVA CONQUISTA!<br><span class="text-xs font-normal">Badge: Reciclador (Reciclou 30 cartas).</span><br><span class="text-sm">Recompensa: +50 XP e +50 <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`);
+                    setTimeout(() => window.mostrarToast(`🏆 NOVA CONQUISTA!<br><span class="text-xs font-normal">Badge: Reciclador (Reciclou 30 cartas).</span><br><span class="text-sm">Recompensa: +50 XP e +50 <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`), 400);
                 }
                 if (subiuNivel) {
-                    mostrarAlerta(msgLevelUp);
+                    setTimeout(() => window.mostrarToast(msgLevelUp), 800);
                 }
 
             } catch (error) {
                 console.error("Erro ao reciclar:", error);
-                mostrarAlerta("Ocorreu um erro ao reciclar a carta.");
+                window.mostrarToast("Ocorreu um erro ao reciclar a carta.");
             }
         });
 

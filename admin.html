@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin - Enviar Mensagem</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #1a1a1a; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    </style>
+</head>
+<body class="h-[100dvh] p-6 flex flex-col items-center justify-center">
+
+    <div class="bg-gray-800 w-full max-w-md rounded-2xl p-6 shadow-2xl border-2 border-purple-500">
+        <h1 class="text-purple-400 font-black text-2xl mb-6 text-center">PAINEL DE COMANDO</h1>
+
+        <div class="flex flex-col gap-4">
+            <div>
+                <label class="text-white font-bold text-sm mb-1 block">Título da Mensagem:</label>
+                <input id="input-titulo" type="text" placeholder="Ex: 🎁 Presente de Atualização!" class="w-full bg-gray-900 text-white border border-gray-600 rounded-lg p-3 focus:outline-none focus:border-purple-500 font-bold">
+            </div>
+
+            <div>
+                <label class="text-white font-bold text-sm mb-1 block">Texto da Mensagem:</label>
+                <!-- Dica: Você pode usar <img src="moedas.png"> aqui dentro! -->
+                <textarea id="input-texto" rows="5" placeholder="Escreva sua mensagem aqui..." class="w-full bg-gray-900 text-white border border-gray-600 rounded-lg p-3 focus:outline-none focus:border-purple-500 font-bold resize-none"></textarea>
+            </div>
+
+            <button id="btn-enviar" class="bg-purple-600 hover:bg-purple-700 text-white font-black py-4 rounded-xl shadow-lg transition-transform hover:scale-105 mt-4">
+                ENVIAR PARA TODOS OS JOGADORES
+            </button>
+            
+            <p id="status-msg" class="text-center font-bold text-sm mt-2 hidden"></p>
+        </div>
+    </div>
+
+    <!-- SCRIPT DO FIREBASE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        // NOVO: Importamos o collection e o getDocs para puxar todos os jogadores
+        import { getFirestore, collection, getDocs, doc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyCU3lFTgfrDMaD9jwR7X7ivYPmGQh4VE1g",
+          authDomain: "supercards-tcg.firebaseapp.com",
+          projectId: "supercards-tcg",
+          storageBucket: "supercards-tcg.firebasestorage.app",
+          messagingSenderId: "862316380615",
+          appId: "1:862316380615:web:b3f28056ebc967673999e2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const btnEnviar = document.getElementById('btn-enviar');
+        const statusMsg = document.getElementById('status-msg');
+
+        btnEnviar.addEventListener('click', async () => {
+            const titulo = document.getElementById('input-titulo').value.trim();
+            const texto = document.getElementById('input-texto').value.trim();
+
+            if (!titulo || !texto) {
+                mostrarStatus("Preencha o título e o texto!", "text-red-500");
+                return;
+            }
+
+            btnEnviar.disabled = true;
+            btnEnviar.innerText = "ENVIANDO...";
+            mostrarStatus("Buscando jogadores...", "text-yellow-400");
+
+            try {
+                // 1. Pega a coleção inteira de usuários
+                const usersSnapshot = await getDocs(collection(db, "users"));
+                let contador = 0;
+
+                // 2. Cria o "pacote" da mensagem
+                const novaMensagem = {
+                    id: "admin_msg_" + Date.now(),
+                    titulo: titulo,
+                    texto: texto,
+                    lida: false,
+                    data: new Date().toISOString()
+                };
+
+                // 3. Roda um loop disparando a mensagem para o perfil de cada um
+                const promessas = [];
+                usersSnapshot.forEach((userDoc) => {
+                    const userRef = doc(db, "users", userDoc.id);
+                    // Adicionamos a promessa de atualização na lista
+                    const promessa = updateDoc(userRef, {
+                        notificacoes: arrayUnion(novaMensagem)
+                    });
+                    promessas.push(promessa);
+                    contador++;
+                });
+
+                // Espera todas as mensagens serem entregues
+                await Promise.all(promessas);
+
+                mostrarStatus(`Sucesso! Mensagem enviada para ${contador} jogador(es).`, "text-green-500");
+                document.getElementById('input-titulo').value = "";
+                document.getElementById('input-texto').value = "";
+
+            } catch (error) {
+                console.error(error);
+                mostrarStatus("Erro ao enviar mensagens. Olhe o console.", "text-red-500");
+            } finally {
+                btnEnviar.disabled = false;
+                btnEnviar.innerText = "ENVIAR PARA TODOS OS JOGADORES";
+            }
+        });
+
+        function mostrarStatus(msg, corClasse) {
+            statusMsg.innerText = msg;
+            statusMsg.className = `text-center font-bold text-sm mt-2 ${corClasse}`;
+            statusMsg.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

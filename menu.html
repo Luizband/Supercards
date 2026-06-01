@@ -15,7 +15,6 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-        /* NOVO CSS DO POP-UP (TOAST) */
         #toast-container {
             position: fixed;
             top: 20px;
@@ -50,7 +49,6 @@
 </head>
 <body class="h-[100dvh] p-4 flex justify-center overflow-hidden">
 
-    <!-- CAIXA INVISÍVEL ONDE OS TOASTS VÃO NASCER -->
     <div id="toast-container"></div>
 
     <div class="w-full max-w-sm flex flex-col h-full relative">
@@ -141,7 +139,16 @@
 
         <footer class="mt-auto flex justify-center pb-2">
             <div class="bg-[#dca3e8] rounded-full flex p-1.5 gap-2 shadow-lg w-full max-w-[280px]">
-                <button onclick="window.location.href='notificacoes.html'" class="flex-1 bg-[#7a32a8] text-white text-xs font-bold py-2 rounded-full hover:bg-purple-600 transition-colors">Notificações</button>
+                
+                <!-- BOTÃO DE NOTIFICAÇÕES COM O INDICADOR PULSANTE -->
+                <button onclick="window.location.href='notificacoes.html'" class="relative flex-1 bg-[#7a32a8] text-white text-xs font-bold py-2 rounded-full hover:bg-purple-600 transition-colors">
+                    Notificações
+                    <span id="indicador-notif" class="hidden absolute -top-1 -right-1 flex h-3 w-3">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-3 w-3 bg-red-600 border border-white"></span>
+                    </span>
+                </button>
+
                 <button class="flex-1 bg-[#7a32a8] text-white text-xs font-bold py-2 rounded-full hover:bg-purple-600 transition-colors">AMIGOS</button>
             </div>
         </footer>
@@ -166,7 +173,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- CONTROLES DA INTERFACE ---
         const btnConfig = document.getElementById('btn-config');
         const dropdownConfig = document.getElementById('dropdown-config');
 
@@ -182,7 +188,6 @@
             signOut(auth).catch((error) => console.error("Erro ao sair: ", error));
         });
 
-        // NOVO MOTOR DO TOAST
         window.mostrarToast = function(mensagem) {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -197,7 +202,6 @@
             }, 3000);
         };
 
-        // --- FUNÇÕES DE DATA (COM RESET ÀS 06:00) ---
         function obterGameDay(offsetDias = 0) {
             let d = new Date();
             if (d.getHours() < 6) d.setDate(d.getDate() - 1);
@@ -212,7 +216,6 @@
             return 3000;
         }
 
-        // --- RADAR DE LOGIN & LÓGICA DE DIAS SEGUIDOS ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('player-name').innerText = user.displayName?.toUpperCase() || "JOGADOR";
@@ -232,8 +235,10 @@
                     let atualizouLogin = false;
                     let docAtualizacao = {};
                     let notificacoesNovas = [];
+                    
+                    // Verifica se já tem alguma mensagem não lida no banco
+                    let temNotifNaoLida = (dados.notificacoes || []).some(n => n.lida === false);
 
-                    // 1. CHECA A OFENSIVA DE DIAS
                     if (ultimoLogin !== hoje) {
                         atualizouLogin = true;
                         if (ultimoLogin === ontem) {
@@ -245,7 +250,6 @@
                         docAtualizacao.estatisticas = { diasSeguidos: diasSeguidos }; 
                     }
 
-                    // 2. CHECA A BADGE 003 (20 DIAS)
                     let badgesJogador = dados.badges || {};
                     let ganhouBadge = false;
                     let bonusXp = 0;
@@ -266,7 +270,6 @@
                         });
                     }
 
-                    // 3. MATEMÁTICA DE LEVEL UP
                     let nivelAtual = dados.nivel || 1;
                     let xpAtual = dados.xp || 0;
                     let subiuNivel = false;
@@ -317,17 +320,24 @@
 
                     if (notificacoesNovas.length > 0) {
                         docAtualizacao.notificacoes = arrayUnion(...notificacoesNovas);
+                        temNotifNaoLida = true; // Acende a bolinha se gerou notificação agora!
                     }
 
                     if (atualizouLogin || ganhouBadge) {
                         await setDoc(docRef, docAtualizacao, { merge: true });
                     }
 
-                    // 4. ATUALIZA A TELA
+                    // ATUALIZA A TELA (Moedas, Nível e Indicador de Notificação)
                     document.getElementById('player-coins').innerText = (dados.moedas || 0) + bonusMoedas;
                     document.getElementById('player-level').innerText = nivelAtual;
+                    
+                    const indicador = document.getElementById('indicador-notif');
+                    if (temNotifNaoLida) {
+                        indicador.classList.remove('hidden');
+                    } else {
+                        indicador.classList.add('hidden');
+                    }
 
-                    // 5. DISPARA ALERTAS TOAST
                     if (ganhouBadge) {
                         setTimeout(() => window.mostrarToast(`🏆 NOVA CONQUISTA!<br><span class="text-xs font-normal">Badge: Jogador Viciado.</span><br><span class="text-sm">Recompensa: +50 XP e +50 <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`), 500);
                     }

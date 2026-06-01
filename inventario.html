@@ -25,7 +25,6 @@
             animation: surgir 0.5s ease-out forwards;
         }
 
-        /* NOVO CSS DO POP-UP (TOAST) */
         #toast-container {
             position: fixed;
             top: 20px;
@@ -60,7 +59,6 @@
 </head>
 <body class="h-[100dvh] p-4 flex justify-center overflow-hidden">
 
-    <!-- CAIXA INVISÍVEL ONDE OS TOASTS VÃO NASCER -->
     <div id="toast-container"></div>
 
     <div class="w-full max-w-sm flex flex-col h-full relative">
@@ -149,7 +147,6 @@
         let arrayCartasRevelar = [];
         let indiceAtualRevelacao = 0;
 
-        // NOVO MOTOR DO TOAST (SUBSTITUIU A FILA DE ALERTAS)
         window.mostrarToast = function(mensagem) {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -164,7 +161,12 @@
             }, 3000);
         };
 
-        // --- SISTEMA DE DROP RATE ---
+        function obterGameDay() {
+            let d = new Date();
+            if (d.getHours() < 6) d.setDate(d.getDate() - 1);
+            return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+        }
+
         const bancoRaridades = { 'Comum': [], 'Rara': [], 'Épica': [], 'Lendária': [] };
 
         function normalizarRaridade(r) {
@@ -270,7 +272,6 @@
             pacoteParaAbrir = null;
         });
 
-        // LÓGICA DE REVELAÇÃO (CLICAR NA TELA PARA PRÓXIMA CARTA)
         const modalRevelar = document.getElementById('modal-revelar-carta');
         const imgCartaRevelada = document.getElementById('img-carta-revelada');
         const containerCartaRevelada = document.getElementById('carta-revelada-container');
@@ -313,7 +314,7 @@
 
         modalRevelar.addEventListener('click', mostrarProximaCarta);
 
-        // CLICOU EM "SIM" (Sorteio + Estatísticas + Nível + Notificações)
+        // CLICOU EM "SIM"
         document.getElementById('btn-confirmar-abrir').addEventListener('click', async () => {
             modalConfirmacaoAbrir.classList.add('hidden');
             if (!pacoteParaAbrir) return;
@@ -360,6 +361,7 @@
                 let pacotesPremiumGanhos = 0;
                 let notificacoesNovas = [];
 
+                // 1. CHECAGEM DE BADGE
                 if (pacotesAbertos >= 30 && !badgesJogador["badge-008"]) {
                     badgesJogador["badge-008"] = true;
                     ganhouBadgePacote = true;
@@ -375,6 +377,23 @@
                     });
                 }
 
+                // 2. GATILHO DA MISSÃO DIÁRIA (Abrir um pacote)
+                let pacoteMissoes = dadosAtuais.missoesDiarias || {};
+                const hoje = obterGameDay();
+                let atualizouMissao = false;
+                let msgMissaoProgresso = "";
+
+                if (pacoteMissoes.dataReset === hoje && pacoteMissoes.lista) {
+                    pacoteMissoes.lista.forEach(m => {
+                        if (m.id === "abrir_pacote" && m.progresso < m.meta) {
+                            m.progresso++;
+                            atualizouMissao = true;
+                            msgMissaoProgresso = `🎯 Progresso: ${m.desc}`;
+                        }
+                    });
+                }
+
+                // 3. MATEMÁTICA DE LEVEL UP
                 let nivelAtual = dadosAtuais.nivel || 1;
                 let xpAtual = dadosAtuais.xp || 0;
                 let novoXp = xpAtual + bonusXp; 
@@ -438,22 +457,31 @@
                     badges: badgesJogador
                 };
 
+                if (atualizouMissao) {
+                    pacoteAtualizacao.missoesDiarias = pacoteMissoes;
+                }
+
                 if (notificacoesNovas.length > 0) {
                     pacoteAtualizacao.notificacoes = arrayUnion(...notificacoesNovas);
                 }
 
-                // SALVA TUDO NO BANCO DE DADOS
                 await setDoc(docRef, pacoteAtualizacao, { merge: true });
 
-                // DISPARA OS TOASTS COM LEVE ATRASO
+                // CASCATA DE TOASTS
+                let tempoAtraso = 800; // Tempo inicial pra não atropelar a animação de clique
+                
+                if (atualizouMissao) {
+                    setTimeout(() => window.mostrarToast(msgMissaoProgresso), tempoAtraso);
+                    tempoAtraso += 500;
+                }
                 if (ganhouBadgePacote) {
-                    setTimeout(() => window.mostrarToast(`🏆 NOVA CONQUISTA!<br><span class="text-xs font-normal">Badge: Pacotinhos!</span><br><span class="text-sm">Recompensa: +50 XP e +50 <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`), 800);
+                    setTimeout(() => window.mostrarToast(`🏆 NOVA CONQUISTA!<br><span class="text-xs font-normal">Badge: Pacotinhos!</span><br><span class="text-sm">Recompensa: +50 XP e +50 <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`), tempoAtraso);
+                    tempoAtraso += 500;
                 }
                 if (subiuNivel) {
-                    setTimeout(() => window.mostrarToast(msgLevelUpPopup), 1500);
+                    setTimeout(() => window.mostrarToast(msgLevelUpPopup), tempoAtraso);
                 }
 
-                // Inicia visual das cartas sorteadas
                 divCartasTiradas.innerHTML = "";
                 cartasSorteadas.forEach((id, index) => {
                     const info = INFO_CARTAS[id];

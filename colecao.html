@@ -22,7 +22,6 @@
             pointer-events: none;
         }
 
-        /* NOVO CSS DO POP-UP (TOAST) */
         #toast-container {
             position: fixed;
             top: 20px;
@@ -57,7 +56,6 @@
 </head>
 <body class="h-[100dvh] p-4 flex justify-center overflow-hidden">
 
-    <!-- CAIXA INVISÍVEL ONDE OS TOASTS VÃO NASCER -->
     <div id="toast-container"></div>
 
     <div class="w-full max-w-sm flex flex-col h-full relative">
@@ -152,7 +150,6 @@
         let cartaAtivaNoModal = null;
         const TOTAL_CARTAS = 52;
 
-        // NOVO MOTOR DO TOAST (SUBSTITUIU A FILA DE ALERTAS)
         window.mostrarToast = function(mensagem) {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -166,6 +163,13 @@
                 setTimeout(() => toast.remove(), 500); 
             }, 3000);
         };
+
+        function obterGameDay(offsetDias = 0) {
+            let d = new Date();
+            if (d.getHours() < 6) d.setDate(d.getDate() - 1);
+            d.setDate(d.getDate() + offsetDias);
+            return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+        }
 
         function calcularXPMaximo(nivel) {
             if (nivel >= 1 && nivel <= 5) return 200;
@@ -231,7 +235,6 @@
             cartaAtivaNoModal = null;
         });
 
-        // --- CHECAGEM AUTOMÁTICA DE BADGES ---
         async function checarBadgesDeColecao(dados) {
             const badgesJogador = dados.badges || {};
             let ganhouBadge = false;
@@ -322,7 +325,6 @@
                 await setDoc(dbUserRef, docAtualizacao, { merge: true });
                 atualizarVisualBarraXP(novoXp, nivelAtual);
 
-                // DISPARA OS NOVOS TOASTS
                 window.mostrarToast(`🏆 NOVA(S) CONQUISTA(S)!<br><span class="text-xs font-normal">Você completou coleções e ganhou ${qtdBadges} badge(s).</span><br><span class="text-sm">Recompensa: +${50 * qtdBadges} XP e +${50 * qtdBadges} <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`);
                 if (subiuNivel) {
                     let htmlRecompensa = (pacotesPremium > 0) ? `1 Pacote Básico, 1 Pacote Premium e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom">` : `1 Pacote Básico e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom">`;
@@ -331,7 +333,7 @@
             }
         }
 
-        // --- LÓGICA DE RECICLAR ---
+        // --- LÓGICA DE RECICLAR COM GATILHO DE MISSÃO ---
         document.getElementById('btn-reciclar').addEventListener('click', async () => {
             if (!cartaAtivaNoModal) return;
 
@@ -350,6 +352,7 @@
                 let ganhouBadgeReciclagem = false;
                 let notificacoesNovas = [];
 
+                // 1. CHECA A BADGE DE RECICLAR 30 CARTAS
                 if (cartasRecicladas >= 30 && !badgesJogador["badge-006"]) {
                     badgesJogador["badge-006"] = true;
                     ganhouBadgeReciclagem = true;
@@ -363,6 +366,23 @@
                     });
                 }
 
+                // 2. GATILHO DA MISSÃO DIÁRIA DE RECICLAGEM
+                let pacoteMissoes = dados.missoesDiarias || {};
+                const hoje = obterGameDay();
+                let atualizouMissao = false;
+                let msgMissaoProgresso = "";
+
+                if (pacoteMissoes.dataReset === hoje && pacoteMissoes.lista) {
+                    pacoteMissoes.lista.forEach(m => {
+                        if (m.id === "reciclar" && m.progresso < m.meta) {
+                            m.progresso++;
+                            atualizouMissao = true;
+                            msgMissaoProgresso = `🎯 Progresso: ${m.desc}`;
+                        }
+                    });
+                }
+
+                // 3. MATEMÁTICA DE LEVEL UP (Caso tenha ganho a Badge)
                 let subiuNivel = false;
                 let msgLevelUp = "";
                 let nivelAtual = dados.nivel || 1;
@@ -374,6 +394,11 @@
                     estatisticas: { cartasRecicladas: increment(1) },
                     badges: badgesJogador
                 };
+
+                // Se completou a missão, salva ela junto no pacote de atualização
+                if (atualizouMissao) {
+                    docAtualizacao.missoesDiarias = pacoteMissoes;
+                }
 
                 if (ganhouBadgeReciclagem) {
                     let novoXp = xpAtual + 50;
@@ -426,14 +451,20 @@
                     renderizarGridCartas();
                 }
 
-                // DISPARA OS NOVOS TOASTS COM LEVE ATRASO ENTRE ELES PARA EMPILHAR BONITO
+                // 4. CASCATA DE TOASTS
                 window.mostrarToast(`Carta reciclada! Você ganhou ${ganhoFragmentos} fragmento(s).`);
                 
+                let atraso = 500;
+                if (atualizouMissao) {
+                    setTimeout(() => window.mostrarToast(msgMissaoProgresso), atraso);
+                    atraso += 500;
+                }
                 if (ganhouBadgeReciclagem) {
-                    setTimeout(() => window.mostrarToast(`🏆 NOVA CONQUISTA!<br><span class="text-xs font-normal">Badge: Reciclador (Reciclou 30 cartas).</span><br><span class="text-sm">Recompensa: +50 XP e +50 <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`), 400);
+                    setTimeout(() => window.mostrarToast(`🏆 NOVA CONQUISTA!<br><span class="text-xs font-normal">Badge: Reciclador (Reciclou 30 cartas).</span><br><span class="text-sm">Recompensa: +50 XP e +50 <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`), atraso);
+                    atraso += 500;
                 }
                 if (subiuNivel) {
-                    setTimeout(() => window.mostrarToast(msgLevelUp), 800);
+                    setTimeout(() => window.mostrarToast(msgLevelUp), atraso);
                 }
 
             } catch (error) {

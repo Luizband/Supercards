@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supercards - Mensagem</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-image: url('fundotela.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="h-[100dvh] p-4 flex justify-center overflow-hidden">
+
+    <div class="w-full max-w-sm flex flex-col h-full relative gap-4">
+        
+        <!-- CABEÇALHO -->
+        <header class="relative flex items-center justify-center mt-4 mb-2 min-h-[40px]">
+            <button onclick="window.location.href='notificacoes.html'" class="absolute left-0 bg-[#dca3e8] hover:bg-[#bc7bd4] transition-colors rounded-full flex items-center justify-center w-10 h-10 shadow-md text-[#7a32a8] font-black text-xl z-50">
+                ←
+            </button>
+            <h1 class="text-white font-black text-xl drop-shadow-md text-center px-12 leading-tight">MENSAGEM</h1>
+        </header>
+
+        <!-- CAIXA DA MENSAGEM -->
+        <main class="flex flex-col flex-grow bg-[#dca3e8] rounded-[2rem] p-6 shadow-2xl overflow-hidden mb-4 border-4 border-[#7a32a8]">
+            
+            <h2 id="msg-titulo" class="text-[#7a32a8] font-black text-2xl mb-2 leading-tight">Carregando...</h2>
+            <span id="msg-data" class="text-gray-600 font-bold text-xs mb-4 border-b-2 border-[#bc7bd4] pb-3">--/--/----</span>
+            
+            <div class="overflow-y-auto no-scrollbar flex-grow mb-6">
+                <!-- O whitespace-pre-wrap garante que as quebras de linha funcionem -->
+                <p id="msg-texto" class="text-black font-bold text-base leading-relaxed whitespace-pre-wrap"></p>
+            </div>
+            
+            <!-- BOTOES DE AÇÃO (EXCLUIR E VOLTAR) -->
+            <div class="flex gap-2 mt-auto">
+                <button id="btn-excluir" class="bg-red-600 hover:bg-red-700 text-white font-black py-4 px-6 rounded-full shadow-md transition-transform hover:scale-105 flex items-center justify-center">
+                    🗑️ APAGAR
+                </button>
+                <button onclick="window.location.href='notificacoes.html'" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-4 flex-grow rounded-full shadow-md transition-transform hover:scale-105">
+                    VOLTAR
+                </button>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- SCRIPT DO FIREBASE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyCU3lFTgfrDMaD9jwR7X7ivYPmGQh4VE1g",
+          authDomain: "supercards-tcg.firebaseapp.com",
+          projectId: "supercards-tcg",
+          storageBucket: "supercards-tcg.firebasestorage.app",
+          messagingSenderId: "862316380615",
+          appId: "1:862316380615:web:b3f28056ebc967673999e2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Pega a ID da notificação na URL (Ex: ?id=notif_12345)
+        const urlParams = new URLSearchParams(window.location.search);
+        const notifId = urlParams.get('id');
+
+        if (!notifId) {
+            window.location.href = 'notificacoes.html'; // Se não tiver ID, volta pra caixa
+        }
+
+        const tituloEl = document.getElementById('msg-titulo');
+        const dataEl = document.getElementById('msg-data');
+        const textoEl = document.getElementById('msg-texto');
+        const btnExcluir = document.getElementById('btn-excluir');
+
+        let notificacoesJogador = [];
+        let dbUserRef = null;
+
+        function formatarData(dataString) {
+            const d = new Date(dataString);
+            return d.toLocaleDateString('pt-BR') + ' às ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                dbUserRef = doc(db, "users", user.uid);
+                const snap = await getDoc(dbUserRef);
+                
+                if (snap.exists()) {
+                    const dados = snap.data();
+                    notificacoesJogador = dados.notificacoes || [];
+                    
+                    // Encontra a mensagem específica
+                    const indexNotif = notificacoesJogador.findIndex(n => n.id === notifId);
+                    
+                    if (indexNotif === -1) {
+                        window.location.href = 'notificacoes.html'; // Mensagem não existe mais
+                        return;
+                    }
+
+                    const notifAtual = notificacoesJogador[indexNotif];
+                    
+                    // Preenche os dados na tela
+                    tituloEl.innerText = notifAtual.titulo;
+                    dataEl.innerText = formatarData(notifAtual.data);
+                    textoEl.innerHTML = notifAtual.texto.replace(/<img[^>]*>/g, match => match);
+
+                    // Se a mensagem ainda for nova (não lida), atualiza pra lida no banco!
+                    if (!notifAtual.lida) {
+                        notificacoesJogador[indexNotif].lida = true;
+                        try {
+                            await setDoc(dbUserRef, { notificacoes: notificacoesJogador }, { merge: true });
+                        } catch (error) {
+                            console.error("Erro ao marcar como lida:", error);
+                        }
+                    }
+                }
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        // Lógica do Botão de Apagar
+        btnExcluir.addEventListener('click', async () => {
+            btnExcluir.innerText = "Apagando...";
+            btnExcluir.disabled = true;
+
+            // Filtra a lista, removendo a notificação que tem essa ID exata
+            const novaLista = notificacoesJogador.filter(n => n.id !== notifId);
+
+            try {
+                // Atualiza a lista no Firebase
+                await setDoc(dbUserRef, { notificacoes: novaLista }, { merge: true });
+                // Volta para a Caixa de Entrada
+                window.location.href = 'notificacoes.html';
+            } catch (error) {
+                console.error("Erro ao deletar:", error);
+                btnExcluir.innerText = "Erro!";
+            }
+        });
+    </script>
+</body>
+</html>

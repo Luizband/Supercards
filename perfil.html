@@ -17,7 +17,6 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* CSS do Toast adicionado para as mensagens de Upload */
         #toast-container {
             position: fixed;
             top: 20px;
@@ -62,25 +61,22 @@
             <!-- Foto e Moedas (Esquerda) -->
             <div class="flex flex-col items-center relative">
                 
-                <!-- ÁREA DA FOTO CLICÁVEL -->
-                <div class="relative group cursor-pointer" onclick="document.getElementById('input-foto').click()">
+                <!-- ÁREA DA FOTO CLICÁVEL (AGORA ABRE O MODAL) -->
+                <div class="relative group cursor-pointer" onclick="document.getElementById('modal-avatares').classList.remove('hidden')">
                     <!-- O Círculo com overflow-hidden para a imagem ficar redonda -->
                     <div class="bg-[#dca3e8] w-24 h-24 rounded-full flex items-center justify-center text-[#7a32a8] font-black text-xl shadow-lg border-2 border-[#bc7bd4] overflow-hidden">
                         <span id="texto-sem-foto">FOTO</span>
                         <img id="img-perfil" src="" class="hidden w-full h-full object-cover absolute inset-0">
                     </div>
                     
-                    <!-- Overlay escuro e ícone de câmera ao passar o mouse / clicar -->
+                    <!-- Overlay escuro e ícone de edição -->
                     <div class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
                         <span class="text-white font-black text-[10px] text-center drop-shadow-md">MUDAR</span>
                     </div>
                     <div class="absolute bottom-1 right-0 bg-[#22c55e] w-7 h-7 rounded-full border-2 border-[#dca3e8] flex items-center justify-center shadow-md text-xs z-20">
-                        📷
+                        ✏️
                     </div>
                 </div>
-
-                <!-- Input invisível para abrir a galeria/câmera -->
-                <input type="file" id="input-foto" accept="image/*" class="hidden">
 
                 <!-- Pílula de moedas sobreposta -->
                 <div class="absolute -bottom-3 bg-[#dca3e8] rounded-full px-3 py-1 flex items-center justify-center gap-1 shadow-md border-2 border-[#bc7bd4] z-30">
@@ -155,15 +151,36 @@
             </button>
         </footer>
 
+        <!-- MODAL DE SELEÇÃO DE AVATAR -->
+        <div id="modal-avatares" class="hidden fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
+            <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 max-w-xs w-full shadow-2xl relative">
+                <h2 class="text-[#7a32a8] font-black text-lg mb-4 text-center uppercase">Escolha seu Avatar</h2>
+                
+                <!-- GRID DOS 10 AVATARES -->
+                <div class="grid grid-cols-4 gap-3 max-h-[50vh] overflow-y-auto no-scrollbar pb-2">
+                    <button onclick="window.salvarAvatar('avatares/avatar1.png')" class="hover:scale-110 transition-transform"><img src="avatares/avatar1.png" class="rounded-full w-full aspect-square object-cover shadow-md border-2 border-transparent hover:border-[#7a32a8]"></button>
+                    <button onclick="window.salvarAvatar('avatares/avatar2.png')" class="hover:scale-110 transition-transform"><img src="avatares/avatar2.png" class="rounded-full w-full aspect-square object-cover shadow-md border-2 border-transparent hover:border-[#7a32a8]"></button>
+                    <button onclick="window.salvarAvatar('avatares/avatar3.png')" class="hover:scale-110 transition-transform"><img src="avatares/avatar3.png" class="rounded-full w-full aspect-square object-cover shadow-md border-2 border-transparent hover:border-[#7a32a8]"></button>
+                    <button onclick="window.salvarAvatar('avatares/avatar4.png')" class="hover:scale-110 transition-transform"><img src="avatares/avatar4.png" class="rounded-full w-full aspect-square object-cover shadow-md border-2 border-transparent hover:border-[#7a32a8]"></button>
+                    <button onclick="window.salvarAvatar('avatares/avatar5.png')" class="hover:scale-110 transition-transform"><img src="avatares/avatar5.png" class="rounded-full w-full aspect-square object-cover shadow-md border-2 border-transparent hover:border-[#7a32a8]"></button>
+                    <button onclick="window.salvarAvatar('avatares/avatar6.png')" class="hover:scale-110 transition-transform"><img src="avatares/avatar6.png" class="rounded-full w-full aspect-square object-cover shadow-md border-2 border-transparent hover:border-[#7a32a8]"></button>
+                    <button onclick="window.salvarAvatar('avatares/avatar7.png')" class="hover:scale-110 transition-transform"><img src="avatares/avatar7.png" class="rounded-full w-full aspect-square object-cover shadow-md border-2 border-transparent hover:border-[#7a32a8]"></button>
+                    <button onclick="window.salvarAvatar('avatares/avatar8.png')" class="hover:scale-110 transition-transform"><img src="avatares/avatar8.png" class="rounded-full w-full aspect-square object-cover shadow-md border-2 border-transparent hover:border-[#7a32a8]"></button>
+                    <button onclick="window.salvarAvatar('avatares/avatar9.png')" class="hover:scale-110 transition-transform"><img src="avatares/avatar9.png" class="rounded-full w-full aspect-square object-cover shadow-md border-2 border-transparent hover:border-[#7a32a8]"></button>
+                    <button onclick="window.salvarAvatar('avatares/avatar10.png')" class="hover:scale-110 transition-transform"><img src="avatares/avatar10.png" class="rounded-full w-full aspect-square object-cover shadow-md border-2 border-transparent hover:border-[#7a32a8]"></button>
+                </div>
+                
+                <button onclick="document.getElementById('modal-avatares').classList.add('hidden')" class="w-full mt-6 bg-[#7a32a8] hover:bg-purple-600 transition-colors text-white font-black py-3 rounded-full shadow-md">FECHAR</button>
+            </div>
+        </div>
+
     </div>
 
-    <!-- SCRIPT DO FIREBASE -->
+    <!-- SCRIPT DO FIREBASE (Sem Storage) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-        // IMPORTAÇÃO DO STORAGE PARA A FOTO
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
         
         import { INFO_BADGES } from './badges.js';
 
@@ -179,7 +196,6 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const storage = getStorage(app); // INICIALIZA O STORAGE
 
         let currentUserUid = null;
 
@@ -206,14 +222,13 @@
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                currentUserUid = user.uid; // Salva o ID para o upload da foto
+                currentUserUid = user.uid; 
                 const docRef = doc(db, "users", user.uid);
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
                     const dados = docSnap.data();
                     
-                    // Preenche o Cabeçalho
                     document.getElementById('perfil-nome').innerText = user.displayName?.toUpperCase() || "JOGADOR";
                     document.getElementById('perfil-moedas').innerText = dados.moedas || 0;
                     
@@ -226,7 +241,7 @@
                     document.getElementById('perfil-texto-xp').innerText = `${xpAtual}/${xpMaximo} xp`;
                     document.getElementById('perfil-barra-xp').style.width = `${porcentagem}%`;
 
-                    // LÓGICA DE EXIBIR A FOTO SE ELA EXISTIR NO BANCO
+                    // LÓGICA DE EXIBIR O AVATAR SE EXISTIR NO BANCO
                     if (dados.fotoPerfil) {
                         document.getElementById('img-perfil').src = dados.fotoPerfil;
                         document.getElementById('img-perfil').classList.remove('hidden');
@@ -273,41 +288,30 @@
             }
         });
 
-        // --- SISTEMA DE UPLOAD DE FOTO ---
-        const inputFoto = document.getElementById('input-foto');
-        
-        inputFoto.addEventListener('change', async (event) => {
-            const arquivo = event.target.files[0];
-            if (!arquivo) return;
+        // --- SISTEMA DE SALVAR O AVATAR ESCOLHIDO ---
+        window.salvarAvatar = async function(caminhoAvatar) {
+            if (!currentUserUid) return;
 
-            window.mostrarToast("Fazendo upload da foto... ⏳");
-            document.getElementById('texto-sem-foto').innerText = "⏳";
-            document.getElementById('texto-sem-foto').classList.remove('hidden');
-            document.getElementById('img-perfil').classList.add('hidden');
+            // Fecha o modal e avisa que está salvando
+            document.getElementById('modal-avatares').classList.add('hidden');
+            window.mostrarToast("Salvando avatar... ⏳");
 
             try {
-                // Salva a imagem na pasta 'fotos_perfil' com o nome sendo a ID do usuário
-                const storageRef = ref(storage, `fotos_perfil/${currentUserUid}`);
-                
-                await uploadBytes(storageRef, arquivo);
-                const linkFoto = await getDownloadURL(storageRef);
+                // Salva o caminho (ex: 'avatares/avatar1.png') direto no Firestore
+                await setDoc(doc(db, "users", currentUserUid), { fotoPerfil: caminhoAvatar }, { merge: true });
 
-                // Salva a URL no banco de dados Firestore
-                await setDoc(doc(db, "users", currentUserUid), { fotoPerfil: linkFoto }, { merge: true });
-
-                // Atualiza a interface
-                document.getElementById('img-perfil').src = linkFoto;
+                // Atualiza a imagem na tela imediatamente
+                document.getElementById('img-perfil').src = caminhoAvatar;
                 document.getElementById('img-perfil').classList.remove('hidden');
                 document.getElementById('texto-sem-foto').classList.add('hidden');
                 
-                window.mostrarToast("📸 Foto atualizada com sucesso!");
+                window.mostrarToast("📸 Avatar atualizado com sucesso!");
 
             } catch (error) {
-                console.error("Erro no upload:", error);
-                window.mostrarToast("Erro ao enviar a imagem.");
-                document.getElementById('texto-sem-foto').innerText = "FOTO";
+                console.error("Erro ao salvar avatar:", error);
+                window.mostrarToast("Erro ao salvar o avatar.");
             }
-        });
+        };
     </script>
 </body>
 </html>

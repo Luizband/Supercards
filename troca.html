@@ -62,6 +62,7 @@
 
     <div class="w-full max-w-sm flex flex-col h-full relative">
         
+        <!-- CABEÇALHO -->
         <header class="flex items-center gap-4 mt-4 mb-2 w-full">
             <div class="relative flex-shrink-0">
                 <div class="bg-[#dca3e8] w-24 h-24 rounded-full flex items-center justify-center text-[#7a32a8] font-black text-xl shadow-lg border-2 border-[#bc7bd4] relative overflow-hidden">
@@ -98,8 +99,10 @@
 
         <main class="flex flex-col gap-3 flex-grow overflow-hidden pb-16">
             
+            <!-- LINHA SUPERIOR -->
             <div class="grid grid-cols-2 gap-3 h-[45%]">
                 
+                <!-- Caixa: Selecionar Amigo -->
                 <div class="bg-[#dca3e8] rounded-3xl p-3 flex flex-col shadow-xl border-2 border-[#bc7bd4]">
                     <span class="text-[#7a32a8] font-black text-[10px] text-center mb-2 uppercase leading-tight tracking-wider">sELECIONAR UM<br>AMIGO</span>
                     <input type="text" id="input-busca-amigo" placeholder="Buscar jogador..." class="mb-2 w-full bg-[#bc7bd4] text-[#7a32a8] placeholder-[#7a32a8]/70 font-black text-[9px] rounded-full px-3 py-1.5 outline-none border border-[#7a32a8]/30 focus:border-[#7a32a8] transition-colors shadow-inner flex-shrink-0">
@@ -109,6 +112,7 @@
                     </button>
                 </div>
                 
+                <!-- Caixa: Convites -->
                 <div class="bg-[#dca3e8] rounded-3xl p-3 flex flex-col shadow-xl border-2 border-[#bc7bd4]">
                     <span class="text-[#7a32a8] font-black text-[11px] text-center mb-3 leading-tight tracking-wide">Convites</span>
                     <div id="lista-convites" class="flex flex-col gap-2 flex-grow overflow-y-auto no-scrollbar mb-3 px-1">
@@ -126,11 +130,14 @@
                 </div>
             </div>
 
+            <!-- LINHA INFERIOR: Mesa da Carta -->
             <div class="bg-[#dca3e8] rounded-3xl p-4 flex flex-col items-center shadow-xl border-2 border-[#bc7bd4] h-[55%] justify-between relative">
                 
+                <!-- Status da Troca -->
                 <span id="status-troca" class="text-[#7a32a8] font-black text-[9px] uppercase tracking-wider absolute top-3 text-center w-full">MESA LIVRE</span>
 
                 <div class="flex w-full justify-around items-center flex-grow mb-1 mt-4">
+                    <!-- Slot ENVIAR (Sua Carta) -->
                     <div class="flex flex-col items-center gap-2">
                         <span class="text-[#7a32a8] font-black text-[12px] uppercase tracking-wide">ENVIAR:</span>
                         <div id="slot-enviar" class="w-[4.5rem] h-24 bg-gray-800 rounded-lg shadow-inner border-2 border-dashed border-[#7a32a8] flex items-center justify-center cursor-pointer hover:border-solid transition-all relative overflow-hidden">
@@ -139,6 +146,7 @@
                         </div>
                     </div>
                     
+                    <!-- Slot Receber (Carta do Amigo) -->
                     <div class="flex flex-col items-center gap-2">
                         <span class="text-[#7a32a8] font-black text-[12px] tracking-wide">Receber:</span>
                         <div id="slot-receber" class="w-[4.5rem] h-24 bg-gray-800 rounded-lg shadow-inner border-2 border-[#bc7bd4] flex items-center justify-center opacity-70 relative overflow-hidden">
@@ -160,13 +168,15 @@
             </button>
         </footer>
 
+        <!-- MODAL DE SELEÇÃO DE CARTA (Invisível até clicar no +) -->
         <div id="modal-selecao-carta" class="hidden fixed inset-0 bg-black/80 z-[100] flex flex-col items-center justify-center p-4 backdrop-blur-sm">
             <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-4 w-full max-w-sm shadow-2xl flex flex-col h-[70%]">
                 <h2 class="text-[#7a32a8] font-black text-lg mb-0.5 text-center uppercase">Escolha sua Carta</h2>
                 <p class="text-center text-[10px] text-[#7a32a8] font-bold mb-4">MOSTRANDO APENAS CARTAS REPETIDAS (+1 CÓPIA)</p>
                 
                 <div id="grid-cartas-modal" class="grid grid-cols-3 gap-3 overflow-y-auto no-scrollbar flex-grow pb-2 content-start">
-                    </div>
+                    <!-- Cartas Repetidas Entram Aqui -->
+                </div>
                 
                 <button onclick="document.getElementById('modal-selecao-carta').classList.add('hidden')" class="w-full mt-4 bg-red-500 hover:bg-red-600 text-white font-black py-2.5 rounded-full shadow-md transition-transform hover:scale-105 uppercase text-xs">
                     Cancelar
@@ -176,6 +186,7 @@
 
     </div>
 
+    <!-- SCRIPT DO FIREBASE E LÓGICA DA TROCA -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -231,11 +242,20 @@
             }, 3000);
         };
 
+        // --- FUNÇÕES DE STATUS DO JOGADOR RECUPERADAS ---
         function calcularXPMaximo(nivel) {
             if (nivel >= 1 && nivel <= 5) return 200;
             if (nivel >= 6 && nivel <= 15) return 750;
             if (nivel >= 16 && nivel <= 25) return 1600;
             return 3000;
+        }
+
+        function atualizarVisualBarraXP(xpAtual, nivelAtual) {
+            const xpMaximo = calcularXPMaximo(nivelAtual);
+            const porcentagem = Math.min((xpAtual / xpMaximo) * 100, 100);
+            document.getElementById('player-level').innerText = nivelAtual; 
+            document.getElementById('texto-xp').innerText = `${xpAtual}/${xpMaximo} xp`;
+            document.getElementById('barra-xp').style.width = `${porcentagem}%`;
         }
 
         function calcularCusto(id1, id2) {
@@ -384,14 +404,12 @@
 
             escutadorTroca = onSnapshot(doc(db, "trocas", idDaTroca), (docSnap) => {
                 if (!docSnap.exists()) {
-                    // Troca foi apagada ou cancelada
                     resetarMesa();
                     return;
                 }
                 
                 const troca = docSnap.data();
                 
-                // Descobre de quem é qual carta
                 const minhaCarta = souRemetente ? troca.cartaRemetente : troca.cartaDestinatario;
                 const cartaAmigo = souRemetente ? troca.cartaDestinatario : troca.cartaRemetente;
 
@@ -444,7 +462,6 @@
             gridModal.innerHTML = '';
             let temRepetida = false;
 
-            // Filtra só as cartas com +1 cópia
             Object.keys(minhaColecao).forEach(id => {
                 if (minhaColecao[id] > 1) {
                     temRepetida = true;
@@ -462,7 +479,6 @@
                     `;
                     
                     div.addEventListener('click', async () => {
-                        // Envia a carta escolhida para o banco
                         const campoDb = souRemetente ? 'cartaRemetente' : 'cartaDestinatario';
                         await updateDoc(doc(db, "trocas", trocaAtivaId), { [campoDb]: id });
                         document.getElementById('modal-selecao-carta').classList.add('hidden');
@@ -479,7 +495,7 @@
             document.getElementById('modal-selecao-carta').classList.remove('hidden');
         });
 
-        // --- BOOT DO JOGADOR (Verifica troca abandonada) ---
+        // --- BOOT DO JOGADOR ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUserUid = user.uid;
@@ -489,10 +505,10 @@
                 const docSnap = await getDoc(doc(db, "users", user.uid));
                 if (docSnap.exists()) {
                     const dados = docSnap.data();
-                    minhaColecao = dados.colecao || {}; // Salva pra usar no modal
+                    minhaColecao = dados.colecao || {}; 
                     
                     document.getElementById('player-fragmentos').innerText = dados.fragmentos || 0;
-                    atualizarVisualBarraXP(dados.xp || 0, dados.nivel || 1);
+                    atualizarVisualBarraXP(dados.xp || 0, dados.nivel || 1); // <-- XP CORRIGIDO E FUNCIONANDO
                     
                     if (dados.fotoPerfil) {
                         const img = document.getElementById('img-perfil-global');
@@ -501,7 +517,6 @@
                     }
                 }
 
-                // Procura se eu já deixei uma troca aberta antes de fechar o jogo
                 const qTrocaAberta = query(collection(db, "trocas"), where("participantes", "array-contains", currentUserUid));
                 const snapAberta = await getDocs(qTrocaAberta);
                 

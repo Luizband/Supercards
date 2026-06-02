@@ -53,57 +53,77 @@
 
     <div class="w-full max-w-sm flex flex-col h-full relative">
         
-        <header class="flex items-center mb-6 mt-2 gap-3">
+        <!-- CABEÇALHO REFORMULADO -->
+        <header class="flex items-center gap-3 mt-4 mb-6">
             
+            <!-- FOTO E NÍVEL (Esquerda) -->
             <div class="relative flex-shrink-0">
-                <div class="bg-[#dca3e8] w-20 h-20 rounded-full flex items-center justify-center text-[#7a32a8] font-bold shadow-lg">
-                    foto
+                <!-- Círculo da foto (Apenas exibição) -->
+                <div class="bg-[#dca3e8] w-20 h-20 rounded-full flex items-center justify-center text-[#7a32a8] font-black text-xl shadow-lg border-2 border-[#bc7bd4] overflow-hidden relative">
+                    <span id="texto-sem-foto" class="text-sm">FOTO</span>
+                    <img id="img-perfil-global" src="" class="hidden w-full h-full object-cover absolute inset-0">
                 </div>
-                <div id="player-level" class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-[#bc7bd4] text-black font-black px-3 py-0.5 rounded-full shadow-md text-sm border border-[#dca3e8]/50">
-                    ...
+                
+                <!-- NÍVEL -->
+                <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-[#bc7bd4] w-7 h-7 rounded-full flex items-center justify-center shadow-md border-2 border-[#dca3e8] z-30">
+                    <span id="player-level" class="text-[#7a32a8] font-black text-xs">--</span>
                 </div>
             </div>
 
-            <div class="flex flex-col flex-grow gap-2">
+            <!-- DIREITA: MOEDAS, MENU, NOME E XP -->
+            <div class="flex flex-col flex-grow gap-2 justify-center">
                 
-                <nav class="bg-[#dca3e8] rounded-full flex justify-between items-center px-2 py-1.5 shadow-md">
-                    <button onclick="window.location.href='perfil.html'" class="bg-[#7a32a8] text-white text-[11px] font-bold px-4 py-1.5 rounded-full hover:bg-purple-600 transition-colors">
-                        PERFIL
-                    </button>
+                <!-- LINHA 1: Moedas e Botões -->
+                <div class="flex items-center gap-2 w-full">
+                    <!-- MOEDAS -->
+                    <div class="bg-[#dca3e8] rounded-full px-3 py-1.5 flex items-center justify-center gap-1 shadow-md w-auto">
+                        <span id="player-coins" class="text-[#7a32a8] font-black text-sm">...</span>
+                        <img src="moedas.png" class="w-4 h-4 object-contain">
+                    </div>
                     
-                    <button onclick="window.location.href='shop.html'" class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-8 h-8 shadow-sm">
-                        <img src="shop.png" alt="Shop" class="w-4 h-4 object-contain">
-                    </button>
-                    
-                    <button onclick="window.location.href='missoes.html'" class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-8 h-8 shadow-sm">
-                        <img src="missao.png" alt="Missões" class="w-4 h-4 object-contain">
-                    </button>
-                    
-                    <div class="relative flex items-center">
-                        <button id="btn-config" class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-8 h-8 shadow-sm">
-                            <img src="config.png" alt="Configurações" class="w-4 h-4 object-contain">
+                    <!-- BOTÕES DE NAVEGAÇÃO -->
+                    <nav class="bg-[#dca3e8] rounded-full flex justify-between items-center px-2 py-1 shadow-md flex-grow">
+                        <button onclick="window.location.href='perfil.html'" class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-7 h-7 shadow-sm">
+                            <img src="perfil.png" alt="Perfil" class="w-4 h-4 object-contain">
                         </button>
-
-                        <div id="dropdown-config" class="hidden absolute right-0 top-10 w-32 bg-[#bc7bd4] border-2 border-[#7a32a8] rounded-xl shadow-2xl overflow-hidden z-50">
-                            <button id="btn-sair" class="w-full px-4 py-2 text-white font-bold text-sm hover:bg-[#7a32a8] transition-colors flex items-center justify-between">
-                                Sair
-                                <span>🚪</span>
+                        
+                        <button onclick="window.location.href='shop.html'" class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-7 h-7 shadow-sm">
+                            <img src="shop.png" alt="Shop" class="w-4 h-4 object-contain">
+                        </button>
+                        
+                        <button onclick="window.location.href='missoes.html'" class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-7 h-7 shadow-sm">
+                            <img src="missao.png" alt="Missões" class="w-4 h-4 object-contain">
+                        </button>
+                        
+                        <div class="relative flex items-center">
+                            <button id="btn-config" class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-7 h-7 shadow-sm">
+                                <img src="config.png" alt="Configurações" class="w-4 h-4 object-contain">
                             </button>
+                            <div id="dropdown-config" class="hidden absolute right-0 top-8 w-32 bg-[#bc7bd4] border-2 border-[#7a32a8] rounded-xl shadow-2xl overflow-hidden z-50">
+                                <button id="btn-sair" class="w-full px-4 py-2 text-white font-bold text-sm hover:bg-[#7a32a8] transition-colors flex items-center justify-between">
+                                    Sair <span>🚪</span>
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                </nav>
-
-                <div class="flex gap-2">
-                    <div id="player-name" class="bg-[#dca3e8] rounded-full flex-grow text-[#7a32a8] font-bold text-xs py-1.5 flex items-center justify-center shadow-md px-2 truncate">
-                        Carregando...
+                    </nav>
+                </div>
+                
+                <!-- LINHA 2: Nome e XP -->
+                <div class="flex items-center gap-2 w-full">
+                    <!-- NOME -->
+                    <div class="bg-[#dca3e8] rounded-full px-2 flex items-center justify-center shadow-md w-28 h-7 overflow-hidden flex-shrink-0">
+                        <span id="player-name" class="text-[#7a32a8] font-black text-[10px] uppercase truncate">...</span>
                     </div>
                     
-                    <div class="bg-[#dca3e8] rounded-full px-3 py-1.5 flex items-center justify-center gap-1 shadow-md">
-                        <span id="player-coins" class="text-black font-black text-xs">...</span>
-                        <img src="moedas.png" alt="Moedas" class="w-4 h-4 object-contain drop-shadow-sm">
+                    <!-- BARRA DE XP -->
+                    <div class="flex flex-col items-center flex-grow">
+                        <div class="w-full bg-transparent border border-[#dca3e8] rounded-full h-2.5 overflow-hidden shadow-inner">
+                            <div id="player-barra-xp" class="bg-[#dca3e8] h-full transition-all duration-500" style="width: 0%;"></div>
+                        </div>
+                        <span id="player-texto-xp" class="text-white text-[9px] font-bold mt-0.5">0/0 xp</span>
                     </div>
                 </div>
-
+                
             </div>
         </header>
 
@@ -147,7 +167,7 @@
                       <span class="relative inline-flex rounded-full h-3 w-3 bg-red-600 border border-white"></span>
                     </span>
                 </button>
-                <button class="flex-1 bg-[#7a32a8] text-white text-xs font-bold py-2 rounded-full hover:bg-purple-600 transition-colors">AMIGOS</button>
+                <button class="flex-1 bg-[#7a32a8] text-white text-xs font-bold py-2 rounded-full hover:bg-purple-600 transition-colors">Amigos</button>
             </div>
         </footer>
 
@@ -232,7 +252,6 @@
                         let pacoteMissoes = dados.missoesDiarias || {};
                         const hoje = obterGameDay();
 
-                        // Verifica se as missões de hoje existem e procura a nossa
                         if (pacoteMissoes.dataReset === hoje && pacoteMissoes.lista) {
                             let atualizou = false;
                             
@@ -241,7 +260,7 @@
                                     m.progresso++;
                                     atualizou = true;
                                     window.mostrarToast(`🎯 Progresso: ${m.desc}`);
-                                    atrasoRedirect = 1200; // Segura um pouco a tela pra dar tempo de ler
+                                    atrasoRedirect = 1200; 
                                 }
                             });
 
@@ -255,7 +274,6 @@
                 }
             }
 
-            // Realiza o redirecionamento
             if (redirectUrl && redirectUrl !== '#') {
                 if (atrasoRedirect > 0) {
                     setTimeout(() => window.location.href = redirectUrl, atrasoRedirect);
@@ -264,7 +282,6 @@
                 }
             }
         };
-        // ------------------------------------------------
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -306,7 +323,7 @@
 
                     if (diasSeguidos >= 20 && !badgesJogador["badge-003"]) {
                         badgesJogador["badge-003"] = true;
-                        ganhouBadge = false; // Ajustado pra teste se precisar
+                        ganhouBadge = false; 
                         bonusXp += 50;
                         bonusMoedas += 50;
 
@@ -323,9 +340,10 @@
                     let xpAtual = dados.xp || 0;
                     let subiuNivel = false;
                     let msgLevelUpPopup = "";
+                    let novoXp = xpAtual;
 
                     if (ganhouBadge) {
-                        let novoXp = xpAtual + bonusXp;
+                        novoXp = xpAtual + bonusXp;
                         let xpMaximo = calcularXPMaximo(nivelAtual);
                         let pacotesBasicos = 0;
                         let pacotesPremium = 0;
@@ -385,6 +403,26 @@
                     } else {
                         indicador.classList.add('hidden');
                     }
+
+                    // --- ATUALIZA A FOTO DE PERFIL GLOBAL ---
+                    if (dados.fotoPerfil) {
+                        const imgElement = document.getElementById('img-perfil-global');
+                        if (imgElement) {
+                            imgElement.src = dados.fotoPerfil;
+                            imgElement.classList.remove('hidden');
+                            document.getElementById('texto-sem-foto').classList.add('hidden');
+                        }
+                    }
+
+                    // --- ATUALIZA A BARRA DE XP NO MENU ---
+                    let finalXp = ganhouBadge ? novoXp : xpAtual;
+                    let maxXp = calcularXPMaximo(nivelAtual);
+                    let porcentagem = Math.min((finalXp / maxXp) * 100, 100);
+                    
+                    const barra = document.getElementById('player-barra-xp');
+                    const textoXp = document.getElementById('player-texto-xp');
+                    if(barra) barra.style.width = `${porcentagem}%`;
+                    if(textoXp) textoXp.innerText = `${finalXp}/${maxXp} xp`;
 
                     if (ganhouBadge) {
                         setTimeout(() => window.mostrarToast(`🏆 NOVA CONQUISTA!<br><span class="text-xs font-normal">Badge: Jogador Viciado.</span><br><span class="text-sm">Recompensa: +50 XP e +50 <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`), 500);

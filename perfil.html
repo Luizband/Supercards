@@ -55,47 +55,59 @@
 
     <div class="w-full max-w-sm flex flex-col h-full relative gap-4">
         
+        <!-- SEÇÃO SUPERIOR: FOTO, NOME E XP -->
         <header class="flex items-center gap-4 mt-4">
             
-            <div class="flex flex-col items-center relative">
+            <!-- FOTO E NÍVEL (Esquerda) -->
+            <div class="relative flex-shrink-0">
                 
                 <!-- ÁREA DA FOTO CLICÁVEL -->
                 <div class="relative group cursor-pointer" onclick="document.getElementById('modal-avatares').classList.remove('hidden')">
                     
-                    <!-- CÍRCULO CORRIGIDO: relative e rounded-full na img -->
-                    <div class="bg-[#dca3e8] w-24 h-24 rounded-full flex items-center justify-center text-[#7a32a8] font-black text-xl shadow-lg border-2 border-[#bc7bd4] relative">
+                    <!-- Círculo da foto -->
+                    <div class="bg-[#dca3e8] w-24 h-24 rounded-full flex items-center justify-center text-[#7a32a8] font-black text-xl shadow-lg border-2 border-[#bc7bd4] relative overflow-hidden">
                         <span id="texto-sem-foto">FOTO</span>
-                        <img id="img-perfil" src="" class="hidden w-full h-full object-cover rounded-full absolute inset-0">
+                        <img id="img-perfil" src="" class="hidden w-full h-full object-cover absolute inset-0">
                     </div>
                     
+                    <!-- Overlay escuro de "MUDAR" -->
                     <div class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
                         <span class="text-white font-black text-[10px] text-center drop-shadow-md">MUDAR</span>
                     </div>
                     
-                    <!-- CANETA CINZA MINIMALISTA SEM FUNDO -->
-                    <div class="absolute bottom-0 -right-1 z-20 pointer-events-none">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-300 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <!-- CANETA CINZA MINIMALISTA -->
+                    <div class="absolute bottom-1 -right-1 bg-gray-100/90 rounded-full p-1.5 shadow-md z-20 pointer-events-none border border-gray-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                         </svg>
                     </div>
                 </div>
 
-                <div class="absolute -bottom-3 bg-[#dca3e8] rounded-full px-3 py-1 flex items-center justify-center gap-1 shadow-md border-2 border-[#bc7bd4] z-30">
-                    <span id="perfil-moedas" class="text-black font-black text-xs">0</span>
-                    <img src="moedas.png" class="w-3 h-3 object-contain">
+                <!-- NÍVEL (Bolinha embaixo da foto) -->
+                <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-[#bc7bd4] w-8 h-8 rounded-full flex items-center justify-center shadow-md border-2 border-[#dca3e8] z-30">
+                    <span id="perfil-nivel" class="text-[#7a32a8] font-black text-sm">--</span>
                 </div>
             </div>
 
-            <div class="flex flex-col flex-grow gap-2">
-                <div class="bg-[#dca3e8] rounded-full px-4 py-2 flex items-center justify-center shadow-md">
-                    <span id="perfil-nome" class="text-[#7a32a8] font-black text-sm tracking-wide uppercase truncate max-w-[150px]">JOGADOR</span>
-                </div>
+            <!-- NOME, MOEDAS E XP (Direita) -->
+            <div class="flex flex-col flex-grow gap-2 justify-center">
                 
-                <div class="flex flex-col items-center mt-1">
-                    <div class="bg-[#dca3e8] rounded-full px-5 py-1 mb-1 shadow-sm">
-                        <span id="perfil-nivel" class="text-black font-black text-xs">Nível --</span>
+                <!-- Linha Nome + Moedas -->
+                <div class="flex items-center gap-2 w-full">
+                    <!-- NOME -->
+                    <div class="bg-[#dca3e8] rounded-full px-3 py-2 flex items-center justify-center shadow-md flex-grow overflow-hidden">
+                        <span id="perfil-nome" class="text-[#7a32a8] font-black text-base tracking-wide uppercase truncate max-w-[130px]">JOGADOR</span>
                     </div>
                     
+                    <!-- MOEDAS -->
+                    <div class="bg-[#dca3e8] rounded-full px-3 py-2 flex items-center justify-center gap-1 shadow-md flex-shrink-0">
+                        <span id="perfil-moedas" class="text-[#7a32a8] font-black text-sm">0</span>
+                        <img src="moedas.png" class="w-4 h-4 object-contain">
+                    </div>
+                </div>
+                
+                <!-- Linha Barra de XP -->
+                <div class="flex flex-col items-center mt-1 w-full">
                     <div class="w-full bg-transparent border border-[#dca3e8] rounded-full h-3 overflow-hidden shadow-inner">
                         <div id="perfil-barra-xp" class="bg-[#dca3e8] h-full transition-all duration-500" style="width: 0%;"></div>
                     </div>
@@ -103,7 +115,7 @@
                 </div>
             </div>
         </header>
-
+        
         <main class="flex flex-col gap-4 flex-grow overflow-y-auto no-scrollbar pb-16 mt-2">
             
             <div class="bg-[#dca3e8] rounded-[2rem] p-5 shadow-xl">
@@ -231,7 +243,7 @@
                     const xpMaximo = calcularXPMaximo(nivel);
                     const porcentagem = Math.min((xpAtual / xpMaximo) * 100, 100);
 
-                    document.getElementById('perfil-nivel').innerText = `Nível ${nivel}`;
+                    document.getElementById('perfil-nivel').innerText = nivel;
                     document.getElementById('perfil-texto-xp').innerText = `${xpAtual}/${xpMaximo} xp`;
                     document.getElementById('perfil-barra-xp').style.width = `${porcentagem}%`;
 

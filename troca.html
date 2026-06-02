@@ -55,7 +55,7 @@
 
     <div class="w-full max-w-sm flex flex-col h-full relative">
         
-        <!-- CABEÇALHO (Padrão com FRAGMENTOS em vez de moedas) -->
+        <!-- CABEÇALHO -->
         <header class="flex items-center gap-4 mt-4 mb-2 w-full">
             
             <div class="relative flex-shrink-0">
@@ -76,7 +76,7 @@
                         <span id="player-name" class="text-[#7a32a8] font-black text-base tracking-wide uppercase truncate max-w-[130px]">JOGADOR</span>
                     </div>
                     
-                    <!-- FRAGMENTOS AO INVÉS DE MOEDAS -->
+                    <!-- FRAGMENTOS COM O ÍCONE CORRETO -->
                     <div class="bg-[#dca3e8] rounded-full px-3 py-2 flex items-center justify-center gap-1 shadow-md flex-shrink-0">
                         <span id="player-fragmentos" class="text-[#7a32a8] font-black text-sm">0</span>
                         <img src="fragmento.png" class="w-4 h-4 object-contain">
@@ -92,61 +92,76 @@
             </div>
         </header>
 
-        <h1 class="text-[#dca3e8] font-black text-xl text-center mb-2 drop-shadow-md">TROCAS</h1>
+        <h1 class="text-[#dca3e8] font-black text-xl text-center mb-2 drop-shadow-md uppercase">TROCAS</h1>
 
-        <!-- GRID DE MESA DE TROCA (Inspirado no rascunho) -->
-        <main class="grid grid-cols-2 gap-3 flex-grow overflow-hidden pb-16">
+        <!-- GRID DE MESA DE TROCA (Layout Inverso / Horizontal) -->
+        <main class="flex flex-col gap-3 flex-grow overflow-hidden pb-16">
             
-            <!-- COLUNA ESQUERDA: Amigos e Convites -->
-            <div class="flex flex-col gap-3 h-full">
+            <!-- LINHA SUPERIOR: Amigos e Convites (50% da altura) -->
+            <div class="grid grid-cols-2 gap-3 h-[45%]">
                 
                 <!-- Caixa: Selecionar Amigo -->
-                <div class="bg-[#dca3e8] rounded-2xl p-3 flex flex-col shadow-xl flex-grow border-2 border-[#bc7bd4]">
-                    <span class="text-[#7a32a8] font-black text-[10px] text-center mb-2 uppercase leading-tight">Selecionar um<br>Amigo</span>
+                <div class="bg-[#dca3e8] rounded-3xl p-3 flex flex-col shadow-xl border-2 border-[#bc7bd4]">
+                    <span class="text-[#7a32a8] font-black text-[10px] text-center mb-3 uppercase leading-tight tracking-wider">sELECIONAR UM<br>AMIGO</span>
                     
                     <!-- Lista Mockada -->
-                    <div class="flex flex-col gap-1.5 flex-grow overflow-y-auto no-scrollbar mb-2">
-                        <div class="bg-[#bc7bd4] h-4 rounded-full w-full"></div>
-                        <div class="bg-[#bc7bd4] h-4 rounded-full w-full"></div>
-                        <div class="bg-[#bc7bd4] h-4 rounded-full w-full"></div>
-                        <div class="bg-[#bc7bd4] h-4 rounded-full w-full"></div>
-                        <div class="bg-[#bc7bd4] h-4 rounded-full w-full"></div>
+                    <div class="flex flex-col gap-2 flex-grow overflow-y-auto no-scrollbar mb-2 px-1">
+                        <div class="bg-[#7a32a8] h-4 rounded-full w-full opacity-90 shadow-inner"></div>
+                        <div class="bg-[#7a32a8] h-4 rounded-full w-full opacity-90 shadow-inner"></div>
+                        <div class="bg-[#7a32a8] h-4 rounded-full w-full opacity-90 shadow-inner"></div>
                     </div>
                     
-                    <button class="bg-[#7a32a8] text-white font-black text-[11px] py-2 w-full rounded-full shadow-md uppercase mt-2 opacity-50 cursor-not-allowed flex items-center justify-center gap-1">
-                      Trocar <span class="font-normal text-[10px] flex items-center gap-0.5">-- <img src="fragmento.png" class="w-3 h-3 object-contain"></span>
-                  </button>
+                    <!-- Texto de Ação -->
+                    <button class="text-[#7a32a8] font-black text-[9px] uppercase hover:scale-105 transition-transform mt-auto mb-1">
+                        ENVIAR CONVITE
+                    </button>
                 </div>
                 
-                <!-- Caixa: Convites Recebidos -->
-                <div class="bg-[#dca3e8] rounded-2xl p-3 flex flex-col shadow-xl h-[35%] border-2 border-[#bc7bd4]">
-                    <span class="text-[#7a32a8] font-black text-[10px] text-center mb-2 uppercase leading-tight">Convites<br>Recebidos:</span>
-                    <div class="flex flex-col gap-1.5 overflow-y-auto no-scrollbar">
-                        <div class="bg-[#bc7bd4] h-4 rounded-full w-full"></div>
-                        <div class="bg-[#bc7bd4] h-4 rounded-full w-full"></div>
+                <!-- Caixa: Convites -->
+                <div class="bg-[#dca3e8] rounded-3xl p-3 flex flex-col shadow-xl border-2 border-[#bc7bd4]">
+                    <span class="text-[#7a32a8] font-black text-[11px] text-center mb-3 leading-tight tracking-wide">Convites</span>
+                    
+                    <!-- Lista Mockada -->
+                    <div class="flex flex-col gap-2 flex-grow overflow-y-auto no-scrollbar mb-2 px-1">
+                        <div class="bg-[#7a32a8] h-4 rounded-full w-full opacity-90 shadow-inner"></div>
+                        <div class="bg-[#7a32a8] h-4 rounded-full w-full opacity-90 shadow-inner"></div>
+                        <div class="bg-[#7a32a8] h-4 rounded-full w-full opacity-90 shadow-inner"></div>
                     </div>
+                    
+                    <!-- Texto de Ação -->
+                    <button class="text-[#7a32a8] font-black text-[10px] hover:scale-105 transition-transform mt-auto mb-1">
+                        Aceitar
+                    </button>
                 </div>
             </div>
 
-            <!-- COLUNA DIREITA: Mesa da Carta -->
-            <div class="bg-[#dca3e8] rounded-2xl p-3 flex flex-col items-center shadow-xl border-2 border-[#bc7bd4] h-full justify-between">
+            <!-- LINHA INFERIOR: Mesa da Carta (50% da altura) -->
+            <div class="bg-[#dca3e8] rounded-3xl p-4 flex flex-col items-center shadow-xl border-2 border-[#bc7bd4] h-[55%] justify-between">
                 
-                <span class="text-[#7a32a8] font-black text-[10px] text-center mb-1 uppercase leading-tight">Selecionar uma<br>Carta</span>
-                
-                <!-- Slot de Carta do Jogador -->
-                <div class="w-16 h-24 bg-gray-800 rounded-lg shadow-inner border-2 border-dashed border-[#7a32a8] flex items-center justify-center cursor-pointer hover:border-solid transition-colors">
-                    <span class="text-[#bc7bd4] text-2xl font-bold">+</span>
+                <!-- Área das Duas Cartas -->
+                <div class="flex w-full justify-around items-center flex-grow mb-1">
+                    
+                    <!-- Slot ENVIAR (Sua Carta) -->
+                    <div class="flex flex-col items-center gap-2">
+                        <span class="text-[#7a32a8] font-black text-[12px] uppercase tracking-wide">ENVIAR:</span>
+                        <div class="w-[4.5rem] h-24 bg-gray-800 rounded-lg shadow-inner border-2 border-dashed border-[#7a32a8] flex items-center justify-center cursor-pointer hover:border-solid transition-colors relative">
+                            <span class="text-[#bc7bd4] text-3xl font-bold">+</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Slot Receber (Carta do Amigo) -->
+                    <div class="flex flex-col items-center gap-2">
+                        <span class="text-[#7a32a8] font-black text-[12px] tracking-wide">Receber:</span>
+                        <div class="w-[4.5rem] h-24 bg-gray-800 rounded-lg shadow-inner border-2 border-[#bc7bd4] flex items-center justify-center opacity-70 relative">
+                            <span class="text-[#bc7bd4] text-[9px] font-black text-center px-1">Aguardando...</span>
+                        </div>
+                    </div>
+
                 </div>
                 
-                <span class="text-[#7a32a8] font-black text-[9px] text-center uppercase leading-tight my-1">Carta do<br>Amigo</span>
-                
-                <!-- Slot de Carta do Amigo -->
-                <div class="w-16 h-24 bg-gray-800 rounded-lg shadow-inner border-2 border-[#bc7bd4] flex items-center justify-center opacity-70">
-                    <span class="text-[#bc7bd4] text-[8px] font-black text-center px-1">Aguardando...</span>
-                </div>
-                
-                <button class="bg-[#7a32a8] text-white font-black text-[11px] py-2 w-full rounded-full shadow-md uppercase mt-2 opacity-50 cursor-not-allowed flex items-center justify-center gap-1">
-                    Trocar <span class="font-normal text-[10px]">-- 💎</span>
+                <!-- Botão de Trocar (Com pílula mais clara) -->
+                <button class="bg-[#bc7bd4] text-[#7a32a8] font-black text-[12px] py-1.5 px-8 rounded-full shadow-md mt-2 opacity-60 cursor-not-allowed flex items-center justify-center gap-2 border border-[#7a32a8]/20">
+                    trocar <span class="font-normal text-[11px] flex items-center gap-0.5">-- <img src="fragmento.png" class="w-3.5 h-3.5 object-contain"></span>
                 </button>
             </div>
 
@@ -154,8 +169,8 @@
 
         <!-- BOTÃO VOLTAR -->
         <footer class="mt-auto flex justify-center pb-2 z-10 absolute bottom-4 left-0 w-full pointer-events-none">
-            <button onclick="window.location.href='menu.html'" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-2 px-8 rounded-full shadow-lg transition-transform hover:-translate-y-1 pointer-events-auto border-2 border-[#dca3e8]">
-                RETORNAR
+            <button onclick="window.location.href='menu.html'" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black text-sm py-2 px-10 rounded-full shadow-lg transition-transform hover:-translate-y-1 pointer-events-auto border-2 border-[#dca3e8]">
+                retornar
             </button>
         </footer>
 

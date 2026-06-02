@@ -267,8 +267,8 @@
                     }
                 }
                 
-                document.getElementById('player-level').innerText = `NÍVEL ${dados.nivel || 1}`;
-                document.getElementById('player-coins').innerText = `${dados.moedas || 0} moedas`;
+                document.getElementById('player-level').innerText = nivelAtual;
+                document.getElementById('player-coins').innerText = dados.moedas || 0;
 
                 let itensNaMochila = [];
 

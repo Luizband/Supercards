@@ -62,13 +62,48 @@
     <div id="toast-container"></div>
 
     <div class="w-full max-w-sm flex flex-col h-full relative">
-        <header class="relative w-full mt-6 mb-6 flex justify-center z-10">
-            <div class="bg-[#dca3e8] w-full rounded-full flex justify-between items-center px-6 py-3 shadow-md">
-                <span id="player-level" class="text-black font-black text-sm drop-shadow-sm">NÍVEL --</span>
-                <span id="player-coins" class="text-white font-black text-sm drop-shadow-sm">-- moedas</span>
+        <!-- CABEÇALHO (Padrão Coleção / Inventário) -->
+        <header class="flex items-center gap-4 mt-4 mb-4 w-full">
+            
+            <!-- FOTO E NÍVEL (Esquerda) -->
+            <div class="relative flex-shrink-0">
+                <!-- Círculo da foto (Apenas exibição) -->
+                <div class="bg-[#dca3e8] w-24 h-24 rounded-full flex items-center justify-center text-[#7a32a8] font-black text-xl shadow-lg border-2 border-[#bc7bd4] relative overflow-hidden">
+                    <span id="texto-sem-foto">FOTO</span>
+                    <img id="img-perfil-global" src="" class="hidden w-full h-full object-cover absolute inset-0">
+                </div>
+                
+                <!-- NÍVEL -->
+                <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-[#bc7bd4] w-8 h-8 rounded-full flex items-center justify-center shadow-md border-2 border-[#dca3e8] z-30">
+                    <span id="player-level" class="text-[#7a32a8] font-black text-sm">--</span>
+                </div>
             </div>
-            <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-[#bc7bd4] w-16 h-16 rounded-full flex items-center justify-center text-[#7a32a8] font-bold shadow-lg border-2 border-[#dca3e8]">
-                foto
+
+            <!-- NOME, MOEDAS E XP (Direita) -->
+            <div class="flex flex-col flex-grow gap-2 justify-center">
+                
+                <!-- Linha Nome + Moedas -->
+                <div class="flex items-center gap-2 w-full">
+                    <!-- NOME -->
+                    <div class="bg-[#dca3e8] rounded-full px-3 py-2 flex items-center justify-center shadow-md flex-grow overflow-hidden">
+                        <span id="player-name" class="text-[#7a32a8] font-black text-base tracking-wide uppercase truncate max-w-[130px]">JOGADOR</span>
+                    </div>
+                    
+                    <!-- MOEDAS -->
+                    <div class="bg-[#dca3e8] rounded-full px-3 py-2 flex items-center justify-center gap-1 shadow-md flex-shrink-0">
+                        <span id="player-coins" class="text-[#7a32a8] font-black text-sm">0</span>
+                        <img src="moedas.png" class="w-4 h-4 object-contain">
+                    </div>
+                </div>
+                
+                <!-- Linha Barra de XP -->
+                <div class="flex flex-col items-center mt-1 w-full">
+                    <div class="w-full bg-transparent border border-[#dca3e8] rounded-full h-3 overflow-hidden shadow-inner">
+                        <div id="barra-xp" class="bg-[#dca3e8] h-full transition-all duration-500" style="width: 0%;"></div>
+                    </div>
+                    <!-- Texto do XP no tom lilás claro -->
+                    <span id="texto-xp" class="text-[#dca3e8] text-[10px] font-bold mt-1">0/0 xp</span>
+                </div>
             </div>
         </header>
 

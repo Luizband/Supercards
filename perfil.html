@@ -55,37 +55,37 @@
 
     <div class="w-full max-w-sm flex flex-col h-full relative gap-4">
         
-        <!-- SEÇÃO SUPERIOR: FOTO, NOME E XP -->
         <header class="flex items-center gap-4 mt-4">
             
-            <!-- Foto e Moedas (Esquerda) -->
             <div class="flex flex-col items-center relative">
                 
-                <!-- ÁREA DA FOTO CLICÁVEL (AGORA ABRE O MODAL) -->
+                <!-- ÁREA DA FOTO CLICÁVEL -->
                 <div class="relative group cursor-pointer" onclick="document.getElementById('modal-avatares').classList.remove('hidden')">
-                    <!-- O Círculo com overflow-hidden para a imagem ficar redonda -->
-                    <div class="bg-[#dca3e8] w-24 h-24 rounded-full flex items-center justify-center text-[#7a32a8] font-black text-xl shadow-lg border-2 border-[#bc7bd4] overflow-hidden">
+                    
+                    <!-- CÍRCULO CORRIGIDO: relative e rounded-full na img -->
+                    <div class="bg-[#dca3e8] w-24 h-24 rounded-full flex items-center justify-center text-[#7a32a8] font-black text-xl shadow-lg border-2 border-[#bc7bd4] relative">
                         <span id="texto-sem-foto">FOTO</span>
-                        <img id="img-perfil" src="" class="hidden w-full h-full object-cover absolute inset-0">
+                        <img id="img-perfil" src="" class="hidden w-full h-full object-cover rounded-full absolute inset-0">
                     </div>
                     
-                    <!-- Overlay escuro e ícone de edição -->
-                    <div class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                    <div class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
                         <span class="text-white font-black text-[10px] text-center drop-shadow-md">MUDAR</span>
                     </div>
-                    <div class="absolute bottom-1 right-0 bg-[#22c55e] w-7 h-7 rounded-full border-2 border-[#dca3e8] flex items-center justify-center shadow-md text-xs z-20">
-                        ✏️
+                    
+                    <!-- CANETA CINZA MINIMALISTA SEM FUNDO -->
+                    <div class="absolute bottom-0 -right-1 z-20 pointer-events-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-300 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
                     </div>
                 </div>
 
-                <!-- Pílula de moedas sobreposta -->
                 <div class="absolute -bottom-3 bg-[#dca3e8] rounded-full px-3 py-1 flex items-center justify-center gap-1 shadow-md border-2 border-[#bc7bd4] z-30">
                     <span id="perfil-moedas" class="text-black font-black text-xs">0</span>
                     <img src="moedas.png" class="w-3 h-3 object-contain">
                 </div>
             </div>
 
-            <!-- Informações do Jogador (Direita) -->
             <div class="flex flex-col flex-grow gap-2">
                 <div class="bg-[#dca3e8] rounded-full px-4 py-2 flex items-center justify-center shadow-md">
                     <span id="perfil-nome" class="text-[#7a32a8] font-black text-sm tracking-wide uppercase truncate max-w-[150px]">JOGADOR</span>
@@ -104,14 +104,12 @@
             </div>
         </header>
 
-        <!-- CAIXA DE BADGES -->
         <main class="flex flex-col gap-4 flex-grow overflow-y-auto no-scrollbar pb-16 mt-2">
             
             <div class="bg-[#dca3e8] rounded-[2rem] p-5 shadow-xl">
                 <h2 class="text-[#7a32a8] font-black text-xl text-center mb-4 uppercase drop-shadow-sm">Badges</h2>
                 
                 <div id="grid-badges" class="grid grid-cols-3 gap-4 place-items-start">
-                    <!-- As Badges serão injetadas aqui pelo JS -->
                 </div>
                 
                 <p id="mensagem-sem-badges" class="text-center text-[#7a32a8]/70 font-bold text-sm hidden">
@@ -119,7 +117,6 @@
                 </p>
             </div>
 
-            <!-- CAIXA DE DADOS ESTATÍSTICOS -->
             <div class="bg-[#dca3e8] rounded-[2rem] p-5 shadow-xl">
                 <h2 class="text-[#7a32a8] font-black text-lg text-center mb-3 uppercase drop-shadow-sm">Dados Estatísticos</h2>
                 
@@ -144,19 +141,16 @@
 
         </main>
 
-        <!-- BOTÃO RETORNAR -->
         <footer class="absolute bottom-4 left-0 w-full flex justify-center z-10">
             <button onclick="window.location.href='menu.html'" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-3 px-12 rounded-full shadow-lg transition-transform hover:-translate-y-1 border-2 border-[#dca3e8]">
                 RETORNAR
             </button>
         </footer>
 
-        <!-- MODAL DE SELEÇÃO DE AVATAR -->
         <div id="modal-avatares" class="hidden fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
             <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 max-w-xs w-full shadow-2xl relative">
                 <h2 class="text-[#7a32a8] font-black text-lg mb-4 text-center uppercase">Escolha seu Avatar</h2>
                 
-                <!-- GRID DOS 10 AVATARES -->
                 <div class="grid grid-cols-4 gap-3 max-h-[50vh] overflow-y-auto no-scrollbar pb-2">
                     <button onclick="window.salvarAvatar('avatares/avatar1.png')" class="hover:scale-110 transition-transform"><img src="avatares/avatar1.png" class="rounded-full w-full aspect-square object-cover shadow-md border-2 border-transparent hover:border-[#7a32a8]"></button>
                     <button onclick="window.salvarAvatar('avatares/avatar2.png')" class="hover:scale-110 transition-transform"><img src="avatares/avatar2.png" class="rounded-full w-full aspect-square object-cover shadow-md border-2 border-transparent hover:border-[#7a32a8]"></button>
@@ -241,14 +235,12 @@
                     document.getElementById('perfil-texto-xp').innerText = `${xpAtual}/${xpMaximo} xp`;
                     document.getElementById('perfil-barra-xp').style.width = `${porcentagem}%`;
 
-                    // LÓGICA DE EXIBIR O AVATAR SE EXISTIR NO BANCO
                     if (dados.fotoPerfil) {
                         document.getElementById('img-perfil').src = dados.fotoPerfil;
                         document.getElementById('img-perfil').classList.remove('hidden');
                         document.getElementById('texto-sem-foto').classList.add('hidden');
                     }
 
-                    // Preenche as Estatísticas
                     const stats = dados.estatisticas || {};
                     document.getElementById('stat-pacotes').innerText = stats.pacotesAbertos || 0;
                     document.getElementById('stat-cartas').innerText = stats.totalCartas || 0;
@@ -256,7 +248,6 @@
                     document.getElementById('stat-batalhas').innerText = stats.batalhasVencidas || 0;
                     document.getElementById('stat-trocas').innerText = stats.trocasFeitas || 0;
 
-                    // Preenche as Badges
                     const gridBadges = document.getElementById('grid-badges');
                     const msgSemBadges = document.getElementById('mensagem-sem-badges');
                     
@@ -288,19 +279,15 @@
             }
         });
 
-        // --- SISTEMA DE SALVAR O AVATAR ESCOLHIDO ---
         window.salvarAvatar = async function(caminhoAvatar) {
             if (!currentUserUid) return;
 
-            // Fecha o modal e avisa que está salvando
             document.getElementById('modal-avatares').classList.add('hidden');
             window.mostrarToast("Salvando avatar... ⏳");
 
             try {
-                // Salva o caminho (ex: 'avatares/avatar1.png') direto no Firestore
                 await setDoc(doc(db, "users", currentUserUid), { fotoPerfil: caminhoAvatar }, { merge: true });
 
-                // Atualiza a imagem na tela imediatamente
                 document.getElementById('img-perfil').src = caminhoAvatar;
                 document.getElementById('img-perfil').classList.remove('hidden');
                 document.getElementById('texto-sem-foto').classList.add('hidden');

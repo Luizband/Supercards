@@ -62,15 +62,19 @@
         
         <!-- CABEÇALHO -->
         <header class="flex items-center gap-3 mt-4 mb-4">
-            <div class="flex-shrink-0">
-                <div class="bg-[#dca3e8] w-24 h-24 rounded-full flex items-center justify-center text-[#7a32a8] font-bold shadow-lg border-4 border-transparent">
-                    foto
+            
+            <!-- FOTO DO PERFIL GLOBAL (Apenas exibição) -->
+            <div class="flex-shrink-0 relative">
+                <div class="bg-[#dca3e8] w-24 h-24 rounded-full flex items-center justify-center text-[#7a32a8] font-black text-xl shadow-lg border-2 border-[#bc7bd4] overflow-hidden relative">
+                    <span id="texto-sem-foto" class="text-sm">FOTO</span>
+                    <img id="img-perfil-global" src="" class="hidden w-full h-full object-cover absolute inset-0">
                 </div>
             </div>
 
+            <!-- NOME E XP -->
             <div class="flex flex-col flex-grow gap-2 justify-center">
                 <div class="bg-[#dca3e8] rounded-full px-4 py-2 flex items-center justify-center shadow-md">
-                    <span id="player-name" class="text-[#7a32a8] font-black text-sm drop-shadow-md truncate max-w-[150px]">NOME DO JOGADOR</span>
+                    <span id="player-name" class="text-[#7a32a8] font-black text-sm drop-shadow-md truncate max-w-[150px]">JOGADOR</span>
                 </div>
                 
                 <div class="flex flex-col items-center">
@@ -352,7 +356,6 @@
                 let ganhouBadgeReciclagem = false;
                 let notificacoesNovas = [];
 
-                // 1. CHECA A BADGE DE RECICLAR 30 CARTAS
                 if (cartasRecicladas >= 30 && !badgesJogador["badge-006"]) {
                     badgesJogador["badge-006"] = true;
                     ganhouBadgeReciclagem = true;
@@ -366,7 +369,6 @@
                     });
                 }
 
-                // 2. GATILHO DA MISSÃO DIÁRIA DE RECICLAGEM
                 let pacoteMissoes = dados.missoesDiarias || {};
                 const hoje = obterGameDay();
                 let atualizouMissao = false;
@@ -382,7 +384,6 @@
                     });
                 }
 
-                // 3. MATEMÁTICA DE LEVEL UP (Caso tenha ganho a Badge)
                 let subiuNivel = false;
                 let msgLevelUp = "";
                 let nivelAtual = dados.nivel || 1;
@@ -395,7 +396,6 @@
                     badges: badgesJogador
                 };
 
-                // Se completou a missão, salva ela junto no pacote de atualização
                 if (atualizouMissao) {
                     docAtualizacao.missoesDiarias = pacoteMissoes;
                 }
@@ -451,7 +451,6 @@
                     renderizarGridCartas();
                 }
 
-                // 4. CASCATA DE TOASTS
                 window.mostrarToast(`Carta reciclada! Você ganhou ${ganhoFragmentos} fragmento(s).`);
                 
                 let atraso = 500;
@@ -487,6 +486,16 @@
                     colecaoJogador = dados.colecao || {};
                     renderizarGridCartas();
                     
+                    // --- EXIBE O AVATAR GLOBAL SE EXISTIR ---
+                    if (dados.fotoPerfil) {
+                        const imgElement = document.getElementById('img-perfil-global');
+                        if (imgElement) {
+                            imgElement.src = dados.fotoPerfil;
+                            imgElement.classList.remove('hidden');
+                            document.getElementById('texto-sem-foto').classList.add('hidden');
+                        }
+                    }
+
                     checarBadgesDeColecao(dados);
                 } else {
                     renderizarGridCartas();

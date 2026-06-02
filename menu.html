@@ -53,53 +53,53 @@
 
     <div class="w-full max-w-sm flex flex-col h-full relative">
         
-        <!-- CABEÇALHO REFORMULADO -->
-        <header class="flex items-center gap-3 mt-4 mb-6">
+        <!-- CABEÇALHO REFORMULADO E AMPLIADO -->
+        <header class="flex items-center gap-4 mt-6 mb-8">
             
             <!-- FOTO E NÍVEL (Esquerda) -->
             <div class="relative flex-shrink-0">
-                <!-- Círculo da foto (Apenas exibição) -->
-                <div class="bg-[#dca3e8] w-20 h-20 rounded-full flex items-center justify-center text-[#7a32a8] font-black text-xl shadow-lg border-2 border-[#bc7bd4] overflow-hidden relative">
+                <!-- Círculo da foto ampliado (Tamanho igual ao do Perfil) -->
+                <div class="bg-[#dca3e8] w-24 h-24 rounded-full flex items-center justify-center text-[#7a32a8] font-black text-xl shadow-lg border-2 border-[#bc7bd4] overflow-hidden relative">
                     <span id="texto-sem-foto" class="text-sm">FOTO</span>
                     <img id="img-perfil-global" src="" class="hidden w-full h-full object-cover absolute inset-0">
                 </div>
                 
                 <!-- NÍVEL -->
-                <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-[#bc7bd4] w-7 h-7 rounded-full flex items-center justify-center shadow-md border-2 border-[#dca3e8] z-30">
-                    <span id="player-level" class="text-[#7a32a8] font-black text-xs">--</span>
+                <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-[#bc7bd4] w-8 h-8 rounded-full flex items-center justify-center shadow-md border-2 border-[#dca3e8] z-30">
+                    <span id="player-level" class="text-[#7a32a8] font-black text-sm">--</span>
                 </div>
             </div>
 
             <!-- DIREITA: MOEDAS, MENU, NOME E XP -->
-            <div class="flex flex-col flex-grow gap-2 justify-center">
+            <div class="flex flex-col flex-grow gap-3 justify-center">
                 
                 <!-- LINHA 1: Moedas e Botões -->
                 <div class="flex items-center gap-2 w-full">
                     <!-- MOEDAS -->
-                    <div class="bg-[#dca3e8] rounded-full px-3 py-1.5 flex items-center justify-center gap-1 shadow-md w-auto">
-                        <span id="player-coins" class="text-[#7a32a8] font-black text-sm">...</span>
-                        <img src="moedas.png" class="w-4 h-4 object-contain">
+                    <div class="bg-[#dca3e8] rounded-full px-4 py-2 flex items-center justify-center gap-1.5 shadow-md w-auto">
+                        <span id="player-coins" class="text-[#7a32a8] font-black text-base">...</span>
+                        <img src="moedas.png" class="w-5 h-5 object-contain">
                     </div>
                     
                     <!-- BOTÕES DE NAVEGAÇÃO -->
-                    <nav class="bg-[#dca3e8] rounded-full flex justify-between items-center px-2 py-1 shadow-md flex-grow">
-                        <button onclick="window.location.href='perfil.html'" class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-7 h-7 shadow-sm">
+                    <nav class="bg-[#dca3e8] rounded-full flex justify-between items-center px-3 py-1.5 shadow-md flex-grow">
+                        <button onclick="window.location.href='perfil.html'" class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-8 h-8 shadow-sm">
                             <img src="perfil.png" alt="Perfil" class="w-4 h-4 object-contain">
                         </button>
                         
-                        <button onclick="window.location.href='shop.html'" class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-7 h-7 shadow-sm">
+                        <button onclick="window.location.href='shop.html'" class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-8 h-8 shadow-sm">
                             <img src="shop.png" alt="Shop" class="w-4 h-4 object-contain">
                         </button>
                         
-                        <button onclick="window.location.href='missoes.html'" class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-7 h-7 shadow-sm">
+                        <button onclick="window.location.href='missoes.html'" class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-8 h-8 shadow-sm">
                             <img src="missao.png" alt="Missões" class="w-4 h-4 object-contain">
                         </button>
                         
                         <div class="relative flex items-center">
-                            <button id="btn-config" class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-7 h-7 shadow-sm">
+                            <button id="btn-config" class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-8 h-8 shadow-sm">
                                 <img src="config.png" alt="Configurações" class="w-4 h-4 object-contain">
                             </button>
-                            <div id="dropdown-config" class="hidden absolute right-0 top-8 w-32 bg-[#bc7bd4] border-2 border-[#7a32a8] rounded-xl shadow-2xl overflow-hidden z-50">
+                            <div id="dropdown-config" class="hidden absolute right-0 top-10 w-32 bg-[#bc7bd4] border-2 border-[#7a32a8] rounded-xl shadow-2xl overflow-hidden z-50">
                                 <button id="btn-sair" class="w-full px-4 py-2 text-white font-bold text-sm hover:bg-[#7a32a8] transition-colors flex items-center justify-between">
                                     Sair <span>🚪</span>
                                 </button>
@@ -111,16 +111,16 @@
                 <!-- LINHA 2: Nome e XP -->
                 <div class="flex items-center gap-2 w-full">
                     <!-- NOME -->
-                    <div class="bg-[#dca3e8] rounded-full px-2 flex items-center justify-center shadow-md w-28 h-7 overflow-hidden flex-shrink-0">
-                        <span id="player-name" class="text-[#7a32a8] font-black text-[10px] uppercase truncate">...</span>
+                    <div class="bg-[#dca3e8] rounded-full px-3 py-1 flex items-center justify-center shadow-md w-32 h-8 overflow-hidden flex-shrink-0">
+                        <span id="player-name" class="text-[#7a32a8] font-black text-xs uppercase truncate">...</span>
                     </div>
                     
                     <!-- BARRA DE XP -->
                     <div class="flex flex-col items-center flex-grow">
-                        <div class="w-full bg-transparent border border-[#dca3e8] rounded-full h-2.5 overflow-hidden shadow-inner">
+                        <div class="w-full bg-transparent border border-[#dca3e8] rounded-full h-3 overflow-hidden shadow-inner">
                             <div id="player-barra-xp" class="bg-[#dca3e8] h-full transition-all duration-500" style="width: 0%;"></div>
                         </div>
-                        <span id="player-texto-xp" class="text-white text-[9px] font-bold mt-0.5">0/0 xp</span>
+                        <span id="player-texto-xp" class="text-white text-[10px] font-bold mt-1">0/0 xp</span>
                     </div>
                 </div>
                 

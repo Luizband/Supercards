@@ -256,6 +256,16 @@
 
             if (docSnap.exists()) {
                 const dados = docSnap.data();
+
+                // --- EXIBE O AVATAR GLOBAL SE EXISTIR ---
+                if (dados.fotoPerfil) {
+                    const imgElement = document.getElementById('img-perfil-global');
+                    if (imgElement) {
+                        imgElement.src = dados.fotoPerfil;
+                        imgElement.classList.remove('hidden');
+                        document.getElementById('texto-sem-foto').classList.add('hidden');
+                    }
+                }
                 
                 document.getElementById('player-level').innerText = `NÍVEL ${dados.nivel || 1}`;
                 document.getElementById('player-coins').innerText = `${dados.moedas || 0} moedas`;

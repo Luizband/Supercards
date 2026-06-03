@@ -49,14 +49,13 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Animação Suave de Aparecer Crescendo */
-        @keyframes zoomIn {
-            0% { transform: scale(0.5); opacity: 0; filter: brightness(2); }
+        /* Animação Suave para a Carta Única Revelada */
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; filter: brightness(2); }
             100% { transform: scale(1); opacity: 1; filter: brightness(1); }
         }
-        .anim-aparecer { 
-            animation: zoomIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; 
-            opacity: 0; 
+        .anim-pop { 
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; 
         }
     </style>
 </head>
@@ -66,6 +65,7 @@
 
     <div class="w-full max-w-sm flex flex-col h-full relative">
         
+        <!-- CABEÇALHO -->
         <header class="flex items-center gap-4 mt-4 mb-4 w-full">
             <div class="relative flex-shrink-0">
                 <div class="bg-[#dca3e8] w-24 h-24 rounded-full flex items-center justify-center text-[#7a32a8] font-black text-xl shadow-lg border-2 border-[#bc7bd4] relative overflow-hidden">
@@ -96,6 +96,7 @@
             </div>
         </header>
 
+        <!-- ÁREA DO INVENTÁRIO -->
         <main class="bg-[#dca3e8] rounded-[2rem] flex flex-col flex-grow p-5 shadow-xl overflow-hidden mb-16 relative border-2 border-[#bc7bd4]">
             <h1 class="text-[#7a32a8] font-black text-xl text-center mb-6 drop-shadow-sm uppercase">Meus Pacotes</h1>
             
@@ -104,25 +105,37 @@
             </div>
         </main>
 
+        <!-- BOTÃO VOLTAR -->
         <footer class="mt-auto flex justify-center pb-2 z-10 absolute bottom-4 left-0 w-full pointer-events-none">
             <button onclick="window.location.href='menu.html'" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black text-sm py-2 px-10 rounded-full shadow-lg transition-transform hover:-translate-y-1 pointer-events-auto border-2 border-[#dca3e8]">
                 retornar
             </button>
         </footer>
 
-        <div id="modal-abrir-pacote" class="hidden fixed inset-0 bg-black/90 z-[100] flex flex-col items-center justify-center p-4 backdrop-blur-md">
-            <h2 class="text-[#4ade80] font-black text-2xl mb-6 text-center uppercase drop-shadow-lg">Novas Cartas!</h2>
+        <!-- MODAL DE CARTAS ABERTAS -->
+        <div id="modal-abrir-pacote" class="hidden fixed inset-0 bg-black/95 z-[100] flex flex-col items-center justify-center p-4 backdrop-blur-md">
             
-            <div id="grid-novas-cartas" class="flex flex-wrap justify-center gap-4 mb-8">
+            <h2 id="titulo-abrir-pacote" class="text-[#4ade80] font-black text-2xl mb-8 text-center uppercase drop-shadow-lg">Toque para revelar</h2>
+            
+            <!-- EXIBIÇÃO DE CARTA ÚNICA (O Jogador clica aqui para avançar) -->
+            <div id="container-revelacao" onclick="window.mostrarProximaCarta()" class="w-56 aspect-[2.5/3.5] bg-gray-800 rounded-2xl overflow-hidden border-4 cursor-pointer flex items-center justify-center relative shadow-2xl transition-all">
+                <img id="img-revelacao" src="" class="w-full h-full object-cover">
+            </div>
+
+            <!-- GRID FINAL DE 5 CARTAS (Escondido até o fim da revelação) -->
+            <div id="grid-novas-cartas" class="hidden flex-wrap justify-center gap-3 mb-8">
+                <!-- Injetado via JS -->
             </div>
             
-            <button id="btn-guardar-colecao" onclick="window.guardarNaColecao()" class="hidden bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-3 px-10 rounded-full shadow-lg transition-transform hover:scale-105 uppercase text-sm border-2 border-[#bc7bd4]">
+            <!-- BOTÃO GUARDAR (Escondido até o fim da revelação) -->
+            <button id="btn-guardar-colecao" onclick="window.guardarNaColecao()" class="hidden mt-8 bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-3 px-10 rounded-full shadow-lg transition-transform hover:scale-105 uppercase text-sm border-2 border-[#bc7bd4]">
                 Guardar na Coleção
             </button>
         </div>
 
     </div>
 
+    <!-- SCRIPT DO FIREBASE E LÓGICA -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -142,20 +155,21 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let currentUserUid = null; // <--- ADICIONE ESTA LINHA AQUI
+        let currentUserUid = null;
         let dbUserRef = null;
         let dadosJogador = null;
         let abrindoPacote = false;
         
         let cartasSorteadaTemp = [];
         let tipoPacoteTemp = '';
+        let indiceRevelacao = 0; // Controla qual carta está sendo exibida no modal
 
-        // Tabela de cores para o brilho de cada raridade
+        // Cores de brilho por raridade
         const CORES_RARIDADE = {
             'Comum': '#a1a1aa',     // Cinza
             'Rara': '#3b82f6',      // Azul
-            'Épica': '#a855f7',     // Roxo
-            'Lendária': '#eab308'   // Dourado
+            'Lendária': '#eab308',  // Dourado
+            'Épica': '#a855f7'      // Roxo
         };
 
         const bancoRaridades = { 'Comum': [], 'Rara': [], 'Épica': [], 'Lendária': [] };
@@ -262,28 +276,38 @@
             }
         }
 
-        function sortearCarta(ehPremium) {
+        // --- SISTEMA MATEMÁTICO REFINADO COM AS SUAS REGRAS EXATAS ---
+        function sortearCarta(tipoPacote, isSlot1) {
             const roll = Math.random() * 100;
             let raridade = 'Comum';
             
-            if (ehPremium) {
-                if (roll < 10) raridade = 'Lendária';
-                else if (roll < 35) raridade = 'Épica';
-                else if (roll < 70) raridade = 'Rara';
-                else raridade = 'Comum';
-            } else {
-                if (roll < 2) raridade = 'Lendária';
-                else if (roll < 10) raridade = 'Épica';
-                else if (roll < 30) raridade = 'Rara';
-                else raridade = 'Comum';
+            if (tipoPacote === 'premium' && isSlot1) {
+                // SLOT 1 PREMIUM: Rara (75%), Lendária (20%), Épica (5%)
+                if (roll <= 75) raridade = 'Rara';
+                else if (roll <= 95) raridade = 'Lendária';
+                else raridade = 'Épica';
+            } 
+            else if (tipoPacote === 'premium' && !isSlot1) {
+                // SLOTS 2 AO 5 PREMIUM: Comum (60%), Rara (30%), Lendária (8%), Épica (2%)
+                if (roll <= 60) raridade = 'Comum';
+                else if (roll <= 90) raridade = 'Rara';
+                else if (roll <= 98) raridade = 'Lendária';
+                else raridade = 'Épica';
+            } 
+            else {
+                // PACOTE BÁSICO: Comum (80%), Rara (17%), Lendária (2.5%), Épica (0.5%)
+                if (roll <= 80) raridade = 'Comum';
+                else if (roll <= 97) raridade = 'Rara';
+                else if (roll <= 99.5) raridade = 'Lendária';
+                else raridade = 'Épica';
             }
 
             let lista = bancoRaridades[raridade];
-            if (!lista || lista.length === 0) lista = bancoRaridades['Comum'];
+            if (!lista || lista.length === 0) lista = bancoRaridades['Comum']; // Proteção contra erro
             return lista[Math.floor(Math.random() * lista.length)];
         }
 
-        // FASE 1: SORTEIA E ANIMA AS CARTAS UMA A UMA (COM BRILHO DA RARIDADE)
+        // --- FASE 1: INICIA A REVELAÇÃO CARTA POR CARTA ---
         window.abrirPacote = async function(tipo) {
             if (abrindoPacote) return;
             abrindoPacote = true;
@@ -299,42 +323,74 @@
 
             tipoPacoteTemp = tipo;
             cartasSorteadaTemp = [];
-            for(let i=0; i<5; i++) {
-                cartasSorteadaTemp.push(sortearCarta(tipo === 'premium'));
+            indiceRevelacao = 0;
+
+            // Sorteia as 5 cartas aplicando as probabilidades corretas (isSlot1 = true apenas no loop 0)
+            for(let i = 0; i < 5; i++) {
+                cartasSorteadaTemp.push(sortearCarta(tipo, i === 0));
             }
 
-            const grid = document.getElementById('grid-novas-cartas');
-            grid.innerHTML = '';
+            // Prepara a UI
+            document.getElementById('grid-novas-cartas').classList.add('hidden');
             document.getElementById('btn-guardar-colecao').classList.add('hidden');
+            document.getElementById('titulo-abrir-pacote').innerText = "Toque para revelar";
+            
+            // Exibe a tela preta e o container principal
             document.getElementById('modal-abrir-pacote').classList.remove('hidden');
+            document.getElementById('container-revelacao').classList.remove('hidden');
 
-            cartasSorteadaTemp.forEach((id, index) => {
-                setTimeout(() => {
-                    const info = INFO_CARTAS[id];
-                    const corRaridade = CORES_RARIDADE[info.raridade] || '#dca3e8';
-                    
-                    const divCarta = document.createElement('div');
-                    
-                    // Aplica a animação de "Aparecer", a borda colorida e a sombra/brilho mágica
-                    divCarta.className = "w-24 aspect-[2.5/3.5] bg-gray-800 rounded-lg overflow-hidden border-2 anim-aparecer";
-                    divCarta.style.borderColor = corRaridade;
-                    divCarta.style.boxShadow = `0 0 20px ${corRaridade}80`; // O "80" no final aplica 50% de opacidade no brilho
-                    
-                    divCarta.innerHTML = `<img src="${info.imagem}" class="w-full h-full object-cover">`;
-                    
-                    grid.appendChild(divCarta);
-
-                    if (index === cartasSorteadaTemp.length - 1) {
-                        setTimeout(() => {
-                            document.getElementById('btn-guardar-colecao').classList.remove('hidden');
-                            abrindoPacote = false;
-                        }, 800);
-                    }
-                }, index * 800);
-            });
+            // Chama a primeira carta
+            window.mostrarProximaCarta();
         };
 
-        // FASE 2: SALVA NO BANCO E CALCULA AS BADGES
+        // --- INTERAÇÃO DE CLIQUE: MOSTRA A PRÓXIMA CARTA OU A TELA FINAL ---
+        window.mostrarProximaCarta = function() {
+            const container = document.getElementById('container-revelacao');
+            const imgElement = document.getElementById('img-revelacao');
+
+            if (indiceRevelacao < 5) {
+                // Puxa a carta da vez
+                const id = cartasSorteadaTemp[indiceRevelacao];
+                const info = INFO_CARTAS[id];
+                const corRaridade = CORES_RARIDADE[info.raridade] || '#dca3e8';
+
+                // Aplica imagem e efeitos de raridade
+                imgElement.src = info.imagem;
+                container.style.borderColor = corRaridade;
+                container.style.boxShadow = `0 0 35px ${corRaridade}`;
+
+                // Reseta e aciona a animação de "Pop" novamente
+                container.classList.remove('anim-pop');
+                void container.offsetWidth; // Força o reflow para reiniciar a animação
+                container.classList.add('anim-pop');
+
+                indiceRevelacao++;
+            } else {
+                // Chegou na última carta. Esconde o display único e mostra o resumo
+                container.classList.add('hidden');
+                document.getElementById('titulo-abrir-pacote').innerText = "Novas Cartas!";
+                
+                const grid = document.getElementById('grid-novas-cartas');
+                grid.innerHTML = '';
+                
+                // Preenche o grid com as 5 cartas reduzidas
+                cartasSorteadaTemp.forEach(id => {
+                    const info = INFO_CARTAS[id];
+                    const corRaridade = CORES_RARIDADE[info.raridade] || '#dca3e8';
+                    grid.innerHTML += `
+                        <div class="w-20 aspect-[2.5/3.5] bg-gray-800 rounded-lg overflow-hidden border-2" style="border-color: ${corRaridade}; box-shadow: 0 0 10px ${corRaridade}90;">
+                            <img src="${info.imagem}" class="w-full h-full object-cover">
+                        </div>
+                    `;
+                });
+
+                grid.classList.remove('hidden');
+                grid.classList.add('flex');
+                document.getElementById('btn-guardar-colecao').classList.remove('hidden');
+            }
+        };
+
+        // --- FASE 2: SALVA NO BANCO E CALCULA AS BADGES/MISSÕES ---
         window.guardarNaColecao = async function() {
             document.getElementById('btn-guardar-colecao').classList.add('hidden'); 
             window.mostrarToast("Guardando na coleção... ⏳");
@@ -455,10 +511,13 @@
                     setTimeout(() => window.mostrarToast(msgLevelUp), delay);
                 }
 
+                abrindoPacote = false;
+
             } catch (e) {
                 console.error(e);
                 window.mostrarToast("Erro ao guardar as cartas no banco.");
                 document.getElementById('btn-guardar-colecao').classList.remove('hidden'); 
+                abrindoPacote = false;
             }
         };
 

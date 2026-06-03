@@ -55,6 +55,7 @@
 
     <div class="w-full max-w-sm flex flex-col h-full relative">
         
+        <!-- CABEÇALHO LIMPO -->
         <header class="flex items-center gap-4 mt-4 mb-4 w-full">
             <div class="relative flex-shrink-0">
                 <div class="bg-[#dca3e8] w-24 h-24 rounded-full flex items-center justify-center text-[#7a32a8] font-black text-xl shadow-lg border-2 border-[#bc7bd4] relative overflow-hidden">
@@ -85,6 +86,7 @@
             </div>
         </header>
 
+        <!-- ÁREA DO INVENTÁRIO -->
         <main class="bg-[#dca3e8] rounded-[2rem] flex flex-col flex-grow p-5 shadow-xl overflow-hidden mb-16 relative border-2 border-[#bc7bd4]">
             <h1 class="text-[#7a32a8] font-black text-xl text-center mb-6 drop-shadow-sm uppercase">Meus Pacotes</h1>
             
@@ -93,17 +95,20 @@
             </div>
         </main>
 
+        <!-- BOTÃO VOLTAR -->
         <footer class="mt-auto flex justify-center pb-2 z-10 absolute bottom-4 left-0 w-full pointer-events-none">
             <button onclick="window.location.href='menu.html'" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black text-sm py-2 px-10 rounded-full shadow-lg transition-transform hover:-translate-y-1 pointer-events-auto border-2 border-[#dca3e8]">
                 retornar
             </button>
         </footer>
 
+        <!-- MODAL DE CARTAS ABERTAS -->
         <div id="modal-abrir-pacote" class="hidden fixed inset-0 bg-black/90 z-[100] flex flex-col items-center justify-center p-4 backdrop-blur-md">
             <h2 class="text-[#4ade80] font-black text-2xl mb-6 text-center uppercase drop-shadow-lg">Novas Cartas!</h2>
             
             <div id="grid-novas-cartas" class="flex flex-wrap justify-center gap-4 mb-8">
-                </div>
+                <!-- Injetado via JS -->
+            </div>
             
             <button onclick="document.getElementById('modal-abrir-pacote').classList.add('hidden')" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-3 px-10 rounded-full shadow-lg transition-transform hover:scale-105 uppercase text-sm border-2 border-[#bc7bd4]">
                 Coletar
@@ -112,6 +117,7 @@
 
     </div>
 
+    <!-- SCRIPT DO FIREBASE E LÓGICA -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -134,7 +140,7 @@
         let currentUserUid = null;
         let abrindoPacote = false;
 
-        // --- PREPARA O BANCO DE RARIDADES ---
+        // BANCO DE RARIDADES
         const bancoRaridades = { 'Comum': [], 'Rara': [], 'Épica': [], 'Lendária': [] };
         for (const [id, carta] of Object.entries(INFO_CARTAS)) {
             if (bancoRaridades[carta.raridade]) {
@@ -155,6 +161,12 @@
             }, 3000);
         };
 
+        function obterGameDay() {
+            let agora = new Date();
+            if (agora.getHours() < 6) agora.setDate(agora.getDate() - 1);
+            return `${agora.getFullYear()}-${agora.getMonth() + 1}-${agora.getDate()}`;
+        }
+
         function calcularXPMaximo(nivel) {
             if (nivel >= 1 && nivel <= 5) return 200;
             if (nivel >= 6 && nivel <= 15) return 750;
@@ -171,14 +183,18 @@
         }
 
         function criarHTMLPacote(tipo, nome, desc, qtd, imagemSrc) {
+            // Se for premium usa borda dourada igual na loja, se não, roxa
+            const isPremium = tipo === 'premium';
+            const bgClass = isPremium ? 'bg-gradient-to-r from-[#ffd700]/80 to-[#ffaa00]/80 border-[#ffd700]' : 'bg-[#bc7bd4] border-[#7a32a8]/30';
+            const titleClass = isPremium ? 'text-[#996600]' : 'text-[#7a32a8]';
+            const descClass = isPremium ? 'text-[#805500]' : 'text-[#7a32a8]';
+
             return `
-            <div class="bg-[#bc7bd4] rounded-2xl p-4 flex items-center gap-4 shadow-md border border-[#7a32a8]/30">
-                <div class="w-16 h-20 rounded-lg flex-shrink-0 flex items-center justify-center shadow-inner overflow-hidden border border-[#7a32a8]/30 bg-gray-800">
-                    <img src="${imagemSrc}" alt="${nome}" class="w-full h-full object-contain">
-                </div>
+            <div class="${bgClass} rounded-2xl p-4 flex items-center gap-4 shadow-md border">
+                <img src="${imagemSrc}" alt="${nome}" class="w-16 h-24 object-contain drop-shadow-lg pointer-events-none flex-shrink-0">
                 <div class="flex flex-col flex-grow">
-                    <span class="text-[#7a32a8] font-black text-sm uppercase">${nome}</span>
-                    <span class="text-[#7a32a8] font-bold text-[10px] mb-2">${desc}</span>
+                    <span class="${titleClass} font-black text-sm uppercase leading-tight">${nome}</span>
+                    <span class="${descClass} font-bold text-[10px] mb-2 leading-tight">${desc}</span>
                     <div class="flex items-center justify-between mt-auto">
                         <span class="bg-[#7a32a8] text-white px-3 py-1 rounded-full text-[10px] font-black shadow-inner">
                             QTD: <span>${qtd}</span>
@@ -198,16 +214,19 @@
             if (docSnap.exists()) {
                 const dados = docSnap.data();
                 
+                // AVATAR
+                if (dados.fotoPerfil) {
+                    const imgElement = document.getElementById('img-perfil-global');
+                    if (imgElement) {
+                        imgElement.src = dados.fotoPerfil;
+                        imgElement.classList.remove('hidden');
+                        document.getElementById('texto-sem-foto').classList.add('hidden');
+                    }
+                }
+
                 document.getElementById('player-coins').innerText = dados.moedas || 0;
                 atualizarVisualBarraXP(dados.xp || 0, dados.nivel || 1);
                 
-                if (dados.fotoPerfil) {
-                    const img = document.getElementById('img-perfil-global');
-                    img.src = dados.fotoPerfil; 
-                    img.classList.remove('hidden');
-                    document.getElementById('texto-sem-foto').classList.add('hidden');
-                }
-
                 const inventario = dados.inventario || {};
                 const qtdBasico = inventario.pacoteBasico || 0;
                 const qtdPremium = inventario.pacotePremium || 0;
@@ -221,16 +240,15 @@
                 }
 
                 if (qtdBasico > 0) {
-                    lista.innerHTML += criarHTMLPacote('basico', 'Pacote Básico', 'Cartas do jogo', qtdBasico, 'pacote_basico.png');
+                    lista.innerHTML += criarHTMLPacote('basico', 'Pacote Básico', '5 Cartas Aleatórias', qtdBasico, 'pacote1.png');
                 }
 
                 if (qtdPremium > 0) {
-                    lista.innerHTML += criarHTMLPacote('premium', 'Pacote Premium', 'Garante cartas mais raras', qtdPremium, 'pacote_premium.png');
+                    lista.innerHTML += criarHTMLPacote('premium', 'Pacote Premium', 'Garante 1 Rara ou superior', qtdPremium, 'pacote2.png');
                 }
             }
         }
 
-        // --- SISTEMA DE SORTEIO ---
         function sortearCarta(ehPremium) {
             const roll = Math.random() * 100;
             let raridade = 'Comum';
@@ -270,25 +288,48 @@
                     return;
                 }
 
-                // ---------- ATENÇÃO AQUI ----------
-                // Configure a quantidade exata de cartas que vêm em cada pacote
-                const numCartas = tipo === 'basico' ? 5 : 5; 
-                // ----------------------------------
+                const numCartas = 5; 
 
                 const novasCartas = [];
                 for(let i=0; i<numCartas; i++) {
                     novasCartas.push(sortearCarta(tipo === 'premium'));
                 }
 
-                // Desconta pacote e salva cartas no banco
-                let updates = { [`inventario.${campo}`]: increment(-1) };
+                // 1. Desconta o pacote e adiciona cartas/estatísticas
+                let updates = { 
+                    [`inventario.${campo}`]: increment(-1),
+                    "estatisticas.pacotesAbertos": increment(1),
+                    "estatisticas.totalCartas": increment(numCartas)
+                };
+
                 novasCartas.forEach(id => {
                     updates[`colecao.${id}`] = increment(1);
                 });
 
+                // 2. Checagem da Missão Diária
+                let pacoteMissoes = dados.missoesDiarias || {};
+                const hoje = obterGameDay();
+                let atualizouMissao = false;
+                let msgMissaoProgresso = "";
+
+                if (pacoteMissoes.dataReset === hoje && pacoteMissoes.lista) {
+                    pacoteMissoes.lista.forEach(m => {
+                        if (m.id === "abrir_pacote" && m.progresso < m.meta) {
+                            m.progresso++;
+                            atualizouMissao = true;
+                            msgMissaoProgresso = `🎯 Progresso: ${m.desc}`;
+                        }
+                    });
+                }
+
+                if (atualizouMissao) {
+                    updates.missoesDiarias = pacoteMissoes;
+                }
+
+                // 3. Atualiza o banco de dados
                 await updateDoc(docRef, updates);
 
-                // Mostra as cartas na tela
+                // 4. Interface visual e Animações
                 const grid = document.getElementById('grid-novas-cartas');
                 grid.innerHTML = '';
                 novasCartas.forEach(id => {
@@ -303,9 +344,13 @@
                 });
                 
                 document.getElementById('modal-abrir-pacote').classList.remove('hidden');
-                
-                // Recarrega a tela do inventário para atualizar a contagem
                 carregarInventario(); 
+
+                // Dispara o Toast da missão se houver atualização
+                if (atualizouMissao) {
+                    setTimeout(() => window.mostrarToast(msgMissaoProgresso), 500);
+                }
+
             } catch(e) {
                 console.error(e);
                 window.mostrarToast("Erro ao abrir pacote.");
@@ -316,7 +361,6 @@
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUserUid = user.uid;
-                document.getElementById('player-name').innerText = user.displayName?.toUpperCase() || "JOGADOR";
                 carregarInventario();
             } else {
                 window.location.href = "index.html";

@@ -47,41 +47,33 @@
         }
     </style>
 </head>
-<body class="h-[100dvh] p-4 flex justify-center overflow-hidden">
+<body class="h-[100dvh] px-4 pt-4 flex justify-center overflow-hidden">
 
     <div id="toast-container"></div>
 
     <div class="w-full max-w-sm flex flex-col h-full relative">
         
-        <!-- CABEÇALHO (Ajustado para não espremer no celular) -->
         <header class="flex items-center gap-3 mt-4 mb-8 w-full">
             
-            <!-- FOTO E NÍVEL (Esquerda) -->
             <div class="relative flex-shrink-0">
-                <!-- Círculo da foto com tamanho otimizado para celular -->
                 <div class="bg-[#dca3e8] w-20 h-20 rounded-full flex items-center justify-center text-[#7a32a8] font-black text-xl shadow-lg border-2 border-[#bc7bd4] overflow-hidden relative">
                     <span id="texto-sem-foto" class="text-sm">FOTO</span>
                     <img id="img-perfil-global" src="" class="hidden w-full h-full object-cover absolute inset-0">
                 </div>
                 
-                <!-- NÍVEL -->
                 <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-[#bc7bd4] w-7 h-7 rounded-full flex items-center justify-center shadow-md border-2 border-[#dca3e8] z-30">
                     <span id="player-level" class="text-[#7a32a8] font-black text-xs">--</span>
                 </div>
             </div>
 
-            <!-- DIREITA: MOEDAS, MENU, NOME E XP -->
             <div class="flex flex-col flex-grow gap-2.5 justify-center overflow-hidden">
                 
-                <!-- LINHA 1: Moedas e Botões -->
                 <div class="flex items-center gap-1.5 w-full">
-                    <!-- MOEDAS -->
                     <div class="bg-[#dca3e8] rounded-full px-3 py-1.5 flex items-center justify-center gap-1 shadow-md flex-shrink-0">
                         <span id="player-coins" class="text-[#7a32a8] font-black text-sm">...</span>
                         <img src="moedas.png" class="w-4 h-4 object-contain">
                     </div>
                     
-                    <!-- BOTÕES DE NAVEGAÇÃO -->
                     <nav class="bg-[#dca3e8] rounded-full flex justify-between items-center px-2 py-1 shadow-md flex-grow">
                         <button onclick="window.location.href='perfil.html'" class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-7 h-7 shadow-sm">
                             <img src="perfil.png" alt="Perfil" class="w-3.5 h-3.5 object-contain">
@@ -108,19 +100,15 @@
                     </nav>
                 </div>
                 
-                <!-- LINHA 2: Nome e XP -->
                 <div class="flex items-center gap-1.5 w-full">
-                    <!-- NOME -->
                     <div class="bg-[#dca3e8] rounded-full px-2 py-1 flex items-center justify-center shadow-md w-1/2 h-7 overflow-hidden flex-shrink-0">
                         <span id="player-name" class="text-[#7a32a8] font-black text-[10px] uppercase truncate text-center w-full">...</span>
                     </div>
                     
-                    <!-- BARRA DE XP -->
                     <div class="flex flex-col items-center flex-grow w-1/2">
                         <div class="w-full bg-transparent border border-[#dca3e8] rounded-full h-2.5 overflow-hidden shadow-inner">
                             <div id="player-barra-xp" class="bg-[#dca3e8] h-full transition-all duration-500" style="width: 0%;"></div>
                         </div>
-                        <!-- Corrigida a cor do texto do XP para o roxo claro -->
                         <span id="player-texto-xp" class="text-[#dca3e8] text-[9px] font-bold mt-1">0/0 xp</span>
                     </div>
                 </div>
@@ -159,7 +147,7 @@
             </div>
         </main>
 
-        <footer class="mt-auto flex justify-center pb-2">
+        <footer class="mt-auto flex justify-center w-full z-10" style="padding-bottom: calc(1rem + env(safe-area-inset-bottom));">
             <div class="bg-[#dca3e8] rounded-full flex p-1.5 gap-2 shadow-lg w-full max-w-[280px]">
                 <button onclick="window.location.href='notificacoes.html'" class="relative flex-1 bg-[#7a32a8] text-white text-xs font-bold py-2 rounded-full hover:bg-purple-600 transition-colors">
                     Notificações

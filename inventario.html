@@ -51,11 +51,16 @@
 
         /* Animação Suave para a Carta Única Revelada */
         @keyframes popIn {
-            0% { transform: scale(0.8); opacity: 0; filter: brightness(2); }
+            0% { transform: scale(0.7); opacity: 0; filter: brightness(2); }
             100% { transform: scale(1); opacity: 1; filter: brightness(1); }
         }
         .anim-pop { 
             animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; 
+        }
+        
+        /* Previne cliques acidentais e facilita a transição */
+        .transicao-suave {
+            transition: transform 0.15s ease, opacity 0.15s ease;
         }
     </style>
 </head>
@@ -118,7 +123,7 @@
             <h2 id="titulo-abrir-pacote" class="text-[#4ade80] font-black text-2xl mb-8 text-center uppercase drop-shadow-lg">Toque para revelar</h2>
             
             <!-- EXIBIÇÃO DE CARTA ÚNICA (O Jogador clica aqui para avançar) -->
-            <div id="container-revelacao" onclick="window.mostrarProximaCarta()" class="w-56 aspect-[2.5/3.5] bg-gray-800 rounded-2xl overflow-hidden border-4 cursor-pointer flex items-center justify-center relative shadow-2xl transition-all">
+            <div id="container-revelacao" onclick="window.mostrarProximaCarta()" class="w-56 aspect-[2.5/3.5] bg-gray-800 rounded-2xl overflow-hidden border-4 cursor-pointer flex items-center justify-center relative shadow-2xl transicao-suave" data-bloqueado="false">
                 <img id="img-revelacao" src="" class="w-full h-full object-cover">
             </div>
 
@@ -162,14 +167,14 @@
         
         let cartasSorteadaTemp = [];
         let tipoPacoteTemp = '';
-        let indiceRevelacao = 0; // Controla qual carta está sendo exibida no modal
+        let indiceRevelacao = 0;
 
         // Cores de brilho por raridade
         const CORES_RARIDADE = {
-            'Comum': '#a1a1aa',     // Cinza
-            'Rara': '#3b82f6',      // Azul
-            'Lendária': '#eab308',  // Dourado
-            'Épica': '#a855f7'      // Roxo
+            'Comum': '#a1a1aa',     
+            'Rara': '#3b82f6',      
+            'Lendária': '#eab308',  
+            'Épica': '#a855f7'      
         };
 
         const bancoRaridades = { 'Comum': [], 'Rara': [], 'Épica': [], 'Lendária': [] };
@@ -276,26 +281,22 @@
             }
         }
 
-        // --- SISTEMA MATEMÁTICO REFINADO COM AS SUAS REGRAS EXATAS ---
         function sortearCarta(tipoPacote, isSlot1) {
             const roll = Math.random() * 100;
             let raridade = 'Comum';
             
             if (tipoPacote === 'premium' && isSlot1) {
-                // SLOT 1 PREMIUM: Rara (75%), Lendária (20%), Épica (5%)
                 if (roll <= 75) raridade = 'Rara';
                 else if (roll <= 95) raridade = 'Lendária';
                 else raridade = 'Épica';
             } 
             else if (tipoPacote === 'premium' && !isSlot1) {
-                // SLOTS 2 AO 5 PREMIUM: Comum (60%), Rara (30%), Lendária (8%), Épica (2%)
                 if (roll <= 60) raridade = 'Comum';
                 else if (roll <= 90) raridade = 'Rara';
                 else if (roll <= 98) raridade = 'Lendária';
                 else raridade = 'Épica';
             } 
             else {
-                // PACOTE BÁSICO: Comum (80%), Rara (17%), Lendária (2.5%), Épica (0.5%)
                 if (roll <= 80) raridade = 'Comum';
                 else if (roll <= 97) raridade = 'Rara';
                 else if (roll <= 99.5) raridade = 'Lendária';
@@ -303,7 +304,7 @@
             }
 
             let lista = bancoRaridades[raridade];
-            if (!lista || lista.length === 0) lista = bancoRaridades['Comum']; // Proteção contra erro
+            if (!lista || lista.length === 0) lista = bancoRaridades['Comum']; 
             return lista[Math.floor(Math.random() * lista.length)];
         }
 
@@ -325,69 +326,93 @@
             cartasSorteadaTemp = [];
             indiceRevelacao = 0;
 
-            // Sorteia as 5 cartas aplicando as probabilidades corretas (isSlot1 = true apenas no loop 0)
             for(let i = 0; i < 5; i++) {
-                cartasSorteadaTemp.push(sortearCarta(tipo, i === 0));
+                const idSorteado = sortearCarta(tipo, i === 0);
+                cartasSorteadaTemp.push(idSorteado);
+                
+                // Pré-carrega a imagem secretamente para não ter delay na animação
+                const imgPreload = new Image();
+                imgPreload.src = INFO_CARTAS[idSorteado].imagem;
             }
 
-            // Prepara a UI
             document.getElementById('grid-novas-cartas').classList.add('hidden');
             document.getElementById('btn-guardar-colecao').classList.add('hidden');
             document.getElementById('titulo-abrir-pacote').innerText = "Toque para revelar";
             
-            // Exibe a tela preta e o container principal
+            const container = document.getElementById('container-revelacao');
+            container.classList.remove('hidden');
+            container.dataset.bloqueado = "false";
             document.getElementById('modal-abrir-pacote').classList.remove('hidden');
-            document.getElementById('container-revelacao').classList.remove('hidden');
 
-            // Chama a primeira carta
-            window.mostrarProximaCarta();
+            // Chama a primeira carta imediatamente (sem delay)
+            window.mostrarProximaCarta(true);
         };
 
         // --- INTERAÇÃO DE CLIQUE: MOSTRA A PRÓXIMA CARTA OU A TELA FINAL ---
-        window.mostrarProximaCarta = function() {
+        window.mostrarProximaCarta = function(primeira = false) {
             const container = document.getElementById('container-revelacao');
             const imgElement = document.getElementById('img-revelacao');
 
-            if (indiceRevelacao < 5) {
-                // Puxa a carta da vez
-                const id = cartasSorteadaTemp[indiceRevelacao];
-                const info = INFO_CARTAS[id];
-                const corRaridade = CORES_RARIDADE[info.raridade] || '#dca3e8';
+            // Proteção contra múltiplos cliques frenéticos
+            if (container.dataset.bloqueado === "true") return;
+            container.dataset.bloqueado = "true";
 
-                // Aplica imagem e efeitos de raridade
-                imgElement.src = info.imagem;
-                container.style.borderColor = corRaridade;
-                container.style.boxShadow = `0 0 35px ${corRaridade}`;
-
-                // Reseta e aciona a animação de "Pop" novamente
+            // Se for do clique 2 ao 5, faz a carta sumir rápido primeiro
+            if (!primeira) {
                 container.classList.remove('anim-pop');
-                void container.offsetWidth; // Força o reflow para reiniciar a animação
-                container.classList.add('anim-pop');
+                container.style.opacity = '0';
+                container.style.transform = 'scale(0.8)';
+            }
 
-                indiceRevelacao++;
-            } else {
-                // Chegou na última carta. Esconde o display único e mostra o resumo
-                container.classList.add('hidden');
-                document.getElementById('titulo-abrir-pacote').innerText = "Novas Cartas!";
-                
-                const grid = document.getElementById('grid-novas-cartas');
-                grid.innerHTML = '';
-                
-                // Preenche o grid com as 5 cartas reduzidas
-                cartasSorteadaTemp.forEach(id => {
+            const tempoEspera = primeira ? 0 : 150;
+
+            setTimeout(() => {
+                if (indiceRevelacao < 5) {
+                    const id = cartasSorteadaTemp[indiceRevelacao];
                     const info = INFO_CARTAS[id];
                     const corRaridade = CORES_RARIDADE[info.raridade] || '#dca3e8';
-                    grid.innerHTML += `
-                        <div class="w-20 aspect-[2.5/3.5] bg-gray-800 rounded-lg overflow-hidden border-2" style="border-color: ${corRaridade}; box-shadow: 0 0 10px ${corRaridade}90;">
-                            <img src="${info.imagem}" class="w-full h-full object-cover">
-                        </div>
-                    `;
-                });
 
-                grid.classList.remove('hidden');
-                grid.classList.add('flex');
-                document.getElementById('btn-guardar-colecao').classList.remove('hidden');
-            }
+                    imgElement.src = info.imagem;
+                    container.style.borderColor = corRaridade;
+                    container.style.boxShadow = `0 0 35px ${corRaridade}`;
+
+                    // Restaura os estilos para a animação do CSS fazer efeito
+                    container.style.opacity = '';
+                    container.style.transform = '';
+
+                    // Força o reset da animação
+                    void container.offsetWidth; 
+                    container.classList.add('anim-pop');
+
+                    indiceRevelacao++;
+                    
+                    // Libera para clicar de novo após 300ms
+                    setTimeout(() => { container.dataset.bloqueado = "false"; }, 300);
+
+                } else {
+                    // Fim das cartas, fecha display e vai pro resumo
+                    container.classList.add('hidden');
+                    container.dataset.bloqueado = "false";
+                    document.getElementById('titulo-abrir-pacote').innerText = "Novas Cartas!";
+                    
+                    const grid = document.getElementById('grid-novas-cartas');
+                    grid.innerHTML = '';
+                    
+                    cartasSorteadaTemp.forEach(id => {
+                        const info = INFO_CARTAS[id];
+                        const corRaridade = CORES_RARIDADE[info.raridade] || '#dca3e8';
+                        grid.innerHTML += `
+                            <div class="w-20 aspect-[2.5/3.5] bg-gray-800 rounded-lg overflow-hidden border-2 anim-pop" style="border-color: ${corRaridade}; box-shadow: 0 0 10px ${corRaridade}90;">
+                                <img src="${info.imagem}" class="w-full h-full object-cover">
+                            </div>
+                        `;
+                    });
+
+                    grid.classList.remove('hidden');
+                    grid.classList.add('flex');
+                    document.getElementById('btn-guardar-colecao').classList.remove('hidden');
+                }
+            }, tempoEspera);
         };
 
         // --- FASE 2: SALVA NO BANCO E CALCULA AS BADGES/MISSÕES ---
@@ -398,7 +423,6 @@
             try {
                 const campo = tipoPacoteTemp === 'basico' ? 'pacoteBasico' : 'pacotePremium';
                 
-                // 1. CHECAGEM DA BADGE DE ABRIR 30 PACOTES
                 let pacotesAbertosAtuais = (dadosJogador.estatisticas?.pacotesAbertos || 0) + 1;
                 let badgesJogador = dadosJogador.badges || {};
                 let ganhouBadge = false;
@@ -409,14 +433,13 @@
                     ganhouBadge = true;
                     notificacoesNovas.push({
                         id: "notif_" + Date.now() + "_badge008",
-                        titulo: "🏆 Conquista: Abridor Compulsivo",
+                        titulo: "🏆 Conquista: Pacotinhos!",
                         texto: "Você abriu 30 pacotes de cartas!\nRecompensas: 50 XP e 50 Moedas.",
                         lida: false,
                         data: new Date().toISOString()
                     });
                 }
 
-                // 2. CHECAGEM DA MISSÃO DIÁRIA
                 let pacoteMissoes = dadosJogador.missoesDiarias || {};
                 const hoje = obterGameDay();
                 let atualizouMissao = false;
@@ -432,7 +455,6 @@
                     });
                 }
 
-                // 3. MATEMÁTICA DO LEVEL UP
                 let xpAtual = dadosJogador.xp || 0;
                 let nivelAtual = dadosJogador.nivel || 1;
                 let subiuNivel = false;
@@ -469,7 +491,6 @@
                     });
                 }
 
-                // 4. PREPARANDO PACOTE DE ATUALIZAÇÃO DO BANCO
                 let deltaBasico = (campo === 'pacoteBasico' ? -1 : 0) + pacotesBasicosGanhos;
                 let deltaPremium = (campo === 'pacotePremium' ? -1 : 0) + pacotesPremiumGanhos;
 
@@ -492,19 +513,17 @@
                 if (atualizouMissao) updates.missoesDiarias = pacoteMissoes;
                 if (notificacoesNovas.length > 0) updates.notificacoes = arrayUnion(...notificacoesNovas);
 
-                // Dispara o salvamento e recarrega a tela
                 await updateDoc(dbUserRef, updates);
                 document.getElementById('modal-abrir-pacote').classList.add('hidden');
                 carregarInventario();
 
-                // 5. CASCATA DE TOASTS
                 let delay = 500;
                 if (atualizouMissao) {
                     setTimeout(() => window.mostrarToast(msgMissaoProgresso), delay);
                     delay += 1000;
                 }
                 if (ganhouBadge) {
-                    setTimeout(() => window.mostrarToast(`🏆 NOVA CONQUISTA!<br><span class="text-xs font-normal">Você abriu 30 pacotes no total.</span><br><span class="text-sm">Recompensa: +50 XP e +50 <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`), delay);
+                    setTimeout(() => window.mostrarToast(`🏆 NOVA CONQUISTA!<br><span class="text-xs font-normal">Badge: Pacotinhos! (Abriu 30 pacotes).</span><br><span class="text-sm">Recompensa: +50 XP e +50 <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`), delay);
                     delay += 1500;
                 }
                 if (subiuNivel) {

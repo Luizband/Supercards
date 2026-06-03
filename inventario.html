@@ -43,9 +43,20 @@
             animation: slideDown 0.3s ease-out;
             pointer-events: auto;
         }
+        
         @keyframes slideDown {
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Animação Suave de Aparecer Crescendo */
+        @keyframes zoomIn {
+            0% { transform: scale(0.5); opacity: 0; filter: brightness(2); }
+            100% { transform: scale(1); opacity: 1; filter: brightness(1); }
+        }
+        .anim-aparecer { 
+            animation: zoomIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; 
+            opacity: 0; 
         }
     </style>
 </head>
@@ -55,7 +66,6 @@
 
     <div class="w-full max-w-sm flex flex-col h-full relative">
         
-        <!-- CABEÇALHO LIMPO -->
         <header class="flex items-center gap-4 mt-4 mb-4 w-full">
             <div class="relative flex-shrink-0">
                 <div class="bg-[#dca3e8] w-24 h-24 rounded-full flex items-center justify-center text-[#7a32a8] font-black text-xl shadow-lg border-2 border-[#bc7bd4] relative overflow-hidden">
@@ -86,7 +96,6 @@
             </div>
         </header>
 
-        <!-- ÁREA DO INVENTÁRIO -->
         <main class="bg-[#dca3e8] rounded-[2rem] flex flex-col flex-grow p-5 shadow-xl overflow-hidden mb-16 relative border-2 border-[#bc7bd4]">
             <h1 class="text-[#7a32a8] font-black text-xl text-center mb-6 drop-shadow-sm uppercase">Meus Pacotes</h1>
             
@@ -95,33 +104,29 @@
             </div>
         </main>
 
-        <!-- BOTÃO VOLTAR -->
         <footer class="mt-auto flex justify-center pb-2 z-10 absolute bottom-4 left-0 w-full pointer-events-none">
             <button onclick="window.location.href='menu.html'" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black text-sm py-2 px-10 rounded-full shadow-lg transition-transform hover:-translate-y-1 pointer-events-auto border-2 border-[#dca3e8]">
                 retornar
             </button>
         </footer>
 
-        <!-- MODAL DE CARTAS ABERTAS -->
         <div id="modal-abrir-pacote" class="hidden fixed inset-0 bg-black/90 z-[100] flex flex-col items-center justify-center p-4 backdrop-blur-md">
             <h2 class="text-[#4ade80] font-black text-2xl mb-6 text-center uppercase drop-shadow-lg">Novas Cartas!</h2>
             
             <div id="grid-novas-cartas" class="flex flex-wrap justify-center gap-4 mb-8">
-                <!-- Injetado via JS -->
             </div>
             
-            <button onclick="document.getElementById('modal-abrir-pacote').classList.add('hidden')" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-3 px-10 rounded-full shadow-lg transition-transform hover:scale-105 uppercase text-sm border-2 border-[#bc7bd4]">
-                Coletar
+            <button id="btn-guardar-colecao" onclick="window.guardarNaColecao()" class="hidden bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-3 px-10 rounded-full shadow-lg transition-transform hover:scale-105 uppercase text-sm border-2 border-[#bc7bd4]">
+                Guardar na Coleção
             </button>
         </div>
 
     </div>
 
-    <!-- SCRIPT DO FIREBASE E LÓGICA -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, updateDoc, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         import { INFO_CARTAS } from './cartas.js';
 
         const firebaseConfig = {
@@ -137,10 +142,21 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let currentUserUid = null;
+        let dbUserRef = null;
+        let dadosJogador = null;
         let abrindoPacote = false;
+        
+        let cartasSorteadaTemp = [];
+        let tipoPacoteTemp = '';
 
-        // BANCO DE RARIDADES
+        // Tabela de cores para o brilho de cada raridade
+        const CORES_RARIDADE = {
+            'Comum': '#a1a1aa',     // Cinza
+            'Rara': '#3b82f6',      // Azul
+            'Épica': '#a855f7',     // Roxo
+            'Lendária': '#eab308'   // Dourado
+        };
+
         const bancoRaridades = { 'Comum': [], 'Rara': [], 'Épica': [], 'Lendária': [] };
         for (const [id, carta] of Object.entries(INFO_CARTAS)) {
             if (bancoRaridades[carta.raridade]) {
@@ -183,7 +199,6 @@
         }
 
         function criarHTMLPacote(tipo, nome, desc, qtd, imagemSrc) {
-            // Se for premium usa borda dourada igual na loja, se não, roxa
             const isPremium = tipo === 'premium';
             const bgClass = isPremium ? 'bg-gradient-to-r from-[#ffd700]/80 to-[#ffaa00]/80 border-[#ffd700]' : 'bg-[#bc7bd4] border-[#7a32a8]/30';
             const titleClass = isPremium ? 'text-[#996600]' : 'text-[#7a32a8]';
@@ -208,26 +223,23 @@
         }
 
         async function carregarInventario() {
-            const docRef = doc(db, "users", currentUserUid);
-            const docSnap = await getDoc(docRef);
-
+            const docSnap = await getDoc(dbUserRef);
             if (docSnap.exists()) {
-                const dados = docSnap.data();
+                dadosJogador = docSnap.data();
                 
-                // AVATAR
-                if (dados.fotoPerfil) {
+                if (dadosJogador.fotoPerfil) {
                     const imgElement = document.getElementById('img-perfil-global');
                     if (imgElement) {
-                        imgElement.src = dados.fotoPerfil;
+                        imgElement.src = dadosJogador.fotoPerfil;
                         imgElement.classList.remove('hidden');
                         document.getElementById('texto-sem-foto').classList.add('hidden');
                     }
                 }
 
-                document.getElementById('player-coins').innerText = dados.moedas || 0;
-                atualizarVisualBarraXP(dados.xp || 0, dados.nivel || 1);
+                document.getElementById('player-coins').innerText = dadosJogador.moedas || 0;
+                atualizarVisualBarraXP(dadosJogador.xp || 0, dadosJogador.nivel || 1);
                 
-                const inventario = dados.inventario || {};
+                const inventario = dadosJogador.inventario || {};
                 const qtdBasico = inventario.pacoteBasico || 0;
                 const qtdPremium = inventario.pacotePremium || 0;
                 
@@ -270,44 +282,85 @@
             return lista[Math.floor(Math.random() * lista.length)];
         }
 
+        // FASE 1: SORTEIA E ANIMA AS CARTAS UMA A UMA (COM BRILHO DA RARIDADE)
         window.abrirPacote = async function(tipo) {
             if (abrindoPacote) return;
             abrindoPacote = true;
 
+            const campo = tipo === 'basico' ? 'pacoteBasico' : 'pacotePremium';
+            let qtd = (dadosJogador.inventario && dadosJogador.inventario[campo]) || 0;
+            
+            if (qtd <= 0) {
+                window.mostrarToast("Pacote esgotado!");
+                abrindoPacote = false;
+                return;
+            }
+
+            tipoPacoteTemp = tipo;
+            cartasSorteadaTemp = [];
+            for(let i=0; i<5; i++) {
+                cartasSorteadaTemp.push(sortearCarta(tipo === 'premium'));
+            }
+
+            const grid = document.getElementById('grid-novas-cartas');
+            grid.innerHTML = '';
+            document.getElementById('btn-guardar-colecao').classList.add('hidden');
+            document.getElementById('modal-abrir-pacote').classList.remove('hidden');
+
+            cartasSorteadaTemp.forEach((id, index) => {
+                setTimeout(() => {
+                    const info = INFO_CARTAS[id];
+                    const corRaridade = CORES_RARIDADE[info.raridade] || '#dca3e8';
+                    
+                    const divCarta = document.createElement('div');
+                    
+                    // Aplica a animação de "Aparecer", a borda colorida e a sombra/brilho mágica
+                    divCarta.className = "w-24 aspect-[2.5/3.5] bg-gray-800 rounded-lg overflow-hidden border-2 anim-aparecer";
+                    divCarta.style.borderColor = corRaridade;
+                    divCarta.style.boxShadow = `0 0 20px ${corRaridade}80`; // O "80" no final aplica 50% de opacidade no brilho
+                    
+                    divCarta.innerHTML = `<img src="${info.imagem}" class="w-full h-full object-cover">`;
+                    
+                    grid.appendChild(divCarta);
+
+                    if (index === cartasSorteadaTemp.length - 1) {
+                        setTimeout(() => {
+                            document.getElementById('btn-guardar-colecao').classList.remove('hidden');
+                            abrindoPacote = false;
+                        }, 800);
+                    }
+                }, index * 800);
+            });
+        };
+
+        // FASE 2: SALVA NO BANCO E CALCULA AS BADGES
+        window.guardarNaColecao = async function() {
+            document.getElementById('btn-guardar-colecao').classList.add('hidden'); 
+            window.mostrarToast("Guardando na coleção... ⏳");
+
             try {
-                const docRef = doc(db, "users", currentUserUid);
-                const docSnap = await getDoc(docRef);
-                const dados = docSnap.data();
+                const campo = tipoPacoteTemp === 'basico' ? 'pacoteBasico' : 'pacotePremium';
                 
-                const campo = tipo === 'basico' ? 'pacoteBasico' : 'pacotePremium';
-                let qtd = (dados.inventario && dados.inventario[campo]) || 0;
-                
-                if (qtd <= 0) {
-                    window.mostrarToast("Pacote esgotado!");
-                    abrindoPacote = false;
-                    return;
+                // 1. CHECAGEM DA BADGE DE ABRIR 30 PACOTES
+                let pacotesAbertosAtuais = (dadosJogador.estatisticas?.pacotesAbertos || 0) + 1;
+                let badgesJogador = dadosJogador.badges || {};
+                let ganhouBadge = false;
+                let notificacoesNovas = [];
+
+                if (pacotesAbertosAtuais >= 30 && !badgesJogador["badge-004"]) {
+                    badgesJogador["badge-004"] = true;
+                    ganhouBadge = true;
+                    notificacoesNovas.push({
+                        id: "notif_" + Date.now() + "_badge004",
+                        titulo: "🏆 Conquista: Abridor Compulsivo",
+                        texto: "Você abriu 30 pacotes de cartas!\nRecompensas: 50 XP e 50 Moedas.",
+                        lida: false,
+                        data: new Date().toISOString()
+                    });
                 }
 
-                const numCartas = 5; 
-
-                const novasCartas = [];
-                for(let i=0; i<numCartas; i++) {
-                    novasCartas.push(sortearCarta(tipo === 'premium'));
-                }
-
-                // 1. Desconta o pacote e adiciona cartas/estatísticas
-                let updates = { 
-                    [`inventario.${campo}`]: increment(-1),
-                    "estatisticas.pacotesAbertos": increment(1),
-                    "estatisticas.totalCartas": increment(numCartas)
-                };
-
-                novasCartas.forEach(id => {
-                    updates[`colecao.${id}`] = increment(1);
-                });
-
-                // 2. Checagem da Missão Diária
-                let pacoteMissoes = dados.missoesDiarias || {};
+                // 2. CHECAGEM DA MISSÃO DIÁRIA
+                let pacoteMissoes = dadosJogador.missoesDiarias || {};
                 const hoje = obterGameDay();
                 let atualizouMissao = false;
                 let msgMissaoProgresso = "";
@@ -322,45 +375,96 @@
                     });
                 }
 
-                if (atualizouMissao) {
-                    updates.missoesDiarias = pacoteMissoes;
-                }
+                // 3. MATEMÁTICA DO LEVEL UP
+                let xpAtual = dadosJogador.xp || 0;
+                let nivelAtual = dadosJogador.nivel || 1;
+                let subiuNivel = false;
+                let msgLevelUp = "";
+                let bonusXp = ganhouBadge ? 50 : 0;
+                let bonusMoedas = ganhouBadge ? 50 : 0;
+                let novoXp = xpAtual + bonusXp;
+                let pacotesBasicosGanhos = 0;
+                let pacotesPremiumGanhos = 0;
 
-                // 3. Atualiza o banco de dados
-                await updateDoc(docRef, updates);
+                let xpMaximo = calcularXPMaximo(nivelAtual);
+                if (novoXp >= xpMaximo && nivelAtual < 30) {
+                    novoXp -= xpMaximo;
+                    nivelAtual++;
+                    subiuNivel = true;
+                    bonusMoedas += 30;
+                    pacotesBasicosGanhos++;
 
-                // 4. Interface visual e Animações
-                const grid = document.getElementById('grid-novas-cartas');
-                grid.innerHTML = '';
-                novasCartas.forEach(id => {
-                    const info = INFO_CARTAS[id];
-                    if (info) {
-                        grid.innerHTML += `
-                            <div class="w-24 aspect-[2.5/3.5] bg-gray-800 rounded-lg overflow-hidden border-2 border-[#dca3e8] shadow-2xl animate-bounce">
-                                <img src="${info.imagem}" class="w-full h-full object-cover">
-                            </div>
-                        `;
+                    let textoRecompensaNotif = "1 Pacote Básico e 30 Moedas";
+                    if (nivelAtual === 10 || nivelAtual === 20 || nivelAtual === 30) {
+                        pacotesPremiumGanhos++;
+                        textoRecompensaNotif = "1 Pacote Básico, 1 Pacote Premium e 30 Moedas";
+                        msgLevelUp = `🎉 LEVEL UP! Nível ${nivelAtual} alcançado!<br><span class="text-xs">Recompensas: 1 Pacote Básico, 1 Pacote Premium e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom"></span>`;
+                    } else {
+                        msgLevelUp = `🎉 LEVEL UP! Nível ${nivelAtual} alcançado!<br><span class="text-xs">Recompensas: 1 Pacote Básico e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom"></span>`;
                     }
-                });
-                
-                document.getElementById('modal-abrir-pacote').classList.remove('hidden');
-                carregarInventario(); 
 
-                // Dispara o Toast da missão se houver atualização
-                if (atualizouMissao) {
-                    setTimeout(() => window.mostrarToast(msgMissaoProgresso), 500);
+                    notificacoesNovas.push({
+                        id: "notif_" + Date.now() + "_nivel" + nivelAtual,
+                        titulo: `🎉 Level Up: Nível ${nivelAtual}`,
+                        texto: `Parabéns! Você alcançou o Nível ${nivelAtual}.\nRecompensas recebidas: ${textoRecompensaNotif}.`,
+                        lida: false,
+                        data: new Date().toISOString()
+                    });
                 }
 
-            } catch(e) {
+                // 4. PREPARANDO PACOTE DE ATUALIZAÇÃO DO BANCO
+                let deltaBasico = (campo === 'pacoteBasico' ? -1 : 0) + pacotesBasicosGanhos;
+                let deltaPremium = (campo === 'pacotePremium' ? -1 : 0) + pacotesPremiumGanhos;
+
+                let updates = {
+                    "estatisticas.pacotesAbertos": increment(1),
+                    "estatisticas.totalCartas": increment(5),
+                    "badges": badgesJogador,
+                    "xp": novoXp,
+                    "nivel": nivelAtual,
+                    "moedas": increment(bonusMoedas)
+                };
+
+                if (deltaBasico !== 0) updates["inventario.pacoteBasico"] = increment(deltaBasico);
+                if (deltaPremium !== 0) updates["inventario.pacotePremium"] = increment(deltaPremium);
+
+                cartasSorteadaTemp.forEach(id => {
+                    updates[`colecao.${id}`] = increment(1);
+                });
+
+                if (atualizouMissao) updates.missoesDiarias = pacoteMissoes;
+                if (notificacoesNovas.length > 0) updates.notificacoes = arrayUnion(...notificacoesNovas);
+
+                // Dispara o salvamento e recarrega a tela
+                await updateDoc(dbUserRef, updates);
+                document.getElementById('modal-abrir-pacote').classList.add('hidden');
+                carregarInventario();
+
+                // 5. CASCATA DE TOASTS
+                let delay = 500;
+                if (atualizouMissao) {
+                    setTimeout(() => window.mostrarToast(msgMissaoProgresso), delay);
+                    delay += 1000;
+                }
+                if (ganhouBadge) {
+                    setTimeout(() => window.mostrarToast(`🏆 NOVA CONQUISTA!<br><span class="text-xs font-normal">Você abriu 30 pacotes no total.</span><br><span class="text-sm">Recompensa: +50 XP e +50 <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`), delay);
+                    delay += 1500;
+                }
+                if (subiuNivel) {
+                    setTimeout(() => window.mostrarToast(msgLevelUp), delay);
+                }
+
+            } catch (e) {
                 console.error(e);
-                window.mostrarToast("Erro ao abrir pacote.");
+                window.mostrarToast("Erro ao guardar as cartas no banco.");
+                document.getElementById('btn-guardar-colecao').classList.remove('hidden'); 
             }
-            abrindoPacote = false;
         };
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUserUid = user.uid;
+                dbUserRef = doc(db, "users", currentUserUid);
                 carregarInventario();
             } else {
                 window.location.href = "index.html";

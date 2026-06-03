@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Supercards - Login</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#7a32a8">
+    <link rel="apple-touch-icon" href="icons/icon1.png">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -18,20 +23,16 @@
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
 
-    <!-- CAIXA PRINCIPAL -->
     <div class="bg-[#bd83d4]/20 backdrop-blur-md border border-[#bd83d4]/50 p-6 md:p-8 rounded-3xl shadow-2xl w-full max-w-md flex flex-col items-center">
         
         <img src="logo.png" alt="Supercards Logo" class="w-56 mb-4 drop-shadow-xl hover:scale-105 transition-transform">
 
         <div id="mensagem-alerta" class="hidden w-full p-3 mb-4 text-center text-sm font-bold rounded-lg"></div>
 
-        <!-- FORMULÁRIO DE LOGIN -->
         <div id="box-login" class="w-full flex flex-col gap-3">
-            <!-- Adicionado autocomplete para o navegador reconhecer -->
             <input type="email" id="login-email" autocomplete="username" placeholder="Seu E-mail" class="w-full px-4 py-3 rounded-xl bg-white/80 border-2 border-transparent focus:border-purple-500 focus:outline-none text-purple-900 font-bold placeholder-purple-400">
             <input type="password" id="login-senha" autocomplete="current-password" placeholder="Sua Senha" class="w-full px-4 py-3 rounded-xl bg-white/80 border-2 border-transparent focus:border-purple-500 focus:outline-none text-purple-900 font-bold placeholder-purple-400">
             
-            <!-- NOVO: Checkbox Lembrar de Mim -->
             <div class="flex items-center gap-2 pl-1 mt-1">
                 <input type="checkbox" id="lembrar-mim" class="w-4 h-4 accent-purple-600 cursor-pointer rounded border-transparent">
                 <label for="lembrar-mim" class="text-white text-sm font-semibold cursor-pointer">Lembrar meu e-mail</label>
@@ -43,7 +44,6 @@
             </p>
         </div>
 
-        <!-- FORMULÁRIO DE CADASTRO -->
         <div id="box-cadastro" class="hidden w-full flex flex-col gap-3">
             <input type="text" id="cadastro-nome" autocomplete="name" placeholder="Nome de Usuário" class="w-full px-4 py-3 rounded-xl bg-white/80 border-2 border-transparent focus:border-green-500 focus:outline-none text-purple-900 font-bold placeholder-purple-400">
             <input type="email" id="cadastro-email" autocomplete="email" placeholder="E-mail" class="w-full px-4 py-3 rounded-xl bg-white/80 border-2 border-transparent focus:border-green-500 focus:outline-none text-purple-900 font-bold placeholder-purple-400">
@@ -55,7 +55,16 @@
         </div>
     </div>
 
-    <!-- SCRIPT DO FIREBASE -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('ServiceWorker registrado com sucesso!', reg.scope))
+                    .catch(err => console.log('Erro no ServiceWorker:', err));
+            });
+        }
+    </script>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -74,7 +83,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // NOVO: Pular a tela de login se já estiver conectado
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 window.location.href = "menu.html";
@@ -87,7 +95,6 @@
         const btnMostrarLogin = document.getElementById('btn-mostrar-login');
         const msgAlerta = document.getElementById('mensagem-alerta');
         
-        // NOVO: Preencher o e-mail automaticamente se estiver salvo no navegador
         const emailSalvo = localStorage.getItem('supercards_email_salvo');
         if (emailSalvo) {
             document.getElementById('login-email').value = emailSalvo;
@@ -135,11 +142,9 @@
                         xp: 0
                     });
 
-                    // Se criou conta, vamos salvar o e-mail também pro futuro
                     localStorage.setItem('supercards_email_salvo', email);
 
                     mostrarMensagem("Conta criada com sucesso! Redirecionando...", "sucesso");
-                    // O onAuthStateChanged lá em cima vai cuidar do redirecionamento
                 })
                 .catch((error) => {
                     const errorCode = error.code;
@@ -159,7 +164,6 @@
                 return;
             }
 
-            // NOVO: Salva ou esquece o e-mail baseado na caixinha
             if (lembrar) {
                 localStorage.setItem('supercards_email_salvo', email);
             } else {
@@ -169,7 +173,6 @@
             signInWithEmailAndPassword(auth, email, senha)
                 .then((userCredential) => {
                     mostrarMensagem("Bem-vindo de volta! Redirecionando...", "sucesso");
-                    // O onAuthStateChanged vai cuidar do redirecionamento
                 })
                 .catch((error) => {
                     mostrarMensagem("E-mail ou senha incorretos.", "erro");

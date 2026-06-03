@@ -106,6 +106,13 @@ export const INFO_CARTAS = {
 
     "052": { nome: "Jessie Malfoy", raridade: "Épica", pontos: 7, aura: 90, fofura: 44, diversao: 65, aleatoriedade: 88, imagem: "cartas/052.png" }
 }; // Não esqueça que o arquivo termina com essa chave e ponto e vírgula!
+
+// Este código adiciona automaticamente a propriedade "miniatura" 
+// em todas as cartas do banco, poupando o trabalho manual!
+for (let id in INFO_CARTAS) {
+    // Ele pega o ID da carta (ex: "001") e monta o caminho exato que você pediu
+    INFO_CARTAS[id].miniatura = `cartas/miniaturas/${id}.png`;
+}
   
 
 // Tabela de fragmentos globais (já deixamos salvo aqui também)

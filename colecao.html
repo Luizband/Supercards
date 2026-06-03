@@ -60,41 +60,33 @@
 
     <div class="w-full max-w-sm flex flex-col h-full relative">
         
-        <!-- CABEÇALHO (Igual ao do Perfil, mas sem edição) -->
+        <!-- CABEÇALHO -->
         <header class="flex items-center gap-4 mt-4 mb-4">
             
-            <!-- FOTO E NÍVEL (Esquerda) -->
             <div class="relative flex-shrink-0">
-                <!-- Círculo da foto (Apenas exibição) -->
                 <div class="bg-[#dca3e8] w-24 h-24 rounded-full flex items-center justify-center text-[#7a32a8] font-black text-xl shadow-lg border-2 border-[#bc7bd4] relative overflow-hidden">
                     <span id="texto-sem-foto">FOTO</span>
                     <img id="img-perfil-global" src="" class="hidden w-full h-full object-cover absolute inset-0">
                 </div>
                 
-                <!-- NÍVEL -->
                 <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-[#bc7bd4] w-8 h-8 rounded-full flex items-center justify-center shadow-md border-2 border-[#dca3e8] z-30">
                     <span id="player-level" class="text-[#7a32a8] font-black text-sm">--</span>
                 </div>
             </div>
 
-            <!-- NOME, MOEDAS E XP (Direita) -->
             <div class="flex flex-col flex-grow gap-2 justify-center">
                 
-                <!-- Linha Nome + Moedas -->
                 <div class="flex items-center gap-2 w-full">
-                    <!-- NOME -->
                     <div class="bg-[#dca3e8] rounded-full px-3 py-2 flex items-center justify-center shadow-md flex-grow overflow-hidden">
                         <span id="player-name" class="text-[#7a32a8] font-black text-base tracking-wide uppercase truncate max-w-[130px]">JOGADOR</span>
                     </div>
                     
-                    <!-- MOEDAS -->
                     <div class="bg-[#dca3e8] rounded-full px-3 py-2 flex items-center justify-center gap-1 shadow-md flex-shrink-0">
                         <span id="player-coins" class="text-[#7a32a8] font-black text-sm">0</span>
                         <img src="moedas.png" class="w-4 h-4 object-contain">
                     </div>
                 </div>
                 
-                <!-- Linha Barra de XP -->
                 <div class="flex flex-col items-center mt-1 w-full">
                     <div class="w-full bg-transparent border border-[#dca3e8] rounded-full h-3 overflow-hidden shadow-inner">
                         <div id="barra-xp" class="bg-[#dca3e8] h-full transition-all duration-500" style="width: 0%;"></div>
@@ -120,9 +112,11 @@
             </button>
         </footer>
 
-        <!-- MODAL DA CARTA -->
+        <!-- MODAL DA CARTA (ALTA RESOLUÇÃO) -->
         <div id="modal-carta" class="hidden fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-center p-4 backdrop-blur-sm">
             <h2 id="modal-titulo" class="text-white font-black text-2xl mb-4 text-center drop-shadow-lg px-4">TÍTULO DA CARTA</h2>
+            
+            <!-- Imagem em alta resolução carregada aqui -->
             <img id="modal-imagem" src="" alt="Carta" class="w-[80%] max-w-xs object-contain drop-shadow-2xl mb-6 rounded-lg">
             
             <div class="flex gap-2 w-[80%] max-w-xs justify-center">
@@ -200,9 +194,7 @@
             const xpMaximo = calcularXPMaximo(nivelAtual);
             const porcentagem = Math.min((xpAtual / xpMaximo) * 100, 100);
             
-            // Alterado para mostrar apenas o número, como no Perfil
             document.getElementById('player-level').innerText = nivelAtual; 
-            
             document.getElementById('texto-xp').innerText = `${xpAtual}/${xpMaximo} xp`;
             document.getElementById('barra-xp').style.width = `${porcentagem}%`;
         }
@@ -224,7 +216,9 @@
                     divCarta.classList.add('carta-bloqueada');
                 }
 
-                const imagemExibida = possuiCarta ? info.imagem : "fundo_carta.png";
+                // OTIMIZAÇÃO DE MINIATURA:
+                // Tenta puxar a info.miniatura. Se ela não existir no cartas.js, usa a info.imagem como fallback.
+                const imagemExibida = possuiCarta ? (info.miniatura || info.imagem) : "fundo_carta.png";
                 
                 divCarta.innerHTML = `
                     <span class="text-black font-black text-[10px] mb-0.5">${idFormatado}</span>
@@ -246,7 +240,10 @@
         function abrirModal(id, info, quantidade) {
             cartaAtivaNoModal = id;
             document.getElementById('modal-titulo').innerText = info.nome.toUpperCase();
+            
+            // O Modal sempre carrega a info.imagem (Alta Resolução)
             document.getElementById('modal-imagem').src = info.imagem;
+            
             document.getElementById('modal-copias').innerText = quantidade;
             modal.classList.remove('hidden');
         }
@@ -346,7 +343,6 @@
                 await setDoc(dbUserRef, docAtualizacao, { merge: true });
                 atualizarVisualBarraXP(novoXp, nivelAtual);
                 
-                // Atualiza visualmente as moedas se ganhou badge
                 document.getElementById('player-coins').innerText = (dados.moedas || 0) + bonusMoedas;
 
                 window.mostrarToast(`🏆 NOVA(S) CONQUISTA(S)!<br><span class="text-xs font-normal">Você completou coleções e ganhou ${qtdBadges} badge(s).</span><br><span class="text-sm">Recompensa: +${50 * qtdBadges} XP e +${50 * qtdBadges} <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`);
@@ -456,7 +452,6 @@
                     docAtualizacao.moedas = increment(bonusMoedas);
                     atualizarVisualBarraXP(novoXp, nivelAtual);
                     
-                    // Atualiza moedas na tela se ganhou badge
                     document.getElementById('player-coins').innerText = (dados.moedas || 0) + bonusMoedas;
                 }
 
@@ -505,7 +500,6 @@
                 if (docSnap.exists()) {
                     const dados = docSnap.data();
                     
-                    // Atualiza as moedas na tela
                     document.getElementById('player-coins').innerText = dados.moedas || 0;
                     
                     atualizarVisualBarraXP(dados.xp || 0, dados.nivel || 1);
@@ -513,7 +507,6 @@
                     colecaoJogador = dados.colecao || {};
                     renderizarGridCartas();
                     
-                    // --- EXIBE O AVATAR GLOBAL SE EXISTIR ---
                     if (dados.fotoPerfil) {
                         const imgElement = document.getElementById('img-perfil-global');
                         if (imgElement) {

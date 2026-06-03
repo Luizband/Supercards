@@ -404,11 +404,11 @@
                 let ganhouBadge = false;
                 let notificacoesNovas = [];
 
-                if (pacotesAbertosAtuais >= 30 && !badgesJogador["badge-004"]) {
+                if (pacotesAbertosAtuais >= 30 && !badgesJogador["badge-008"]) {
                     badgesJogador["badge-008"] = true;
                     ganhouBadge = true;
                     notificacoesNovas.push({
-                        id: "notif_" + Date.now() + "_badge004",
+                        id: "notif_" + Date.now() + "_badge008",
                         titulo: "🏆 Conquista: Abridor Compulsivo",
                         texto: "Você abriu 30 pacotes de cartas!\nRecompensas: 50 XP e 50 Moedas.",
                         lida: false,

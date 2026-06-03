@@ -62,7 +62,6 @@
 
     <div class="w-full max-w-sm flex flex-col h-full relative">
         
-        <!-- CABEÇALHO -->
         <header class="flex items-center gap-4 mt-4 mb-2 w-full">
             <div class="relative flex-shrink-0">
                 <div class="bg-[#dca3e8] w-24 h-24 rounded-full flex items-center justify-center text-[#7a32a8] font-black text-xl shadow-lg border-2 border-[#bc7bd4] relative overflow-hidden">
@@ -99,10 +98,7 @@
 
         <main class="flex flex-col gap-3 flex-grow overflow-hidden pb-16">
             
-            <!-- LINHA SUPERIOR -->
             <div class="grid grid-cols-2 gap-3 h-[45%]">
-                
-                <!-- Caixa: Selecionar Amigo -->
                 <div class="bg-[#dca3e8] rounded-3xl p-3 flex flex-col shadow-xl border-2 border-[#bc7bd4]">
                     <span class="text-[#7a32a8] font-black text-[10px] text-center mb-2 uppercase leading-tight tracking-wider">sELECIONAR UM<br>AMIGO</span>
                     <input type="text" id="input-busca-amigo" placeholder="Buscar jogador..." class="mb-2 w-full bg-[#bc7bd4] text-[#7a32a8] placeholder-[#7a32a8]/70 font-black text-[9px] rounded-full px-3 py-1.5 outline-none border border-[#7a32a8]/30 focus:border-[#7a32a8] transition-colors shadow-inner flex-shrink-0">
@@ -112,7 +108,6 @@
                     </button>
                 </div>
                 
-                <!-- Caixa: Convites -->
                 <div class="bg-[#dca3e8] rounded-3xl p-3 flex flex-col shadow-xl border-2 border-[#bc7bd4]">
                     <span class="text-[#7a32a8] font-black text-[11px] text-center mb-3 leading-tight tracking-wide">Convites</span>
                     <div id="lista-convites" class="flex flex-col gap-2 flex-grow overflow-y-auto no-scrollbar mb-3 px-1">
@@ -130,14 +125,10 @@
                 </div>
             </div>
 
-            <!-- LINHA INFERIOR: Mesa da Carta -->
             <div class="bg-[#dca3e8] rounded-3xl p-4 flex flex-col items-center shadow-xl border-2 border-[#bc7bd4] h-[55%] justify-between relative">
-                
-                <!-- Status da Troca -->
                 <span id="status-troca" class="text-[#7a32a8] font-black text-[9px] uppercase tracking-wider absolute top-3 text-center w-full">MESA LIVRE</span>
 
                 <div class="flex w-full justify-around items-center flex-grow mb-1 mt-4">
-                    <!-- Slot ENVIAR (Sua Carta) -->
                     <div class="flex flex-col items-center gap-2">
                         <span class="text-[#7a32a8] font-black text-[12px] uppercase tracking-wide">ENVIAR:</span>
                         <div id="slot-enviar" class="w-[4.5rem] h-24 bg-gray-800 rounded-lg shadow-inner border-2 border-dashed border-[#7a32a8] flex items-center justify-center cursor-pointer hover:border-solid transition-all relative overflow-hidden">
@@ -146,7 +137,6 @@
                         </div>
                     </div>
                     
-                    <!-- Slot Receber (Carta do Amigo) -->
                     <div class="flex flex-col items-center gap-2">
                         <span class="text-[#7a32a8] font-black text-[12px] tracking-wide">Receber:</span>
                         <div id="slot-receber" class="w-[4.5rem] h-24 bg-gray-800 rounded-lg shadow-inner border-2 border-[#bc7bd4] flex items-center justify-center opacity-70 relative overflow-hidden">
@@ -168,15 +158,13 @@
             </button>
         </footer>
 
-        <!-- MODAL DE SELEÇÃO DE CARTA (Invisível até clicar no +) -->
         <div id="modal-selecao-carta" class="hidden fixed inset-0 bg-black/80 z-[100] flex flex-col items-center justify-center p-4 backdrop-blur-sm">
             <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-4 w-full max-w-sm shadow-2xl flex flex-col h-[70%]">
                 <h2 class="text-[#7a32a8] font-black text-lg mb-0.5 text-center uppercase">Escolha sua Carta</h2>
                 <p class="text-center text-[10px] text-[#7a32a8] font-bold mb-4">MOSTRANDO APENAS CARTAS REPETIDAS (+1 CÓPIA)</p>
                 
                 <div id="grid-cartas-modal" class="grid grid-cols-3 gap-3 overflow-y-auto no-scrollbar flex-grow pb-2 content-start">
-                    <!-- Cartas Repetidas Entram Aqui -->
-                </div>
+                    </div>
                 
                 <button onclick="document.getElementById('modal-selecao-carta').classList.add('hidden')" class="w-full mt-4 bg-red-500 hover:bg-red-600 text-white font-black py-2.5 rounded-full shadow-md transition-transform hover:scale-105 uppercase text-xs">
                     Cancelar
@@ -186,13 +174,11 @@
 
     </div>
 
-    <!-- SCRIPT DO FIREBASE E LÓGICA DA TROCA -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, orderBy, limit, startAt, endAt } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, orderBy, limit, startAt, endAt, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         
-        // Importa o banco de cartas e raridades
         import { INFO_CARTAS } from './cartas.js';
 
         const firebaseConfig = {
@@ -208,26 +194,20 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Custos definidos por você
-        const CUSTOS_TROCA = {
-            'Comum': 10,
-            'Rara': 40,
-            'Lendária': 100,
-            'Épica': 200
-        };
+        const CUSTOS_TROCA = { 'Comum': 10, 'Rara': 40, 'Lendária': 100, 'Épica': 200 };
 
         let currentUserUid = null;
         let currentUserName = "JOGADOR";
-        let minhaColecao = {}; // Vai guardar as cópias para o modal
+        let minhaColecao = {}; 
 
         let amigoSelecionadoId = null;
         let amigoSelecionadoNome = null;
         let conviteSelecionadoId = null;
 
-        // Variáveis da Troca Ativa
         let trocaAtivaId = null;
         let souRemetente = false;
         let escutadorTroca = null;
+        let trocaProcessada = false; // Evita loop de troca
 
         window.mostrarToast = function(mensagem) {
             const container = document.getElementById('toast-container');
@@ -242,7 +222,6 @@
             }, 3000);
         };
 
-        // --- FUNÇÕES DE STATUS DO JOGADOR RECUPERADAS ---
         function calcularXPMaximo(nivel) {
             if (nivel >= 1 && nivel <= 5) return 200;
             if (nivel >= 6 && nivel <= 15) return 750;
@@ -317,7 +296,7 @@
                     remetenteNome: currentUserName,
                     destinatarioId: amigoSelecionadoId,
                     destinatarioNome: amigoSelecionadoNome,
-                    participantes: [currentUserUid, amigoSelecionadoId], // Array mágico pra busca
+                    participantes: [currentUserUid, amigoSelecionadoId], 
                     status: 'convite_pendente',
                     cartaRemetente: null,
                     cartaDestinatario: null,
@@ -385,10 +364,9 @@
 
             try {
                 await updateDoc(doc(db, "trocas", conviteSelecionadoId), { status: 'escolhendo_cartas' });
-                
-                // Configura as variáveis globais
                 trocaAtivaId = conviteSelecionadoId;
-                souRemetente = false; // Se eu aceitei, eu sou o destinatário
+                souRemetente = false; 
+                trocaProcessada = false;
                 escutarMesaTroca(trocaAtivaId);
                 
                 window.mostrarToast("✅ Troca iniciada! Selecione sua carta.");
@@ -396,31 +374,31 @@
             } catch (e) { console.error(e); }
         });
 
-        // --- MESA DE TROCA (TEMPO REAL E CÁLCULO) ---
+        // --- MESA DE TROCA E EFETIVAÇÃO ---
         function escutarMesaTroca(idDaTroca) {
-            if (escutadorTroca) escutadorTroca(); // Cancela o anterior se tiver
+            if (escutadorTroca) escutadorTroca(); 
             
             document.getElementById('status-troca').innerText = "ESCOLHENDO CARTAS...";
 
-            escutadorTroca = onSnapshot(doc(db, "trocas", idDaTroca), (docSnap) => {
+            escutadorTroca = onSnapshot(doc(db, "trocas", idDaTroca), async (docSnap) => {
                 if (!docSnap.exists()) {
                     resetarMesa();
                     return;
                 }
                 
                 const troca = docSnap.data();
-                
                 const minhaCarta = souRemetente ? troca.cartaRemetente : troca.cartaDestinatario;
                 const cartaAmigo = souRemetente ? troca.cartaDestinatario : troca.cartaRemetente;
+                
+                const jaPaguei = souRemetente ? troca.pagoRemetente : troca.pagoDestinatario;
+                const amigoPagou = souRemetente ? troca.pagoDestinatario : troca.pagoRemetente;
 
-                // Atualiza Slot Enviar (Minha)
                 if (minhaCarta) {
                     document.getElementById('icone-mais').classList.add('hidden');
                     document.getElementById('img-minha-carta').src = INFO_CARTAS[minhaCarta].imagem;
                     document.getElementById('img-minha-carta').classList.remove('hidden');
                 }
 
-                // Atualiza Slot Receber (Amigo)
                 if (cartaAmigo) {
                     document.getElementById('texto-aguardando').classList.add('hidden');
                     document.getElementById('img-carta-amigo').src = INFO_CARTAS[cartaAmigo].imagem;
@@ -429,20 +407,101 @@
                     document.getElementById('texto-aguardando').innerText = `${souRemetente ? troca.destinatarioNome : troca.remetenteNome} escolhendo...`;
                 }
 
-                // Calcula o custo se os dois escolheram
+                // Quando as duas cartas estão na mesa
                 if (minhaCarta && cartaAmigo) {
                     const custo = calcularCusto(minhaCarta, cartaAmigo);
-                    document.getElementById('custo-troca').innerHTML = `${custo} <img src="fragmento.png" class="w-3.5 h-3.5 object-contain">`;
-                    
-                    document.getElementById('btn-efetivar-troca').classList.remove('opacity-50', 'cursor-not-allowed', 'bg-[#bc7bd4]');
-                    document.getElementById('btn-efetivar-troca').classList.add('bg-[#7a32a8]', 'text-white', 'hover:scale-105');
                     document.getElementById('status-troca').innerText = "CARTAS SELECIONADAS!";
+                    
+                    const btn = document.getElementById('btn-efetivar-troca');
+                    
+                    if (!jaPaguei) {
+                        btn.className = "bg-[#4ade80] text-[#7a32a8] border border-[#22c55e] font-black text-[12px] py-1.5 px-8 rounded-full shadow-md mt-2 flex items-center justify-center gap-2 transition-all hover:scale-105 cursor-pointer";
+                        btn.innerHTML = `trocar <span id="custo-troca" class="font-normal text-[11px] flex items-center gap-0.5">${custo} <img src="fragmento.png" class="w-3.5 h-3.5 object-contain"></span>`;
+                    } else if (!amigoPagou) {
+                        btn.className = "bg-[#bc7bd4] text-[#7a32a8] font-black text-[12px] py-1.5 px-8 rounded-full shadow-md mt-2 opacity-50 cursor-not-allowed flex items-center justify-center gap-2 border border-[#7a32a8]/20 transition-all";
+                        btn.innerText = "Aguardando amigo...";
+                    }
+
+                    // Se os dois pagaram, efetiva a troca localmente
+                    if (jaPaguei && amigoPagou && !trocaProcessada && troca.status !== 'concluida') {
+                        trocaProcessada = true;
+                        document.getElementById('status-troca').innerText = "TROCA CONCLUÍDA!";
+                        await finalizarTrocaLocal(idDaTroca, minhaCarta, cartaAmigo, custo);
+                    }
                 }
             });
         }
 
+        // Lógica do Clique em TROCAR
+        document.getElementById('btn-efetivar-troca').addEventListener('click', async () => {
+            if (!trocaAtivaId) return;
+            
+            const btn = document.getElementById('btn-efetivar-troca');
+            if (btn.classList.contains('cursor-not-allowed')) return;
+
+            const custoTexto = document.getElementById('custo-troca').innerText;
+            const custo = parseInt(custoTexto) || 0;
+
+            const userSnap = await getDoc(doc(db, "users", currentUserUid));
+            const fragmentos = userSnap.data().fragmentos || 0;
+
+            if (fragmentos < custo) {
+                return window.mostrarToast("❌ Você não tem fragmentos suficientes!");
+            }
+
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            btn.innerHTML = "Processando... ⏳";
+
+            try {
+                // Debita os fragmentos localmente primeiro
+                await updateDoc(doc(db, "users", currentUserUid), {
+                    fragmentos: increment(-custo)
+                });
+
+                // Avisa a mesa que você pagou
+                const campoPago = souRemetente ? 'pagoRemetente' : 'pagoDestinatario';
+                await updateDoc(doc(db, "trocas", trocaAtivaId), {
+                    [campoPago]: true
+                });
+
+                window.mostrarToast("✅ Pagamento realizado! Aguardando o amigo...");
+                
+                // Atualiza na tela a quantidade de fragmentos pra dar feedback imediato
+                document.getElementById('player-fragmentos').innerText = fragmentos - custo;
+            } catch(e) {
+                console.error(e);
+                window.mostrarToast("Erro ao processar pagamento.");
+            }
+        });
+
+        // Função que realiza a entrega da carta recebida
+        async function finalizarTrocaLocal(idTroca, cartaDada, cartaRecebida, custo) {
+            try {
+                // Atualiza o banco do usuário (remove a carta dada, adiciona a recebida e soma +1 troca)
+                let updates = {
+                    [`colecao.${cartaDada}`]: increment(-1),
+                    [`colecao.${cartaRecebida}`]: increment(1),
+                    "estatisticas.trocasFeitas": increment(1)
+                };
+                
+                await setDoc(doc(db, "users", currentUserUid), updates, {merge: true});
+                
+                window.mostrarToast(`✨ Troca concluída com sucesso!<br><span class="text-xs">Você recebeu a carta ${cartaRecebida}</span>`);
+                
+                // Apenas o remetente apaga/conclui a mesa no servidor para não ter conflito duplo
+                if (souRemetente) {
+                    await updateDoc(doc(db, "trocas", idTroca), { status: 'concluida' });
+                }
+                
+                setTimeout(() => resetarMesa(), 3000);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
         function resetarMesa() {
             trocaAtivaId = null;
+            trocaProcessada = false;
             document.getElementById('status-troca').innerText = "MESA LIVRE";
             document.getElementById('icone-mais').classList.remove('hidden');
             document.getElementById('img-minha-carta').classList.add('hidden');
@@ -450,8 +509,12 @@
             document.getElementById('texto-aguardando').classList.remove('hidden');
             document.getElementById('img-carta-amigo').classList.add('hidden');
             
-            document.getElementById('custo-troca').innerHTML = `-- <img src="fragmento.png" class="w-3.5 h-3.5 object-contain">`;
-            document.getElementById('btn-efetivar-troca').className = "bg-[#bc7bd4] text-[#7a32a8] font-black text-[12px] py-1.5 px-8 rounded-full shadow-md mt-2 opacity-50 cursor-not-allowed flex items-center justify-center gap-2 border border-[#7a32a8]/20 transition-all";
+            const btn = document.getElementById('btn-efetivar-troca');
+            btn.innerHTML = `trocar <span id="custo-troca" class="font-normal text-[11px] flex items-center gap-0.5">-- <img src="fragmento.png" class="w-3.5 h-3.5 object-contain"></span>`;
+            btn.className = "bg-[#bc7bd4] text-[#7a32a8] font-black text-[12px] py-1.5 px-8 rounded-full shadow-md mt-2 opacity-50 cursor-not-allowed flex items-center justify-center gap-2 border border-[#7a32a8]/20 transition-all";
+            
+            // Recarrega coleção pro modal
+            getDoc(doc(db, "users", currentUserUid)).then(snap => minhaColecao = snap.data().colecao || {});
         }
 
         // --- SISTEMA DO MODAL DE CARTAS ---
@@ -508,7 +571,7 @@
                     minhaColecao = dados.colecao || {}; 
                     
                     document.getElementById('player-fragmentos').innerText = dados.fragmentos || 0;
-                    atualizarVisualBarraXP(dados.xp || 0, dados.nivel || 1); // <-- XP CORRIGIDO E FUNCIONANDO
+                    atualizarVisualBarraXP(dados.xp || 0, dados.nivel || 1);
                     
                     if (dados.fotoPerfil) {
                         const img = document.getElementById('img-perfil-global');

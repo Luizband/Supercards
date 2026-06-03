@@ -177,7 +177,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, orderBy, limit, startAt, endAt, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, orderBy, limit, startAt, endAt, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         
         import { INFO_CARTAS } from './cartas.js';
 
@@ -207,7 +207,7 @@
         let trocaAtivaId = null;
         let souRemetente = false;
         let escutadorTroca = null;
-        let trocaProcessada = false; // Evita loop de troca
+        let trocaProcessada = false; 
 
         window.mostrarToast = function(mensagem) {
             const container = document.getElementById('toast-container');
@@ -221,6 +221,12 @@
                 setTimeout(() => toast.remove(), 500); 
             }, 3000);
         };
+
+        function obterGameDay() {
+            let agora = new Date();
+            if (agora.getHours() < 6) agora.setDate(agora.getDate() - 1);
+            return `${agora.getFullYear()}-${agora.getMonth() + 1}-${agora.getDate()}`;
+        }
 
         function calcularXPMaximo(nivel) {
             if (nivel >= 1 && nivel <= 5) return 200;
@@ -305,6 +311,17 @@
                     dataCriacao: serverTimestamp()
                 });
 
+                // INJETA A NOTIFICAÇÃO NA CAIXA DE ENTRADA DO AMIGO
+                await updateDoc(doc(db, "users", amigoSelecionadoId), {
+                    notificacoes: arrayUnion({
+                        id: "notif_convite_" + Date.now(),
+                        titulo: "🔄 Convite de Troca",
+                        texto: `${currentUserName} quer trocar cartas com você! Vá até a mesa de trocas para aceitar ou recusar.`,
+                        lida: false,
+                        data: new Date().toISOString()
+                    })
+                });
+
                 window.mostrarToast(`Convite enviado para ${amigoSelecionadoNome}!`);
                 amigoSelecionadoId = null;
                 amigoSelecionadoNome = null;
@@ -382,7 +399,7 @@
 
             escutadorTroca = onSnapshot(doc(db, "trocas", idDaTroca), async (docSnap) => {
                 if (!docSnap.exists()) {
-                    resetarMesa();
+                    resetarMesa(); // Limpa a tela automaticamente se o documento foi deletado
                     return;
                 }
                 
@@ -422,8 +439,8 @@
                         btn.innerText = "Aguardando amigo...";
                     }
 
-                    // Se os dois pagaram, efetiva a troca localmente
-                    if (jaPaguei && amigoPagou && !trocaProcessada && troca.status !== 'concluida') {
+                    // Somente processa se os DOIS confirmaram o pagamento
+                    if (jaPaguei && amigoPagou && !trocaProcessada) {
                         trocaProcessada = true;
                         document.getElementById('status-troca').innerText = "TROCA CONCLUÍDA!";
                         await finalizarTrocaLocal(idDaTroca, minhaCarta, cartaAmigo, custo);
@@ -453,7 +470,7 @@
             btn.innerHTML = "Processando... ⏳";
 
             try {
-                // Debita os fragmentos localmente primeiro
+                // Debita os fragmentos localmente
                 await updateDoc(doc(db, "users", currentUserUid), {
                     fragmentos: increment(-custo)
                 });
@@ -465,8 +482,6 @@
                 });
 
                 window.mostrarToast("Aguardando o amigo...");
-                
-                // Atualiza na tela a quantidade de fragmentos pra dar feedback imediato
                 document.getElementById('player-fragmentos').innerText = fragmentos - custo;
             } catch(e) {
                 console.error(e);
@@ -474,26 +489,170 @@
             }
         });
 
-        // Função que realiza a entrega da carta recebida
+        // O CÉREBRO DA TROCA: Função que realiza a entrega da carta e confere badges/missões
         async function finalizarTrocaLocal(idTroca, cartaDada, cartaRecebida, custo) {
             try {
-                // Atualiza o banco do usuário (remove a carta dada, adiciona a recebida e soma +1 troca)
+                const userRef = doc(db, "users", currentUserUid);
+                const userSnap = await getDoc(userRef);
+                let dados = userSnap.exists() ? userSnap.data() : {};
+
+                let badgesJogador = dados.badges || {};
+                let notificacoesNovas = [];
+                let ganhouBadgeTroca = false;
+                let ganhouBadgeColecao = false;
+                let qtdBadgesColecao = 0;
+
+                // 1. Simula a coleção localmente para ver se ganha badge
+                let colecao = dados.colecao || {};
+                colecao[cartaDada] = (colecao[cartaDada] || 0) - 1;
+                colecao[cartaRecebida] = (colecao[cartaRecebida] || 0) + 1;
+                let trocasFeitas = (dados.estatisticas?.trocasFeitas || 0) + 1;
+
+                // 2. Checagem da Badge de Troca
+                if (trocasFeitas >= 20 && !badgesJogador["badge-004"]) {
+                    badgesJogador["badge-004"] = true;
+                    ganhouBadgeTroca = true;
+                    notificacoesNovas.push({
+                        id: "notif_" + Date.now() + "_badge004",
+                        titulo: "🏆 Conquista: Troca Troca",
+                        texto: "Você fez 20 trocas ao todo!\nRecompensas: 50 XP e 50 Moedas.",
+                        lida: false,
+                        data: new Date().toISOString()
+                    });
+                }
+
+                // 3. Checagem de Badges de Coleção
+                if (!badgesJogador["badge-001"]) {
+                    let temTodas = true;
+                    for (let i = 1; i <= 52; i++) {
+                        let id = String(i).padStart(3, '0');
+                        if (!colecao[id] || colecao[id] <= 0) { temTodas = false; break; }
+                    }
+                    if (temTodas) { badgesJogador["badge-001"] = true; ganhouBadgeColecao = true; qtdBadgesColecao++; }
+                }
+                if (!badgesJogador["badge-002"]) {
+                    if (colecao["020"] > 0 && colecao["036"] > 0 && colecao["045"] > 0) {
+                        badgesJogador["badge-002"] = true; ganhouBadgeColecao = true; qtdBadgesColecao++;
+                    }
+                }
+                if (!badgesJogador["badge-009"]) {
+                    if (colecao["009"] > 0 && colecao["027"] > 0) {
+                        badgesJogador["badge-009"] = true; ganhouBadgeColecao = true; qtdBadgesColecao++;
+                    }
+                }
+
+                if (ganhouBadgeColecao) {
+                    notificacoesNovas.push({
+                        id: "notif_" + Date.now() + "_badgescolecao",
+                        titulo: "🏆 Conquistas de Coleção",
+                        texto: `Você completou coleções e ganhou ${qtdBadgesColecao} badge(s)!\nRecompensas: ${50 * qtdBadgesColecao} XP e ${50 * qtdBadgesColecao} Moedas.`,
+                        lida: false,
+                        data: new Date().toISOString()
+                    });
+                }
+
+                // 4. Checagem da Missão Diária
+                let pacoteMissoes = dados.missoesDiarias || {};
+                const hoje = obterGameDay();
+                let atualizouMissao = false;
+                let msgMissaoProgresso = "";
+
+                if (pacoteMissoes.dataReset === hoje && pacoteMissoes.lista) {
+                    pacoteMissoes.lista.forEach(m => {
+                        if (m.id === "troca" && m.progresso < m.meta) {
+                            m.progresso++;
+                            atualizouMissao = true;
+                            msgMissaoProgresso = `🎯 Progresso: ${m.desc}`;
+                        }
+                    });
+                }
+
+                // 5. XP e Level Up
+                let xpAtual = dados.xp || 0;
+                let nivelAtual = dados.nivel || 1;
+                let subiuNivel = false;
+                let msgLevelUp = "";
+                let bonusXp = (ganhouBadgeTroca ? 50 : 0) + (ganhouBadgeColecao ? 50 * qtdBadgesColecao : 0);
+                let bonusMoedas = (ganhouBadgeTroca ? 50 : 0) + (ganhouBadgeColecao ? 50 * qtdBadgesColecao : 0);
+                let novoXp = xpAtual + bonusXp;
+                let pacotesBasicosGanhos = 0;
+                let pacotesPremiumGanhos = 0;
+
+                let xpMaximo = calcularXPMaximo(nivelAtual);
+                while (novoXp >= xpMaximo && nivelAtual < 30) {
+                    novoXp -= xpMaximo;
+                    nivelAtual++;
+                    subiuNivel = true;
+                    bonusMoedas += 30;
+                    pacotesBasicosGanhos++;
+
+                    let textoRecompensaNotif = "1 Pacote Básico e 30 Moedas";
+                    if (nivelAtual === 10 || nivelAtual === 20 || nivelAtual === 30) {
+                        pacotesPremiumGanhos++;
+                        textoRecompensaNotif = "1 Pacote Básico, 1 Pacote Premium e 30 Moedas";
+                        msgLevelUp = `🎉 LEVEL UP! Nível ${nivelAtual} alcançado!<br><span class="text-xs">Recompensas: 1 Pacote Básico, 1 Pacote Premium e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom"></span>`;
+                    } else {
+                        msgLevelUp = `🎉 LEVEL UP! Nível ${nivelAtual} alcançado!<br><span class="text-xs">Recompensas: 1 Pacote Básico e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom"></span>`;
+                    }
+
+                    notificacoesNovas.push({
+                        id: "notif_" + Date.now() + "_nivel" + nivelAtual,
+                        titulo: `🎉 Level Up: Nível ${nivelAtual}`,
+                        texto: `Parabéns! Você alcançou o Nível ${nivelAtual}.\nRecompensas recebidas: ${textoRecompensaNotif}.`,
+                        lida: false,
+                        data: new Date().toISOString()
+                    });
+                    xpMaximo = calcularXPMaximo(nivelAtual);
+                }
+
+                // 6. Envia Atualizações para o Firestore
                 let updates = {
                     [`colecao.${cartaDada}`]: increment(-1),
                     [`colecao.${cartaRecebida}`]: increment(1),
-                    "estatisticas.trocasFeitas": increment(1)
+                    "estatisticas.trocasFeitas": increment(1),
+                    "badges": badgesJogador,
+                    "xp": novoXp,
+                    "nivel": nivelAtual,
+                    "moedas": increment(bonusMoedas)
                 };
+
+                if (pacotesBasicosGanhos > 0) updates["inventario.pacoteBasico"] = increment(pacotesBasicosGanhos);
+                if (pacotesPremiumGanhos > 0) updates["inventario.pacotePremium"] = increment(pacotesPremiumGanhos);
+                if (atualizouMissao) updates.missoesDiarias = pacoteMissoes;
+                if (notificacoesNovas.length > 0) updates.notificacoes = arrayUnion(...notificacoesNovas);
+
+                await updateDoc(userRef, updates);
                 
-                await setDoc(doc(db, "users", currentUserUid), updates, {merge: true});
-                
+                // Recarrega coleção no JS para a tela não bugar depois
+                minhaColecao[cartaDada] = (minhaColecao[cartaDada] || 0) - 1;
+                minhaColecao[cartaRecebida] = (minhaColecao[cartaRecebida] || 0) + 1;
+
                 window.mostrarToast(`✨ Troca concluída com sucesso!<br><span class="text-xs">Você recebeu a carta ${cartaRecebida}</span>`);
                 
-                // Apenas o remetente apaga/conclui a mesa no servidor para não ter conflito duplo
-                if (souRemetente) {
-                    await updateDoc(doc(db, "trocas", idTroca), { status: 'concluida' });
+                // Cascata de Toasts
+                let delay = 1500;
+                if (atualizouMissao) {
+                    setTimeout(() => window.mostrarToast(msgMissaoProgresso), delay);
+                    delay += 1500;
                 }
-                
-                setTimeout(() => resetarMesa(), 3000);
+                if (ganhouBadgeTroca) {
+                    setTimeout(() => window.mostrarToast(`🏆 NOVA CONQUISTA!<br><span class="text-xs font-normal">Badge: Troca Troca (20 trocas).</span><br><span class="text-sm">Recompensa: +50 XP e +50 <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`), delay);
+                    delay += 1500;
+                }
+                if (ganhouBadgeColecao) {
+                    setTimeout(() => window.mostrarToast(`🏆 NOVA CONQUISTA!<br><span class="text-xs font-normal">Você ganhou ${qtdBadgesColecao} badge(s) de coleção.</span><br><span class="text-sm">Recompensa: +${50*qtdBadgesColecao} XP e +${50*qtdBadgesColecao} <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`), delay);
+                    delay += 1500;
+                }
+                if (subiuNivel) {
+                    setTimeout(() => window.mostrarToast(msgLevelUp), delay);
+                }
+
+                // O REMETENTE limpa a mesa do servidor após 3 segundos
+                if (souRemetente) {
+                    setTimeout(async () => {
+                        await deleteDoc(doc(db, "trocas", idTroca));
+                    }, 3000);
+                }
             } catch (e) {
                 console.error(e);
             }
@@ -504,17 +663,19 @@
             trocaProcessada = false;
             document.getElementById('status-troca').innerText = "MESA LIVRE";
             document.getElementById('icone-mais').classList.remove('hidden');
+            
+            document.getElementById('img-minha-carta').src = "";
             document.getElementById('img-minha-carta').classList.add('hidden');
+            
             document.getElementById('texto-aguardando').innerText = "Aguardando...";
             document.getElementById('texto-aguardando').classList.remove('hidden');
+            
+            document.getElementById('img-carta-amigo').src = "";
             document.getElementById('img-carta-amigo').classList.add('hidden');
             
             const btn = document.getElementById('btn-efetivar-troca');
             btn.innerHTML = `trocar <span id="custo-troca" class="font-normal text-[11px] flex items-center gap-0.5">-- <img src="fragmento.png" class="w-3.5 h-3.5 object-contain"></span>`;
             btn.className = "bg-[#bc7bd4] text-[#7a32a8] font-black text-[12px] py-1.5 px-8 rounded-full shadow-md mt-2 opacity-50 cursor-not-allowed flex items-center justify-center gap-2 border border-[#7a32a8]/20 transition-all";
-            
-            // Recarrega coleção pro modal
-            getDoc(doc(db, "users", currentUserUid)).then(snap => minhaColecao = snap.data().colecao || {});
         }
 
         // --- SISTEMA DO MODAL DE CARTAS ---

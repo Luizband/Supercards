@@ -1,0 +1,22 @@
+{
+  "name": "Supercards TCG",
+  "short_name": "Supercards",
+  "description": "Seu Card Game de Coleção e Batalhas",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#dca3e8",
+  "theme_color": "#7a32a8",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icons/icon1.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon2.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

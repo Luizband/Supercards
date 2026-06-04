@@ -71,20 +71,16 @@
 
     <div class="w-full max-w-sm flex flex-col h-full relative">
         
-        <!-- CABEÇALHO DO DECK -->
         <header class="flex flex-col items-center w-full mb-4 flex-shrink-0">
             <h1 id="titulo-deck" class="text-[#dca3e8] font-black text-2xl text-center drop-shadow-md uppercase tracking-wider">CARREGANDO...</h1>
             <span id="contador-cartas" class="text-white bg-[#7a32a8] px-4 py-1 rounded-full text-xs font-bold mt-2 border border-[#bc7bd4] shadow-md">0 / 20 CARTAS</span>
         </header>
 
-        <!-- GRADE DE 20 CARTAS DO DECK -->
         <main class="flex-grow overflow-y-auto no-scrollbar pb-32 bg-[#dca3e8]/30 backdrop-blur-sm rounded-2xl p-4 border-2 border-[#bc7bd4] shadow-xl">
             <div id="grid-construtor" class="grid grid-cols-4 gap-2 w-full h-full content-start">
-                <!-- Injetado pelo JS: 20 slots -->
-            </div>
+                </div>
         </main>
 
-        <!-- FOOTER: RETORNAR E SALVAR -->
         <footer class="fixed bottom-8 left-1/2 transform -translate-x-1/2 w-full flex justify-center z-[50] pointer-events-none" style="padding-bottom: env(safe-area-inset-bottom);">
             <div class="flex gap-4 w-[90%] max-w-[280px] pointer-events-auto">
                 <button onclick="window.location.href='decks.html'" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-black py-3 rounded-full shadow-2xl transition-transform hover:-translate-y-1 border-2 border-gray-400 uppercase text-xs tracking-wider">
@@ -98,7 +94,6 @@
 
     </div>
 
-    <!-- MODAL DE COLEÇÃO (Para escolher a carta) -->
     <div id="modal-colecao" class="hidden fixed inset-0 bg-black/90 z-[200] flex flex-col items-center justify-start pt-10 px-4 pb-20 backdrop-blur-md pointer-events-auto">
         
         <button onclick="fecharModalColecao()" class="absolute top-4 right-6 text-[#dca3e8] font-black text-2xl hover:text-white transition-colors z-50">X</button>
@@ -106,14 +101,27 @@
         <h2 class="text-[#dca3e8] font-black text-xl text-center uppercase tracking-wider mb-6">Sua Coleção</h2>
         
         <div id="lista-colecao" class="grid grid-cols-4 gap-2 w-full max-w-sm overflow-y-auto no-scrollbar content-start flex-grow pb-10">
-            <!-- As cartas da coleção serão injetadas aqui -->
             <span class="text-white col-span-4 text-center text-sm">Carregando cartas...</span>
         </div>
 
     </div>
 
-    <!-- MODAL DE REGRAS (Aviso para Decks Novos) -->
-    <div id="modal-regras" class="hidden fixed inset-0 bg-black/80 z-[250] flex flex-col items-center justify-center p-4 backdrop-blur-sm pointer-events-auto">
+    <div id="modal-zoom-carta" class="hidden fixed inset-0 bg-black/95 z-[250] flex flex-col items-center justify-center p-4 backdrop-blur-md pointer-events-auto">
+        <h2 id="zoom-titulo" class="text-white font-black text-2xl mb-4 text-center drop-shadow-lg px-4 uppercase tracking-widest">NOME DA CARTA</h2>
+        
+        <img id="zoom-imagem" src="fundo_carta.png" alt="Carta" class="w-[80%] max-w-[260px] aspect-[2.5/3.5] object-cover drop-shadow-2xl mb-8 rounded-xl border-4 border-transparent transition-all">
+        
+        <div class="flex gap-4 w-[80%] max-w-[260px] justify-center">
+            <button onclick="fecharZoomCarta()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-black py-3 rounded-full shadow-lg border-2 border-red-800 uppercase text-xs tracking-wider">
+                CANCELAR
+            </button>
+            <button onclick="confirmarAdicaoCarta()" class="flex-1 bg-[#4ade80] hover:bg-green-600 text-black font-black py-3 rounded-full shadow-lg border-2 border-green-700 uppercase text-xs tracking-wider">
+                ADICIONAR
+            </button>
+        </div>
+    </div>
+
+    <div id="modal-regras" class="hidden fixed inset-0 bg-black/80 z-[300] flex flex-col items-center justify-center p-4 backdrop-blur-sm pointer-events-auto">
         <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 w-full max-w-sm shadow-2xl flex flex-col items-center gap-4 relative">
             <button onclick="document.getElementById('modal-regras').classList.add('hidden')" class="absolute top-2 right-4 text-[#7a32a8] font-black text-xl hover:text-purple-600 transition-colors">X</button>
             
@@ -133,8 +141,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE ERRO DE VALIDAÇÃO -->
-    <div id="modal-erro-deck" class="hidden fixed inset-0 bg-black/80 z-[250] flex flex-col items-center justify-center p-4 backdrop-blur-sm pointer-events-auto">
+    <div id="modal-erro-deck" class="hidden fixed inset-0 bg-black/80 z-[300] flex flex-col items-center justify-center p-4 backdrop-blur-sm pointer-events-auto">
         <div class="bg-[#dca3e8] border-4 border-red-600 rounded-2xl p-6 w-full max-w-sm shadow-2xl flex flex-col items-center gap-4 relative">
             <h2 class="text-red-600 font-black text-lg text-center uppercase tracking-wider mb-2">Deck Inválido</h2>
             
@@ -151,7 +158,6 @@
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         
-        // Importa o banco de cartas local para pegar as imagens e raridades
         import { INFO_CARTAS } from './cartas.js';
 
         const firebaseConfig = {
@@ -168,19 +174,18 @@
         const db = getFirestore(app);
 
         let currentUserUid = null;
-        let colecaoJogador = {}; // Formato: {"001": 2, "005": 1}
+        let colecaoJogador = {}; 
         
-        let deckState = Array(20).fill(null); // Nossa grade de 20 espaços, guarda os IDs ("001")
+        let deckState = Array(20).fill(null); 
         let slotSelecionadoParaEdicao = null; 
+        let cartaEmZoomId = null;
 
-        // Informações do Deck
         let metaDeck = {
             id: null,
             nome: "MEU DECK",
             icone: "baralho01.png"
         };
 
-        // --- INICIALIZAÇÃO E PARÂMETROS ---
         function carregarParametrosDaURL() {
             const params = new URLSearchParams(window.location.search);
             
@@ -191,10 +196,8 @@
                 metaDeck.icone = params.get('icone');
                 metaDeck.id = "deck_" + Date.now(); 
                 
-                // Exibe as regras apenas para decks novos
                 document.getElementById('modal-regras').classList.remove('hidden');
             } else {
-                // URL inválida, volta pro menu de decks
                 window.location.href = "decks.html";
             }
             
@@ -231,12 +234,10 @@
                     const imagemExibida = info.miniatura || info.imagem;
 
                     div.innerHTML = `<img src="${imagemExibida}" class="w-full h-full object-cover rounded-md shadow-md border-2 border-transparent hover:border-red-500 transition-colors">`;
-                    // Se clicar numa carta preenchida, ela é removida
                     div.onclick = () => removerCartaDoSlot(i);
                 } else {
                     div.innerHTML = `<div class="w-6 h-6 border-2 border-white/30 rounded-full flex items-center justify-center"><span class="text-white/30 font-black text-xs">+</span></div>`;
                     div.classList.add('border-2', 'border-dashed', 'border-white/20');
-                    // Se clicar num espaço vazio, abre a coleção
                     div.onclick = () => abrirColecao(i);
                 }
                 
@@ -267,20 +268,17 @@
             const container = document.getElementById('lista-colecao');
             container.innerHTML = "";
 
-            // Conta quantas cartas de cada ID já estão no deck
             const contagemDeck = {};
             deckState.forEach(id => {
-                if (id) {
-                    contagemDeck[id] = (contagemDeck[id] || 0) + 1;
-                }
+                if (id) contagemDeck[id] = (contagemDeck[id] || 0) + 1;
             });
 
             let temCartas = false;
+            const idsOrdenados = Object.keys(colecaoJogador).sort();
 
-            // Percorre toda a coleção do banco de dados (colecaoJogador)
-            for (const [id, quantidadePossuida] of Object.entries(colecaoJogador)) {
+            for (const id of idsOrdenados) {
+                const quantidadePossuida = colecaoJogador[id];
                 
-                // Só processa se o jogador tiver 1 ou mais cópias e se a carta existir no cartas.js
                 if (quantidadePossuida > 0 && INFO_CARTAS[id]) {
                     temCartas = true;
                     
@@ -288,28 +286,32 @@
                     const copiasDisponiveis = quantidadePossuida - quantidadeNoDeck;
                     const info = INFO_CARTAS[id];
                     
-                    const div = document.createElement('div');
-                    div.className = "relative aspect-[2.5/3.5] rounded-md shadow-lg overflow-hidden border-2 border-transparent";
+                    const divWrapper = document.createElement('div');
+                    divWrapper.className = "flex flex-col items-center";
+
+                    const divCarta = document.createElement('div');
+                    divCarta.className = "relative w-full aspect-[2.5/3.5] rounded-md shadow-lg overflow-hidden border-2 border-transparent bg-gray-800";
                     
                     if (copiasDisponiveis > 0) {
-                        // Carta clicável
-                        div.classList.add('cursor-pointer', 'hover:border-[#dca3e8]', 'transition-colors');
-                        div.onclick = () => escolherCartaParaSlot(id);
+                        divCarta.classList.add('cursor-pointer', 'hover:border-[#dca3e8]', 'transition-colors', 'transform', 'hover:scale-105');
+                        divCarta.onclick = () => abrirZoomCarta(id); // Agora abre o preview (Zoom)
                     } else {
-                        // Carta esgotada (já colocou todas as cópias que tem no deck)
-                        div.classList.add('opacity-40', 'grayscale', 'pointer-events-none');
+                        divCarta.classList.add('opacity-40', 'grayscale', 'pointer-events-none');
                     }
 
                     const imagemExibida = info.miniatura || info.imagem;
 
-                    div.innerHTML = `
+                    divCarta.innerHTML = `
                         <img src="${imagemExibida}" class="w-full h-full object-cover">
                         <div class="absolute bottom-0 left-0 w-full bg-black/80 py-1 flex justify-center items-center">
                             <span class="text-white text-[9px] font-black tracking-widest">${copiasDisponiveis} DISP.</span>
                         </div>
                     `;
                     
-                    container.appendChild(div);
+                    divWrapper.innerHTML = `<span class="text-[#dca3e8] font-black text-[10px] mb-0.5">${id}</span>`;
+                    divWrapper.appendChild(divCarta);
+                    
+                    container.appendChild(divWrapper);
                 }
             }
 
@@ -318,9 +320,36 @@
             }
         }
 
-        window.escolherCartaParaSlot = function(idCarta) {
-            if (slotSelecionadoParaEdicao !== null) {
-                deckState[slotSelecionadoParaEdicao] = idCarta; 
+        // --- SISTEMA DE ZOOM E CONFIRMAÇÃO ---
+        window.abrirZoomCarta = function(idCarta) {
+            cartaEmZoomId = idCarta;
+            const info = INFO_CARTAS[idCarta];
+            
+            document.getElementById('zoom-titulo').innerText = info.nome;
+            // Carrega a imagem em alta resolução
+            document.getElementById('zoom-imagem').src = info.imagem; 
+
+            // Aplica a cor da borda com base na raridade
+            const imgElement = document.getElementById('zoom-imagem');
+            imgElement.className = "w-[80%] max-w-[260px] aspect-[2.5/3.5] object-cover drop-shadow-2xl mb-8 rounded-xl border-4 transition-all";
+            
+            if (info.raridade === "Comum") imgElement.classList.add('border-gray-400');
+            else if (info.raridade === "Rara") imgElement.classList.add('border-blue-400');
+            else if (info.raridade === "Épica") imgElement.classList.add('border-purple-500');
+            else if (info.raridade === "Lendária") imgElement.classList.add('border-yellow-400');
+
+            document.getElementById('modal-zoom-carta').classList.remove('hidden');
+        };
+
+        window.fecharZoomCarta = function() {
+            document.getElementById('modal-zoom-carta').classList.add('hidden');
+            cartaEmZoomId = null;
+        };
+
+        window.confirmarAdicaoCarta = function() {
+            if (cartaEmZoomId && slotSelecionadoParaEdicao !== null) {
+                deckState[slotSelecionadoParaEdicao] = cartaEmZoomId; 
+                fecharZoomCarta();
                 fecharModalColecao();
                 renderizarGrade();
             }
@@ -401,17 +430,14 @@
                 if (docSnap.exists()) {
                     const dados = docSnap.data();
                     
-                    // Salva a coleção na memória do JS para podermos usar no modal
                     colecaoJogador = dados.colecao || {};
 
-                    // Se estivermos editando um deck existente...
                     if (metaDeck.id && dados.decks && dados.decks[metaDeck.id] && !window.location.search.includes('nome=')) {
                         const deckSalvo = dados.decks[metaDeck.id];
                         metaDeck.nome = deckSalvo.nome;
                         metaDeck.icone = deckSalvo.icone;
                         document.getElementById('titulo-deck').innerText = metaDeck.nome;
 
-                        // Preenche a grade baseando-se nos IDs salvos
                         if (deckSalvo.cartas && Array.isArray(deckSalvo.cartas)) {
                             for (let i = 0; i < deckSalvo.cartas.length; i++) {
                                 if (i >= 20) break;

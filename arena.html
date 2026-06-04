@@ -597,60 +597,54 @@
                 
                 document.getElementById('modal-resultado-final').classList.remove('hidden');
 
-                // Garante que o banco de dados só seja atualizado UMA vez no final
-                if (!window.premioColetado) {
-                    window.premioColetado = true; 
+                // Trava de segurança rodando fora do "if (vitoria)" para contabilizar derrotas nas missões
+                if (!window.dadosSalvos) {
+                    window.dadosSalvos = true; 
                     const userRef = doc(db, "users", currentUserUid);
                     
-                    // Puxa as informações do jogador para ver as missões atuais
-                    const snap = await getDoc(userRef);
-                    
-                    if (snap.exists()) {
-                        let dados = snap.data();
-                        let updates = {};
-                        
-                        // --- 1. ATUALIZAR MISSÕES DIÁRIAS ---
-                        let pacoteMissoes = dados.missoesDiarias || {};
-                        let atualizouMissao = false;
-                        
-                        // Verifica se as missões são as de hoje
-                        let agora = new Date();
-                        if (agora.getHours() < 6) agora.setDate(agora.getDate() - 1);
-                        let hoje = `${agora.getFullYear()}-${agora.getMonth() + 1}-${agora.getDate()}`;
-
-                        if (pacoteMissoes.dataReset === hoje && pacoteMissoes.lista) {
-                            pacoteMissoes.lista.forEach(m => {
-                                // A missão de "batalhar" pontua ganhando, perdendo ou empatando
-                                if (m.id === "batalhar" && m.progresso < m.meta) {
-                                    m.progresso++; 
-                                    atualizouMissao = true;
-                                }
-                                // A missão de "ganhar_partida" só pontua se for vitória
-                                if (vitoria && m.id === "ganhar_partida" && m.progresso < m.meta) {
-                                    m.progresso++; 
-                                    atualizouMissao = true;
-                                }
-                            });
-                        }
-                        
-                        if (atualizouMissao) {
-                            updates.missoesDiarias = pacoteMissoes;
-                        }
-
-                        // --- 2. ATUALIZAR ESTATÍSTICAS E RECOMPENSAS ---
-                        if (vitoria) {
-                            updates.moedas = increment(10);
-                            updates.xp = increment(10);
+                    try {
+                        const snap = await getDoc(userRef);
+                        if (snap.exists()) {
+                            let dados = snap.data();
+                            let updates = {};
                             
-                            // Corrige o bug do ranking: atualizamos as duas variáveis para o Perfil e o Ranking funcionarem em sincronia
-                            updates['estatisticas.batalhasVencidas'] = increment(1); 
-                            updates['estatisticas.vitorias'] = increment(1); 
-                        }
+                            // 1. MISSÕES DIÁRIAS
+                            let pacoteMissoes = dados.missoesDiarias || {};
+                            let atualizouMissao = false;
 
-                        // Dispara todas as atualizações pro Firebase de uma vez só
-                        if (Object.keys(updates).length > 0) {
-                            await updateDoc(userRef, updates);
+                            if (pacoteMissoes.lista && Array.isArray(pacoteMissoes.lista)) {
+                                pacoteMissoes.lista.forEach(m => {
+                                    // A missão de batalhar conclui ganhando ou perdendo
+                                    if (m.id === "batalhar" && m.progresso < m.meta) {
+                                        m.progresso++; 
+                                        atualizouMissao = true;
+                                    }
+                                    // A missão de vencer conclui apenas com vitória
+                                    if (vitoria && m.id === "ganhar_partida" && m.progresso < m.meta) {
+                                        m.progresso++; 
+                                        atualizouMissao = true;
+                                    }
+                                });
+                            }
+                            
+                            if (atualizouMissao) {
+                                updates.missoesDiarias = pacoteMissoes;
+                            }
+
+                            // 2. ESTATÍSTICAS E RECOMPENSAS (Somente se venceu)
+                            if (vitoria) {
+                                updates.moedas = increment(10);
+                                updates.xp = increment(10);
+                                updates['estatisticas.batalhasVencidas'] = increment(1); 
+                                updates['estatisticas.vitorias'] = increment(1); 
+                            }
+
+                            if (Object.keys(updates).length > 0) {
+                                await updateDoc(userRef, updates);
+                            }
                         }
+                    } catch (err) {
+                        console.error("Erro ao salvar o fim de jogo:", err);
                     }
                 }
             }

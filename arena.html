@@ -608,19 +608,19 @@
                             let dados = snap.data();
                             let updates = {};
                             
-                            // 1. MISSÕES DIÁRIAS
+                            // 1. MISSÕES DIÁRIAS (Computa vitórias e derrotas corretamente)
                             let pacoteMissoes = dados.missoesDiarias || {};
                             let atualizouMissao = false;
 
                             if (pacoteMissoes.lista && Array.isArray(pacoteMissoes.lista)) {
                                 pacoteMissoes.lista.forEach(m => {
                                     // A missão de batalhar conclui ganhando ou perdendo
-                                    if (m.id === "batalhar" && m.progresso < m.meta) {
+                                    if ((m.id === "batalhar" || m.id === "jogar_batalha" || m.id === "jogar") && m.progresso < m.meta) {
                                         m.progresso++; 
                                         atualizouMissao = true;
                                     }
                                     // A missão de vencer conclui apenas com vitória
-                                    if (vitoria && m.id === "ganhar_partida" && m.progresso < m.meta) {
+                                    if (vitoria && (m.id === "ganhar_partida" || m.id === "vencer_batalha" || m.id === "vencer") && m.progresso < m.meta) {
                                         m.progresso++; 
                                         atualizouMissao = true;
                                     }
@@ -631,14 +631,26 @@
                                 updates.missoesDiarias = pacoteMissoes;
                             }
 
-                            // 2. ESTATÍSTICAS E RECOMPENSAS (Somente se venceu)
+                            // 2. ESTATÍSTICAS, RECOMPENSAS E BADGES (Somente se venceu)
                             if (vitoria) {
                                 updates.moedas = increment(10);
                                 updates.xp = increment(10);
                                 updates['estatisticas.batalhasVencidas'] = increment(1); 
                                 updates['estatisticas.vitorias'] = increment(1); 
+
+                                // ---- GATILHO DA BADGE DE 30 VITÓRIAS (Guerreiro) ----
+                                let vitoriasAtuais = (dados.estatisticas?.batalhasVencidas || 0) + 1;
+                                
+                                // Verifica se chegou a 30 e se o jogador ainda NÃO tem a badge-005
+                                if (vitoriasAtuais >= 30 && (!dados.badges || !dados.badges['badge-005'])) {
+                                    updates['badges.badge-005'] = true; // Salva a badge no banco
+                                    
+                                    // Deixa um "bilhete" no navegador para a tela de Batalha mostrar o aviso
+                                    localStorage.setItem('novaBadge', 'Guerreiro');
+                                }
                             }
 
+                            // Dispara a atualização para o banco
                             if (Object.keys(updates).length > 0) {
                                 await updateDoc(userRef, updates);
                             }
@@ -649,7 +661,7 @@
                 }
             }
         };
-
+        
         function iniciarCascataFinal() {
             if (window.etapaIniciada) return;
             window.etapaIniciada = true;

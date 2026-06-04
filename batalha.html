@@ -122,7 +122,6 @@
 
                 <div onclick="window.location.href='decks.html'" class="flex flex-col items-center group cursor-pointer">
                     <div class="bg-[#dca3e8] w-full aspect-square rounded-[24px] flex items-center justify-center p-4 shadow-xl hover:scale-105 transition-transform border-4 border-transparent hover:border-[#8b3dff]/50 relative">
-                        <!-- Imagem provisória, você pode usar uma imagem de cartas diferente aqui depois -->
                         <img src="colecao.png" alt="Decks" class="w-[80%] h-[80%] object-contain drop-shadow-lg opacity-90">
                     </div>
                     <span class="text-[#dca3e8] font-black text-sm mt-3 drop-shadow-md uppercase tracking-wide text-center leading-tight">Meus<br>Decks</span>
@@ -150,7 +149,7 @@
 
     </div>
 
-    <!-- MODAL DE BUSCA DE PARTIDA (ESTRUTURA INICIAL) -->
+    <!-- MODAL DE BUSCA DE PARTIDA -->
     <div id="modal-busca" class="hidden fixed inset-0 bg-black/90 z-[200] flex flex-col items-center justify-center p-4 backdrop-blur-md pointer-events-auto w-screen h-screen">
         <h2 class="text-[#dca3e8] font-black text-2xl text-center uppercase tracking-wider mb-8 animate-pulse">Procurando<br>Oponente...</h2>
         <div class="w-16 h-16 border-4 border-[#7a32a8] border-t-[#dca3e8] rounded-full animate-spin mb-8"></div>
@@ -162,7 +161,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, collection, query, orderBy, limit, getDocs, where, addDoc, updateDoc, onSnapshot, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyCU3lFTgfrDMaD9jwR7X7ivYPmGQh4VE1g",
@@ -178,6 +177,8 @@
         const db = getFirestore(app);
 
         let currentUserDoc = null;
+        let partidaIdAtual = null;
+        let unsubscribePartida = null;
 
         window.mostrarToast = function(mensagem) {
             const container = document.getElementById('toast-container');
@@ -200,22 +201,105 @@
             return 3000;
         }
 
-        // Funções provisórias de Matchmaking
-        window.buscarPartida = function() {
-            if (!currentUserDoc || !currentUserDoc.deckPadrao) {
-                return window.mostrarToast("Você precisa criar e selecionar um Deck padrão primeiro!");
+        // --- SISTEMA DE MATCHMAKING (PAREAMENTO) ---
+        window.buscarPartida = async function() {
+            if (!currentUserDoc) return;
+            
+            // Verifica se tem deck padrão
+            if (!currentUserDoc.deckPadrao || !currentUserDoc.decks || !currentUserDoc.decks[currentUserDoc.deckPadrao]) {
+                return window.mostrarToast("Você precisa criar e selecionar um Deck Padrão na tela de Decks!");
             }
+
+            const deckCompleto = currentUserDoc.decks[currentUserDoc.deckPadrao].cartas;
+            if (!deckCompleto || deckCompleto.length < 20) {
+                return window.mostrarToast("Seu Deck Padrão está incompleto. Ajuste-o primeiro.");
+            }
+
             document.getElementById('modal-busca').classList.remove('hidden');
+
+            try {
+                const partidasRef = collection(db, "partidas");
+                // Procura alguma sala aberta esperando jogador
+                const q = query(partidasRef, where("status", "==", "aguardando"), limit(1));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    // NINGUÉM ESPERANDO: Cria uma sala nova e fica de host
+                    const novaPartida = {
+                        status: "aguardando",
+                        criadoEm: serverTimestamp(),
+                        jogador1: {
+                            uid: auth.currentUser.uid,
+                            nome: currentUserDoc.nomeDisplay || "JOGADOR 1",
+                            foto: currentUserDoc.fotoPerfil || "",
+                            deck: deckCompleto
+                        },
+                        jogador2: null,
+                        turnoAtual: 0,
+                        quemAtaca: null
+                    };
+
+                    const docRef = await addDoc(partidasRef, novaPartida);
+                    partidaIdAtual = docRef.id;
+
+                    // Fica escutando as mudanças nessa sala
+                    unsubscribePartida = onSnapshot(docRef, (docSnap) => {
+                        const dadosPartida = docSnap.data();
+                        if (dadosPartida && dadosPartida.status === "andamento") {
+                            // Alguém entrou! Vai para a Arena.
+                            window.location.href = `arena.html?sala=${docRef.id}`;
+                        }
+                    });
+
+                } else {
+                    // ACHOU UMA SALA: Entra como Jogador 2
+                    const salaId = querySnapshot.docs[0].id;
+                    const dadosSala = querySnapshot.docs[0].data();
+                    const salaRef = doc(db, "partidas", salaId);
+                    
+                    // Sorteio de quem ataca primeiro (Cara ou Coroa)
+                    const sorteio = Math.random() < 0.5 ? 1 : 2;
+                    const quemComecaUid = sorteio === 1 ? dadosSala.jogador1.uid : auth.currentUser.uid;
+
+                    await updateDoc(salaRef, {
+                        status: "andamento",
+                        jogador2: {
+                            uid: auth.currentUser.uid,
+                            nome: currentUserDoc.nomeDisplay || "JOGADOR 2",
+                            foto: currentUserDoc.fotoPerfil || "",
+                            deck: deckCompleto
+                        },
+                        turnoAtual: 1,
+                        quemAtaca: quemComecaUid
+                    });
+
+                    window.location.href = `arena.html?sala=${salaId}`;
+                }
+            } catch (error) {
+                console.error("Erro no matchmaking:", error);
+                window.mostrarToast("Erro ao conectar com os servidores de batalha.");
+                cancelarBusca();
+            }
         };
 
-        window.cancelarBusca = function() {
+        window.cancelarBusca = async function() {
             document.getElementById('modal-busca').classList.add('hidden');
+            
+            // Se ele era o host da sala e cancelou, deleta a sala do banco
+            if (partidaIdAtual) {
+                if (unsubscribePartida) unsubscribePartida(); // Para de escutar
+                try {
+                    await deleteDoc(doc(db, "partidas", partidaIdAtual));
+                } catch (e) {
+                    console.error("Erro ao apagar sala abandonada:", e);
+                }
+                partidaIdAtual = null;
+            }
         };
 
         async function carregarRanking() {
             const containerRanking = document.getElementById('lista-ranking');
             try {
-                // Busca os 5 melhores jogadores baseados em vitórias
                 const usersRef = collection(db, "users");
                 const q = query(usersRef, orderBy("estatisticas.vitorias", "desc"), limit(5));
                 const querySnapshot = await getDocs(q);
@@ -235,7 +319,6 @@
                     
                     const div = document.createElement('div');
                     
-                    // Se for o primeiro lugar, damos um destaque visual
                     if (posicao === 1) {
                         div.className = "flex justify-between items-center bg-[#7a32a8] text-white rounded-full px-4 py-2 shadow-inner border border-yellow-400";
                     } else {
@@ -253,7 +336,6 @@
 
             } catch (error) {
                 console.error("Erro ao buscar ranking:", error);
-                // NOTA: Se for o primeiro teste, o Firebase pode pedir para criar um Index no console.
                 containerRanking.innerHTML = '<span class="text-red-500 text-[10px] font-bold text-center">Erro ao carregar ranking.</span>';
             }
         }
@@ -286,7 +368,6 @@
                     document.getElementById('player-barra-xp').style.width = `${porcentagem}%`;
                     document.getElementById('player-texto-xp').innerText = `${xpAtual}/${maxXp} xp`;
 
-                    // Chama a função de ranking após carregar o jogador
                     carregarRanking();
                 }
             } else {

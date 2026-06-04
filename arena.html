@@ -81,22 +81,23 @@
 
     <div class="w-full h-full max-w-sm mx-auto relative flex flex-col border-x-2 border-[#dca3e8]/30 shadow-2xl">
 
-        <div class="absolute top-4 w-[95%] left-1/2 transform -translate-x-1/2 flex items-center justify-between bg-[#dca3e8] rounded-full shadow-lg z-50 h-12 px-2">
+        <div class="absolute top-4 w-[95%] max-w-[360px] left-1/2 transform -translate-x-1/2 flex items-center justify-between bg-[#dca3e8] rounded-full shadow-lg z-50 h-12 px-4 border-2 border-[#bc7bd4]">
             
-            <div class="flex-1 flex justify-start pr-8 relative">
-                <button onclick="abrirModalDesistir()" class="bg-red-600 hover:bg-red-700 text-white font-black text-[9px] px-3 py-1.5 rounded-full shadow-md border-2 border-red-800 uppercase tracking-widest transition-transform active:scale-95 absolute -left-1 -top-1">
-                    DESISTIR
-                </button>
+            <div class="flex-1 flex justify-start items-center overflow-hidden pr-6">
+                <span id="opp-nome" class="text-[#7a32a8] font-black text-[11px] uppercase tracking-wide truncate">BUSCANDO...</span>
             </div>
             
-            <div class="absolute left-1/2 transform -translate-x-1/2 -top-2 w-16 h-16 bg-[#dca3e8] rounded-full flex items-center justify-center shadow-md overflow-hidden z-40 border-2 border-[#bc7bd4]">
+            <div class="absolute left-1/2 transform -translate-x-1/2 -top-3 w-16 h-16 bg-[#dca3e8] rounded-full flex items-center justify-center shadow-md overflow-hidden z-40 border-2 border-[#bc7bd4]">
                 <img id="opp-foto" src="" class="hidden w-full h-full object-cover">
                 <span id="opp-foto-placeholder" class="text-[#7a32a8] font-black text-[10px]">FOTO</span>
             </div>
             
-            <div class="flex-1 text-center truncate pl-8">
-                <span id="opp-nome" class="text-[#7a32a8] font-black text-[10px] uppercase tracking-wide">BUSCANDO...</span>
+            <div class="flex-1 flex justify-end items-center pl-6">
+                <button onclick="abrirModalDesistir()" class="bg-red-600 hover:bg-red-700 text-white font-black text-[9px] px-3 py-1.5 rounded-full shadow-md border-2 border-red-800 uppercase tracking-widest transition-transform active:scale-95">
+                    DESISTIR
+                </button>
             </div>
+
         </div>
 
         <div class="w-full h-[45%] relative z-20 mt-16">
@@ -344,7 +345,7 @@
             if (dadosSala[minhaRole].cartaJogada) return; 
 
             const isMyTurn = dadosSala.quemAtaca === currentUserUid;
-            if (!isMyTurn && dadosSala.statusTurno === 'aguardando_ataque') return; // Bloqueia o defensor antes da hora
+            if (!isMyTurn && dadosSala.statusTurno === 'aguardando_ataque') return; 
 
             cartaFocadaId = idCarta;
             document.getElementById('zoom-img').src = INFO_CARTAS[idCarta]?.imagem || 'fundo_carta.png';
@@ -366,18 +367,21 @@
 
         window.fecharZoomCarta = function() {
             document.getElementById('modal-zoom').classList.add('hidden');
-            cartaFocadaId = null;
+            // NÃO ZERAMOS A cartaFocadaId AQUI, PARA PODERMOS USAR ELA AO CONFIRMAR
         };
 
         window.confirmarAcao = function(atributo) {
-            fecharZoomCarta();
+            const idAlvo = cartaFocadaId; // Salva o ID da carta que foi clicada antes de fechar a janela
             
-            // Remove a carta da mão localmente imediatamente
+            fecharZoomCarta();
+            cartaFocadaId = null; // Agora sim podemos zerar de forma segura
+            
+            // Remove a carta da mão localmente imediatamente usando o id salvo
             const myMao = [...dadosSala[minhaRole].mao];
-            const newMao = myMao.filter(id => id !== cartaFocadaId);
+            const newMao = myMao.filter(id => id !== idAlvo);
 
             let updates = {
-                [`${minhaRole}.cartaJogada`]: cartaFocadaId,
+                [`${minhaRole}.cartaJogada`]: idAlvo,
                 [`${minhaRole}.mao`]: newMao
             };
 
@@ -410,17 +414,18 @@
 
             document.getElementById('embate-atributo-titulo').innerText = `ATRIBUTO: ${dadosSala.atributoTurno.toUpperCase()}`;
 
-            // P1
+            // P1 (Puxa do banco INFO_CARTAS usando o ID real gravado)
+            const info1 = INFO_CARTAS[data.id1] || { imagem: 'fundo_carta.png' };
             document.getElementById('clash-p1-name').innerText = dadosSala.jogador1.nome;
-            document.getElementById('clash-p1-card').style.backgroundImage = `url('${INFO_CARTAS[data.id1]?.imagem || 'fundo_carta.png'}')`;
+            document.getElementById('clash-p1-card').style.backgroundImage = `url('${info1.imagem}')`;
             document.getElementById('clash-p1-valor').innerText = data.val1;
 
-            // P2
+            // P2 (Puxa do banco INFO_CARTAS usando o ID real gravado)
+            const info2 = INFO_CARTAS[data.id2] || { imagem: 'fundo_carta.png' };
             document.getElementById('clash-p2-name').innerText = dadosSala.jogador2.nome;
-            document.getElementById('clash-p2-card').style.backgroundImage = `url('${INFO_CARTAS[data.id2]?.imagem || 'fundo_carta.png'}')`;
+            document.getElementById('clash-p2-card').style.backgroundImage = `url('${info2.imagem}')`;
             document.getElementById('clash-p2-valor').innerText = data.val2;
 
-            // Zera as classes para garantir que a animação rode
             [p1c, p2c, vsText].forEach(el => { el.style.animation = 'none'; void el.offsetWidth; });
             p1c.classList.remove('is-winner', 'is-loser');
             p2c.classList.remove('is-winner', 'is-loser');
@@ -432,7 +437,6 @@
             vsText.style.animation = 'fadeIn 1s 0.5s forwards';
             vsText.style.opacity = 0;
 
-            // Depois de 1.5s as cartas colidem e revela quem ganha a luz verde
             setTimeout(() => {
                 if (dadosSala.chaveVencedor === 'jogador1') {
                     p1c.classList.add('is-winner'); p2c.classList.add('is-loser');
@@ -453,6 +457,13 @@
 
             const id1 = dadosSala.jogador1.cartaJogada;
             const id2 = dadosSala.jogador2.cartaJogada;
+            
+            // Trava de segurança para garantir que a rede gravou os IDs corretamente
+            if (!id1 || !id2) {
+                window.resolvendoHost = false;
+                return;
+            }
+
             const attr = dadosSala.atributoTurno.toLowerCase();
 
             const info1 = INFO_CARTAS[id1] || { aura:0, fofura:0, diversao:0, aleatoriedade:0 };
@@ -486,7 +497,7 @@
                 }
             }
 
-            // O Host publica o resultado. Isso faz os clientes abrirem a Animação e o Toast.
+            // O Host publica o resultado na rede (desencadeia o Toast e Animação visual)
             await updateDoc(doc(db, "partidas", salaId), {
                 statusTurno: 'exibindo_resultado',
                 vencedorTurno: tipoVitoria,
@@ -495,17 +506,15 @@
                 clashData: { id1, val1, id2, val2 }
             });
 
-            // O Host segura o jogo por 5 segundos para a animação rodar e os jogadores lerem.
+            // O Host segura o jogo por 5 segundos para a animação rodar
             setTimeout(async () => {
                 
-                // MANDA AS DUAS CARTAS PARA A PILHA INVISÍVEL DO VENCEDOR
                 let j1Pilha = [...(dadosSala.jogador1.pilhaVitorias || [])];
                 let j2Pilha = [...(dadosSala.jogador2.pilhaVitorias || [])];
 
                 if (vencedorKey === 'jogador1') j1Pilha.push(id1, id2);
                 else j2Pilha.push(id1, id2);
 
-                // SACA UMA NOVA CARTA DOS MONTES RESTANTES DE CADA UM (se ainda houver)
                 let j1Deck = [...dadosSala.jogador1.deck];
                 let j1Mao = [...dadosSala.jogador1.mao];
                 if (j1Deck.length > 0) j1Mao.push(j1Deck.shift());
@@ -526,7 +535,6 @@
                     'clashData': null
                 };
 
-                // Acaba apenas quando o deck acabar E a mão também!
                 if (j1Mao.length === 0 && j2Mao.length === 0) {
                     updates['status'] = 'finalizada';
                     updates['statusTurno'] = 'finalizada';
@@ -645,7 +653,6 @@
                         minhaRole = 'jogador2'; oppRole = 'jogador1'; isHost = false;
                     }
 
-                    // Host embaralha e distribui a mão inicial
                     if (isHost && !dadosSala.jogador1.mao) {
                         let j1Deck = [...dadosSala.jogador1.deck];
                         let j2Deck = [...dadosSala.jogador2.deck];

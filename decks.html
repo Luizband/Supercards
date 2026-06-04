@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supercards - Meus Decks</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-image: url('fundotela.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            width: 90%;
+            max-width: 350px;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .toast-msg {
+            background: #dca3e8;
+            color: #7a32a8;
+            border: 3px solid #7a32a8;
+            padding: 12px 20px;
+            border-radius: 9999px;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.3);
+            text-align: center;
+            font-weight: 900;
+            font-size: 0.85rem;
+            animation: slideDown 0.3s ease-out;
+            pointer-events: auto;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Efeito de tremedeira para o modo exclusão */
+        .shake-danger {
+            animation: shake 0.5s infinite;
+            border-color: #ef4444 !important;
+        }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+    </style>
+</head>
+<body class="fixed inset-0 px-4 pt-8 flex justify-center overflow-hidden w-screen">
+
+    <div id="toast-container"></div>
+
+    <div class="w-full max-w-sm flex flex-col h-full relative">
+        
+        <h1 class="text-[#dca3e8] font-black text-2xl text-center mb-8 drop-shadow-md uppercase tracking-wider">Decks</h1>
+
+        <!-- GRADE DE DECKS -->
+        <main class="flex-grow overflow-y-auto no-scrollbar pb-40">
+            <div id="grid-decks" class="grid grid-cols-3 gap-x-4 gap-y-6 w-full px-2">
+                <!-- Os decks serão injetados aqui pelo JavaScript -->
+            </div>
+            
+            <div id="msg-sem-decks" class="hidden text-center text-[#dca3e8] font-bold mt-10">
+                Você ainda não possui nenhum deck.
+            </div>
+        </main>
+
+        <!-- BOTÕES CRIAR E EXCLUIR -->
+        <div class="absolute bottom-28 left-0 w-full flex justify-center gap-4 z-40">
+            <button onclick="abrirModalCriar()" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-3 px-8 rounded-full shadow-lg border-2 border-[#bc7bd4] uppercase text-sm tracking-wide transition-transform hover:scale-105">
+                Criar
+            </button>
+            <button id="btn-toggle-excluir" onclick="toggleModoExclusao()" class="bg-red-600 hover:bg-red-700 text-white font-black py-3 px-8 rounded-full shadow-lg border-2 border-red-400 uppercase text-sm tracking-wide transition-transform hover:scale-105">
+                Excluir
+            </button>
+        </div>
+
+        <!-- FOOTER RETORNAR -->
+        <footer class="fixed bottom-8 left-1/2 transform -translate-x-1/2 w-full flex justify-center z-[100] pointer-events-none" style="padding-bottom: env(safe-area-inset-bottom);">
+            <button onclick="window.location.href='batalha.html'" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-2.5 px-12 rounded-full shadow-2xl transition-transform hover:-translate-y-1 pointer-events-auto border-2 border-[#dca3e8] uppercase text-sm tracking-wider">
+                Retornar
+            </button>
+        </footer>
+
+    </div>
+
+    <!-- MODAL DE CRIAÇÃO DE DECK -->
+    <div id="modal-criar" class="hidden fixed inset-0 bg-black/80 z-[200] flex flex-col items-center justify-center p-4 backdrop-blur-sm pointer-events-auto">
+        <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 w-full max-w-sm shadow-2xl flex flex-col items-center gap-5 relative">
+            <button onclick="fecharModalCriar()" class="absolute top-2 right-4 text-[#7a32a8] font-black text-xl hover:text-purple-600 transition-colors">X</button>
+            
+            <h2 class="text-[#7a32a8] font-black text-lg text-center uppercase tracking-wider">Novo Deck</h2>
+            
+            <input type="text" id="input-nome-deck" placeholder="Nome do Baralho" maxlength="15" class="w-full px-4 py-3 rounded-xl bg-white/80 border-2 border-transparent focus:border-purple-500 focus:outline-none text-purple-900 font-bold placeholder-purple-400 text-center uppercase">
+            
+            <div class="w-full text-center">
+                <span class="text-[#7a32a8] font-bold text-xs uppercase tracking-widest mb-2 block">Escolha a cor</span>
+                <div class="flex justify-between items-center gap-2">
+                    <!-- Opção 1 -->
+                    <div onclick="selecionarIcone('baralho01.png', this)" class="icone-opcao w-20 h-20 bg-black/20 rounded-xl p-2 cursor-pointer border-4 border-transparent hover:bg-black/30 transition-all flex items-center justify-center">
+                        <img src="baralho01.png" class="w-full h-full object-contain">
+                    </div>
+                    <!-- Opção 2 -->
+                    <div onclick="selecionarIcone('baralho02.png', this)" class="icone-opcao w-20 h-20 bg-black/20 rounded-xl p-2 cursor-pointer border-4 border-transparent hover:bg-black/30 transition-all flex items-center justify-center">
+                        <img src="baralho02.png" class="w-full h-full object-contain">
+                    </div>
+                    <!-- Opção 3 -->
+                    <div onclick="selecionarIcone('baralho03.png', this)" class="icone-opcao w-20 h-20 bg-black/20 rounded-xl p-2 cursor-pointer border-4 border-transparent hover:bg-black/30 transition-all flex items-center justify-center">
+                        <img src="baralho03.png" class="w-full h-full object-contain">
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="avancarConstrutor()" class="w-full mt-2 py-3 bg-[#7a32a8] hover:bg-purple-600 text-white font-black text-sm rounded-full shadow-md transition-transform hover:scale-105 uppercase tracking-wide">
+                Avançar para Cartas
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIRMAÇÃO DE EXCLUSÃO -->
+    <div id="modal-excluir" class="hidden fixed inset-0 bg-black/80 z-[200] flex flex-col items-center justify-center p-4 backdrop-blur-sm pointer-events-auto">
+        <div class="bg-[#dca3e8] border-4 border-red-600 rounded-2xl p-6 w-full max-w-xs shadow-2xl flex flex-col items-center gap-4">
+            <h2 class="text-red-600 font-black text-lg text-center uppercase tracking-wider mb-2">Excluir Deck?</h2>
+            <p class="text-[#7a32a8] font-bold text-sm text-center mb-2">Esta ação não pode ser desfeita.</p>
+            
+            <div class="flex w-full gap-3 mt-2">
+                <button onclick="fecharModalExcluir()" class="flex-1 py-3 bg-gray-500 hover:bg-gray-600 text-white font-black text-xs rounded-full shadow-md uppercase">
+                    Cancelar
+                </button>
+                <button id="btn-confirmar-exclusao" class="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white font-black text-xs rounded-full shadow-md uppercase">
+                    Excluir
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyCU3lFTgfrDMaD9jwR7X7ivYPmGQh4VE1g",
+          authDomain: "supercards-tcg.firebaseapp.com",
+          projectId: "supercards-tcg",
+          storageBucket: "supercards-tcg.firebasestorage.app",
+          messagingSenderId: "862316380615",
+          appId: "1:862316380615:web:b3f28056ebc967673999e2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUserUid = null;
+        let meusDecks = {};
+        let deckPadrao = "";
+        let modoExclusao = false;
+        let deckParaExcluir = null;
+        let iconeSelecionado = null;
+
+        window.mostrarToast = function(mensagem) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast-msg';
+            toast.innerHTML = mensagem;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => toast.remove(), 500); 
+            }, 3000);
+        };
+
+        // --- LÓGICA DO MODAL DE CRIAÇÃO ---
+        window.abrirModalCriar = function() {
+            document.getElementById('input-nome-deck').value = "";
+            iconeSelecionado = null;
+            document.querySelectorAll('.icone-opcao').forEach(el => {
+                el.classList.remove('border-[#7a32a8]', 'bg-black/40');
+                el.classList.add('border-transparent');
+            });
+            document.getElementById('modal-criar').classList.remove('hidden');
+        };
+
+        window.fecharModalCriar = function() {
+            document.getElementById('modal-criar').classList.add('hidden');
+        };
+
+        window.selecionarIcone = function(nomeArquivo, elemento) {
+            iconeSelecionado = nomeArquivo;
+            document.querySelectorAll('.icone-opcao').forEach(el => {
+                el.classList.remove('border-[#7a32a8]', 'bg-black/40');
+                el.classList.add('border-transparent');
+            });
+            elemento.classList.remove('border-transparent');
+            elemento.classList.add('border-[#7a32a8]', 'bg-black/40');
+        };
+
+        // Redireciona para o construtor enviando nome e ícone via URL
+        window.avancarConstrutor = function() {
+            const nome = document.getElementById('input-nome-deck').value.trim();
+            if (!nome) return window.mostrarToast("Dê um nome ao seu deck!");
+            if (!iconeSelecionado) return window.mostrarToast("Escolha a cor da caixa!");
+            
+            // Redireciona sem salvar no Firebase. O construtor.html vai fazer o salvamento.
+            window.location.href = `construtor.html?nome=${encodeURIComponent(nome)}&icone=${iconeSelecionado}`;
+        };
+
+        // --- LÓGICA DA TELA DE DECKS ---
+        window.toggleModoExclusao = function() {
+            modoExclusao = !modoExclusao;
+            const btn = document.getElementById('btn-toggle-excluir');
+            
+            if (modoExclusao) {
+                btn.classList.replace('bg-red-600', 'bg-gray-800');
+                btn.classList.replace('border-red-400', 'border-gray-500');
+                btn.innerText = "CANCELAR";
+                window.mostrarToast("Modo exclusão ativado. Clique em um deck para apagar.");
+            } else {
+                btn.classList.replace('bg-gray-800', 'bg-red-600');
+                btn.classList.replace('border-gray-500', 'border-red-400');
+                btn.innerText = "EXCLUIR";
+            }
+            renderizarDecks(); // Atualiza a interface
+        };
+
+        window.interagirComDeck = async function(id) {
+            if (modoExclusao) {
+                deckParaExcluir = id;
+                document.getElementById('modal-excluir').classList.remove('hidden');
+            } else {
+                // Se não estiver excluindo, define como Padrão
+                if (deckPadrao === id) return; // Já é o padrão
+                
+                try {
+                    const userRef = doc(db, "users", currentUserUid);
+                    await updateDoc(userRef, { deckPadrao: id });
+                    deckPadrao = id;
+                    renderizarDecks();
+                    window.mostrarToast("Deck definido como padrão!");
+                } catch (error) {
+                    window.mostrarToast("Erro ao definir deck padrão.");
+                }
+            }
+        };
+
+        window.fecharModalExcluir = function() {
+            document.getElementById('modal-excluir').classList.add('hidden');
+            deckParaExcluir = null;
+        };
+
+        document.getElementById('btn-confirmar-exclusao').addEventListener('click', async () => {
+            if (!deckParaExcluir) return;
+            
+            try {
+                const userRef = doc(db, "users", currentUserUid);
+                
+                // Remove o deck usando deleteField() na propriedade específica
+                const atualizacao = {};
+                atualizacao[`decks.${deckParaExcluir}`] = deleteField();
+                
+                // Se o deck excluído era o padrão, remove o padrão
+                if (deckPadrao === deckParaExcluir) {
+                    atualizacao.deckPadrao = deleteField();
+                    deckPadrao = "";
+                }
+
+                await updateDoc(userRef, atualizacao);
+                
+                delete meusDecks[deckParaExcluir];
+                fecharModalExcluir();
+                renderizarDecks();
+                window.mostrarToast("Deck excluído!");
+                
+                // Desativa modo exclusão se não sobrar decks
+                if (Object.keys(meusDecks).length === 0) {
+                    toggleModoExclusao();
+                }
+
+            } catch (error) {
+                window.mostrarToast("Erro ao excluir deck.");
+            }
+        });
+
+        function renderizarDecks() {
+            const grid = document.getElementById('grid-decks');
+            const msgVazio = document.getElementById('msg-sem-decks');
+            grid.innerHTML = "";
+
+            const ids = Object.keys(meusDecks);
+            
+            if (ids.length === 0) {
+                msgVazio.classList.remove('hidden');
+            } else {
+                msgVazio.classList.add('hidden');
+                
+                ids.forEach(id => {
+                    const deck = meusDecks[id];
+                    const isPadrao = (id === deckPadrao);
+                    
+                    let classesCaixa = "bg-[#dca3e8] w-full aspect-square rounded-[20px] flex items-center justify-center p-3 shadow-lg border-4 transition-all relative";
+                    let textoIndicador = "";
+
+                    if (modoExclusao) {
+                        classesCaixa += " shake-danger bg-red-200 cursor-pointer";
+                    } else if (isPadrao) {
+                        classesCaixa += " border-[#8b3dff] cursor-pointer ring-4 ring-[#8b3dff]/30";
+                        textoIndicador = `<div class="absolute -top-3 bg-[#8b3dff] text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-white">Padrão</div>`;
+                    } else {
+                        classesCaixa += " border-transparent hover:border-[#8b3dff]/50 cursor-pointer";
+                    }
+
+                    const div = document.createElement('div');
+                    div.className = "flex flex-col items-center";
+                    div.onclick = () => interagirComDeck(id);
+                    
+                    div.innerHTML = `
+                        <div class="${classesCaixa}">
+                            ${textoIndicador}
+                            <img src="${deck.icone || 'baralho01.png'}" class="w-[85%] h-[85%] object-contain drop-shadow-md">
+                        </div>
+                        <span class="text-[#dca3e8] font-black text-[10px] mt-2 drop-shadow-md uppercase text-center w-full truncate px-1">${deck.nome}</span>
+                    `;
+                    
+                    grid.appendChild(div);
+                });
+            }
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUserUid = user.uid;
+                const docRef = doc(db, "users", user.uid);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const dados = docSnap.data();
+                    meusDecks = dados.decks || {};
+                    deckPadrao = dados.deckPadrao || "";
+                    
+                    renderizarDecks();
+                }
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+    </script>
+</body>
+</html>

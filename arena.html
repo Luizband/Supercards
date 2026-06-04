@@ -376,9 +376,13 @@
             fecharZoomCarta();
             cartaFocadaId = null; // Agora sim podemos zerar de forma segura
             
-            // Remove a carta da mão localmente imediatamente usando o id salvo
+            // Remove APENAS UMA CÓPIA da carta da mão localmente usando o index
             const myMao = [...dadosSala[minhaRole].mao];
-            const newMao = myMao.filter(id => id !== idAlvo);
+            const indexARemover = myMao.indexOf(idAlvo);
+            if (indexARemover > -1) {
+                myMao.splice(indexARemover, 1);
+            }
+            const newMao = myMao;
 
             let updates = {
                 [`${minhaRole}.cartaJogada`]: idAlvo,

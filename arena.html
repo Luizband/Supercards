@@ -44,6 +44,17 @@
             animation: slideDown 0.3s ease-out forwards;
             pointer-events: auto;
         }
+        
+        /* Animações do Modal de Embate (Estilo LOFT) */
+        @keyframes slideInFromLeft { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideInFromRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes winnerPulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 20px #4ade80; } 50% { transform: scale(1.05); box-shadow: 0 0 35px #4ade80; } }
+
+        .clash-card-container { transition: filter 0.5s ease-in-out, transform 0.5s ease-in-out; }
+        .is-loser { filter: brightness(0.4); transform: scale(0.95); }
+        .is-winner { animation: winnerPulse 1.5s infinite; border-color: #4ade80 !important; }
+
         @keyframes slideDown {
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -54,12 +65,12 @@
         .leque-3 { transform: rotate(5deg) translateY(0px); }
         .leque-4 { transform: rotate(15deg) translateY(10px); }
 
-        /* Animação das suas cartas sobrepostas */
+        /* Efeito das suas cartas sobrepostas */
         .hover-carta { 
             transition: transform 0.2s ease, z-index 0s; 
         }
         .hover-carta:hover { 
-            transform: translateY(-20px) scale(1.1); 
+            transform: translateY(-30px) scale(1.15); 
             z-index: 50 !important; 
         }
     </style>
@@ -70,11 +81,12 @@
 
     <div class="w-full h-full max-w-sm mx-auto relative flex flex-col border-x-2 border-[#dca3e8]/30 shadow-2xl">
 
-        <!-- ================= CABEÇALHO COM BOTÃO DESISTIR ================= -->
         <div class="absolute top-4 w-[95%] left-1/2 transform -translate-x-1/2 flex items-center justify-between bg-[#dca3e8] rounded-full shadow-lg z-50 h-12 px-2">
             
-            <div class="flex-1 text-center truncate pr-8">
-                <span id="opp-nome" class="text-[#7a32a8] font-black text-[11px] uppercase tracking-wide">BUSCANDO...</span>
+            <div class="flex-1 flex justify-start pr-8 relative">
+                <button onclick="abrirModalDesistir()" class="bg-red-600 hover:bg-red-700 text-white font-black text-[9px] px-3 py-1.5 rounded-full shadow-md border-2 border-red-800 uppercase tracking-widest transition-transform active:scale-95 absolute -left-1 -top-1">
+                    DESISTIR
+                </button>
             </div>
             
             <div class="absolute left-1/2 transform -translate-x-1/2 -top-2 w-16 h-16 bg-[#dca3e8] rounded-full flex items-center justify-center shadow-md overflow-hidden z-40 border-2 border-[#bc7bd4]">
@@ -82,55 +94,44 @@
                 <span id="opp-foto-placeholder" class="text-[#7a32a8] font-black text-[10px]">FOTO</span>
             </div>
             
-            <div class="flex-1 flex justify-end pl-8">
-                <button onclick="abrirModalDesistir()" class="bg-red-600 hover:bg-red-700 text-white font-black text-[9px] px-3 py-1.5 rounded-full shadow-md border-2 border-red-800 uppercase tracking-widest transition-transform active:scale-95">
-                    DESISTIR
-                </button>
+            <div class="flex-1 text-center truncate pl-8">
+                <span id="opp-nome" class="text-[#7a32a8] font-black text-[10px] uppercase tracking-wide">BUSCANDO...</span>
             </div>
         </div>
 
-        <!-- ================= ÁREA DO ADVERSÁRIO ================= -->
         <div class="w-full h-[45%] relative z-20 mt-16">
 
             <div id="mao-adversario" class="absolute top-4 left-1/2 transform -translate-x-1/2 flex justify-center w-full z-10 pointer-events-none">
-                <!-- Injetado via JS -->
-            </div>
+                </div>
 
-            <!-- Deck Invertido -->
             <div class="absolute bottom-4 right-4 flex flex-col items-center">
                 <img src="fundo_carta.png" class="w-14 object-contain drop-shadow-xl brightness-50 rounded-md border border-black">
-                <span id="opp-deck-count" class="text-white font-black text-xl -mt-9 drop-shadow-[0_2px_4px_rgba(0,0,0,1)] z-10">20</span>
+                <span id="opp-deck-count" class="text-white font-black text-xl -mt-9 drop-shadow-[0_2px_4px_rgba(0,0,0,1)] z-10">15</span>
             </div>
 
         </div>
 
-        <!-- ================= LOGO ================= -->
         <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
             <img src="logo.png" class="w-[80%] max-w-[250px] opacity-20 grayscale object-contain drop-shadow-lg">
         </div>
 
-        <!-- ================= ÁREA DO JOGADOR ================= -->
         <div class="w-full h-[55%] relative z-20 border-t-2 border-[#dca3e8]/20 backdrop-blur-sm bg-black/10">
             
             <div class="absolute top-4 left-4 flex flex-col items-center">
                 <img src="fundo_carta.png" class="w-14 object-contain drop-shadow-xl brightness-50 rounded-md border border-black">
-                <span id="player-deck-count" class="text-white font-black text-xl -mt-9 drop-shadow-[0_2px_4px_rgba(0,0,0,1)] z-10">20</span>
+                <span id="player-deck-count" class="text-white font-black text-xl -mt-9 drop-shadow-[0_2px_4px_rgba(0,0,0,1)] z-10">15</span>
             </div>
 
-            <!-- Centro da Arena -->
             <div id="arena-combate" class="absolute -top-16 left-1/2 transform -translate-x-1/2 w-full h-32 flex justify-center items-center gap-4 z-40 hidden">
                 <div id="carta-jogada-player" class="w-[85px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-2xl border-2 border-white transform translate-y-10 transition-all duration-500"></div>
                 <div id="carta-jogada-opp" class="w-[85px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-2xl border-2 border-black transform -translate-y-10 transition-all duration-500"></div>
             </div>
 
-            <!-- Mão do jogador MAIOR e SOBREPOSTA -->
-            <div id="mao-jogador" class="absolute bottom-9 left-1/2 transform -translate-x-1/2 w-full flex justify-center -space-x-4 px-2 z-30">
-                <!-- Injetado via JS -->
-            </div>
+            <div id="mao-jogador" class="absolute bottom-10 left-1/2 transform -translate-x-1/2 w-full flex justify-center -space-x-6 px-2 z-30">
+                </div>
 
         </div>
 
-        <!-- ================= MODAL AÇÃO ================= -->
         <div id="modal-zoom" class="hidden fixed inset-0 bg-black/90 z-[100] flex flex-col items-center justify-center p-4 backdrop-blur-md">
             <button onclick="fecharZoomCarta()" class="absolute top-4 right-6 text-white font-black text-2xl hover:text-gray-300 transition-colors z-50">X</button>
             <h2 id="titulo-acao" class="text-white font-black text-xl text-center uppercase tracking-wider mb-4 drop-shadow-md">AÇÃO DA CARTA</h2>
@@ -148,8 +149,32 @@
             </div>
         </div>
 
-        <!-- ================= MODAL DESISTIR ================= -->
-        <div id="modal-desistir" class="hidden fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div id="modal-embate" class="hidden fixed inset-0 bg-black/95 z-[150] flex flex-col items-center justify-center p-4 backdrop-blur-md">
+            <h2 id="embate-atributo-titulo" class="text-[#dca3e8] font-black text-xl uppercase tracking-widest mb-8 drop-shadow-lg absolute top-10"></h2>
+            
+            <div class="w-full max-w-md flex flex-row justify-around items-center px-2">
+                
+                <div id="clash-p1-container" class="clash-card-container flex flex-col items-center gap-3">
+                    <span id="clash-p1-name" class="text-sky-400 font-black text-[10px] uppercase truncate w-24 text-center"></span>
+                    <div id="clash-p1-card" class="w-24 aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-2xl border-4 border-transparent" style="background-size: cover; background-position: center;"></div>
+                    <div class="bg-black/60 px-4 py-1 rounded-md border border-white/20">
+                        <span id="clash-p1-valor" class="text-white font-black text-2xl"></span>
+                    </div>
+                </div>
+                
+                <span id="clash-vs-text" class="text-white font-black text-3xl mx-2 drop-shadow-lg">VS</span>
+                
+                <div id="clash-p2-container" class="clash-card-container flex flex-col items-center gap-3">
+                    <span id="clash-p2-name" class="text-fuchsia-400 font-black text-[10px] uppercase truncate w-24 text-center"></span>
+                    <div id="clash-p2-card" class="w-24 aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-2xl border-4 border-transparent" style="background-size: cover; background-position: center;"></div>
+                    <div class="bg-black/60 px-4 py-1 rounded-md border border-white/20">
+                        <span id="clash-p2-valor" class="text-white font-black text-2xl"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="modal-desistir" class="hidden fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4 backdrop-blur-sm">
             <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 max-w-xs w-full text-center shadow-2xl relative">
                 <h2 class="text-red-600 font-black text-lg mb-2 uppercase">Desistir da Batalha?</h2>
                 <p class="text-[#7a32a8] font-bold text-xs mb-6">A partida será encerrada imediatamente e nenhum jogador receberá recompensas.</p>
@@ -160,25 +185,22 @@
             </div>
         </div>
 
-        <!-- ================= FASES DE FIM DE JOGO ================= -->
-        <div id="modal-fim-etapa" class="hidden fixed inset-0 bg-black/95 z-[200] flex flex-col items-center justify-start pt-10 p-4 backdrop-blur-md">
-            
-            <h1 id="fim-titulo-jogador" class="text-[#dca3e8] font-black text-xl uppercase tracking-widest mb-1 text-center">CARTAS DE JOGADOR</h1>
-            <h2 id="fim-pontos-jogador" class="text-white font-black text-4xl mb-6 drop-shadow-md">0 PTS</h2>
+        <div id="modal-fim-etapa" class="hidden fixed inset-0 bg-black/95 z-[250] flex flex-col items-center justify-start pt-10 p-4 backdrop-blur-md">
+            <h1 id="fim-titulo-jogador" class="text-[#dca3e8] font-black text-xl uppercase tracking-widest mb-1 text-center">CARTAS GANHAS POR</h1>
+            <h2 id="fim-pontos-jogador" class="text-[#4ade80] font-black text-4xl mb-6 drop-shadow-md">0 PTS</h2>
             
             <div id="fim-grid-cartas" class="grid grid-cols-4 gap-2 w-full max-w-sm overflow-y-auto no-scrollbar content-start flex-grow pb-10">
-                <!-- Cartas Injetadas -->
-            </div>
+                </div>
 
             <div class="w-full max-w-sm pb-8 flex-shrink-0 flex justify-center mt-4">
-                <button id="btn-avancar-fim" onclick="avancarEtapaFim()" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-3 px-12 rounded-full shadow-lg border-2 border-[#bc7bd4] tracking-widest uppercase">
+                <button onclick="avancarEtapaFim()" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-3 px-12 rounded-full shadow-lg border-2 border-[#bc7bd4] tracking-widest uppercase">
                     AVANÇAR
                 </button>
             </div>
         </div>
 
-        <div id="modal-resultado-final" class="hidden fixed inset-0 bg-black/95 z-[250] flex flex-col items-center justify-center p-4">
-            <h1 id="texto-vitoria" class="text-5xl font-black text-white uppercase tracking-widest mb-6 drop-shadow-2xl text-center"></h1>
+        <div id="modal-resultado-final" class="hidden fixed inset-0 bg-black/95 z-[300] flex flex-col items-center justify-center p-4">
+            <h1 id="texto-vitoria" class="text-4xl font-black text-white uppercase tracking-widest mb-6 drop-shadow-2xl text-center"></h1>
             <div id="recompensas-final" class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 w-full max-w-xs flex flex-col items-center gap-2 mb-8 shadow-2xl">
                 <span class="text-[#7a32a8] font-black text-lg">RECOMPENSAS</span>
                 <span class="text-black font-bold text-sm">+10 XP</span>
@@ -189,7 +211,6 @@
 
     </div>
 
-    <!-- SCRIPT FIREBASE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -215,10 +236,11 @@
         let isHost = false;
         let salaId = null;
         let dadosSala = null;
+        
         let cartaFocadaId = null;
-        let ultimoEstado = null; // Para travar repetições de toast
+        let ultimoEstadoToast = null; 
 
-        // Controle de fim de jogo
+        // Variáveis do fim de jogo
         let etapaFim = 0; 
         let pointsJ1 = 0;
         let pointsJ2 = 0;
@@ -243,7 +265,7 @@
                 toast.style.opacity = '0';
                 toast.style.transition = 'opacity 0.5s ease';
                 setTimeout(() => toast.remove(), 500); 
-            }, 4000); // 4 segundos na tela
+            }, 4000); 
         };
 
         // ==========================================
@@ -260,6 +282,7 @@
                 document.getElementById('opp-foto-placeholder').classList.add('hidden');
             }
 
+            // Mostra quantas cartas restam no monte
             document.getElementById('opp-deck-count').innerText = oppData.deck.length;
             document.getElementById('player-deck-count').innerText = myData.deck.length;
 
@@ -270,85 +293,58 @@
                 oppMaoContainer.innerHTML += `<img src="fundo_carta.png" class="w-[18%] max-w-[65px] object-contain ${classesLeque[i] || ''} shadow-md border border-black/20 rounded-md">`;
             });
 
-            // Mão do Jogador (Maiores e Sobrepostas via flex e space-x)
             const myMaoContainer = document.getElementById('mao-jogador');
             myMaoContainer.innerHTML = '';
             myData.mao.forEach((cartaId, index) => {
                 const info = INFO_CARTAS[cartaId] || { miniatura: 'fundo_carta.png', imagem: 'fundo_carta.png' };
                 myMaoContainer.innerHTML += `
-                    <div onclick="abrirZoomCarta('${cartaId}')" class="w-[26%] max-w-[90px] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-2xl border-2 border-transparent hover:border-[#4ade80] cursor-pointer hover-carta relative overflow-hidden" style="z-index: ${index};">
+                    <div onclick="abrirZoomCarta('${cartaId}')" class="w-[26%] max-w-[100px] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-2xl border-2 border-black hover:border-[#4ade80] cursor-pointer hover-carta relative overflow-hidden" style="z-index: ${index};">
                         <img src="${info.miniatura || info.imagem}" class="w-full h-full object-cover">
                     </div>
                 `;
             });
 
+            // As cartas centrais ficam vazias/invisíveis até o Host puxar a animação e guardar na pilha
             const arenaCombate = document.getElementById('arena-combate');
-            const slotOpp = document.getElementById('carta-jogada-opp');
-            const slotPlayer = document.getElementById('carta-jogada-player');
-            
-            slotPlayer.className = "w-[85px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-2xl border-2 border-white transform translate-y-10 transition-all duration-500";
-            slotOpp.className = "w-[85px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-2xl border-2 border-black transform -translate-y-10 transition-all duration-500";
-
-            let hasCardInCenter = false;
-            
-            if (myData.cartaJogada) {
-                hasCardInCenter = true;
-                const info = INFO_CARTAS[myData.cartaJogada] || { imagem: 'fundo_carta.png' };
-                slotPlayer.innerHTML = `<img src="${info.imagem}" class="w-full h-full object-cover rounded-md">`;
-                slotPlayer.classList.remove('opacity-0');
-            } else {
-                slotPlayer.classList.add('opacity-0');
-            }
-
-            if (oppData.cartaJogada) {
-                hasCardInCenter = true;
-                // Só revela a carta do adversário se o status for resolvendo ou resultado
-                if (dadosSala.statusTurno === 'resolvendo' || dadosSala.statusTurno === 'exibindo_resultado') {
-                    const info = INFO_CARTAS[oppData.cartaJogada] || { imagem: 'fundo_carta.png' };
-                    slotOpp.innerHTML = `<img src="${info.imagem}" class="w-full h-full object-cover rounded-md">`;
-                } else {
-                    slotOpp.innerHTML = `<img src="fundo_carta.png" class="w-full h-full object-cover rounded-md">`;
-                }
-                slotOpp.classList.remove('opacity-0');
-            } else {
-                slotOpp.classList.add('opacity-0');
-            }
-
-            if (hasCardInCenter) arenaCombate.classList.remove('hidden');
-            else arenaCombate.classList.add('hidden');
+            arenaCombate.classList.add('hidden');
         }
 
         // ==========================================
-        // GESTÃO DE TOASTS E AÇÕES
+        // GESTÃO DOS TOASTS EXATOS DO USUÁRIO
         // ==========================================
-        function gerenciarToastsDeTurno() {
+        function dispararToastsDeTurno() {
+            if (dadosSala.status === 'finalizada') return;
+
             let estadoAtual = `${dadosSala.turnoAtual}-${dadosSala.statusTurno}`;
-            if (ultimoEstado === estadoAtual) return;
-            ultimoEstado = estadoAtual;
+            if (ultimoEstadoToast === estadoAtual) return;
+            ultimoEstadoToast = estadoAtual;
 
             const atacanteNome = dadosSala.quemAtaca === dadosSala.jogador1.uid ? dadosSala.jogador1.nome : dadosSala.jogador2.nome;
             const defensorNome = dadosSala.quemAtaca === dadosSala.jogador1.uid ? dadosSala.jogador2.nome : dadosSala.jogador1.nome;
 
             if (dadosSala.statusTurno === 'aguardando_ataque') {
-                window.mostrarToast(`Vez do jogador ${atacanteNome} escolher uma carta e uma caracteristica!`);
+                window.mostrarToast(`Vez do jogador ${atacanteNome} escolher uma carta e uma caracteristica`);
             } else if (dadosSala.statusTurno === 'aguardando_defesa') {
                 const attrStr = dadosSala.atributoTurno ? dadosSala.atributoTurno.toUpperCase() : "ATRIBUTO";
-                window.mostrarToast(`Vez do jogador ${defensorNome} jogar uma carta com ${attrStr}!`);
+                window.mostrarToast(`Vez do jogador ${defensorNome} jogar uma carta com ${attrStr}`);
             } else if (dadosSala.statusTurno === 'exibindo_resultado') {
                 if (dadosSala.vencedorTurno === 'empate') {
-                    window.mostrarToast(`Jogador ${dadosSala.nomeVencedorTurno} ganhou por desempate!`);
+                    window.mostrarToast(`Jogador ${dadosSala.nomeVencedorTurno} ganhou por desempate`);
                 } else {
-                    window.mostrarToast(`Jogador ${dadosSala.nomeVencedorTurno} ganhou!`);
+                    window.mostrarToast(`Jogador ${dadosSala.nomeVencedorTurno} ganhou`);
                 }
             }
         }
 
+        // ==========================================
+        // AÇÕES DA MÃO DO JOGADOR
+        // ==========================================
         window.abrirZoomCarta = function(idCarta) {
             if (dadosSala.statusTurno === 'resolvendo' || dadosSala.statusTurno === 'exibindo_resultado' || dadosSala.status === 'finalizada') return;
             if (dadosSala[minhaRole].cartaJogada) return; 
 
             const isMyTurn = dadosSala.quemAtaca === currentUserUid;
-            if (!isMyTurn && dadosSala.statusTurno === 'aguardando_ataque') return; // Espera o atacante
+            if (!isMyTurn && dadosSala.statusTurno === 'aguardando_ataque') return; // Bloqueia o defensor antes da hora
 
             cartaFocadaId = idCarta;
             document.getElementById('zoom-img').src = INFO_CARTAS[idCarta]?.imagem || 'fundo_carta.png';
@@ -375,6 +371,8 @@
 
         window.confirmarAcao = function(atributo) {
             fecharZoomCarta();
+            
+            // Remove a carta da mão localmente imediatamente
             const myMao = [...dadosSala[minhaRole].mao];
             const newMao = myMao.filter(id => id !== cartaFocadaId);
 
@@ -388,7 +386,7 @@
                 updates.atributoTurno = atributo;
                 updates.statusTurno = 'aguardando_defesa';
             } else {
-                updates.statusTurno = 'resolvendo'; // Engatilha o Host
+                updates.statusTurno = 'resolvendo'; 
             }
 
             updateDoc(doc(db, "partidas", salaId), updates);
@@ -399,14 +397,59 @@
         };
 
         // ==========================================
-        // LÓGICA DO HOST
+        // ANIMAÇÃO DE EMBATE (CLIENTE LÊ O BANCO)
+        // ==========================================
+        function exibirAnimacaoClash() {
+            const data = dadosSala.clashData;
+            if (!data) return;
+
+            const modal = document.getElementById('modal-embate');
+            const p1c = document.getElementById('clash-p1-container');
+            const p2c = document.getElementById('clash-p2-container');
+            const vsText = document.getElementById('clash-vs-text');
+
+            document.getElementById('embate-atributo-titulo').innerText = `ATRIBUTO: ${dadosSala.atributoTurno.toUpperCase()}`;
+
+            // P1
+            document.getElementById('clash-p1-name').innerText = dadosSala.jogador1.nome;
+            document.getElementById('clash-p1-card').style.backgroundImage = `url('${INFO_CARTAS[data.id1]?.imagem || 'fundo_carta.png'}')`;
+            document.getElementById('clash-p1-valor').innerText = data.val1;
+
+            // P2
+            document.getElementById('clash-p2-name').innerText = dadosSala.jogador2.nome;
+            document.getElementById('clash-p2-card').style.backgroundImage = `url('${INFO_CARTAS[data.id2]?.imagem || 'fundo_carta.png'}')`;
+            document.getElementById('clash-p2-valor').innerText = data.val2;
+
+            // Zera as classes para garantir que a animação rode
+            [p1c, p2c, vsText].forEach(el => { el.style.animation = 'none'; void el.offsetWidth; });
+            p1c.classList.remove('is-winner', 'is-loser');
+            p2c.classList.remove('is-winner', 'is-loser');
+            
+            modal.classList.remove('hidden');
+
+            p1c.style.animation = 'slideInFromLeft 0.5s forwards';
+            p2c.style.animation = 'slideInFromRight 0.5s forwards';
+            vsText.style.animation = 'fadeIn 1s 0.5s forwards';
+            vsText.style.opacity = 0;
+
+            // Depois de 1.5s as cartas colidem e revela quem ganha a luz verde
+            setTimeout(() => {
+                if (dadosSala.chaveVencedor === 'jogador1') {
+                    p1c.classList.add('is-winner'); p2c.classList.add('is-loser');
+                } else if (dadosSala.chaveVencedor === 'jogador2') {
+                    p2c.classList.add('is-winner'); p1c.classList.add('is-loser');
+                } else {
+                    p1c.classList.add('is-loser'); p2c.classList.add('is-loser');
+                }
+            }, 1500);
+        }
+
+        // ==========================================
+        // LÓGICA DO HOST (RESOLUÇÃO MATEMÁTICA)
         // ==========================================
         async function resolverCombateHost() {
             if (window.resolvendoHost) return;
             window.resolvendoHost = true;
-
-            // Espera 3 segundos para ler as cartas
-            await new Promise(resolve => setTimeout(resolve, 3000));
 
             const id1 = dadosSala.jogador1.cartaJogada;
             const id2 = dadosSala.jogador2.cartaJogada;
@@ -429,7 +472,6 @@
                 vencedorKey = 'jogador2';
                 nomeVencedor = dadosSala.jogador2.nome;
             } else {
-                // Desempate
                 tipoVitoria = "empate";
                 const m1 = Math.max(info1.aura, info1.fofura, info1.diversao, info1.aleatoriedade);
                 const m2 = Math.max(info2.aura, info2.fofura, info2.diversao, info2.aleatoriedade);
@@ -444,60 +486,66 @@
                 }
             }
 
-            // Exibe resultado pra geral
+            // O Host publica o resultado. Isso faz os clientes abrirem a Animação e o Toast.
             await updateDoc(doc(db, "partidas", salaId), {
                 statusTurno: 'exibindo_resultado',
                 vencedorTurno: tipoVitoria,
                 nomeVencedorTurno: nomeVencedor,
-                chaveVencedor: vencedorKey
+                chaveVencedor: vencedorKey,
+                clashData: { id1, val1, id2, val2 }
             });
 
-            // Espera 2.5 segundos de Toast
-            await new Promise(resolve => setTimeout(resolve, 2500));
+            // O Host segura o jogo por 5 segundos para a animação rodar e os jogadores lerem.
+            setTimeout(async () => {
+                
+                // MANDA AS DUAS CARTAS PARA A PILHA INVISÍVEL DO VENCEDOR
+                let j1Pilha = [...(dadosSala.jogador1.pilhaVitorias || [])];
+                let j2Pilha = [...(dadosSala.jogador2.pilhaVitorias || [])];
 
-            // Coleta prêmios e saca
-            let j1Pilha = [...(dadosSala.jogador1.pilhaVitorias || [])];
-            let j2Pilha = [...(dadosSala.jogador2.pilhaVitorias || [])];
+                if (vencedorKey === 'jogador1') j1Pilha.push(id1, id2);
+                else j2Pilha.push(id1, id2);
 
-            if (vencedorKey === 'jogador1') j1Pilha.push(id1, id2);
-            else j2Pilha.push(id1, id2);
+                // SACA UMA NOVA CARTA DOS MONTES RESTANTES DE CADA UM (se ainda houver)
+                let j1Deck = [...dadosSala.jogador1.deck];
+                let j1Mao = [...dadosSala.jogador1.mao];
+                if (j1Deck.length > 0) j1Mao.push(j1Deck.shift());
 
-            let j1Deck = [...dadosSala.jogador1.deck];
-            let j1Mao = [...dadosSala.jogador1.mao];
-            if (j1Deck.length > 0) j1Mao.push(j1Deck.shift());
+                let j2Deck = [...dadosSala.jogador2.deck];
+                let j2Mao = [...dadosSala.jogador2.mao];
+                if (j2Deck.length > 0) j2Mao.push(j2Deck.shift());
+                
+                let proxTurno = dadosSala.turnoAtual + 1;
+                let proxAtacante = (dadosSala.quemAtaca === dadosSala.jogador1.uid) ? dadosSala.jogador2.uid : dadosSala.jogador1.uid;
+                
+                let updates = {
+                    'jogador1.pilhaVitorias': j1Pilha, 'jogador2.pilhaVitorias': j2Pilha,
+                    'jogador1.deck': j1Deck, 'jogador1.mao': j1Mao,
+                    'jogador2.deck': j2Deck, 'jogador2.mao': j2Mao,
+                    'jogador1.cartaJogada': null, 'jogador2.cartaJogada': null,
+                    'atributoTurno': null, 'vencedorTurno': null, 'nomeVencedorTurno': null, 'chaveVencedor': null,
+                    'clashData': null
+                };
 
-            let j2Deck = [...dadosSala.jogador2.deck];
-            let j2Mao = [...dadosSala.jogador2.mao];
-            if (j2Deck.length > 0) j2Mao.push(j2Deck.shift());
-            
-            let proxTurno = dadosSala.turnoAtual + 1;
-            let proxAtacante = (dadosSala.quemAtaca === dadosSala.jogador1.uid) ? dadosSala.jogador2.uid : dadosSala.jogador1.uid;
-            
-            let updates = {
-                'jogador1.pilhaVitorias': j1Pilha, 'jogador2.pilhaVitorias': j2Pilha,
-                'jogador1.deck': j1Deck, 'jogador1.mao': j1Mao,
-                'jogador2.deck': j2Deck, 'jogador2.mao': j2Mao,
-                'jogador1.cartaJogada': null, 'jogador2.cartaJogada': null,
-                'atributoTurno': null, 'vencedorTurno': null, 'nomeVencedorTurno': null, 'chaveVencedor': null
-            };
+                // Acaba apenas quando o deck acabar E a mão também!
+                if (j1Mao.length === 0 && j2Mao.length === 0) {
+                    updates['status'] = 'finalizada';
+                    updates['statusTurno'] = 'finalizada';
+                } else {
+                    updates['turnoAtual'] = proxTurno;
+                    updates['statusTurno'] = 'aguardando_ataque';
+                    updates['quemAtaca'] = proxAtacante;
+                }
 
-            if (j1Mao.length === 0 && j2Mao.length === 0) {
-                updates['status'] = 'finalizada';
-                updates['statusTurno'] = 'finalizada';
-            } else {
-                updates['turnoAtual'] = proxTurno;
-                updates['statusTurno'] = 'aguardando_ataque';
-                updates['quemAtaca'] = proxAtacante;
-            }
+                await updateDoc(doc(db, "partidas", salaId), updates);
+                window.resolvendoHost = false;
 
-            await updateDoc(doc(db, "partidas", salaId), updates);
-            window.resolvendoHost = false;
+            }, 5000);
         }
 
         // ==========================================
         // FIM DE JOGO: CASCATA DE MODAIS
         // ==========================================
-        function montarGrid(jogadorKey) {
+        function montarGridFinal(jogadorKey) {
             const grid = document.getElementById('fim-grid-cartas');
             grid.innerHTML = '';
             
@@ -508,13 +556,13 @@
                 const info = INFO_CARTAS[id] || { miniatura: 'fundo_carta.png', pontos: 0 };
                 total += info.pontos;
                 grid.innerHTML += `
-                    <div class="relative aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-lg overflow-hidden border-2 border-transparent">
+                    <div class="relative aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-lg overflow-hidden border border-black">
                         <img src="${info.miniatura || info.imagem || 'fundo_carta.png'}" class="w-full h-full object-cover">
                     </div>
                 `;
             });
             
-            document.getElementById('fim-titulo-jogador').innerText = `CARTAS DE ${dadosSala[jogadorKey].nome}`;
+            document.getElementById('fim-titulo-jogador').innerText = `CARTAS GANHAS POR: ${dadosSala[jogadorKey].nome}`;
             document.getElementById('fim-pontos-jogador').innerText = `${total} PTS`;
             
             return total;
@@ -523,10 +571,8 @@
         window.avancarEtapaFim = async function() {
             etapaFim++;
             if (etapaFim === 2) {
-                // Etapa 2: Mostra cartas do Jogador 2
-                pointsJ2 = montarGrid('jogador2');
+                pointsJ2 = montarGridFinal('jogador2');
             } else if (etapaFim === 3) {
-                // Etapa 3: Veredito
                 document.getElementById('modal-fim-etapa').classList.add('hidden');
                 
                 const myPoints = minhaRole === 'jogador1' ? pointsJ1 : pointsJ2;
@@ -557,12 +603,12 @@
             window.etapaIniciada = true;
             
             etapaFim = 1;
-            pointsJ1 = montarGrid('jogador1');
+            pointsJ1 = montarGridFinal('jogador1');
             document.getElementById('modal-fim-etapa').classList.remove('hidden');
         }
 
         // ==========================================
-        // INICIALIZAÇÃO
+        // DESISTÊNCIA
         // ==========================================
         window.abrirModalDesistir = function() { document.getElementById('modal-desistir').classList.remove('hidden'); };
         window.fecharModalDesistir = function() { document.getElementById('modal-desistir').classList.add('hidden'); };
@@ -574,6 +620,9 @@
             window.location.href = 'batalha.html';
         };
 
+        // ==========================================
+        // SINCRONIZAÇÃO EM TEMPO REAL
+        // ==========================================
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUserUid = user.uid;
@@ -582,10 +631,9 @@
                 
                 if (!salaId) return window.location.href = 'batalha.html';
 
-                unsubscribePartida = onSnapshot(doc(db, "partidas", salaId), (docSnap) => {
+                onSnapshot(doc(db, "partidas", salaId), (docSnap) => {
                     if (!docSnap.exists()) {
-                        window.mostrarToast("A sala foi encerrada.");
-                        setTimeout(() => window.location.href = 'batalha.html', 1500);
+                        window.location.href = 'batalha.html';
                         return;
                     }
 
@@ -597,7 +645,7 @@
                         minhaRole = 'jogador2'; oppRole = 'jogador1'; isHost = false;
                     }
 
-                    // Distribui a mão inicial
+                    // Host embaralha e distribui a mão inicial
                     if (isHost && !dadosSala.jogador1.mao) {
                         let j1Deck = [...dadosSala.jogador1.deck];
                         let j2Deck = [...dadosSala.jogador2.deck];
@@ -612,21 +660,24 @@
 
                     if (!dadosSala.jogador1.mao) return; 
 
+                    // 1. Atualiza visual da mesa
                     renderizarArena();
-                    gerenciarToastsDeTurno();
 
+                    // 2. Dispara Toasts se o estado mudou
+                    dispararToastsDeTurno();
+
+                    // 3. Controle da Animação do Embate
                     if (dadosSala.statusTurno === 'exibindo_resultado') {
-                        const slotPlayer = document.getElementById('carta-jogada-player');
-                        const slotOpp = document.getElementById('carta-jogada-opp');
-                        if (dadosSala.chaveVencedor === minhaRole) {
-                            slotPlayer.classList.add('border-green-400', 'scale-110', 'z-50');
-                            slotOpp.classList.add('grayscale', 'opacity-50');
-                        } else if (dadosSala.chaveVencedor === oppRole) {
-                            slotOpp.classList.add('border-green-400', 'scale-110', 'z-50');
-                            slotPlayer.classList.add('grayscale', 'opacity-50');
+                        if (!window.clashAtivo) {
+                            window.clashAtivo = true;
+                            exibirAnimacaoClash();
                         }
+                    } else {
+                        window.clashAtivo = false;
+                        document.getElementById('modal-embate').classList.add('hidden');
                     }
 
+                    // 4. Controle de Lógicas Pesadas
                     if (dadosSala.statusTurno === 'resolvendo' && isHost) {
                         resolverCombateHost();
                     } else if (dadosSala.status === 'finalizada') {

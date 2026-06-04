@@ -81,6 +81,7 @@
 
     <div class="w-full h-full max-w-sm mx-auto relative flex flex-col border-x-2 border-[#dca3e8]/30 shadow-2xl">
 
+        <!-- ================= CABEÇALHO ================= -->
         <div class="absolute top-4 w-[95%] max-w-[360px] left-1/2 transform -translate-x-1/2 flex items-center justify-between bg-[#dca3e8] rounded-full shadow-lg z-50 h-12 px-4 border-2 border-[#bc7bd4]">
             
             <div class="flex-1 flex justify-start items-center overflow-hidden pr-6">
@@ -100,10 +101,12 @@
 
         </div>
 
+        <!-- ================= ÁREA DO ADVERSÁRIO ================= -->
         <div class="w-full h-[45%] relative z-20 mt-16">
 
             <div id="mao-adversario" class="absolute top-4 left-1/2 transform -translate-x-1/2 w-full flex justify-center -space-x-4 px-2 z-10 pointer-events-none">
-                </div>
+                <!-- Injetado via JS -->
+            </div>
 
             <div class="absolute bottom-4 right-4 flex flex-col items-center">
                 <img src="fundo_carta.png" class="w-14 object-contain drop-shadow-xl brightness-50 rounded-md border border-black">
@@ -112,10 +115,12 @@
 
         </div>
 
+        <!-- ================= LOGO ================= -->
         <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
             <img src="logo.png" class="w-[80%] max-w-[250px] opacity-20 grayscale object-contain drop-shadow-lg">
         </div>
 
+        <!-- ================= ÁREA DO JOGADOR ================= -->
         <div class="w-full h-[55%] relative z-20 border-t-2 border-[#dca3e8]/20 backdrop-blur-sm bg-black/10">
             
             <div class="absolute top-4 left-4 flex flex-col items-center">
@@ -129,10 +134,12 @@
             </div>
 
             <div id="mao-jogador" class="absolute bottom-10 left-1/2 transform -translate-x-1/2 w-full flex justify-center -space-x-6 px-2 z-30">
-                </div>
+                <!-- Injetado via JS -->
+            </div>
 
         </div>
 
+        <!-- ================= MODAIS DE AÇÃO E ANIMAÇÃO ================= -->
         <div id="modal-zoom" class="hidden fixed inset-0 bg-black/90 z-[100] flex flex-col items-center justify-center p-4 backdrop-blur-md">
             <button onclick="fecharZoomCarta()" class="absolute top-4 right-6 text-white font-black text-2xl hover:text-gray-300 transition-colors z-50">X</button>
             <h2 id="titulo-acao" class="text-white font-black text-xl text-center uppercase tracking-wider mb-4 drop-shadow-md">AÇÃO DA CARTA</h2>
@@ -175,6 +182,13 @@
             </div>
         </div>
 
+        <!-- ================= MODAL DE DESEMPATE ================= -->
+        <div id="modal-desempate" class="hidden fixed top-[30%] left-1/2 transform -translate-x-1/2 z-[300] bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-4 shadow-2xl w-[80%] max-w-[280px] text-center" style="animation: slideDown 0.3s ease-out forwards;">
+            <h2 class="text-[#7a32a8] font-black text-2xl mb-1 uppercase drop-shadow-sm">EMPATE!</h2>
+            <p id="desempate-texto" class="text-black font-bold text-xs leading-tight"></p>
+        </div>
+
+        <!-- ================= MODAIS DE SISTEMA E FIM DE JOGO ================= -->
         <div id="modal-desistir" class="hidden fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4 backdrop-blur-sm">
             <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 max-w-xs w-full text-center shadow-2xl relative">
                 <h2 class="text-red-600 font-black text-lg mb-2 uppercase">Desistir da Batalha?</h2>
@@ -212,6 +226,7 @@
 
     </div>
 
+    <!-- SCRIPT FIREBASE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -283,7 +298,6 @@
                 document.getElementById('opp-foto-placeholder').classList.add('hidden');
             }
 
-            // Mostra quantas cartas restam no monte
             document.getElementById('opp-deck-count').innerText = oppData.deck.length;
             document.getElementById('player-deck-count').innerText = myData.deck.length;
 
@@ -304,13 +318,12 @@
                 `;
             });
 
-            // As cartas centrais ficam vazias/invisíveis até o Host puxar a animação e guardar na pilha
             const arenaCombate = document.getElementById('arena-combate');
             arenaCombate.classList.add('hidden');
         }
 
         // ==========================================
-        // GESTÃO DOS TOASTS EXATOS DO USUÁRIO
+        // GESTÃO DOS TOASTS E MODAIS
         // ==========================================
         function dispararToastsDeTurno() {
             if (dadosSala.status === 'finalizada') return;
@@ -328,8 +341,18 @@
                 const attrStr = dadosSala.atributoTurno ? dadosSala.atributoTurno.toUpperCase() : "ATRIBUTO";
                 window.mostrarToast(`Vez do jogador ${defensorNome} jogar uma carta com ${attrStr}`);
             } else if (dadosSala.statusTurno === 'exibindo_resultado') {
-                if (dadosSala.vencedorTurno === 'empate') {
+                if (dadosSala.vencedorTurno === 'anuladas') {
+                    window.mostrarToast(`As cartas eram idênticas e se ANULARAM!`);
+                } else if (dadosSala.vencedorTurno === 'desempate') {
                     window.mostrarToast(`Jogador ${dadosSala.nomeVencedorTurno} ganhou por desempate`);
+                    
+                    // Exibe o modal flutuante com a explicação do desempate
+                    const modal = document.getElementById('modal-desempate');
+                    document.getElementById('desempate-texto').innerText = `${dadosSala.nomeVencedorTurno} levou a melhor pelo maior atributo restante da carta: ${dadosSala.valorDesempate}!`;
+                    modal.classList.remove('hidden');
+                    
+                    // Esconde o modal automaticamente antes do próximo turno
+                    setTimeout(() => modal.classList.add('hidden'), 4000);
                 } else {
                     window.mostrarToast(`Jogador ${dadosSala.nomeVencedorTurno} ganhou`);
                 }
@@ -366,16 +389,14 @@
 
         window.fecharZoomCarta = function() {
             document.getElementById('modal-zoom').classList.add('hidden');
-            // NÃO ZERAMOS A cartaFocadaId AQUI, PARA PODERMOS USAR ELA AO CONFIRMAR
         };
 
         window.confirmarAcao = function(atributo) {
-            const idAlvo = cartaFocadaId; // Salva o ID da carta que foi clicada antes de fechar a janela
+            const idAlvo = cartaFocadaId; 
             
             fecharZoomCarta();
-            cartaFocadaId = null; // Agora sim podemos zerar de forma segura
+            cartaFocadaId = null; 
             
-            // Remove APENAS UMA CÓPIA da carta da mão localmente usando o index
             const myMao = [...dadosSala[minhaRole].mao];
             const indexARemover = myMao.indexOf(idAlvo);
             if (indexARemover > -1) {
@@ -404,7 +425,7 @@
         };
 
         // ==========================================
-        // ANIMAÇÃO DE EMBATE (CLIENTE LÊ O BANCO)
+        // ANIMAÇÃO DE EMBATE 
         // ==========================================
         function exibirAnimacaoClash() {
             const data = dadosSala.clashData;
@@ -417,13 +438,11 @@
 
             document.getElementById('embate-atributo-titulo').innerText = `ATRIBUTO: ${dadosSala.atributoTurno.toUpperCase()}`;
 
-            // P1 (Puxa do banco INFO_CARTAS usando o ID real gravado)
             const info1 = INFO_CARTAS[data.id1] || { imagem: 'fundo_carta.png' };
             document.getElementById('clash-p1-name').innerText = dadosSala.jogador1.nome;
             document.getElementById('clash-p1-card').style.backgroundImage = `url('${info1.imagem}')`;
             document.getElementById('clash-p1-valor').innerText = data.val1;
 
-            // P2 (Puxa do banco INFO_CARTAS usando o ID real gravado)
             const info2 = INFO_CARTAS[data.id2] || { imagem: 'fundo_carta.png' };
             document.getElementById('clash-p2-name').innerText = dadosSala.jogador2.nome;
             document.getElementById('clash-p2-card').style.backgroundImage = `url('${info2.imagem}')`;
@@ -461,7 +480,6 @@
             const id1 = dadosSala.jogador1.cartaJogada;
             const id2 = dadosSala.jogador2.cartaJogada;
             
-            // Trava de segurança para garantir que a rede gravou os IDs corretamente
             if (!id1 || !id2) {
                 window.resolvendoHost = false;
                 return;
@@ -478,6 +496,7 @@
             let vencedorKey = null;
             let nomeVencedor = "";
             let tipoVitoria = "normal";
+            let valorDesempate = 0; 
 
             if (val1 > val2) {
                 vencedorKey = 'jogador1';
@@ -486,7 +505,7 @@
                 vencedorKey = 'jogador2';
                 nomeVencedor = dadosSala.jogador2.nome;
             } else {
-                tipoVitoria = "empate";
+                tipoVitoria = "desempate";
                 
                 // 1. Criamos a lista com os 4 atributos
                 const atributos = ['aura', 'fofura', 'diversao', 'aleatoriedade'];
@@ -501,33 +520,39 @@
                 if (m1 > m2) {
                     vencedorKey = 'jogador1'; 
                     nomeVencedor = dadosSala.jogador1.nome;
+                    valorDesempate = m1;
                 } else if (m2 > m1) {
                     vencedorKey = 'jogador2'; 
                     nomeVencedor = dadosSala.jogador2.nome;
+                    valorDesempate = m2;
                 } else {
-                    // Vantagem do atacante SÓ se as outras 3 características também empatarem
-                    vencedorKey = dadosSala.quemAtaca === dadosSala.jogador1.uid ? 'jogador1' : 'jogador2';
-                    nomeVencedor = dadosSala[vencedorKey].nome;
+                    // ---- ANULAÇÃO (Cartas absolutamente idênticas) ----
+                    vencedorKey = 'nenhum';
+                    nomeVencedor = 'Ninguém';
+                    tipoVitoria = 'anuladas';
                 }
             }
 
-            // O Host publica o resultado na rede (desencadeia o Toast e Animação visual)
             await updateDoc(doc(db, "partidas", salaId), {
                 statusTurno: 'exibindo_resultado',
                 vencedorTurno: tipoVitoria,
                 nomeVencedorTurno: nomeVencedor,
                 chaveVencedor: vencedorKey,
+                valorDesempate: typeof valorDesempate !== 'undefined' ? valorDesempate : 0, 
                 clashData: { id1, val1, id2, val2 }
             });
 
-            // O Host segura o jogo por 5 segundos para a animação rodar
             setTimeout(async () => {
                 
                 let j1Pilha = [...(dadosSala.jogador1.pilhaVitorias || [])];
                 let j2Pilha = [...(dadosSala.jogador2.pilhaVitorias || [])];
 
-                if (vencedorKey === 'jogador1') j1Pilha.push(id1, id2);
-                else j2Pilha.push(id1, id2);
+                // Só manda para a pilha se alguém venceu. Se for 'nenhum', as cartas se anulam (somem)
+                if (vencedorKey === 'jogador1') {
+                    j1Pilha.push(id1, id2);
+                } else if (vencedorKey === 'jogador2') {
+                    j2Pilha.push(id1, id2);
+                }
 
                 let j1Deck = [...dadosSala.jogador1.deck];
                 let j1Mao = [...dadosSala.jogador1.mao];
@@ -546,7 +571,8 @@
                     'jogador2.deck': j2Deck, 'jogador2.mao': j2Mao,
                     'jogador1.cartaJogada': null, 'jogador2.cartaJogada': null,
                     'atributoTurno': null, 'vencedorTurno': null, 'nomeVencedorTurno': null, 'chaveVencedor': null,
-                    'clashData': null
+                    'clashData': null,
+                    'valorDesempate': null
                 };
 
                 if (j1Mao.length === 0 && j2Mao.length === 0) {

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supercards - Batalhas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-image: url('fundotela.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            width: 90%;
+            max-width: 350px;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .toast-msg {
+            background: #dca3e8;
+            color: #7a32a8;
+            border: 3px solid #7a32a8;
+            padding: 12px 20px;
+            border-radius: 9999px;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.3);
+            text-align: center;
+            font-weight: 900;
+            font-size: 0.85rem;
+            animation: slideDown 0.3s ease-out;
+            pointer-events: auto;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="fixed inset-0 px-4 pt-4 flex justify-center overflow-hidden w-screen">
+
+    <div id="toast-container"></div>
+
+    <div class="w-full max-w-sm flex flex-col h-full relative">
+        
+        <!-- CABEÇALHO PADRÃO -->
+        <header class="flex items-center gap-3 mt-4 mb-6 w-full flex-shrink-0">
+            <div class="relative flex-shrink-0">
+                <div class="bg-[#dca3e8] w-20 h-20 rounded-full flex items-center justify-center text-[#7a32a8] font-black text-xl shadow-lg border-2 border-[#bc7bd4] overflow-hidden relative">
+                    <span id="texto-sem-foto" class="text-sm">FOTO</span>
+                    <img id="img-perfil-global" src="" class="hidden w-full h-full object-cover absolute inset-0">
+                </div>
+                
+                <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-[#bc7bd4] w-7 h-7 rounded-full flex items-center justify-center shadow-md border-2 border-[#dca3e8] z-30">
+                    <span id="player-level" class="text-[#7a32a8] font-black text-xs">--</span>
+                </div>
+            </div>
+
+            <div class="flex flex-col flex-grow gap-2.5 justify-center overflow-hidden">
+                <div class="flex items-center gap-1.5 w-full">
+                    <div class="bg-[#dca3e8] rounded-full px-3 py-1.5 flex items-center justify-center gap-1 shadow-md flex-shrink-0">
+                        <span id="player-coins" class="text-[#7a32a8] font-black text-sm">...</span>
+                        <img src="moedas.png" class="w-4 h-4 object-contain">
+                    </div>
+                    
+                    <nav class="bg-[#dca3e8] rounded-full flex justify-between items-center px-2 py-1 shadow-md flex-grow">
+                        <button onclick="window.location.href='perfil.html'" class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-7 h-7 shadow-sm">
+                            <img src="perfil.png" alt="Perfil" class="w-3.5 h-3.5 object-contain">
+                        </button>
+                        
+                        <button onclick="window.location.href='shop.html'" class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-7 h-7 shadow-sm">
+                            <img src="shop.png" alt="Shop" class="w-3.5 h-3.5 object-contain">
+                        </button>
+                        
+                        <button onclick="window.location.href='missoes.html'" class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-7 h-7 shadow-sm">
+                            <img src="missao.png" alt="Missões" class="w-3.5 h-3.5 object-contain">
+                        </button>
+                    </nav>
+                </div>
+                
+                <div class="flex items-center gap-1.5 w-full">
+                    <div class="bg-[#dca3e8] rounded-full px-2 py-1 flex items-center justify-center shadow-md w-1/2 h-7 overflow-hidden flex-shrink-0">
+                        <span id="player-name" class="text-[#7a32a8] font-black text-[10px] uppercase truncate text-center w-full">...</span>
+                    </div>
+                    
+                    <div class="flex flex-col items-center flex-grow w-1/2">
+                        <div class="w-full bg-transparent border border-[#dca3e8] rounded-full h-2.5 overflow-hidden shadow-inner">
+                            <div id="player-barra-xp" class="bg-[#dca3e8] h-full transition-all duration-500" style="width: 0%;"></div>
+                        </div>
+                        <span id="player-texto-xp" class="text-[#dca3e8] text-[9px] font-bold mt-1">0/0 xp</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- CONTEÚDO PRINCIPAL: BATALHAS -->
+        <main class="flex flex-col items-center w-full flex-grow overflow-y-auto no-scrollbar pb-32">
+            
+            <h1 class="text-[#dca3e8] font-black text-2xl text-center mb-6 drop-shadow-md uppercase tracking-wider">BATALHAS</h1>
+
+            <div class="grid grid-cols-2 gap-6 w-full max-w-[280px] mb-8">
+                
+                <div onclick="buscarPartida()" class="flex flex-col items-center group cursor-pointer">
+                    <div class="bg-[#dca3e8] w-full aspect-square rounded-[24px] flex items-center justify-center p-4 shadow-xl hover:scale-105 transition-transform border-4 border-transparent hover:border-[#8b3dff]/50">
+                        <img src="vs.png" alt="Buscar Partida" class="w-full h-full object-contain drop-shadow-lg">
+                    </div>
+                    <span class="text-[#dca3e8] font-black text-sm mt-3 drop-shadow-md uppercase tracking-wide text-center leading-tight">Buscar<br>Partida</span>
+                </div>
+
+                <div onclick="window.location.href='decks.html'" class="flex flex-col items-center group cursor-pointer">
+                    <div class="bg-[#dca3e8] w-full aspect-square rounded-[24px] flex items-center justify-center p-4 shadow-xl hover:scale-105 transition-transform border-4 border-transparent hover:border-[#8b3dff]/50 relative">
+                        <!-- Imagem provisória, você pode usar uma imagem de cartas diferente aqui depois -->
+                        <img src="colecao.png" alt="Decks" class="w-[80%] h-[80%] object-contain drop-shadow-lg opacity-90">
+                    </div>
+                    <span class="text-[#dca3e8] font-black text-sm mt-3 drop-shadow-md uppercase tracking-wide text-center leading-tight">Meus<br>Decks</span>
+                </div>
+
+            </div>
+
+            <!-- RANKING -->
+            <div class="bg-[#dca3e8] rounded-[24px] w-full max-w-[280px] p-5 shadow-2xl border-4 border-[#bc7bd4] flex flex-col">
+                <h2 class="text-[#7a32a8] font-black text-base text-center uppercase tracking-widest mb-4">RANKING MENSAL</h2>
+                
+                <div id="lista-ranking" class="flex flex-col gap-2 w-full">
+                    <span class="text-[#7a32a8] text-xs font-bold text-center animate-pulse">Carregando heróis...</span>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- FOOTER COM O BOTÃO RETORNAR -->
+        <footer class="fixed bottom-8 left-1/2 transform -translate-x-1/2 w-full flex justify-center z-[100] pointer-events-none" style="padding-bottom: env(safe-area-inset-bottom);">
+            <button onclick="window.location.href='menu.html'" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-2.5 px-12 rounded-full shadow-2xl transition-transform hover:-translate-y-1 pointer-events-auto border-2 border-[#dca3e8] uppercase text-sm tracking-wider">
+                Retornar
+            </button>
+        </footer>
+
+    </div>
+
+    <!-- MODAL DE BUSCA DE PARTIDA (ESTRUTURA INICIAL) -->
+    <div id="modal-busca" class="hidden fixed inset-0 bg-black/90 z-[200] flex flex-col items-center justify-center p-4 backdrop-blur-md pointer-events-auto w-screen h-screen">
+        <h2 class="text-[#dca3e8] font-black text-2xl text-center uppercase tracking-wider mb-8 animate-pulse">Procurando<br>Oponente...</h2>
+        <div class="w-16 h-16 border-4 border-[#7a32a8] border-t-[#dca3e8] rounded-full animate-spin mb-8"></div>
+        <button onclick="cancelarBusca()" class="bg-red-600 hover:bg-red-700 text-white font-black py-2.5 px-10 rounded-full shadow-xl uppercase text-sm tracking-wide">
+            Cancelar
+        </button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyCU3lFTgfrDMaD9jwR7X7ivYPmGQh4VE1g",
+          authDomain: "supercards-tcg.firebaseapp.com",
+          projectId: "supercards-tcg",
+          storageBucket: "supercards-tcg.firebasestorage.app",
+          messagingSenderId: "862316380615",
+          appId: "1:862316380615:web:b3f28056ebc967673999e2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUserDoc = null;
+
+        window.mostrarToast = function(mensagem) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast-msg';
+            toast.innerHTML = mensagem;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => toast.remove(), 500); 
+            }, 3000);
+        };
+
+        function calcularXPMaximo(nivel) {
+            if (nivel >= 1 && nivel <= 5) return 200;
+            if (nivel >= 6 && nivel <= 15) return 750;
+            if (nivel >= 16 && nivel <= 25) return 1600;
+            return 3000;
+        }
+
+        // Funções provisórias de Matchmaking
+        window.buscarPartida = function() {
+            if (!currentUserDoc || !currentUserDoc.deckPadrao) {
+                return window.mostrarToast("Você precisa criar e selecionar um Deck padrão primeiro!");
+            }
+            document.getElementById('modal-busca').classList.remove('hidden');
+        };
+
+        window.cancelarBusca = function() {
+            document.getElementById('modal-busca').classList.add('hidden');
+        };
+
+        async function carregarRanking() {
+            const containerRanking = document.getElementById('lista-ranking');
+            try {
+                // Busca os 5 melhores jogadores baseados em vitórias
+                const usersRef = collection(db, "users");
+                const q = query(usersRef, orderBy("estatisticas.vitorias", "desc"), limit(5));
+                const querySnapshot = await getDocs(q);
+                
+                containerRanking.innerHTML = '';
+                let posicao = 1;
+
+                if (querySnapshot.empty) {
+                    containerRanking.innerHTML = '<span class="text-[#7a32a8] text-xs font-bold text-center">Nenhum registro ainda.</span>';
+                    return;
+                }
+
+                querySnapshot.forEach((docSnap) => {
+                    const dados = docSnap.data();
+                    const vitorias = dados.estatisticas?.vitorias || 0;
+                    const nome = (dados.nomeDisplay || "JOGADOR").toUpperCase();
+                    
+                    const div = document.createElement('div');
+                    
+                    // Se for o primeiro lugar, damos um destaque visual
+                    if (posicao === 1) {
+                        div.className = "flex justify-between items-center bg-[#7a32a8] text-white rounded-full px-4 py-2 shadow-inner border border-yellow-400";
+                    } else {
+                        div.className = "flex justify-between items-center bg-[#7a32a8] text-white rounded-full px-4 py-2 shadow-inner";
+                    }
+
+                    div.innerHTML = `
+                        <span class="font-black text-[11px] truncate max-w-[120px]">${posicao}. ${nome}</span>
+                        <span class="font-bold text-[10px] opacity-90 whitespace-nowrap">${vitorias} VITÓRIAS</span>
+                    `;
+                    
+                    containerRanking.appendChild(div);
+                    posicao++;
+                });
+
+            } catch (error) {
+                console.error("Erro ao buscar ranking:", error);
+                // NOTA: Se for o primeiro teste, o Firebase pode pedir para criar um Index no console.
+                containerRanking.innerHTML = '<span class="text-red-500 text-[10px] font-bold text-center">Erro ao carregar ranking.</span>';
+            }
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                document.getElementById('player-name').innerText = user.displayName?.toUpperCase() || "JOGADOR";
+
+                const docRef = doc(db, "users", user.uid);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    currentUserDoc = docSnap.data();
+                    
+                    document.getElementById('player-coins').innerText = currentUserDoc.moedas || 0;
+                    
+                    let nivelAtual = currentUserDoc.nivel || 1;
+                    let xpAtual = currentUserDoc.xp || 0;
+                    document.getElementById('player-level').innerText = nivelAtual;
+
+                    if (currentUserDoc.fotoPerfil) {
+                        const imgElement = document.getElementById('img-perfil-global');
+                        imgElement.src = currentUserDoc.fotoPerfil;
+                        imgElement.classList.remove('hidden');
+                        document.getElementById('texto-sem-foto').classList.add('hidden');
+                    }
+
+                    let maxXp = calcularXPMaximo(nivelAtual);
+                    let porcentagem = Math.min((xpAtual / maxXp) * 100, 100);
+                    document.getElementById('player-barra-xp').style.width = `${porcentagem}%`;
+                    document.getElementById('player-texto-xp').innerText = `${xpAtual}/${maxXp} xp`;
+
+                    // Chama a função de ranking após carregar o jogador
+                    carregarRanking();
+                }
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+    </script>
+</body>
+</html>

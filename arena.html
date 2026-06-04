@@ -88,16 +88,16 @@
 
             <!-- Mão do Adversário (Leque Invertido) -->
             <div id="mao-adversario" class="absolute top-16 left-1/2 transform -translate-x-1/2 flex justify-center w-full z-10 pointer-events-none">
-                <img src="carta_verso.png" class="w-16 object-contain leque-1 shadow-md -mr-4">
-                <img src="carta_verso.png" class="w-16 object-contain leque-2 shadow-md -mr-4">
-                <img src="carta_verso.png" class="w-16 object-contain shadow-md z-10">
-                <img src="carta_verso.png" class="w-16 object-contain leque-3 shadow-md -ml-4">
-                <img src="carta_verso.png" class="w-16 object-contain leque-4 shadow-md -ml-4">
+                <img src="fundo_carta.png" class="w-16 object-contain leque-1 shadow-md -mr-4">
+                <img src="fundo_carta.png" class="w-16 object-contain leque-2 shadow-md -mr-4">
+                <img src="fundo_carta.png" class="w-16 object-contain shadow-md z-10">
+                <img src="fundo_carta.png" class="w-16 object-contain leque-3 shadow-md -ml-4">
+                <img src="fundo_carta.png" class="w-16 object-contain leque-4 shadow-md -ml-4">
             </div>
 
             <!-- Deck do Adversário -->
             <div class="absolute top-[50%] right-4 flex flex-col items-center">
-                <img src="carta_verso.png" class="w-16 object-contain drop-shadow-xl brightness-75">
+                <img src="fundo_carta.png" class="w-16 object-contain drop-shadow-xl brightness-75">
                 <span id="opp-deck-count" class="text-white font-black text-2xl -mt-10 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] z-10">15</span>
             </div>
 
@@ -113,7 +113,7 @@
             
             <!-- Deck do Jogador -->
             <div class="absolute top-10 left-4 flex flex-col items-center">
-                <img src="carta_verso.png" class="w-16 object-contain drop-shadow-xl brightness-75">
+                <img src="fundo_carta.png" class="w-16 object-contain drop-shadow-xl brightness-75">
                 <span id="player-deck-count" class="text-[#4ade80] font-black text-2xl -mt-10 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] z-10">15</span>
             </div>
 
@@ -129,19 +129,19 @@
             <div id="mao-jogador" class="absolute bottom-4 left-0 w-full flex justify-center gap-1 px-2 z-30">
                 <!-- Essas cartas são provisórias só para você ver o design na tela -->
                 <div onclick="abrirZoomCarta('001')" class="w-[19%] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-xl border-2 border-transparent hover:border-[#4ade80] cursor-pointer hover-carta relative">
-                    <img src="carta_verso.png" class="w-full h-full object-cover rounded-sm">
+                    <img src="fundo_carta.png" class="w-full h-full object-cover rounded-sm">
                 </div>
                 <div onclick="abrirZoomCarta('002')" class="w-[19%] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-xl border-2 border-transparent hover:border-[#4ade80] cursor-pointer hover-carta relative">
-                    <img src="carta_verso.png" class="w-full h-full object-cover rounded-sm">
+                    <img src="fundo_carta.png" class="w-full h-full object-cover rounded-sm">
                 </div>
                 <div onclick="abrirZoomCarta('003')" class="w-[19%] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-xl border-2 border-transparent hover:border-[#4ade80] cursor-pointer hover-carta relative">
-                    <img src="carta_verso.png" class="w-full h-full object-cover rounded-sm">
+                    <img src="fundo_carta.png" class="w-full h-full object-cover rounded-sm">
                 </div>
                 <div onclick="abrirZoomCarta('004')" class="w-[19%] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-xl border-2 border-transparent hover:border-[#4ade80] cursor-pointer hover-carta relative">
-                    <img src="carta_verso.png" class="w-full h-full object-cover rounded-sm">
+                    <img src="fundo_carta.png" class="w-full h-full object-cover rounded-sm">
                 </div>
                 <div onclick="abrirZoomCarta('005')" class="w-[19%] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-xl border-2 border-transparent hover:border-[#4ade80] cursor-pointer hover-carta relative">
-                    <img src="carta_verso.png" class="w-full h-full object-cover rounded-sm">
+                    <img src="fundo_carta.png" class="w-full h-full object-cover rounded-sm">
                 </div>
             </div>
 
@@ -155,7 +155,7 @@
             <h2 id="titulo-acao" class="text-white font-black text-xl text-center uppercase tracking-wider mb-4 drop-shadow-md">ESCOLHA O ATRIBUTO</h2>
             
             <!-- Imagem em alta resolução da carta -->
-            <img id="zoom-img" src="carta_verso.png" alt="Carta" class="w-[65%] max-w-[240px] aspect-[2.5/3.5] object-cover drop-shadow-2xl mb-6 rounded-xl border-4 border-[#bc7bd4]">
+            <img id="zoom-img" src="fundo_carta.png" alt="Carta" class="w-[65%] max-w-[240px] aspect-[2.5/3.5] object-cover drop-shadow-2xl mb-6 rounded-xl border-4 border-[#bc7bd4]">
             
             <!-- Botões de Atributo -->
             <div id="painel-atributos" class="grid grid-cols-2 gap-3 w-full max-w-xs">
@@ -176,7 +176,7 @@
 
     </div>
 
-    <!-- SCRIPT DE INTERFACE BÁSICA (O Firebase completo virá no próximo passo) -->
+    <!-- SCRIPT DE INTERFACE BÁSICA -->
     <script type="module">
         import { INFO_CARTAS } from './cartas.js';
 
@@ -198,7 +198,6 @@
         window.abrirZoomCarta = function(idCarta) {
             cartaFocadaId = idCarta;
             
-            // Puxa a imagem real da carta se ela existir no cartas.js
             if (INFO_CARTAS && INFO_CARTAS[idCarta]) {
                 document.getElementById('zoom-img').src = INFO_CARTAS[idCarta].imagem;
             }
@@ -214,9 +213,6 @@
         window.confirmarAcao = function(atributo) {
             fecharZoomCarta();
             window.mostrarToast(`Você declarou ataque com ${atributo.toUpperCase()}! Aguardando adversário...`);
-            
-            // Aqui entrará a lógica do Firebase que envia sua jogada para o banco de dados
-            // e espera o adversário escolher a carta de defesa dele.
         };
 
     </script>

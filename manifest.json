@@ -4,7 +4,7 @@
   "description": "Seu Card Game de Coleção e Batalhas",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#dca3e8",
+  "background_color": "#7a32a8",
   "theme_color": "#7a32a8",
   "orientation": "portrait",
   "icons": [

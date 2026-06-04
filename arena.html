@@ -645,8 +645,19 @@
                                 if (vitoriasAtuais >= 30 && (!dados.badges || !dados.badges['badge-005'])) {
                                     updates['badges.badge-005'] = true; // Salva a badge no banco
                                     
-                                    // Deixa um "bilhete" no navegador para a tela de Batalha mostrar o aviso
+                                    // Deixa um "bilhete" no navegador para a tela de Batalha mostrar o aviso Pop-up
                                     localStorage.setItem('novaBadge', 'Guerreiro');
+                                
+                                    // Envia uma mensagem oficial para a Caixa de Entrada de Notificações
+                                    let listaNotificacoes = dados.notificacoes || [];
+                                    listaNotificacoes.push({
+                                        id: "notif_" + Date.now() + "_badge005",
+                                        titulo: "🏆 Badge Conquistada: Guerreiro",
+                                        texto: "Parabéns! Você alcançou a marca épica de 30 vitórias na Arena e liberou uma nova badge para o seu perfil.",
+                                        lida: false,
+                                        data: new Date().toISOString()
+                                    });
+                                    updates.notificacoes = listaNotificacoes;
                                 }
                             }
 

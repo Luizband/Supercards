@@ -369,6 +369,17 @@
                     document.getElementById('player-texto-xp').innerText = `${xpAtual}/${maxXp} xp`;
 
                     carregarRanking();
+
+                    // ---- LÊ O BILHETE E MOSTRA A BADGE NOVA ----
+                    const badgePendente = localStorage.getItem('novaBadge');
+                    if (badgePendente) {
+                        // Dá um pequeno atraso (meio segundo) pra animação ficar suave depois que a página carrega
+                        setTimeout(() => {
+                            window.mostrarToast(`🏆 Nova Badge Conquistada: ${badgePendente}!`);
+                            // Apaga o bilhete para não ficar repetindo
+                            localStorage.removeItem('novaBadge');
+                        }, 500);
+                    }
                 }
             } else {
                 window.location.href = "index.html";

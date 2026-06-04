@@ -597,14 +597,61 @@
                 
                 document.getElementById('modal-resultado-final').classList.remove('hidden');
 
-                if (vitoria && !window.premioColetado) {
-                    window.premioColetado = true;
+                // Garante que o banco de dados só seja atualizado UMA vez no final
+                if (!window.premioColetado) {
+                    window.premioColetado = true; 
                     const userRef = doc(db, "users", currentUserUid);
-                    await updateDoc(userRef, {
-                        moedas: increment(10),
-                        xp: increment(10),
-                        'estatisticas.batalhasVencidas': increment(1)
-                    });
+                    
+                    // Puxa as informações do jogador para ver as missões atuais
+                    const snap = await getDoc(userRef);
+                    
+                    if (snap.exists()) {
+                        let dados = snap.data();
+                        let updates = {};
+                        
+                        // --- 1. ATUALIZAR MISSÕES DIÁRIAS ---
+                        let pacoteMissoes = dados.missoesDiarias || {};
+                        let atualizouMissao = false;
+                        
+                        // Verifica se as missões são as de hoje
+                        let agora = new Date();
+                        if (agora.getHours() < 6) agora.setDate(agora.getDate() - 1);
+                        let hoje = `${agora.getFullYear()}-${agora.getMonth() + 1}-${agora.getDate()}`;
+
+                        if (pacoteMissoes.dataReset === hoje && pacoteMissoes.lista) {
+                            pacoteMissoes.lista.forEach(m => {
+                                // A missão de "batalhar" pontua ganhando, perdendo ou empatando
+                                if (m.id === "batalhar" && m.progresso < m.meta) {
+                                    m.progresso++; 
+                                    atualizouMissao = true;
+                                }
+                                // A missão de "ganhar_partida" só pontua se for vitória
+                                if (vitoria && m.id === "ganhar_partida" && m.progresso < m.meta) {
+                                    m.progresso++; 
+                                    atualizouMissao = true;
+                                }
+                            });
+                        }
+                        
+                        if (atualizouMissao) {
+                            updates.missoesDiarias = pacoteMissoes;
+                        }
+
+                        // --- 2. ATUALIZAR ESTATÍSTICAS E RECOMPENSAS ---
+                        if (vitoria) {
+                            updates.moedas = increment(10);
+                            updates.xp = increment(10);
+                            
+                            // Corrige o bug do ranking: atualizamos as duas variáveis para o Perfil e o Ranking funcionarem em sincronia
+                            updates['estatisticas.batalhasVencidas'] = increment(1); 
+                            updates['estatisticas.vitorias'] = increment(1); 
+                        }
+
+                        // Dispara todas as atualizações pro Firebase de uma vez só
+                        if (Object.keys(updates).length > 0) {
+                            await updateDoc(userRef, updates);
+                        }
+                    }
                 }
             }
         };

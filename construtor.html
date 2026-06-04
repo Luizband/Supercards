@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supercards - Construtor de Deck</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-image: url('fundotela.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            width: 90%;
+            max-width: 350px;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .toast-msg {
+            background: #dca3e8;
+            color: #7a32a8;
+            border: 3px solid #7a32a8;
+            padding: 12px 20px;
+            border-radius: 9999px;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.3);
+            text-align: center;
+            font-weight: 900;
+            font-size: 0.85rem;
+            animation: slideDown 0.3s ease-out;
+            pointer-events: auto;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .carta-slot {
+            aspect-ratio: 2.5 / 3.5;
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            box-shadow: inset 0 4px 6px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.1s;
+            position: relative;
+            overflow: hidden;
+        }
+        .carta-slot:active { transform: scale(0.95); }
+    </style>
+</head>
+<body class="fixed inset-0 px-4 pt-6 flex justify-center overflow-hidden w-screen">
+
+    <div id="toast-container"></div>
+
+    <div class="w-full max-w-sm flex flex-col h-full relative">
+        
+        <!-- CABEÇALHO DO DECK -->
+        <header class="flex flex-col items-center w-full mb-4 flex-shrink-0">
+            <h1 id="titulo-deck" class="text-[#dca3e8] font-black text-2xl text-center drop-shadow-md uppercase tracking-wider">CARREGANDO...</h1>
+            <span id="contador-cartas" class="text-white bg-[#7a32a8] px-4 py-1 rounded-full text-xs font-bold mt-2 border border-[#bc7bd4] shadow-md">0 / 20 CARTAS</span>
+        </header>
+
+        <!-- GRADE DE 20 CARTAS DO DECK -->
+        <main class="flex-grow overflow-y-auto no-scrollbar pb-32 bg-[#dca3e8]/30 backdrop-blur-sm rounded-2xl p-4 border-2 border-[#bc7bd4] shadow-xl">
+            <div id="grid-construtor" class="grid grid-cols-4 gap-2 w-full h-full content-start">
+                <!-- Injetado pelo JS: 20 slots -->
+            </div>
+        </main>
+
+        <!-- FOOTER: RETORNAR E SALVAR -->
+        <footer class="fixed bottom-8 left-1/2 transform -translate-x-1/2 w-full flex justify-center z-[50] pointer-events-none" style="padding-bottom: env(safe-area-inset-bottom);">
+            <div class="flex gap-4 w-[90%] max-w-[280px] pointer-events-auto">
+                <button onclick="window.location.href='decks.html'" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-black py-3 rounded-full shadow-2xl transition-transform hover:-translate-y-1 border-2 border-gray-400 uppercase text-xs tracking-wider">
+                    Retornar
+                </button>
+                <button onclick="salvarDeck()" class="flex-1 bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-3 rounded-full shadow-2xl transition-transform hover:-translate-y-1 border-2 border-[#dca3e8] uppercase text-xs tracking-wider">
+                    Salvar
+                </button>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- MODAL DE COLEÇÃO (Para escolher a carta) -->
+    <div id="modal-colecao" class="hidden fixed inset-0 bg-black/90 z-[200] flex flex-col items-center justify-start pt-10 px-4 pb-20 backdrop-blur-md pointer-events-auto">
+        
+        <button onclick="fecharModalColecao()" class="absolute top-4 right-6 text-[#dca3e8] font-black text-2xl hover:text-white transition-colors z-50">X</button>
+        
+        <h2 class="text-[#dca3e8] font-black text-xl text-center uppercase tracking-wider mb-6">Sua Coleção</h2>
+        
+        <div id="lista-colecao" class="grid grid-cols-4 gap-2 w-full max-w-sm overflow-y-auto no-scrollbar content-start flex-grow pb-10">
+            <!-- As cartas da coleção serão injetadas aqui -->
+            <span class="text-white col-span-4 text-center text-sm">Carregando cartas...</span>
+        </div>
+
+    </div>
+
+    <!-- MODAL DE REGRAS (Aviso para Decks Novos) -->
+    <div id="modal-regras" class="hidden fixed inset-0 bg-black/80 z-[250] flex flex-col items-center justify-center p-4 backdrop-blur-sm pointer-events-auto">
+        <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 w-full max-w-sm shadow-2xl flex flex-col items-center gap-4 relative">
+            <button onclick="document.getElementById('modal-regras').classList.add('hidden')" class="absolute top-2 right-4 text-[#7a32a8] font-black text-xl hover:text-purple-600 transition-colors">X</button>
+            
+            <h2 class="text-[#7a32a8] font-black text-lg text-center uppercase tracking-wider mb-2">Regras do Deck</h2>
+            
+            <ul class="text-[#7a32a8] font-bold text-sm space-y-2 w-full px-2">
+                <li class="border-b border-[#7a32a8]/20 pb-1">- Exatamente 20 cartas.</li>
+                <li class="border-b border-[#7a32a8]/20 pb-1">- Máximo de 1 carta Épica.</li>
+                <li class="border-b border-[#7a32a8]/20 pb-1">- Máximo de 2 cartas Lendárias.</li>
+                <li class="border-b border-[#7a32a8]/20 pb-1">- Máximo de 7 cartas Raras.</li>
+                <li class="pt-1">- O restante (Comuns) sem limite.</li>
+            </ul>
+            
+            <button onclick="document.getElementById('modal-regras').classList.add('hidden')" class="w-full py-3 mt-2 bg-[#7a32a8] hover:bg-purple-600 text-white font-black text-sm rounded-full shadow-md uppercase">
+                Entendido
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL DE ERRO DE VALIDAÇÃO -->
+    <div id="modal-erro-deck" class="hidden fixed inset-0 bg-black/80 z-[250] flex flex-col items-center justify-center p-4 backdrop-blur-sm pointer-events-auto">
+        <div class="bg-[#dca3e8] border-4 border-red-600 rounded-2xl p-6 w-full max-w-sm shadow-2xl flex flex-col items-center gap-4 relative">
+            <h2 class="text-red-600 font-black text-lg text-center uppercase tracking-wider mb-2">Deck Inválido</h2>
+            
+            <p id="texto-erro-deck" class="text-[#7a32a8] font-black text-sm text-center px-2"></p>
+            
+            <button onclick="document.getElementById('modal-erro-deck').classList.add('hidden')" class="w-full py-3 mt-2 bg-red-600 hover:bg-red-700 text-white font-black text-sm rounded-full shadow-md uppercase">
+                Corrigir
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        
+        // Importa o banco de cartas local para pegar as imagens e raridades
+        import { INFO_CARTAS } from './cartas.js';
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyCU3lFTgfrDMaD9jwR7X7ivYPmGQh4VE1g",
+          authDomain: "supercards-tcg.firebaseapp.com",
+          projectId: "supercards-tcg",
+          storageBucket: "supercards-tcg.firebasestorage.app",
+          messagingSenderId: "862316380615",
+          appId: "1:862316380615:web:b3f28056ebc967673999e2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUserUid = null;
+        let colecaoJogador = {}; // Formato: {"001": 2, "005": 1}
+        
+        let deckState = Array(20).fill(null); // Nossa grade de 20 espaços, guarda os IDs ("001")
+        let slotSelecionadoParaEdicao = null; 
+
+        // Informações do Deck
+        let metaDeck = {
+            id: null,
+            nome: "MEU DECK",
+            icone: "baralho01.png"
+        };
+
+        // --- INICIALIZAÇÃO E PARÂMETROS ---
+        function carregarParametrosDaURL() {
+            const params = new URLSearchParams(window.location.search);
+            
+            if (params.has('editar')) {
+                metaDeck.id = params.get('editar');
+            } else if (params.has('nome') && params.has('icone')) {
+                metaDeck.nome = params.get('nome');
+                metaDeck.icone = params.get('icone');
+                metaDeck.id = "deck_" + Date.now(); 
+                
+                // Exibe as regras apenas para decks novos
+                document.getElementById('modal-regras').classList.remove('hidden');
+            } else {
+                // URL inválida, volta pro menu de decks
+                window.location.href = "decks.html";
+            }
+            
+            document.getElementById('titulo-deck').innerText = metaDeck.nome;
+        }
+
+        window.mostrarToast = function(mensagem) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast-msg';
+            toast.innerHTML = mensagem;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => toast.remove(), 500); 
+            }, 3000);
+        };
+
+        // --- LÓGICA DA GRADE (20 SLOTS) ---
+        function renderizarGrade() {
+            const grid = document.getElementById('grid-construtor');
+            grid.innerHTML = "";
+            let cartasPreenchidas = 0;
+
+            for (let i = 0; i < 20; i++) {
+                const idCarta = deckState[i];
+                const div = document.createElement('div');
+                div.className = "carta-slot bg-black/20 rounded-lg flex items-center justify-center relative";
+                
+                if (idCarta && INFO_CARTAS[idCarta]) {
+                    cartasPreenchidas++;
+                    const info = INFO_CARTAS[idCarta];
+                    const imagemExibida = info.miniatura || info.imagem;
+
+                    div.innerHTML = `<img src="${imagemExibida}" class="w-full h-full object-cover rounded-md shadow-md border-2 border-transparent hover:border-red-500 transition-colors">`;
+                    // Se clicar numa carta preenchida, ela é removida
+                    div.onclick = () => removerCartaDoSlot(i);
+                } else {
+                    div.innerHTML = `<div class="w-6 h-6 border-2 border-white/30 rounded-full flex items-center justify-center"><span class="text-white/30 font-black text-xs">+</span></div>`;
+                    div.classList.add('border-2', 'border-dashed', 'border-white/20');
+                    // Se clicar num espaço vazio, abre a coleção
+                    div.onclick = () => abrirColecao(i);
+                }
+                
+                grid.appendChild(div);
+            }
+
+            document.getElementById('contador-cartas').innerText = `${cartasPreenchidas} / 20 CARTAS`;
+        }
+
+        window.removerCartaDoSlot = function(index) {
+            deckState[index] = null;
+            renderizarGrade();
+        };
+
+        // --- LÓGICA DA COLEÇÃO DO JOGADOR NO MODAL ---
+        window.abrirColecao = function(slotIndex) {
+            slotSelecionadoParaEdicao = slotIndex;
+            renderizarColecaoModal();
+            document.getElementById('modal-colecao').classList.remove('hidden');
+        };
+
+        window.fecharModalColecao = function() {
+            document.getElementById('modal-colecao').classList.add('hidden');
+            slotSelecionadoParaEdicao = null;
+        };
+
+        function renderizarColecaoModal() {
+            const container = document.getElementById('lista-colecao');
+            container.innerHTML = "";
+
+            // Conta quantas cartas de cada ID já estão no deck
+            const contagemDeck = {};
+            deckState.forEach(id => {
+                if (id) {
+                    contagemDeck[id] = (contagemDeck[id] || 0) + 1;
+                }
+            });
+
+            let temCartas = false;
+
+            // Percorre toda a coleção do banco de dados (colecaoJogador)
+            for (const [id, quantidadePossuida] of Object.entries(colecaoJogador)) {
+                
+                // Só processa se o jogador tiver 1 ou mais cópias e se a carta existir no cartas.js
+                if (quantidadePossuida > 0 && INFO_CARTAS[id]) {
+                    temCartas = true;
+                    
+                    const quantidadeNoDeck = contagemDeck[id] || 0;
+                    const copiasDisponiveis = quantidadePossuida - quantidadeNoDeck;
+                    const info = INFO_CARTAS[id];
+                    
+                    const div = document.createElement('div');
+                    div.className = "relative aspect-[2.5/3.5] rounded-md shadow-lg overflow-hidden border-2 border-transparent";
+                    
+                    if (copiasDisponiveis > 0) {
+                        // Carta clicável
+                        div.classList.add('cursor-pointer', 'hover:border-[#dca3e8]', 'transition-colors');
+                        div.onclick = () => escolherCartaParaSlot(id);
+                    } else {
+                        // Carta esgotada (já colocou todas as cópias que tem no deck)
+                        div.classList.add('opacity-40', 'grayscale', 'pointer-events-none');
+                    }
+
+                    const imagemExibida = info.miniatura || info.imagem;
+
+                    div.innerHTML = `
+                        <img src="${imagemExibida}" class="w-full h-full object-cover">
+                        <div class="absolute bottom-0 left-0 w-full bg-black/80 py-1 flex justify-center items-center">
+                            <span class="text-white text-[9px] font-black tracking-widest">${copiasDisponiveis} DISP.</span>
+                        </div>
+                    `;
+                    
+                    container.appendChild(div);
+                }
+            }
+
+            if (!temCartas) {
+                container.innerHTML = `<span class="text-white col-span-4 text-center text-sm font-bold mt-10">Você não possui cartas disponíveis.</span>`;
+            }
+        }
+
+        window.escolherCartaParaSlot = function(idCarta) {
+            if (slotSelecionadoParaEdicao !== null) {
+                deckState[slotSelecionadoParaEdicao] = idCarta; 
+                fecharModalColecao();
+                renderizarGrade();
+            }
+        };
+
+        // --- SISTEMA DE VALIDAÇÃO E SALVAMENTO ---
+        window.salvarDeck = async function() {
+            let contagemEpic = 0;
+            let contagemLeg = 0;
+            let contagemRare = 0;
+            let espacosVazios = 0;
+            let listaIDs = [];
+
+            for (let i = 0; i < 20; i++) {
+                const id = deckState[i];
+                if (!id) {
+                    espacosVazios++;
+                } else {
+                    listaIDs.push(id);
+                    const info = INFO_CARTAS[id];
+                    if (info) {
+                        const raridade = info.raridade;
+                        if (raridade === "Épica") contagemEpic++;
+                        if (raridade === "Lendária") contagemLeg++;
+                        if (raridade === "Rara") contagemRare++;
+                    }
+                }
+            }
+
+            let msgErro = null;
+            if (espacosVazios > 0) {
+                msgErro = `Seu deck está incompleto. Faltam ${espacosVazios} carta(s).`;
+            } else if (contagemEpic > 1) {
+                msgErro = `LIMITE ESTOURADO!\nMáximo de 1 carta Épica. Você colocou ${contagemEpic}.`;
+            } else if (contagemLeg > 2) {
+                msgErro = `LIMITE ESTOURADO!\nMáximo de 2 cartas Lendárias. Você colocou ${contagemLeg}.`;
+            } else if (contagemRare > 7) {
+                msgErro = `LIMITE ESTOURADO!\nMáximo de 7 cartas Raras. Você colocou ${contagemRare}.`;
+            }
+
+            if (msgErro) {
+                document.getElementById('texto-erro-deck').innerText = msgErro;
+                document.getElementById('modal-erro-deck').classList.remove('hidden');
+                return;
+            }
+
+            window.mostrarToast("Salvando deck...");
+            try {
+                const userRef = doc(db, "users", currentUserUid);
+                
+                const objetoDeckSalvo = {
+                    nome: metaDeck.nome,
+                    icone: metaDeck.icone,
+                    cartas: listaIDs
+                };
+
+                const atualizacao = {};
+                atualizacao[`decks.${metaDeck.id}`] = objetoDeckSalvo;
+
+                await updateDoc(userRef, atualizacao);
+                window.location.href = "decks.html";
+                
+            } catch (error) {
+                console.error(error);
+                window.mostrarToast("Erro ao salvar o deck. Verifique a conexão.");
+            }
+        };
+
+        // --- CARREGAMENTO DO FIREBASE ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUserUid = user.uid;
+                carregarParametrosDaURL();
+
+                const docRef = doc(db, "users", user.uid);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const dados = docSnap.data();
+                    
+                    // Salva a coleção na memória do JS para podermos usar no modal
+                    colecaoJogador = dados.colecao || {};
+
+                    // Se estivermos editando um deck existente...
+                    if (metaDeck.id && dados.decks && dados.decks[metaDeck.id] && !window.location.search.includes('nome=')) {
+                        const deckSalvo = dados.decks[metaDeck.id];
+                        metaDeck.nome = deckSalvo.nome;
+                        metaDeck.icone = deckSalvo.icone;
+                        document.getElementById('titulo-deck').innerText = metaDeck.nome;
+
+                        // Preenche a grade baseando-se nos IDs salvos
+                        if (deckSalvo.cartas && Array.isArray(deckSalvo.cartas)) {
+                            for (let i = 0; i < deckSalvo.cartas.length; i++) {
+                                if (i >= 20) break;
+                                deckState[i] = deckSalvo.cartas[i];
+                            }
+                        }
+                    }
+
+                    renderizarGrade();
+                }
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+    </script>
+</body>
+</html>

@@ -437,9 +437,13 @@
             }
             if (!conviteSelecionadoId) return;
 
+            // SALVA A ID ANTES DO FIREBASE ATUALIZAR E APAGAR A VARIÁVEL GLOBAL
+            const idDoConvite = conviteSelecionadoId;
+
             try {
-                await updateDoc(doc(db, "trocas", conviteSelecionadoId), { status: 'escolhendo_cartas' });
-                trocaAtivaId = conviteSelecionadoId;
+                await updateDoc(doc(db, "trocas", idDoConvite), { status: 'escolhendo_cartas' });
+                
+                trocaAtivaId = idDoConvite;
                 souRemetente = false; 
                 trocaProcessada = false;
                 escutarMesaTroca(trocaAtivaId);

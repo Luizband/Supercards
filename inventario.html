@@ -466,7 +466,7 @@
                 let pacotesPremiumGanhos = 0;
 
                 let xpMaximo = calcularXPMaximo(nivelAtual);
-                if (novoXp >= xpMaximo && nivelAtual < 30) {
+                while (novoXp >= xpMaximo && nivelAtual < 30) {
                     novoXp -= xpMaximo;
                     nivelAtual++;
                     subiuNivel = true;
@@ -489,6 +489,7 @@
                         lida: false,
                         data: new Date().toISOString()
                     });
+                    xpMaximo = calcularXPMaximo(nivelAtual);
                 }
 
                 let deltaBasico = (campo === 'pacoteBasico' ? -1 : 0) + pacotesBasicosGanhos;

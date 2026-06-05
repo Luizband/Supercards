@@ -370,15 +370,30 @@
 
                     carregarRanking();
 
-                    // ---- LÊ O BILHETE E MOSTRA A BADGE NOVA ----
+                    // ---- LÊ OS BILHETES E MOSTRA OS AVISOS ----
                     const badgePendente = localStorage.getItem('novaBadge');
+                    const levelPendente = localStorage.getItem('novoLevel');
+                    
+                    let delayToast = 500;
+
                     if (badgePendente) {
-                        // Dá um pequeno atraso (meio segundo) pra animação ficar suave depois que a página carrega
                         setTimeout(() => {
-                            window.mostrarToast(`🏆 Nova Badge Conquistada: ${badgePendente}!`);
-                            // Apaga o bilhete para não ficar repetindo
+                            window.mostrarToast(`🏆 NOVA CONQUISTA!<br><span class="text-xs font-normal">Badge: ${badgePendente}.</span><br><span class="text-sm">Recompensa: +50 XP e +50 <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`);
                             localStorage.removeItem('novaBadge');
-                        }, 500);
+                        }, delayToast);
+                        delayToast += 1500;
+                    }
+
+                    if (levelPendente) {
+                        setTimeout(() => {
+                            let lvl = parseInt(levelPendente);
+                            let htmlRecompensa = (lvl === 10 || lvl === 20 || lvl === 30) 
+                                ? `1 Pacote Básico, 1 Pacote Premium e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom">` 
+                                : `1 Pacote Básico e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom">`;
+                            
+                            window.mostrarToast(`🎉 LEVEL UP! Nível ${lvl} alcançado!<br><span class="text-xs">Recompensas: ${htmlRecompensa}</span>`);
+                            localStorage.removeItem('novoLevel');
+                        }, delayToast);
                     }
                 }
             } else {

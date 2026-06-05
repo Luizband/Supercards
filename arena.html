@@ -634,7 +634,6 @@
                 
                 document.getElementById('modal-resultado-final').classList.remove('hidden');
 
-                // Trava de segurança rodando fora do "if (vitoria)" para contabilizar derrotas nas missões
                 if (!window.dadosSalvos) {
                     window.dadosSalvos = true; 
                     const userRef = doc(db, "users", currentUserUid);
@@ -644,61 +643,110 @@
                         if (snap.exists()) {
                             let dados = snap.data();
                             let updates = {};
+                            let notificacoesNovas = [];
                             
-                            // 1. MISSÕES DIÁRIAS (Computa vitórias e derrotas corretamente)
+                            // 1. MISSÕES DIÁRIAS
                             let pacoteMissoes = dados.missoesDiarias || {};
                             let atualizouMissao = false;
 
                             if (pacoteMissoes.lista && Array.isArray(pacoteMissoes.lista)) {
                                 pacoteMissoes.lista.forEach(m => {
-                                    // A missão de batalhar conclui ganhando ou perdendo
                                     if ((m.id === "batalhar" || m.id === "jogar_batalha" || m.id === "jogar") && m.progresso < m.meta) {
                                         m.progresso++; 
                                         atualizouMissao = true;
                                     }
-                                    // A missão de vencer conclui apenas com vitória
                                     if (vitoria && (m.id === "ganhar_partida" || m.id === "vencer_batalha" || m.id === "vencer") && m.progresso < m.meta) {
                                         m.progresso++; 
                                         atualizouMissao = true;
                                     }
                                 });
                             }
-                            
-                            if (atualizouMissao) {
-                                updates.missoesDiarias = pacoteMissoes;
-                            }
+                            if (atualizouMissao) updates.missoesDiarias = pacoteMissoes;
 
-                            // 2. ESTATÍSTICAS, RECOMPENSAS E BADGES (Somente se venceu)
+                            // 2. MATEMÁTICA DE RECOMPENSAS E BADGE
                             if (vitoria) {
-                                updates.moedas = increment(10);
-                                updates.xp = increment(10);
+                                let bonusXp = 10;
+                                let bonusMoedas = 10;
+                                let ganhouBadge = false;
+
                                 updates['estatisticas.batalhasVencidas'] = increment(1); 
                                 updates['estatisticas.vitorias'] = increment(1); 
 
-                                // ---- GATILHO DA BADGE DE 30 VITÓRIAS (Guerreiro) ----
                                 let vitoriasAtuais = (dados.estatisticas?.batalhasVencidas || 0) + 1;
                                 
-                                // Verifica se chegou a 30 e se o jogador ainda NÃO tem a badge-005
                                 if (vitoriasAtuais >= 30 && (!dados.badges || !dados.badges['badge-005'])) {
-                                    updates['badges.badge-005'] = true; // Salva a badge no banco
+                                    updates['badges.badge-005'] = true; 
+                                    ganhouBadge = true;
+                                    bonusXp += 50;
+                                    bonusMoedas += 50;
                                     
-                                    // Deixa um "bilhete" no navegador para a tela de Batalha mostrar o aviso Pop-up
                                     localStorage.setItem('novaBadge', 'Guerreiro');
                                 
-                                    // Envia uma mensagem oficial para a Caixa de Entrada de Notificações
-                                    let listaNotificacoes = dados.notificacoes || [];
-                                    listaNotificacoes.push({
+                                    notificacoesNovas.push({
                                         id: "notif_" + Date.now() + "_badge005",
-                                        titulo: "🏆 Badge Conquistada: Guerreiro",
-                                        texto: "Parabéns! Você alcançou a marca épica de 30 vitórias na Arena e liberou uma nova badge para o seu perfil.",
+                                        titulo: "🏆 Conquista: Guerreiro",
+                                        texto: "Você alcançou a marca épica de 30 vitórias na Arena!\nRecompensas: 50 XP e 50 Moedas.",
                                         lida: false,
                                         data: new Date().toISOString()
                                     });
-                                    updates.notificacoes = listaNotificacoes;
+                                }
+
+                                // 3. CÁLCULO DO LEVEL UP (Faltava aqui)
+                                let nivelAtual = dados.nivel || 1;
+                                let xpAtual = dados.xp || 0;
+                                let novoXp = xpAtual + bonusXp;
+                                let subiuNivel = false;
+                                let pacotesBasicosGanhos = 0;
+                                let pacotesPremiumGanhos = 0;
+
+                                function calcXP(n) {
+                                    if (n >= 1 && n <= 5) return 200;
+                                    if (n >= 6 && n <= 15) return 750;
+                                    if (n >= 16 && n <= 25) return 1600;
+                                    return 3000;
+                                }
+
+                                let xpMaximo = calcXP(nivelAtual);
+                                while (novoXp >= xpMaximo && nivelAtual < 30) {
+                                    novoXp -= xpMaximo;
+                                    nivelAtual++;
+                                    subiuNivel = true;
+                                    bonusMoedas += 30;
+                                    pacotesBasicosGanhos++;
+
+                                    let textoRecompensaNotif = "1 Pacote Básico e 30 Moedas";
+                                    if (nivelAtual === 10 || nivelAtual === 20 || nivelAtual === 30) {
+                                        pacotesPremiumGanhos++;
+                                        textoRecompensaNotif = "1 Pacote Básico, 1 Pacote Premium e 30 Moedas";
+                                    }
+
+                                    notificacoesNovas.push({
+                                        id: "notif_" + Date.now() + "_nivel" + nivelAtual,
+                                        titulo: `🎉 Level Up: Nível ${nivelAtual}`,
+                                        texto: `Parabéns! Você alcançou o Nível ${nivelAtual}.\nRecompensas recebidas: ${textoRecompensaNotif}.`,
+                                        lida: false,
+                                        data: new Date().toISOString()
+                                    });
+                                    xpMaximo = calcXP(nivelAtual);
+                                }
+
+                                updates.xp = novoXp;
+                                updates.nivel = nivelAtual;
+                                updates.moedas = increment(bonusMoedas);
+
+                                if (pacotesBasicosGanhos > 0) updates['inventario.pacoteBasico'] = increment(pacotesBasicosGanhos);
+                                if (pacotesPremiumGanhos > 0) updates['inventario.pacotePremium'] = increment(pacotesPremiumGanhos);
+                                
+                                if (subiuNivel) {
+                                    // Deixa um bilhete para a tela de Batalhas avisar que subiu de nível
+                                    localStorage.setItem('novoLevel', nivelAtual); 
                                 }
                             }
 
-                            // Dispara a atualização para o banco
+                            if (notificacoesNovas.length > 0) {
+                                updates.notificacoes = arrayUnion(...notificacoesNovas);
+                            }
+
                             if (Object.keys(updates).length > 0) {
                                 await updateDoc(userRef, updates);
                             }

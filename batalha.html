@@ -14,7 +14,6 @@
             background-attachment: fixed;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -44,10 +43,7 @@
             animation: slideDown 0.3s ease-out;
             pointer-events: auto;
         }
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="fixed inset-0 px-4 pt-4 flex justify-center overflow-hidden w-screen">
@@ -55,15 +51,12 @@
     <div id="toast-container"></div>
 
     <div class="w-full max-w-sm flex flex-col h-full relative">
-        
-        <!-- CABEÇALHO PADRÃO -->
         <header class="flex items-center gap-3 mt-4 mb-6 w-full flex-shrink-0">
             <div class="relative flex-shrink-0">
                 <div class="bg-[#dca3e8] w-20 h-20 rounded-full flex items-center justify-center text-[#7a32a8] font-black text-xl shadow-lg border-2 border-[#bc7bd4] overflow-hidden relative">
                     <span id="texto-sem-foto" class="text-sm">FOTO</span>
                     <img id="img-perfil-global" src="" class="hidden w-full h-full object-cover absolute inset-0">
                 </div>
-                
                 <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-[#bc7bd4] w-7 h-7 rounded-full flex items-center justify-center shadow-md border-2 border-[#dca3e8] z-30">
                     <span id="player-level" class="text-[#7a32a8] font-black text-xs">--</span>
                 </div>
@@ -75,27 +68,16 @@
                         <span id="player-coins" class="text-[#7a32a8] font-black text-sm">...</span>
                         <img src="moedas.png" class="w-4 h-4 object-contain">
                     </div>
-                    
                     <nav class="bg-[#dca3e8] rounded-full flex justify-between items-center px-2 py-1 shadow-md flex-grow">
-                        <button onclick="window.location.href='perfil.html'" class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-7 h-7 shadow-sm">
-                            <img src="perfil.png" alt="Perfil" class="w-3.5 h-3.5 object-contain">
-                        </button>
-                        
-                        <button onclick="window.location.href='shop.html'" class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-7 h-7 shadow-sm">
-                            <img src="shop.png" alt="Shop" class="w-3.5 h-3.5 object-contain">
-                        </button>
-                        
-                        <button onclick="window.location.href='missoes.html'" class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-7 h-7 shadow-sm">
-                            <img src="missao.png" alt="Missões" class="w-3.5 h-3.5 object-contain">
-                        </button>
+                        <button onclick="window.location.href='perfil.html'" class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-7 h-7 shadow-sm"><img src="perfil.png" class="w-3.5 h-3.5 object-contain"></button>
+                        <button onclick="window.location.href='shop.html'" class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-7 h-7 shadow-sm"><img src="shop.png" class="w-3.5 h-3.5 object-contain"></button>
+                        <button onclick="window.location.href='missoes.html'" class="bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-7 h-7 shadow-sm"><img src="missao.png" class="w-3.5 h-3.5 object-contain"></button>
                     </nav>
                 </div>
-                
                 <div class="flex items-center gap-1.5 w-full">
                     <div class="bg-[#dca3e8] rounded-full px-2 py-1 flex items-center justify-center shadow-md w-1/2 h-7 overflow-hidden flex-shrink-0">
                         <span id="player-name" class="text-[#7a32a8] font-black text-[10px] uppercase truncate text-center w-full">...</span>
                     </div>
-                    
                     <div class="flex flex-col items-center flex-grow w-1/2">
                         <div class="w-full bg-transparent border border-[#dca3e8] rounded-full h-2.5 overflow-hidden shadow-inner">
                             <div id="player-barra-xp" class="bg-[#dca3e8] h-full transition-all duration-500" style="width: 0%;"></div>
@@ -106,61 +88,46 @@
             </div>
         </header>
 
-        <!-- CONTEÚDO PRINCIPAL: BATALHAS -->
         <main class="flex flex-col items-center w-full flex-grow overflow-y-auto no-scrollbar pb-32">
-            
             <h1 class="text-[#dca3e8] font-black text-2xl text-center mb-6 drop-shadow-md uppercase tracking-wider">BATALHAS</h1>
 
             <div class="grid grid-cols-2 gap-6 w-full max-w-[280px] mb-4">
-                
                 <div onclick="buscarPartida()" class="flex flex-col items-center group cursor-pointer">
                     <div class="bg-[#dca3e8] w-full aspect-square rounded-[24px] flex items-center justify-center p-4 shadow-xl hover:scale-105 transition-transform border-4 border-transparent hover:border-[#8b3dff]/50">
-                        <img src="vs.png" alt="Buscar Partida" class="w-full h-full object-contain drop-shadow-lg">
+                        <img src="vs.png" class="w-full h-full object-contain drop-shadow-lg">
                     </div>
                     <span class="text-[#dca3e8] font-black text-sm mt-3 drop-shadow-md uppercase tracking-wide text-center leading-tight">Buscar<br>Partida</span>
                 </div>
-
                 <div onclick="window.location.href='decks.html'" class="flex flex-col items-center group cursor-pointer">
                     <div class="bg-[#dca3e8] w-full aspect-square rounded-[24px] flex items-center justify-center p-4 shadow-xl hover:scale-105 transition-transform border-4 border-transparent hover:border-[#8b3dff]/50 relative">
-                        <img src="colecao.png" alt="Decks" class="w-[80%] h-[80%] object-contain drop-shadow-lg opacity-90">
+                        <img src="colecao.png" class="w-[80%] h-[80%] object-contain drop-shadow-lg opacity-90">
                     </div>
                     <span class="text-[#dca3e8] font-black text-sm mt-3 drop-shadow-md uppercase tracking-wide text-center leading-tight">Meus<br>Decks</span>
                 </div>
-
             </div>
 
-            <!-- BOTÃO: DESAFIAR AMIGO -->
             <div onclick="window.location.href='amigos.html'" class="flex items-center justify-center bg-[#7a32a8] hover:bg-purple-600 w-full max-w-[280px] rounded-full py-3 shadow-lg border-2 border-[#bc7bd4] cursor-pointer transition-transform hover:scale-105 mb-8">
                 <span class="text-white font-black text-sm uppercase tracking-widest drop-shadow-md">Desafiar Amigo</span>
             </div>
 
-            <!-- RANKING -->
             <div class="bg-[#dca3e8] rounded-[24px] w-full max-w-[280px] p-5 shadow-2xl border-4 border-[#bc7bd4] flex flex-col">
                 <h2 class="text-[#7a32a8] font-black text-base text-center uppercase tracking-widest mb-4">RANKING MENSAL</h2>
-                
                 <div id="lista-ranking" class="flex flex-col gap-2 w-full">
                     <span class="text-[#7a32a8] text-xs font-bold text-center animate-pulse">Carregando heróis...</span>
                 </div>
             </div>
-
         </main>
 
-        <!-- FOOTER COM O BOTÃO RETORNAR -->
-        <footer class="fixed bottom-8 left-1/2 transform -translate-x-1/2 w-full flex justify-center z-[100] pointer-events-none" style="padding-bottom: env(safe-area-inset-bottom);">
-            <button onclick="window.location.href='menu.html'" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-2.5 px-12 rounded-full shadow-2xl transition-transform hover:-translate-y-1 pointer-events-auto border-2 border-[#dca3e8] uppercase text-sm tracking-wider">
-                Retornar
-            </button>
+        <footer class="fixed bottom-8 left-1/2 transform -translate-x-1/2 w-full flex justify-center z-[100] pointer-events-none">
+            <button onclick="window.location.href='menu.html'" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-2.5 px-12 rounded-full shadow-2xl transition-transform hover:-translate-y-1 pointer-events-auto border-2 border-[#dca3e8] uppercase text-sm tracking-wider">Retornar</button>
         </footer>
-
     </div>
 
-    <!-- MODAL DE BUSCA DE PARTIDA -->
+    <!-- MODAL DE BUSCA -->
     <div id="modal-busca" class="hidden fixed inset-0 bg-black/90 z-[200] flex flex-col items-center justify-center p-4 backdrop-blur-md pointer-events-auto w-screen h-screen">
         <h2 class="text-[#dca3e8] font-black text-2xl text-center uppercase tracking-wider mb-8 animate-pulse">Procurando<br>Oponente...</h2>
         <div class="w-16 h-16 border-4 border-[#7a32a8] border-t-[#dca3e8] rounded-full animate-spin mb-8"></div>
-        <button onclick="cancelarBusca()" class="bg-red-600 hover:bg-red-700 text-white font-black py-2.5 px-10 rounded-full shadow-xl uppercase text-sm tracking-wide">
-            Cancelar
-        </button>
+        <button onclick="cancelarBusca()" class="bg-red-600 hover:bg-red-700 text-white font-black py-2.5 px-10 rounded-full shadow-xl uppercase text-sm tracking-wide">Cancelar</button>
     </div>
 
     <script type="module">
@@ -168,16 +135,14 @@
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, collection, query, orderBy, limit, getDocs, where, addDoc, updateDoc, onSnapshot, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-        const firebaseConfig = {
+        const app = initializeApp({
           apiKey: "AIzaSyCU3lFTgfrDMaD9jwR7X7ivYPmGQh4VE1g",
           authDomain: "supercards-tcg.firebaseapp.com",
           projectId: "supercards-tcg",
           storageBucket: "supercards-tcg.firebasestorage.app",
           messagingSenderId: "862316380615",
           appId: "1:862316380615:web:b3f28056ebc967673999e2"
-        };
-
-        const app = initializeApp(firebaseConfig);
+        });
         const auth = getAuth(app);
         const db = getFirestore(app);
 
@@ -185,230 +150,122 @@
         let partidaIdAtual = null;
         let unsubscribePartida = null;
 
-        window.mostrarToast = function(mensagem) {
+        window.mostrarToast = function(msg) {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            toast.className = 'toast-msg';
-            toast.innerHTML = mensagem;
+            toast.className = 'toast-msg'; toast.innerHTML = msg;
             container.appendChild(toast);
-
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transition = 'opacity 0.5s ease';
-                setTimeout(() => toast.remove(), 500); 
-            }, 3000);
+            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
         };
 
-        function calcularXPMaximo(nivel) {
-            if (nivel >= 1 && nivel <= 5) return 200;
-            if (nivel >= 6 && nivel <= 15) return 750;
-            if (nivel >= 16 && nivel <= 25) return 1600;
-            return 3000;
-        }
-
-        // --- SISTEMA DE MATCHMAKING (PAREAMENTO) ---
         window.buscarPartida = async function() {
             if (!currentUserDoc) return;
-            
-            // Verifica se tem deck padrão
             if (!currentUserDoc.deckPadrao || !currentUserDoc.decks || !currentUserDoc.decks[currentUserDoc.deckPadrao]) {
-                return window.mostrarToast("Você precisa criar e selecionar um Deck Padrão na tela de Decks!");
+                return window.mostrarToast("Você precisa selecionar um Deck Padrão!");
             }
-
-            const deckCompleto = currentUserDoc.decks[currentUserDoc.deckPadrao].cartas;
-            if (!deckCompleto || deckCompleto.length < 20) {
-                return window.mostrarToast("Seu Deck Padrão está incompleto. Ajuste-o primeiro.");
-            }
+            const deck = currentUserDoc.decks[currentUserDoc.deckPadrao].cartas;
+            if (deck.length < 20) return window.mostrarToast("Seu Deck Padrão está incompleto.");
 
             document.getElementById('modal-busca').classList.remove('hidden');
 
             try {
-                const partidasRef = collection(db, "partidas");
-                const q = query(partidasRef, where("status", "==", "aguardando"), limit(15));
-                const querySnapshot = await getDocs(q);
+                const q = query(collection(db, "partidas"), where("status", "==", "aguardando"), limit(10));
+                const snap = await getDocs(q);
 
-                let salaIdEncontrada = null;
-                let dadosSalaEncontrada = null;
-
-                querySnapshot.forEach(docSnap => {
-                    const dados = docSnap.data();
-                    // IGNORA desafios de amigos e IGNORA salas criadas por você mesmo
-                    if (dados.tipo !== "desafio_amigo" && dados.jogador1.uid !== auth.currentUser.uid) {
-                        if (!salaIdEncontrada) {
-                            salaIdEncontrada = docSnap.id;
-                            dadosSalaEncontrada = dados;
-                        }
+                let salaAberta = null;
+                snap.forEach(d => {
+                    const dados = d.data();
+                    // Proteção exigida: Não entra na própria sala e não rouba salas de amigos
+                    if (dados.jogador1 && dados.jogador1.uid !== auth.currentUser.uid && dados.tipo !== "desafio_amigo") {
+                        if (!salaAberta) salaAberta = d.id;
                     }
                 });
 
-                if (!salaIdEncontrada) {
-                    // NINGUÉM ESPERANDO: Cria uma sala nova e fica de host
-                    const novaPartida = {
-                        tipo: "aleatoria", // IDENTIFICADOR DE SALA PÚBLICA
-                        status: "aguardando",
-                        criadoEm: serverTimestamp(),
-                        jogador1: {
-                            uid: auth.currentUser.uid,
-                            nome: currentUserDoc.nomeDisplay || "JOGADOR 1",
-                            foto: currentUserDoc.fotoPerfil || "",
-                            deck: deckCompleto
-                        },
-                        jogador2: null,
-                        turnoAtual: 0,
-                        quemAtaca: null
-                    };
-
-                    const docRef = await addDoc(partidasRef, novaPartida);
-                    partidaIdAtual = docRef.id;
-
-                    // Fica escutando as mudanças nessa sala
-                    unsubscribePartida = onSnapshot(docRef, (docSnap) => {
-                        const dadosPartida = docSnap.data();
-                        if (dadosPartida && dadosPartida.status === "andamento") {
-                            window.location.href = `arena.html?sala=${docRef.id}`;
-                        }
-                    });
-
-                } else {
-                    // ACHOU UMA SALA: Entra como Jogador 2
-                    const salaRef = doc(db, "partidas", salaIdEncontrada);
-                    
-                    await updateDoc(salaRef, {
+                if (salaAberta) {
+                    await updateDoc(doc(db, "partidas", salaAberta), {
                         status: "andamento",
                         jogador2: {
                             uid: auth.currentUser.uid,
                             nome: currentUserDoc.nomeDisplay || "JOGADOR 2",
                             foto: currentUserDoc.fotoPerfil || "",
-                            deck: deckCompleto
+                            deck: deck
                         }
                     });
-
-                    window.location.href = `arena.html?sala=${salaIdEncontrada}`;
+                    window.location.href = `arena.html?sala=${salaAberta}`;
+                } else {
+                    const docRef = await addDoc(collection(db, "partidas"), {
+                        tipo: "aleatoria", status: "aguardando", criadoEm: serverTimestamp(),
+                        jogador1: { uid: auth.currentUser.uid, nome: currentUserDoc.nomeDisplay || "JOGADOR 1", foto: currentUserDoc.fotoPerfil || "", deck: deck },
+                        jogador2: null, turnoAtual: 0, quemAtaca: null
+                    });
+                    partidaIdAtual = docRef.id;
+                    unsubscribePartida = onSnapshot(docRef, (docSnap) => {
+                        if (docSnap.data()?.status === "andamento") window.location.href = `arena.html?sala=${docRef.id}`;
+                    });
                 }
             } catch (error) {
-                console.error("Erro no matchmaking:", error);
-                window.mostrarToast("Erro ao conectar com os servidores de batalha.");
+                console.error("Erro na busca:", error);
                 cancelarBusca();
             }
         };
 
         window.cancelarBusca = async function() {
             document.getElementById('modal-busca').classList.add('hidden');
-            
-            // Se ele era o host da sala e cancelou, deleta a sala do banco
             if (partidaIdAtual) {
-                if (unsubscribePartida) unsubscribePartida(); // Para de escutar
-                try {
-                    await deleteDoc(doc(db, "partidas", partidaIdAtual));
-                } catch (e) {
-                    console.error("Erro ao apagar sala abandonada:", e);
-                }
+                if (unsubscribePartida) unsubscribePartida();
+                try { await deleteDoc(doc(db, "partidas", partidaIdAtual)); } catch(e) {}
                 partidaIdAtual = null;
             }
         };
 
         async function carregarRanking() {
-            const containerRanking = document.getElementById('lista-ranking');
-            try {
-                const usersRef = collection(db, "users");
-                const q = query(usersRef, orderBy("estatisticas.vitorias", "desc"), limit(5));
-                const querySnapshot = await getDocs(q);
-                
-                containerRanking.innerHTML = '';
-                let posicao = 1;
-
-                if (querySnapshot.empty) {
-                    containerRanking.innerHTML = '<span class="text-[#7a32a8] text-xs font-bold text-center">Nenhum registro ainda.</span>';
-                    return;
-                }
-
-                querySnapshot.forEach((docSnap) => {
-                    const dados = docSnap.data();
-                    const vitorias = dados.estatisticas?.vitorias || 0;
-                    const nome = (dados.nomeDisplay || "JOGADOR").toUpperCase();
-                    
-                    const div = document.createElement('div');
-                    
-                    if (posicao === 1) {
-                        div.className = "flex justify-between items-center bg-[#7a32a8] text-white rounded-full px-4 py-2 shadow-inner border border-yellow-400";
-                    } else {
-                        div.className = "flex justify-between items-center bg-[#7a32a8] text-white rounded-full px-4 py-2 shadow-inner";
-                    }
-
-                    div.innerHTML = `
-                        <span class="font-black text-[11px] truncate max-w-[120px]">${posicao}. ${nome}</span>
-                        <span class="font-bold text-[10px] opacity-90 whitespace-nowrap">${vitorias} VITÓRIAS</span>
-                    `;
-                    
-                    containerRanking.appendChild(div);
-                    posicao++;
-                });
-
-            } catch (error) {
-                console.error("Erro ao buscar ranking:", error);
-                containerRanking.innerHTML = '<span class="text-red-500 text-[10px] font-bold text-center">Erro ao carregar ranking.</span>';
-            }
+            const container = document.getElementById('lista-ranking');
+            const q = query(collection(db, "users"), orderBy("estatisticas.vitorias", "desc"), limit(5));
+            const snap = await getDocs(q);
+            container.innerHTML = '';
+            let pos = 1;
+            snap.forEach((d) => {
+                const v = d.data().estatisticas?.vitorias || 0;
+                const nome = (d.data().nomeDisplay || "JOGADOR").toUpperCase();
+                const div = document.createElement('div');
+                div.className = pos === 1 ? "flex justify-between items-center bg-[#7a32a8] text-white rounded-full px-4 py-2 shadow-inner border border-yellow-400" : "flex justify-between items-center bg-[#7a32a8] text-white rounded-full px-4 py-2 shadow-inner";
+                div.innerHTML = `<span class="font-black text-[11px] truncate max-w-[120px]">${pos}. ${nome}</span><span class="font-bold text-[10px] opacity-90">${v} VITÓRIAS</span>`;
+                container.appendChild(div); pos++;
+            });
         }
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('player-name').innerText = user.displayName?.toUpperCase() || "JOGADOR";
-
-                const docRef = doc(db, "users", user.uid);
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
-                    currentUserDoc = docSnap.data();
-                    
+                const snap = await getDoc(doc(db, "users", user.uid));
+                if (snap.exists()) {
+                    currentUserDoc = snap.data();
                     document.getElementById('player-coins').innerText = currentUserDoc.moedas || 0;
-                    
-                    let nivelAtual = currentUserDoc.nivel || 1;
-                    let xpAtual = currentUserDoc.xp || 0;
-                    document.getElementById('player-level').innerText = nivelAtual;
-
+                    document.getElementById('player-level').innerText = currentUserDoc.nivel || 1;
                     if (currentUserDoc.fotoPerfil) {
-                        const imgElement = document.getElementById('img-perfil-global');
-                        imgElement.src = currentUserDoc.fotoPerfil;
-                        imgElement.classList.remove('hidden');
+                        document.getElementById('img-perfil-global').src = currentUserDoc.fotoPerfil;
+                        document.getElementById('img-perfil-global').classList.remove('hidden');
                         document.getElementById('texto-sem-foto').classList.add('hidden');
                     }
-
-                    let maxXp = calcularXPMaximo(nivelAtual);
-                    let porcentagem = Math.min((xpAtual / maxXp) * 100, 100);
-                    document.getElementById('player-barra-xp').style.width = `${porcentagem}%`;
-                    document.getElementById('player-texto-xp').innerText = `${xpAtual}/${maxXp} xp`;
+                    
+                    let nxp = currentUserDoc.xp || 0;
+                    let mxp = (currentUserDoc.nivel >= 1 && currentUserDoc.nivel <= 5) ? 200 : (currentUserDoc.nivel <= 15 ? 750 : (currentUserDoc.nivel <= 25 ? 1600 : 3000));
+                    document.getElementById('player-barra-xp').style.width = `${Math.min((nxp/mxp)*100, 100)}%`;
+                    document.getElementById('player-texto-xp').innerText = `${nxp}/${mxp} xp`;
 
                     carregarRanking();
-
-                    // ---- LÊ OS BILHETES E MOSTRA OS AVISOS ----
-                    const badgePendente = localStorage.getItem('novaBadge');
-                    const levelPendente = localStorage.getItem('novoLevel');
                     
-                    let delayToast = 500;
-
-                    if (badgePendente) {
-                        setTimeout(() => {
-                            window.mostrarToast(`🏆 NOVA CONQUISTA!<br><span class="text-xs font-normal">Badge: ${badgePendente}.</span><br><span class="text-sm">Recompensa: +50 XP e +50 <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`);
-                            localStorage.removeItem('novaBadge');
-                        }, delayToast);
-                        delayToast += 1500;
+                    // Lida com avisos de final de partida
+                    if (localStorage.getItem('novaBadge')) {
+                        setTimeout(() => window.mostrarToast(`🏆 CONQUISTA!<br>Recompensa: +50 XP / +50 Moedas`), 500);
+                        localStorage.removeItem('novaBadge');
                     }
-
-                    if (levelPendente) {
-                        setTimeout(() => {
-                            let lvl = parseInt(levelPendente);
-                            let htmlRecompensa = (lvl === 10 || lvl === 20 || lvl === 30) 
-                                ? `1 Pacote Básico, 1 Pacote Premium e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom">` 
-                                : `1 Pacote Básico e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom">`;
-                            
-                            window.mostrarToast(`🎉 LEVEL UP! Nível ${lvl} alcançado!<br><span class="text-xs">Recompensas: ${htmlRecompensa}</span>`);
-                            localStorage.removeItem('novoLevel');
-                        }, delayToast);
+                    if (localStorage.getItem('novoLevel')) {
+                        setTimeout(() => window.mostrarToast(`🎉 LEVEL UP!`), 2000);
+                        localStorage.removeItem('novoLevel');
                     }
                 }
-            } else {
-                window.location.href = "index.html";
-            }
+            } else window.location.href = "index.html";
         });
     </script>
 </body>

@@ -115,7 +115,7 @@
             </div>
 
             <div class="bg-[#dca3e8] rounded-[24px] w-full max-w-[280px] p-5 shadow-2xl border-4 border-[#bc7bd4] flex flex-col">
-                <h2 class="text-[#7a32a8] font-black text-base text-center uppercase tracking-widest mb-4">RANKING MENSAL</h2>
+                <h2 class="text-[#7a32a8] font-black text-base text-center uppercase tracking-widest mb-4">RANKING GLOBAL</h2>
                 <div id="lista-ranking" class="flex flex-col gap-2 w-full">
                     <span class="text-[#7a32a8] text-xs font-bold text-center animate-pulse">Carregando heróis...</span>
                 </div>
@@ -503,12 +503,12 @@
         // ===============================================
         async function carregarRanking() {
             const container = document.getElementById('lista-ranking');
-            const q = query(collection(db, "users"), orderBy("estatisticas.vitorias", "desc"), limit(5));
+            const q = query(collection(db, "users"), orderBy("estatisticas.batalhasVencidas", "desc"), limit(5));
             const snap = await getDocs(q);
             container.innerHTML = '';
             let pos = 1;
             snap.forEach((d) => {
-                const v = d.data().estatisticas?.vitorias || 0;
+                const v = d.data().estatisticas?.batalhasVencidas || 0;
                 const nome = (d.data().nomeDisplay || "JOGADOR").toUpperCase();
                 const div = document.createElement('div');
                 div.className = pos === 1 ? "flex justify-between items-center bg-[#7a32a8] text-white rounded-full px-4 py-2 shadow-inner border border-yellow-400" : "flex justify-between items-center bg-[#7a32a8] text-white rounded-full px-4 py-2 shadow-inner";

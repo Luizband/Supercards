@@ -2,7 +2,7 @@
 // Aqui você vai preencher os dados reais de todas as 52 cartas!
 
 export const INFO_CARTAS = {
-    "001": { nome: "Cuba Livre", raridade: "Comum", pontos: 1, aura: 57, fofura: 31, diversao: 12, aleatoriedade: 20, imagem: "cartas/001.png" },
+    "001": { nome: "Cuba Livre", raridade: "Comum", pontos: 1, aura: 57, fofura: 31, diversao: 13, aleatoriedade: 20, imagem: "cartas/001.png" },
     
     "002": { nome: "João do Circo", raridade: "Comum", pontos: 1, aura: 45, fofura: 25, diversao: 22, aleatoriedade: 28, imagem: "cartas/002.png" },
     

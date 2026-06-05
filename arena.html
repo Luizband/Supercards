@@ -783,68 +783,84 @@
         // ==========================================
         // SINCRONIZAÇÃO EM TEMPO REAL
         // ==========================================
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUserUid = user.uid;
-                const params = new URLSearchParams(window.location.search);
-                salaId = params.get('sala');
-                
-                if (!salaId) return window.location.href = 'batalha.html';
+        onSnapshot(doc(db, "partidas", salaId), (docSnap) => {
+            if (!docSnap.exists()) {
+                window.location.href = 'batalha.html';
+                return;
+            }
 
-                onSnapshot(doc(db, "partidas", salaId), (docSnap) => {
-                    if (!docSnap.exists()) {
-                        window.location.href = 'batalha.html';
-                        return;
-                    }
+            dadosSala = docSnap.data();
 
-                    dadosSala = docSnap.data();
-
-                    if (dadosSala.jogador1 && dadosSala.jogador1.uid === user.uid) {
-                        minhaRole = 'jogador1'; oppRole = 'jogador2'; isHost = true;
-                    } else {
-                        minhaRole = 'jogador2'; oppRole = 'jogador1'; isHost = false;
-                    }
-
-                    if (isHost && !dadosSala.jogador1.mao) {
-                        let j1Deck = [...dadosSala.jogador1.deck];
-                        let j2Deck = [...dadosSala.jogador2.deck];
-                        shuffle(j1Deck); shuffle(j2Deck);
-                        updateDoc(doc(db, "partidas", salaId), {
-                            'jogador1.mao': j1Deck.splice(0, 5), 'jogador1.deck': j1Deck, 'jogador1.pilhaVitorias': [],
-                            'jogador2.mao': j2Deck.splice(0, 5), 'jogador2.deck': j2Deck, 'jogador2.pilhaVitorias': [],
-                            'statusTurno': 'aguardando_ataque'
-                        });
-                        return; 
-                    }
-
-                    if (!dadosSala.jogador1.mao) return; 
-
-                    // 1. Atualiza visual da mesa
-                    renderizarArena();
-
-                    // 2. Dispara Toasts se o estado mudou
-                    dispararToastsDeTurno();
-
-                    // 3. Controle da Animação do Embate
-                    if (dadosSala.statusTurno === 'exibindo_resultado') {
-                        if (!window.clashAtivo) {
-                            window.clashAtivo = true;
-                            exibirAnimacaoClash();
+            // --- 1. DEFINIÇÃO DOS PAPÉIS E INJEÇÃO DO CONVIDADO ---
+            if (dadosSala.jogador1 && dadosSala.jogador1.uid === user.uid) {
+                minhaRole = 'jogador1'; oppRole = 'jogador2'; isHost = true;
+            } else if (dadosSala.jogador2 && dadosSala.jogador2.uid === user.uid) {
+                minhaRole = 'jogador2'; oppRole = 'jogador1'; isHost = false;
+            } else if (!dadosSala.jogador2) {
+                // EU SOU O CONVIDADO ENTRANDO NA SALA AGORA!
+                const userRef = doc(db, "users", user.uid);
+                getDoc(userRef).then(myUserSnap => {
+                    const myData = myUserSnap.data();
+                    const myDeck = myData.decks[myData.deckPadrao].cartas;
+                    
+                    updateDoc(doc(db, "partidas", salaId), {
+                        status: "andamento",
+                        jogador2: {
+                            uid: user.uid,
+                            nome: myData.nomeDisplay || "JOGADOR 2",
+                            foto: myData.fotoPerfil || "",
+                            deck: myDeck
                         }
-                    } else {
-                        window.clashAtivo = false;
-                        document.getElementById('modal-embate').classList.add('hidden');
-                    }
-
-                    // 4. Controle de Lógicas Pesadas
-                    if (dadosSala.statusTurno === 'resolvendo' && isHost) {
-                        resolverCombateHost();
-                    } else if (dadosSala.status === 'finalizada') {
-                        iniciarCascataFinal();
-                    }
+                    });
                 });
+                return; // Pausa a tela e espera o Firebase avisar que eu entrei
             } else {
-                window.location.href = "index.html";
+                // Sala lotada ou você não pertence a ela
+                window.location.href = 'batalha.html';
+                return;
+            }
+
+            // --- 2. ESTADO DE ESPERA ---
+            if (!dadosSala.jogador2) {
+                document.getElementById('opp-nome').innerText = "AGUARDANDO ADVERSÁRIO...";
+                document.getElementById('opp-deck-count').innerText = "0";
+                return; // Bloqueia o jogo até o amigo clicar no convite
+            }
+
+            // --- 3. O HOST DISTRIBUI AS CARTAS ---
+            if (isHost && dadosSala.jogador2 && !dadosSala.jogador1.mao) {
+                let j1Deck = [...dadosSala.jogador1.deck];
+                let j2Deck = [...dadosSala.jogador2.deck];
+                shuffle(j1Deck); shuffle(j2Deck);
+                updateDoc(doc(db, "partidas", salaId), {
+                    'jogador1.mao': j1Deck.splice(0, 5), 'jogador1.deck': j1Deck, 'jogador1.pilhaVitorias': [],
+                    'jogador2.mao': j2Deck.splice(0, 5), 'jogador2.deck': j2Deck, 'jogador2.pilhaVitorias': [],
+                    'statusTurno': 'aguardando_ataque',
+                    'quemAtaca': Math.random() < 0.5 ? dadosSala.jogador1.uid : dadosSala.jogador2.uid
+                });
+                return; 
+            }
+
+            if (!dadosSala.jogador1.mao) return; 
+
+            // --- 4. RENDERIZAÇÃO E JOGO NORMAL ---
+            renderizarArena();
+            dispararToastsDeTurno();
+
+            if (dadosSala.statusTurno === 'exibindo_resultado') {
+                if (!window.clashAtivo) {
+                    window.clashAtivo = true;
+                    exibirAnimacaoClash();
+                }
+            } else {
+                window.clashAtivo = false;
+                document.getElementById('modal-embate').classList.add('hidden');
+            }
+
+            if (dadosSala.statusTurno === 'resolvendo' && isHost) {
+                resolverCombateHost();
+            } else if (dadosSala.status === 'finalizada') {
+                iniciarCascataFinal();
             }
         });
     </script>

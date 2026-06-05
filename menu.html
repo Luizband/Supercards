@@ -290,7 +290,9 @@
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                document.getElementById('player-name').innerText = user.displayName?.toUpperCase() || "JOGADOR";
+                // Pegamos o nome do Google (ou e-mail) logo no início da função
+                const nomeParaSalvar = user.displayName || "JOGADOR";
+                document.getElementById('player-name').innerText = nomeParaSalvar.toUpperCase();
 
                 const docRef = doc(db, "users", user.uid);
                 const docSnap = await getDoc(docRef);
@@ -309,6 +311,14 @@
                     let notificacoesNovas = [];
                     
                     let temNotifNaoLida = (dados.notificacoes || []).some(n => n.lida === false);
+
+                    // --- INÍCIO DO SINCRONIZADOR DE NOME ---
+                    if (!dados.nomeDisplay || !dados.nome) {
+                        docAtualizacao.nomeDisplay = nomeParaSalvar;
+                        docAtualizacao.nome = nomeParaSalvar;
+                        atualizouLogin = true; // Avisa o sistema que precisa salvar isso no banco
+                    }
+                    // --- FIM DO SINCRONIZADOR ---
 
                     // Checa e mostra o Modal de Boas-Vindas se for o primeiro acesso
                     if (!dados.boasVindasLida) {
@@ -446,6 +456,8 @@
                     
                     // Se for uma conta totalmente nova sem registro, define os status básicos e mostra as Boas Vindas
                     await setDoc(docRef, {
+                        nomeDisplay: nomeParaSalvar, // Grava o nome em contas novas
+                        nome: nomeParaSalvar,        // Grava o nome em contas novas
                         ultimoLogin: hoje,
                         estatisticas: { diasSeguidos: 1 },
                         moedas: 0,

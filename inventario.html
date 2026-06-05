@@ -313,6 +313,13 @@
             if (abrindoPacote) return;
             abrindoPacote = true;
 
+            // 🧹 LIMPEZA DO "FANTASMA" DO PACOTE ANTERIOR
+            const imgRevelacao = document.getElementById('img-revelacao');
+            const containerRevelacao = document.getElementById('container-revelacao');
+            imgRevelacao.src = ""; // Apaga a imagem velha
+            containerRevelacao.classList.remove('anim-pop'); // Remove qualquer animação travada
+            containerRevelacao.style.opacity = '0'; // Esconde o container até a nova carta estar pronta
+
             const campo = tipo === 'basico' ? 'pacoteBasico' : 'pacotePremium';
             let qtd = (dadosJogador.inventario && dadosJogador.inventario[campo]) || 0;
             
@@ -339,15 +346,13 @@
             document.getElementById('btn-guardar-colecao').classList.add('hidden');
             document.getElementById('titulo-abrir-pacote').innerText = "Toque para revelar";
             
-            const container = document.getElementById('container-revelacao');
-            container.classList.remove('hidden');
-            container.dataset.bloqueado = "false";
+            containerRevelacao.classList.remove('hidden');
+            containerRevelacao.dataset.bloqueado = "false";
             document.getElementById('modal-abrir-pacote').classList.remove('hidden');
 
             // Chama a primeira carta imediatamente (sem delay)
             window.mostrarProximaCarta(true);
         };
-
         // --- INTERAÇÃO DE CLIQUE: MOSTRA A PRÓXIMA CARTA OU A TELA FINAL ---
         window.mostrarProximaCarta = function(primeira = false) {
             const container = document.getElementById('container-revelacao');

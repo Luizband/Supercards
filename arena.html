@@ -323,46 +323,98 @@
 
         window.avancarEtapaFim = async function() {
             etapaFim++;
-            if (etapaFim === 2) pointsJ2 = montarGridFinal('jogador2');
-            else if (etapaFim === 3) {
+            if (etapaFim === 2) {
+                pointsJ2 = montarGridFinal('jogador2');
+            } else if (etapaFim === 3) {
                 document.getElementById('modal-fim-etapa').classList.add('hidden');
-                const myP = minhaRole === 'jogador1' ? pointsJ1 : pointsJ2, oppP = minhaRole === 'jogador1' ? pointsJ2 : pointsJ1;
+                
+                const myP = minhaRole === 'jogador1' ? pointsJ1 : pointsJ2;
+                const oppP = minhaRole === 'jogador1' ? pointsJ2 : pointsJ1;
                 const vitoria = myP > oppP;
+                
                 document.getElementById('texto-vitoria').innerText = vitoria ? "VITÓRIA!" : (myP === oppP ? "EMPATE" : "DERROTA");
                 document.getElementById('modal-resultado-final').classList.remove('hidden');
 
-                if (!window.dadosSalvos && vitoria) {
+                // CORREÇÃO AQUI: Salva os dados independentemente se ganhou ou perdeu
+                if (!window.dadosSalvos) {
                     window.dadosSalvos = true;
                     try {
                         const s = await getDoc(doc(db, "users", currentUserUid));
                         if(s.exists()) {
-                            let d = s.data(), ups = {}, nts = [];
-                            let ms = d.missoesDiarias || {}; let aM = false;
-                            (ms.lista||[]).forEach(m => { if(["batalhar","jogar_batalha","jogar","ganhar_partida","vencer_batalha","vencer"].includes(m.id) && m.progresso < m.meta) { m.progresso++; aM = true; } });
+                            let d = s.data();
+                            let ups = {};
+                            
+                            // 1. MISSÕES DIÁRIAS (Avançam mesmo se o jogador perder, desde que a missão seja de "jogar")
+                            let ms = d.missoesDiarias || {}; 
+                            let aM = false;
+                            (ms.lista || []).forEach(m => { 
+                                // Missões apenas de participar
+                                if(["batalhar","jogar_batalha","jogar"].includes(m.id) && m.progresso < m.meta) { 
+                                    m.progresso++; aM = true; 
+                                } 
+                                // Missões que exigem vitória
+                                if(vitoria && ["ganhar_partida","vencer_batalha","vencer"].includes(m.id) && m.progresso < m.meta) { 
+                                    m.progresso++; aM = true; 
+                                } 
+                            });
                             if(aM) ups.missoesDiarias = ms;
 
-                            ups['estatisticas.batalhasVencidas'] = increment(1); ups['estatisticas.vitorias'] = increment(1);
-                            let va = (d.estatisticas?.vitorias || 0) + 1;
-                            let xpB = 10, moB = 10;
-                            if (va >= 30 && (!d.badges || !d.badges['badge-005'])) { ups['badges.badge-005'] = true; xpB+=50; moB+=50; localStorage.setItem('novaBadge', 'Guerreiro'); }
-                            
-                            let nA = d.nivel || 1, nx = (d.xp || 0) + xpB; let sub = false, pb = 0, pp = 0;
-                            let mx = (nA <= 5) ? 200 : (nA <= 15 ? 750 : (nA <= 25 ? 1600 : 3000));
-                            while (nx >= mx && nA < 30) {
-                                nx -= mx; nA++; sub = true; moB += 30; pb++;
-                                if ([10,20,30].includes(nA)) pp++;
-                                mx = (nA <= 5) ? 200 : (nA <= 15 ? 750 : (nA <= 25 ? 1600 : 3000));
+                            // 2. RECOMPENSAS, STATS E LEVEL UP (Ocorrem APENAS se o jogador vencer)
+                            if (vitoria) {
+                                ups['estatisticas.batalhasVencidas'] = increment(1); 
+                                ups['estatisticas.vitorias'] = increment(1);
+                                
+                                let va = (d.estatisticas?.vitorias || 0) + 1;
+                                let xpB = 10;
+                                let moB = 10;
+                                
+                                // Checagem da Badge "Guerreiro" (30 Vitórias)
+                                if (va >= 30 && (!d.badges || !d.badges['badge-005'])) { 
+                                    ups['badges.badge-005'] = true; 
+                                    xpB += 50; 
+                                    moB += 50; 
+                                    localStorage.setItem('novaBadge', 'Guerreiro'); 
+                                }
+                                
+                                // Matemática de Level Up
+                                let nA = d.nivel || 1;
+                                let nx = (d.xp || 0) + xpB; 
+                                let sub = false;
+                                let pb = 0;
+                                let pp = 0;
+                                
+                                let mx = (nA <= 5) ? 200 : (nA <= 15 ? 750 : (nA <= 25 ? 1600 : 3000));
+                                
+                                while (nx >= mx && nA < 30) {
+                                    nx -= mx; 
+                                    nA++; 
+                                    sub = true; 
+                                    moB += 30; 
+                                    pb++;
+                                    if ([10, 20, 30].includes(nA)) pp++;
+                                    mx = (nA <= 5) ? 200 : (nA <= 15 ? 750 : (nA <= 25 ? 1600 : 3000));
+                                }
+                                
+                                ups.xp = nx; 
+                                ups.nivel = nA; 
+                                ups.moedas = increment(moB);
+                                if(pb > 0) ups['inventario.pacoteBasico'] = increment(pb); 
+                                if(pp > 0) ups['inventario.pacotePremium'] = increment(pp);
+                                if(sub) localStorage.setItem('novoLevel', nA);
                             }
-                            ups.xp = nx; ups.nivel = nA; ups.moedas = increment(moB);
-                            if(pb>0) ups['inventario.pacoteBasico'] = increment(pb); if(pp>0) ups['inventario.pacotePremium'] = increment(pp);
-                            if(sub) localStorage.setItem('novoLevel', nA);
-                            await updateDoc(doc(db, "users", currentUserUid), ups);
+
+                            // Envia tudo para o Firebase de uma vez só
+                            if(Object.keys(ups).length > 0) {
+                                await updateDoc(doc(db, "users", currentUserUid), ups);
+                            }
                         }
-                    } catch(e){}
+                    } catch(e) {
+                        console.error("Erro ao salvar:", e);
+                    }
                 }
             }
         };
-
+        
         function iniciarCascataFinal() { if (window.etapaIniciada) return; window.etapaIniciada = true; etapaFim = 1; pointsJ1 = montarGridFinal('jogador1'); document.getElementById('modal-fim-etapa').classList.remove('hidden'); }
 
         window.abrirModalDesistir = function() { document.getElementById('modal-desistir').classList.remove('hidden'); };

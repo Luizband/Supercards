@@ -301,12 +301,13 @@
             carregarMeusAmigos(); // Atualiza a tela de trás caso tenha aceitado alguém
         };
 
-        // Pesquisa Jogadores
+       // Pesquisa Jogadores
         document.getElementById('input-busca-jogador').addEventListener('input', async (event) => {
-            const termo = event.target.value.trim().toUpperCase();
+            const termoBusca = event.target.value;
+            const termoNormalizado = termoBusca.toLowerCase().trim();
             const container = document.getElementById('resultado-busca');
             
-            if (termo === "") {
+            if (termoNormalizado === "") {
                 container.innerHTML = '<span class="text-[#7a32a8] text-[10px] font-bold text-center mt-2">Pesquise para adicionar...</span>';
                 return;
             }
@@ -314,8 +315,9 @@
             container.innerHTML = '<span class="text-[#7a32a8] text-[10px] font-bold text-center mt-2 animate-pulse">Buscando...</span>';
 
             try {
+                // Traz uma lista de usuários para filtrar no JS (ignora maiúscula/minúscula)
                 const usersRef = collection(db, "users");
-                const q = query(usersRef, orderBy("nomeDisplay"), startAt(termo), endAt(termo + "\uf8ff"), limit(10));
+                const q = query(usersRef, limit(50));
                 const snap = await getDocs(q);
                 
                 container.innerHTML = '';
@@ -323,29 +325,35 @@
 
                 snap.forEach(docSnap => {
                     if (docSnap.id !== currentUserUid) {
-                        temResultado = true;
                         const dados = docSnap.data();
-                        const nome = (dados.nomeDisplay || "JOGADOR").toUpperCase();
-                        const nivel = dados.nivel || 1;
+                        // Lê o campo 'nome' que é o padrão do seu banco de dados
+                        const nomeDb = dados.nome || dados.nomeDisplay || "JOGADOR";
                         
-                        // Verifica se já são amigos
-                        const jaAmigo = (currentUserData.amigos || []).includes(docSnap.id);
+                        // Faz a checagem flexível
+                        if (nomeDb.toLowerCase().includes(termoNormalizado)) {
+                            temResultado = true;
+                            const nomeFormatado = nomeDb.toUpperCase();
+                            const nivel = dados.nivel || 1;
+                            
+                            // Verifica se já são amigos
+                            const jaAmigo = (currentUserData.amigos || []).includes(docSnap.id);
 
-                        const div = document.createElement('div');
-                        div.className = "flex items-center justify-between bg-white border border-[#7a32a8]/20 rounded-lg p-2 shadow-sm";
-                        
-                        let htmlBotao = jaAmigo 
-                            ? `<span class="text-[#7a32a8]/50 font-black text-[10px] uppercase">JÁ AMIGO</span>`
-                            : `<button onclick="enviarPedidoAmizade('${docSnap.id}', '${nome}')" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black text-[9px] py-1.5 px-3 rounded-full shadow-sm uppercase transition-transform hover:scale-105">ADICIONAR</button>`;
+                            const div = document.createElement('div');
+                            div.className = "flex items-center justify-between bg-white border border-[#7a32a8]/20 rounded-lg p-2 shadow-sm";
+                            
+                            let htmlBotao = jaAmigo 
+                                ? `<span class="text-[#7a32a8]/50 font-black text-[10px] uppercase">JÁ AMIGO</span>`
+                                : `<button onclick="enviarPedidoAmizade('${docSnap.id}', '${nomeFormatado}')" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black text-[9px] py-1.5 px-3 rounded-full shadow-sm uppercase transition-transform hover:scale-105">ADICIONAR</button>`;
 
-                        div.innerHTML = `
-                            <div class="flex flex-col">
-                                <span class="text-[#7a32a8] font-black text-xs uppercase">${nome}</span>
-                                <span class="text-[#7a32a8]/70 font-bold text-[9px]">Nível ${nivel}</span>
-                            </div>
-                            ${htmlBotao}
-                        `;
-                        container.appendChild(div);
+                            div.innerHTML = `
+                                <div class="flex flex-col">
+                                    <span class="text-[#7a32a8] font-black text-xs uppercase">${nomeFormatado}</span>
+                                    <span class="text-[#7a32a8]/70 font-bold text-[9px]">Nível ${nivel}</span>
+                                </div>
+                                ${htmlBotao}
+                            `;
+                            container.appendChild(div);
+                        }
                     }
                 });
 

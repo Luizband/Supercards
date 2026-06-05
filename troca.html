@@ -62,7 +62,6 @@
 
     <div class="w-full max-w-sm flex flex-col h-full relative">
         
-        <!-- CABEÇALHO PADRÃO -->
         <header class="flex items-center gap-4 mt-4 mb-2 w-full">
             <div class="relative flex-shrink-0">
                 <div class="bg-[#dca3e8] w-24 h-24 rounded-full flex items-center justify-center text-[#7a32a8] font-black text-xl shadow-lg border-2 border-[#bc7bd4] relative overflow-hidden">
@@ -93,7 +92,6 @@
             </div>
         </header>
 
-        <!-- TÍTULO E BOTÃO DE CONVITES -->
         <h1 class="text-[#dca3e8] font-black text-xl text-center mb-3 mt-2 drop-shadow-md uppercase flex items-center justify-center gap-2">
             TROCAS
         </h1>
@@ -108,7 +106,6 @@
             </button>
         </div>
 
-        <!-- MESA LIVRE DE TROCA -->
         <main class="flex flex-col gap-3 flex-grow overflow-hidden pb-24">
             
             <div class="bg-[#dca3e8] rounded-3xl p-5 flex flex-col items-center shadow-xl border-2 border-[#bc7bd4] flex-grow justify-center relative">
@@ -135,24 +132,25 @@
                 <button id="btn-efetivar-troca" class="bg-[#bc7bd4] text-[#7a32a8] font-black text-sm py-2 px-10 rounded-full shadow-md mt-4 opacity-50 cursor-not-allowed flex items-center justify-center gap-2 border border-[#7a32a8]/20 transition-all">
                     TROCAR <span id="custo-troca" class="font-normal text-xs flex items-center gap-0.5 ml-1">-- <img src="fragmento.png" class="w-4 h-4 object-contain"></span>
                 </button>
+                
+                <button id="btn-cancelar-troca" onclick="window.cancelarTroca()" class="hidden mt-3 text-red-500 hover:text-red-700 font-black text-[10px] uppercase tracking-wider underline transition-colors">
+                    Cancelar Troca
+                </button>
             </div>
         </main>
 
-        <!-- RODAPÉ -->
         <footer class="mt-auto flex justify-center pb-2 z-10 absolute bottom-10 left-0 w-full pointer-events-none">
             <button onclick="window.location.href='menu.html'" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black text-sm py-2.5 px-12 rounded-full shadow-lg transition-transform hover:-translate-y-1 pointer-events-auto border-2 border-[#dca3e8] uppercase tracking-widest">
                 RETORNAR
             </button>
         </footer>
 
-        <!-- ================= MODAL: NOVA TROCA E CONVITES ================= -->
         <div id="modal-trocas" class="hidden fixed inset-0 bg-black/90 z-[100] flex flex-col items-center justify-center p-4 backdrop-blur-md pointer-events-auto">
             <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-5 w-full max-w-sm shadow-2xl flex flex-col h-[85%] max-h-[600px] relative">
                 <button onclick="fecharModalTrocas()" class="absolute top-2 right-4 text-[#7a32a8] font-black text-xl hover:text-purple-600 transition-colors">X</button>
                 
                 <h2 class="text-[#7a32a8] font-black text-lg text-center uppercase tracking-wider mb-4 mt-2">Convidar para Troca</h2>
 
-                <!-- Busca e Envio -->
                 <input type="text" id="input-busca-amigo" placeholder="Buscar jogador..." class="mb-3 w-full bg-[#bc7bd4] text-[#7a32a8] placeholder-[#7a32a8]/70 font-black text-xs rounded-full px-4 py-2.5 outline-none border-2 border-[#7a32a8]/30 focus:border-[#7a32a8] transition-colors shadow-inner flex-shrink-0 text-center uppercase">
                 
                 <div id="lista-amigos" class="flex flex-col gap-2 overflow-y-auto no-scrollbar flex-grow mb-3 bg-white/30 rounded-xl p-2 border border-[#7a32a8]/20 min-h-[120px]">
@@ -163,10 +161,8 @@
                     ENVIAR CONVITE DE TROCA
                 </button>
 
-                <!-- Divisor -->
                 <div class="w-full h-px bg-[#7a32a8]/30 mb-5 flex-shrink-0"></div>
 
-                <!-- Convites Recebidos -->
                 <h2 class="text-[#7a32a8] font-black text-sm text-center uppercase tracking-wider mb-2">Convites Recebidos</h2>
                 
                 <div id="lista-convites" class="flex flex-col gap-2 overflow-y-auto no-scrollbar h-[25%] min-h-[100px] bg-white/30 rounded-xl p-2 border border-[#7a32a8]/20 mb-3">
@@ -184,7 +180,6 @@
             </div>
         </div>
 
-        <!-- ================= MODAL: ESCOLHA DA CARTA ================= -->
         <div id="modal-selecao-carta" class="hidden fixed inset-0 bg-black/80 z-[100] flex flex-col items-center justify-center p-4 backdrop-blur-sm">
             <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-4 w-full max-w-sm shadow-2xl flex flex-col h-[70%]">
                 <h2 class="text-[#7a32a8] font-black text-lg mb-0.5 text-center uppercase">Escolha sua Carta</h2>
@@ -463,10 +458,14 @@
 
             escutadorTroca = onSnapshot(doc(db, "trocas", idDaTroca), async (docSnap) => {
                 if (!docSnap.exists()) {
+                    window.mostrarToast("⚠️ A troca atual foi cancelada ou finalizada.");
                     resetarMesa(); // Limpa a tela automaticamente se o documento foi deletado
                     return;
                 }
                 
+                // Mostra o botão de cancelar porque a mesa está ativa
+                document.getElementById('btn-cancelar-troca').classList.remove('hidden');
+
                 const troca = docSnap.data();
                 const minhaCarta = souRemetente ? troca.cartaRemetente : troca.cartaDestinatario;
                 const cartaAmigo = souRemetente ? troca.cartaDestinatario : troca.cartaRemetente;
@@ -740,7 +739,30 @@
             const btn = document.getElementById('btn-efetivar-troca');
             btn.innerHTML = `TROCAR <span id="custo-troca" class="font-normal text-xs flex items-center gap-0.5 ml-1">-- <img src="fragmento.png" class="w-4 h-4 object-contain"></span>`;
             btn.className = "bg-[#bc7bd4] text-[#7a32a8] font-black text-sm py-2 px-10 rounded-full shadow-md mt-4 opacity-50 cursor-not-allowed flex items-center justify-center gap-2 border border-[#7a32a8]/20 transition-all uppercase tracking-widest";
+            
+            // ESCONDE O BOTÃO DE CANCELAR
+            const btnCancelar = document.getElementById('btn-cancelar-troca');
+            if (btnCancelar) btnCancelar.classList.add('hidden');
         }
+
+        // ==========================================
+        // CANCELAR TROCA ATIVA
+        // ==========================================
+        window.cancelarTroca = async function() {
+            if (!trocaAtivaId) return;
+            
+            // Confirmação para o jogador não cancelar sem querer ao esbarrar o dedo
+            if(!confirm("Tem certeza que deseja cancelar e abandonar a mesa de troca?")) return;
+
+            try {
+                // Ao deletar o documento, o onSnapshot dos dois jogadores vai disparar,
+                // avisando e limpando a mesa para você e para o amigo simultaneamente!
+                await deleteDoc(doc(db, "trocas", trocaAtivaId));
+            } catch (e) {
+                console.error("Erro ao cancelar troca:", e);
+                window.mostrarToast("Erro ao cancelar a troca.");
+            }
+        };
 
         // --- SISTEMA DO MODAL DE CARTAS ---
         document.getElementById('slot-enviar').addEventListener('click', () => {

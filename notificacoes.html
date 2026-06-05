@@ -22,22 +22,23 @@
 
     <div class="w-full max-w-sm flex flex-col h-full relative gap-4">
         
-        <!-- CABEÇALHO -->
         <header class="relative flex items-center justify-center mt-4 mb-2 min-h-[40px]">
             <button onclick="window.location.href='menu.html'" class="absolute left-0 bg-[#dca3e8] hover:bg-[#bc7bd4] transition-colors rounded-full flex items-center justify-center w-10 h-10 shadow-md text-[#7a32a8] font-black text-xl z-50">
                 ←
             </button>
+            
             <h1 class="text-white font-black text-xl drop-shadow-md text-center px-12 leading-tight">CAIXA DE ENTRADA</h1>
+            
+            <button onclick="limparNotificacoes()" class="absolute right-0 bg-red-500 hover:bg-red-600 transition-colors rounded-full flex items-center justify-center w-10 h-10 shadow-md text-white font-black text-lg z-50 pb-1" title="Limpar Tudo">
+                🗑️
+            </button>
         </header>
 
-        <!-- LISTA DE NOTIFICAÇÕES -->
         <main class="flex flex-col flex-grow bg-[#dca3e8]/90 backdrop-blur-sm rounded-[2rem] p-4 shadow-xl overflow-hidden mb-4 border-2 border-[#bc7bd4]">
             
             <div id="lista-notificacoes" class="flex flex-col gap-3 overflow-y-auto no-scrollbar h-full pb-2">
-                <!-- As mensagens serão injetadas aqui -->
-            </div>
+                </div>
 
-            <!-- MENSAGEM DE CAIXA VAZIA -->
             <div id="mensagem-vazia" class="hidden flex-col items-center justify-center h-full text-center opacity-70">
                 <span class="text-[#7a32a8] text-4xl mb-2">📭</span>
                 <p class="text-[#7a32a8] font-black text-sm uppercase">Caixa Vazia</p>
@@ -47,11 +48,11 @@
         </main>
     </div>
 
-    <!-- SCRIPT DO FIREBASE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        // Adicionado o updateDoc na importação
+        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyCU3lFTgfrDMaD9jwR7X7ivYPmGQh4VE1g",
@@ -69,6 +70,7 @@
         const listaContainer = document.getElementById('lista-notificacoes');
         const msgVazia = document.getElementById('mensagem-vazia');
         
+        let currentUserUid = null;
         let notificacoesJogador = [];
 
         function formatarData(dataString) {
@@ -106,7 +108,6 @@
                     ${!notif.lida ? '<div class="w-3 h-3 bg-[#ffd700] rounded-full shadow-md mr-1 flex-shrink-0"></div>' : ''}
                 `;
 
-                // ATUALIZADO: Ao clicar, redireciona para a página de detalhes passando a ID na URL
                 item.addEventListener('click', () => {
                     window.location.href = `detalhe-notificacao.html?id=${notif.id}`;
                 });
@@ -115,8 +116,41 @@
             });
         }
 
+        // ==========================================
+        // FUNÇÃO DE LIMPAR CAIXA DE ENTRADA
+        // ==========================================
+        window.limparNotificacoes = async function() {
+            if (!currentUserUid) return;
+            
+            if (notificacoesJogador.length === 0) {
+                alert("A sua caixa de entrada já está vazia!");
+                return;
+            }
+
+            const confirmacao = confirm("Tem certeza que deseja apagar TODAS as mensagens da sua caixa de entrada? Isso não pode ser desfeito.");
+            
+            if (confirmacao) {
+                try {
+                    // Atualiza o banco de dados passando um array vazio para as notificações
+                    await updateDoc(doc(db, "users", currentUserUid), {
+                        notificacoes: []
+                    });
+                    
+                    // Atualiza a tela em tempo real
+                    notificacoesJogador = [];
+                    renderizarLista();
+                    
+                } catch (error) {
+                    console.error("Erro ao limpar a caixa de entrada:", error);
+                    alert("Ocorreu um erro ao tentar limpar as notificações.");
+                }
+            }
+        };
+
         onAuthStateChanged(auth, async (user) => {
             if (user) {
+                currentUserUid = user.uid; // Salva o UID do usuário na variável global
+                
                 const dbUserRef = doc(db, "users", user.uid);
                 const snap = await getDoc(dbUserRef);
                 

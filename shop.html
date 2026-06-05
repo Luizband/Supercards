@@ -59,7 +59,7 @@
             <button onclick="window.location.href='menu.html'" class="bg-[#dca3e8] hover:bg-[#bc7bd4] transition-colors rounded-full flex items-center justify-center w-10 h-10 shadow-md text-[#7a32a8] font-black text-xl z-50">
                 ←
             </button>
-            <h1 onclick="window.ativarCheat()" class="text-white font-black text-2xl drop-shadow-md cursor-pointer relative z-50">LOJA</h1>
+            <h1 class="text-white font-black text-2xl drop-shadow-md relative z-50">LOJA</h1>
             <div class="bg-[#dca3e8] rounded-full px-3 py-1.5 flex items-center justify-center gap-1 shadow-md">
                 <span id="player-coins" class="text-black font-black text-sm">0</span>
                 <img src="moedas.png" alt="Moedas" class="w-5 h-5 object-contain drop-shadow-sm pointer-events-none">
@@ -264,7 +264,6 @@
                 let bonusMoedas = 0;
                 let notificacoesNovas = []; 
 
-                // 1. CHECAGEM DA BADGE DE GASTAR MOEDAS
                 if (moedasGastas >= 3000 && !badgesJogador["badge-007"]) {
                     badgesJogador["badge-007"] = true;
                     ganhouBadge = true;
@@ -280,7 +279,6 @@
                     });
                 }
 
-                // 2. GATILHO DA MISSÃO DIÁRIA (Comprar algo na loja)
                 let pacoteMissoes = dados.missoesDiarias || {};
                 const hoje = window.obterGameDay();
                 let atualizouMissao = false;
@@ -296,7 +294,6 @@
                     });
                 }
                 
-                // 3. MATEMÁTICA DE LEVEL UP
                 let nivelAtual = dados.nivel || 1;
                 let xpAtual = dados.xp || 0;
                 let novoXp = xpAtual + bonusXp;
@@ -374,7 +371,6 @@
                 document.getElementById('player-coins').innerText = window.saldoMoedas;
                 window.mostrarMensagem("Compra realizada com sucesso!", "sucesso");
                 
-                // 4. CASCATA DE TOASTS
                 let tempoAtraso = 500;
                 if (atualizouMissao) {
                     setTimeout(() => window.mostrarToast(msgMissaoProgresso), tempoAtraso);
@@ -393,24 +389,6 @@
                 window.mostrarMensagem("Erro ao processar compra.", "erro");
             }
             window.pacotePendente = null;
-        };
-
-        window.ativarCheat = async function() {
-            if (!auth.currentUser) return;
-            try {
-                const ref = doc(db, "users", auth.currentUser.uid);
-                await setDoc(ref, { moedas: increment(1000), ultimoResgateDiario: "" }, { merge: true });
-                window.saldoMoedas += 1000;
-                document.getElementById('player-coins').innerText = window.saldoMoedas;
-                const statusDiv = document.getElementById('status-bonus');
-                statusDiv.innerText = "PEGAR PACOTE";
-                statusDiv.classList.remove('bg-gray-500', 'bg-yellow-500');
-                statusDiv.classList.add('bg-[#22c55e]');
-                window.mostrarMensagem("DEV: +1000 Moedas e Relógio Resetado!", "sucesso");
-            } catch (e) {
-                console.error(e);
-                window.mostrarMensagem("Erro no cheat.", "erro");
-            }
         };
     </script>
 </body>

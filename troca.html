@@ -288,36 +288,42 @@
             document.getElementById('modal-trocas').classList.add('hidden');
         };
 
-        // --- SISTEMA DE LISTAR E BUSCAR AMIGOS ---
+       // --- SISTEMA DE LISTAR E BUSCAR AMIGOS ---
         async function carregarListaAmigos(termoBusca = "") {
             const lista = document.getElementById('lista-amigos');
             lista.innerHTML = '<span class="text-[10px] text-center text-[#7a32a8] mt-2 font-bold animate-pulse">Buscando...</span>';
             
             try {
                 const usersRef = collection(db, "users");
-                let q = termoBusca.trim() === "" 
-                    ? query(usersRef, limit(15)) 
-                    : query(usersRef, orderBy("nomeDisplay"), startAt(termoBusca.toUpperCase()), endAt(termoBusca.toUpperCase() + "\uf8ff"), limit(15));
-
+                const q = query(usersRef, limit(50));
                 const snap = await getDocs(q);
+
                 lista.innerHTML = '';
                 let temAlguem = false;
+                const termoNormalizado = termoBusca.toLowerCase().trim();
 
                 snap.forEach(docSnap => {
                     if(docSnap.id !== currentUserUid) {
-                        temAlguem = true;
-                        const nomeAmigo = (docSnap.data().nomeDisplay || "JOGADOR").toUpperCase();
-                        const divAmigo = document.createElement('div');
-                        divAmigo.className = "bg-[#4ade80] text-[#7a32a8] border-2 border-[#22c55e] text-[10px] py-2.5 px-3 rounded-full cursor-pointer text-center font-black tracking-wider transition-all shadow-sm flex-shrink-0";
-                        divAmigo.innerText = nomeAmigo;
+                        const dados = docSnap.data();
+                        // Lê o campo 'nome' correto do seu banco
+                        const nomeDb = dados.nome || dados.nomeDisplay || "JOGADOR";
                         
-                        divAmigo.addEventListener('click', () => {
-                            Array.from(lista.children).forEach(el => el.classList.remove('amigo-selecionado'));
-                            divAmigo.classList.add('amigo-selecionado');
-                            amigoSelecionadoId = docSnap.id;
-                            amigoSelecionadoNome = nomeAmigo;
-                        });
-                        lista.appendChild(divAmigo);
+                        // Faz a checagem flexível ignorando maiúsculas
+                        if (nomeDb.toLowerCase().includes(termoNormalizado) || termoNormalizado === "") {
+                            temAlguem = true;
+                            const nomeAmigo = nomeDb.toUpperCase();
+                            const divAmigo = document.createElement('div');
+                            divAmigo.className = "bg-[#4ade80] text-[#7a32a8] border-2 border-[#22c55e] text-[10px] py-2.5 px-3 rounded-full cursor-pointer text-center font-black tracking-wider transition-all shadow-sm flex-shrink-0";
+                            divAmigo.innerText = nomeAmigo;
+                            
+                            divAmigo.addEventListener('click', () => {
+                                Array.from(lista.children).forEach(el => el.classList.remove('amigo-selecionado'));
+                                divAmigo.classList.add('amigo-selecionado');
+                                amigoSelecionadoId = docSnap.id;
+                                amigoSelecionadoNome = nomeAmigo;
+                            });
+                            lista.appendChild(divAmigo);
+                        }
                     }
                 });
 

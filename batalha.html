@@ -224,13 +224,27 @@
 
             try {
                 const partidasRef = collection(db, "partidas");
-                // Procura alguma sala aberta esperando jogador
-                const q = query(partidasRef, where("status", "==", "aguardando"), limit(1));
+                const q = query(partidasRef, where("status", "==", "aguardando"), limit(15));
                 const querySnapshot = await getDocs(q);
 
-                if (querySnapshot.empty) {
+                let salaIdEncontrada = null;
+                let dadosSalaEncontrada = null;
+
+                querySnapshot.forEach(docSnap => {
+                    const dados = docSnap.data();
+                    // IGNORA desafios de amigos e IGNORA salas criadas por você mesmo
+                    if (dados.tipo !== "desafio_amigo" && dados.jogador1.uid !== auth.currentUser.uid) {
+                        if (!salaIdEncontrada) {
+                            salaIdEncontrada = docSnap.id;
+                            dadosSalaEncontrada = dados;
+                        }
+                    }
+                });
+
+                if (!salaIdEncontrada) {
                     // NINGUÉM ESPERANDO: Cria uma sala nova e fica de host
                     const novaPartida = {
+                        tipo: "aleatoria", // IDENTIFICADOR DE SALA PÚBLICA
                         status: "aguardando",
                         criadoEm: serverTimestamp(),
                         jogador1: {
@@ -251,21 +265,14 @@
                     unsubscribePartida = onSnapshot(docRef, (docSnap) => {
                         const dadosPartida = docSnap.data();
                         if (dadosPartida && dadosPartida.status === "andamento") {
-                            // Alguém entrou! Vai para a Arena.
                             window.location.href = `arena.html?sala=${docRef.id}`;
                         }
                     });
 
                 } else {
                     // ACHOU UMA SALA: Entra como Jogador 2
-                    const salaId = querySnapshot.docs[0].id;
-                    const dadosSala = querySnapshot.docs[0].data();
-                    const salaRef = doc(db, "partidas", salaId);
+                    const salaRef = doc(db, "partidas", salaIdEncontrada);
                     
-                    // Sorteio de quem ataca primeiro (Cara ou Coroa)
-                    const sorteio = Math.random() < 0.5 ? 1 : 2;
-                    const quemComecaUid = sorteio === 1 ? dadosSala.jogador1.uid : auth.currentUser.uid;
-
                     await updateDoc(salaRef, {
                         status: "andamento",
                         jogador2: {
@@ -273,12 +280,10 @@
                             nome: currentUserDoc.nomeDisplay || "JOGADOR 2",
                             foto: currentUserDoc.fotoPerfil || "",
                             deck: deckCompleto
-                        },
-                        turnoAtual: 1,
-                        quemAtaca: quemComecaUid
+                        }
                     });
 
-                    window.location.href = `arena.html?sala=${salaId}`;
+                    window.location.href = `arena.html?sala=${salaIdEncontrada}`;
                 }
             } catch (error) {
                 console.error("Erro no matchmaking:", error);

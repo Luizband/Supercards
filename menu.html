@@ -264,7 +264,7 @@
                                 if (m.id === missaoId && m.progresso < m.meta) {
                                     m.progresso++;
                                     atualizou = true;
-                                    window.mostrarToast(`Progresso: ${m.desc}`);
+                                    window.mostrarToast(`🎯 Progresso: ${m.desc}`);
                                     atrasoRedirect = 1200; 
                                 }
                             });
@@ -371,15 +371,15 @@
 
                             if (nivelAtual === 10 || nivelAtual === 20 || nivelAtual === 30) {
                                 pacotesPremium++;
-                                msgLevelUpPopup = `LEVEL UP! Nível ${nivelAtual} alcançado!<br><span class="text-xs">Recompensas: 1 Pacote Básico, 1 Pacote Premium e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom"></span>`;
+                                msgLevelUpPopup = `🎉 LEVEL UP! Nível ${nivelAtual} alcançado!<br><span class="text-xs">Recompensas: 1 Pacote Básico, 1 Pacote Premium e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom"></span>`;
                                 textoRecompensaNotif = "1 Pacote Básico, 1 Pacote Premium e 30 Moedas";
                             } else {
-                                msgLevelUpPopup = `LEVEL UP! Nível ${nivelAtual} alcançado!<br><span class="text-xs">Recompensas: 1 Pacote Básico e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom"></span>`;
+                                msgLevelUpPopup = `🎉 LEVEL UP! Nível ${nivelAtual} alcançado!<br><span class="text-xs">Recompensas: 1 Pacote Básico e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom"></span>`;
                             }
 
                             notificacoesNovas.push({
                                 id: "notif_" + Date.now() + "_nivel" + nivelAtual,
-                                titulo: `Level Up: Nível ${nivelAtual}`,
+                                titulo: `🎉 Level Up: Nível ${nivelAtual}`,
                                 texto: `Parabéns! Você alcançou o Nível ${nivelAtual}.\nRecompensas recebidas: ${textoRecompensaNotif}.`,
                                 lida: false,
                                 data: new Date().toISOString()
@@ -435,7 +435,7 @@
                     if(textoXp) textoXp.innerText = `${finalXp}/${maxXp} xp`;
 
                     if (ganhouBadge) {
-                        setTimeout(() => window.mostrarToast(`NOVA CONQUISTA!<br><span class="text-xs font-normal">Badge: Jogador Viciado.</span><br><span class="text-sm">Recompensa: +50 XP e +50 <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`), 500);
+                        setTimeout(() => window.mostrarToast(`🏆 NOVA CONQUISTA!<br><span class="text-xs font-normal">Badge: Jogador Viciado.</span><br><span class="text-sm">Recompensa: +50 XP e +50 <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`), 500);
                     }
                     if (subiuNivel) {
                         setTimeout(() => window.mostrarToast(msgLevelUpPopup), 1000);

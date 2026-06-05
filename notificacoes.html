@@ -106,8 +106,17 @@
                     ${!notif.lida ? '<div class="w-3 h-3 bg-[#ffd700] rounded-full shadow-md mr-1 flex-shrink-0"></div>' : ''}
                 `;
 
-                // ATUALIZADO: Ao clicar, redireciona para a página de detalhes passando a ID na URL
+                // ATUALIZADO: Ao clicar, vê se é um convite de batalha para entrar na arena
                 item.addEventListener('click', () => {
+                    if (notif.id.includes("notif_desafio_")) {
+                        // Extrai a ID secreta que fica no meio do texto
+                        const match = notif.texto.match(/ID da Sala:\s*([a-zA-Z0-9_-]+)/);
+                        if (match && match[1]) {
+                            window.location.href = `arena.html?sala=${match[1]}`;
+                            return;
+                        }
+                    }
+                    // Se não for desafio de batalha, abre normalmente
                     window.location.href = `detalhe-notificacao.html?id=${notif.id}`;
                 });
                 

@@ -55,7 +55,6 @@
 
     <div class="w-full max-w-sm flex flex-col h-full relative">
         
-        <!-- CABEÇALHO PADRÃO -->
         <header class="flex items-center gap-4 mt-4 mb-6">
             <div class="relative flex-shrink-0">
                 <div class="bg-[#dca3e8] w-24 h-24 rounded-full flex items-center justify-center text-[#7a32a8] font-black text-xl shadow-lg border-2 border-[#bc7bd4] relative overflow-hidden">
@@ -89,7 +88,6 @@
             </div>
         </header>
 
-        <!-- TÍTULO E BOTÃO DE ADICIONAR -->
         <div class="flex flex-col items-center w-full mb-4 z-10 relative">
             <h1 class="text-[#dca3e8] font-black text-2xl drop-shadow-md uppercase tracking-wider mb-3">AMIGOS</h1>
             
@@ -102,24 +100,20 @@
             </button>
         </div>
 
-        <!-- CAIXA DA LISTA DE AMIGOS -->
         <main class="bg-[#dca3e8] rounded-[2rem] flex flex-col flex-grow p-4 shadow-xl overflow-hidden mb-16 relative border-2 border-[#bc7bd4]">
             
             <div id="lista-amigos" class="flex flex-col gap-3 overflow-y-auto no-scrollbar pb-10 h-full">
-                <!-- Injetado via JS -->
                 <span class="text-[#7a32a8] font-bold text-xs text-center mt-10 animate-pulse">Carregando amigos...</span>
             </div>
 
         </main>
 
-        <!-- BOTÃO VOLTAR -->
         <footer class="mt-auto flex justify-center pb-2 z-10 absolute bottom-4 left-0 w-full pointer-events-none">
             <button onclick="window.location.href='batalha.html'" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-2.5 px-10 rounded-full shadow-lg transition-transform hover:-translate-y-1 pointer-events-auto border-2 border-[#dca3e8] uppercase text-sm tracking-wider">
                 VOLTAR
             </button>
         </footer>
 
-        <!-- ================= MODAL: ADICIONAR E CONVITES ================= -->
         <div id="modal-adicionar" class="hidden fixed inset-0 bg-black/90 z-[100] flex flex-col items-center justify-center p-4 backdrop-blur-md pointer-events-auto">
             <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-5 w-full max-w-sm shadow-2xl flex flex-col h-[80%] max-h-[600px] relative">
                 
@@ -127,20 +121,16 @@
                 
                 <h2 class="text-[#7a32a8] font-black text-lg text-center uppercase tracking-wider mb-4">Adicionar Amigos</h2>
 
-                <!-- Barra de Pesquisa -->
                 <input type="text" id="input-busca-jogador" placeholder="Digite o nome do jogador..." class="mb-4 w-full bg-[#bc7bd4] text-[#7a32a8] placeholder-[#7a32a8]/70 font-black text-xs rounded-full px-4 py-2 outline-none border-2 border-[#7a32a8]/30 focus:border-[#7a32a8] transition-colors shadow-inner flex-shrink-0 text-center uppercase">
                 
-                <!-- Resultados da Busca -->
                 <div id="resultado-busca" class="flex flex-col gap-2 overflow-y-auto no-scrollbar flex-grow mb-4 bg-white/30 rounded-xl p-2 border border-[#7a32a8]/20 min-h-[120px]">
                     <span class="text-[#7a32a8] text-[10px] font-bold text-center mt-2">Nenhum jogador pesquisado.</span>
                 </div>
 
-                <!-- Divisor -->
                 <div class="w-full h-px bg-[#7a32a8]/20 mb-4 flex-shrink-0"></div>
 
                 <h2 class="text-[#7a32a8] font-black text-sm text-center uppercase tracking-wider mb-2">Convites Recebidos</h2>
                 
-                <!-- Convites Pendentes -->
                 <div id="lista-convites" class="flex flex-col gap-2 overflow-y-auto no-scrollbar h-[35%] min-h-[120px] bg-white/30 rounded-xl p-2 border border-[#7a32a8]/20">
                     <span class="text-[#7a32a8] text-[10px] font-bold text-center mt-2">Nenhum convite pendente.</span>
                 </div>
@@ -148,13 +138,11 @@
             </div>
         </div>
 
-        <!-- ================= MODAL: PERFIL DO AMIGO (Leitura) ================= -->
         <div id="modal-perfil-amigo" class="hidden fixed inset-0 bg-black/90 z-[150] flex flex-col items-center justify-center p-4 backdrop-blur-md pointer-events-auto">
             <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-[2rem] w-full max-w-sm shadow-2xl flex flex-col items-center p-6 relative">
                 
                 <button onclick="fecharModalPerfil()" class="absolute top-4 right-5 text-[#7a32a8] font-black text-2xl hover:text-purple-600 transition-colors z-50">X</button>
 
-                <!-- Header do Perfil -->
                 <div class="flex flex-col items-center mb-6 mt-2 relative">
                     <div class="bg-[#bc7bd4] w-28 h-28 rounded-full border-4 border-[#7a32a8] flex items-center justify-center overflow-hidden shadow-lg mb-3">
                         <img id="modal-amigo-foto" src="fundo_carta.png" class="w-full h-full object-cover">
@@ -165,7 +153,6 @@
                     <h2 id="modal-amigo-nome" class="text-[#7a32a8] font-black text-2xl uppercase tracking-widest drop-shadow-sm text-center mt-1">NOME DO AMIGO</h2>
                 </div>
 
-                <!-- Estatísticas -->
                 <div class="w-full bg-[#bc7bd4]/30 rounded-2xl p-4 mb-4 border border-[#7a32a8]/20">
                     <h3 class="text-[#7a32a8] font-black text-sm text-center uppercase mb-2">Estatísticas</h3>
                     <ul class="text-[#7a32a8] font-bold text-xs space-y-1.5">
@@ -175,12 +162,10 @@
                     </ul>
                 </div>
 
-                <!-- Badges -->
                 <div class="w-full">
                     <h3 class="text-[#7a32a8] font-black text-sm text-center uppercase mb-2">Badges Conquistadas</h3>
                     <div id="modal-amigo-badges" class="grid grid-cols-4 gap-2 place-items-center bg-[#bc7bd4]/30 rounded-2xl p-3 border border-[#7a32a8]/20 min-h-[80px]">
-                        <!-- Injetado via JS -->
-                    </div>
+                        </div>
                 </div>
 
             </div>
@@ -188,7 +173,6 @@
 
     </div>
 
-    <!-- SCRIPT DO FIREBASE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -261,22 +245,20 @@
                         const foto = dadosAmigo.fotoPerfil || "fundo_carta.png";
                         
                         const item = document.createElement('div');
-                        item.className = "bg-white/40 border-2 border-white/50 rounded-xl p-2 flex items-center justify-between shadow-sm hover:bg-white/60 transition-colors";
+                        // Removido o flex-between para centralizar o amigo já que não há botão
+                        item.className = "bg-white/40 border-2 border-white/50 rounded-xl p-3 shadow-sm hover:bg-white/60 transition-colors cursor-pointer group";
+                        item.onclick = () => abrirPerfilAmigo(uid);
                         
                         item.innerHTML = `
-                            <div class="flex items-center gap-3 cursor-pointer group flex-grow" onclick="abrirPerfilAmigo('${uid}')">
+                            <div class="flex items-center gap-4">
                                 <div class="relative">
-                                    <img src="${foto}" class="w-12 h-12 rounded-full object-cover border-2 border-[#7a32a8] group-hover:scale-105 transition-transform">
-                                    <div class="absolute -bottom-1 -right-1 bg-[#7a32a8] rounded-full w-5 h-5 flex items-center justify-center border border-white">
-                                        <span class="text-white font-black text-[9px]">${nivel}</span>
+                                    <img src="${foto}" class="w-14 h-14 rounded-full object-cover border-2 border-[#7a32a8] group-hover:scale-105 transition-transform">
+                                    <div class="absolute -bottom-1 -right-1 bg-[#7a32a8] rounded-full w-6 h-6 flex items-center justify-center border border-white">
+                                        <span class="text-white font-black text-[10px]">${nivel}</span>
                                     </div>
                                 </div>
-                                <span class="text-[#7a32a8] font-black text-sm uppercase truncate max-w-[120px]">${nome}</span>
+                                <span class="text-[#7a32a8] font-black text-base uppercase truncate max-w-[200px]">${nome}</span>
                             </div>
-                            
-                            <button onclick="desafiarAmigo('${uid}', '${nome}')" class="bg-[#4ade80] hover:bg-[#22c55e] text-[#7a32a8] font-black text-[10px] py-2 px-4 rounded-full shadow-md uppercase tracking-wider transition-transform hover:scale-105 border border-[#22c55e] flex-shrink-0">
-                                DESAFIAR
-                            </button>
                         `;
                         container.appendChild(item);
                     }
@@ -523,63 +505,6 @@
         window.fecharModalPerfil = function() {
             document.getElementById('modal-perfil-amigo').classList.add('hidden');
         };
-
-        // ==========================================
-        // SISTEMA DE DESAFIO (Cria sala e notifica)
-        // ==========================================
-        window.desafiarAmigo = async function(alvoUid, alvoNome) {
-            // Checa se o usuário tem deck padrão pronto (Mesma trava da Arena normal)
-            if (!currentUserData.deckPadrao || !currentUserData.decks || !currentUserData.decks[currentUserData.deckPadrao]) {
-                return window.mostrarToast("Você precisa ter um Deck Padrão completo para batalhar!");
-            }
-            
-            const deckCompleto = currentUserData.decks[currentUserData.deckPadrao].cartas;
-            if (!deckCompleto || deckCompleto.length < 20) {
-                return window.mostrarToast("Seu Deck Padrão está incompleto. Ajuste-o primeiro.");
-            }
-
-            window.mostrarToast("Preparando arena... ⚔️");
-
-            try {
-                // 1. Cria a sala na coleção de partidas
-                const novaPartida = {
-                    status: "aguardando",
-                    criadoEm: serverTimestamp(),
-                    tipo: "desafio_amigo", // Marcador para não cair na busca aleatória
-                    jogador1: {
-                        uid: currentUserUid,
-                        nome: currentUserData.nomeDisplay || "JOGADOR 1",
-                        foto: currentUserData.fotoPerfil || "",
-                        deck: deckCompleto
-                    },
-                    jogador2: null,
-                    turnoAtual: 0,
-                    quemAtaca: null
-                };
-
-                const docRef = await addDoc(collection(db, "partidas"), novaPartida);
-                const salaId = docRef.id;
-
-                // 2. Envia a notificação para a caixa de entrada do amigo
-                await updateDoc(doc(db, "users", alvoUid), {
-                    notificacoes: arrayUnion({
-                        id: "notif_desafio_" + Date.now(),
-                        titulo: "⚔️ DESAFIO RECEBIDO!",
-                        texto: `${currentUserData.nomeDisplay} te desafiou para uma batalha! Para aceitar, avise-o e vocês entram juntos. (ID da Sala: ${salaId})`,
-                        lida: false,
-                        data: new Date().toISOString()
-                    })
-                });
-
-                // 3. Joga o criador para dentro da sala dele
-                window.location.href = `arena.html?sala=${salaId}`;
-
-            } catch (error) {
-                console.error("Erro ao desafiar:", error);
-                window.mostrarToast("Erro ao criar a sala de desafio.");
-            }
-        };
-
 
         // ==========================================
         // INICIALIZAÇÃO

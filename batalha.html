@@ -509,7 +509,7 @@
             let pos = 1;
             snap.forEach((d) => {
                 const v = d.data().estatisticas?.batalhasVencidas || 0;
-                const nome = (d.data().nomeDisplay || "JOGADOR").toUpperCase();
+                const nome = (d.data().nomeDisplay || d.data().nome || "JOGADOR").toUpperCase();
                 const div = document.createElement('div');
                 div.className = pos === 1 ? "flex justify-between items-center bg-[#7a32a8] text-white rounded-full px-4 py-2 shadow-inner border border-yellow-400" : "flex justify-between items-center bg-[#7a32a8] text-white rounded-full px-4 py-2 shadow-inner";
                 div.innerHTML = `<span class="font-black text-[11px] truncate max-w-[120px]">${pos}. ${nome}</span><span class="font-bold text-[10px] opacity-90">${v} VITÓRIAS</span>`;
@@ -524,6 +524,13 @@
                 const snap = await getDoc(doc(db, "users", user.uid));
                 if (snap.exists()) {
                     currentUserDoc = snap.data();
+
+                    // AUTO-CURA: Salva o nome no banco se estiver faltando
+                    if (!currentUserDoc.nomeDisplay && !currentUserDoc.nome && user.displayName) {
+                        updateDoc(doc(db, "users", user.uid), { nomeDisplay: user.displayName });
+                        currentUserDoc.nomeDisplay = user.displayName;
+                    }
+                    
                     document.getElementById('player-coins').innerText = currentUserDoc.moedas || 0;
                     document.getElementById('player-level').innerText = currentUserDoc.nivel || 1;
                     if (currentUserDoc.fotoPerfil) {

@@ -240,7 +240,7 @@
                     const snapAmigo = await getDoc(doc(db, "users", uid));
                     if (snapAmigo.exists()) {
                         const dadosAmigo = snapAmigo.data();
-                        const nome = (dadosAmigo.nomeDisplay || "JOGADOR").toUpperCase();
+                        const nome = (dadosAmigo.nomeDisplay || dadosAmigo.nome || "JOGADOR").toUpperCase();
                         const nivel = dadosAmigo.nivel || 1;
                         const foto = dadosAmigo.fotoPerfil || "fundo_carta.png";
                         
@@ -464,7 +464,7 @@
                     const dados = snap.data();
                     
                     document.getElementById('modal-amigo-foto').src = dados.fotoPerfil || "fundo_carta.png";
-                    document.getElementById('modal-amigo-nome').innerText = dados.nomeDisplay || "JOGADOR";
+                    document.getElementById('modal-amigo-nome').innerText = (dados.nomeDisplay || dados.nome || "JOGADOR").toUpperCase();
                     document.getElementById('modal-amigo-nivel').innerText = dados.nivel || 1;
                     
                     const stats = dados.estatisticas || {};
@@ -517,6 +517,12 @@
 
                 if (docSnap.exists()) {
                     currentUserData = docSnap.data();
+
+                    // AUTO-CURA: Salva o nome no banco se estiver faltando
+                    if (!currentUserData.nomeDisplay && !currentUserData.nome && user.displayName) {
+                        updateDoc(docRef, { nomeDisplay: user.displayName });
+                        currentUserData.nomeDisplay = user.displayName;
+                    }
                     
                     document.getElementById('player-name').innerText = user.displayName?.toUpperCase() || "JOGADOR";
                     document.getElementById('player-coins').innerText = currentUserData.moedas || 0;

@@ -53,8 +53,7 @@
       OneSignalDeferred.push(async function(OneSignal) {
           await OneSignal.init({
             appId: "51293d65-6260-42cb-896c-fad4a8c9a16b",
-            // Agora apontamos para o seu arquivo de cache unificado:
-            serviceWorkerPath: "/Supercards/sw.js", 
+            serviceWorkerPath: "/Supercards/OneSignalSDKWorker.js",
             serviceWorkerParam: { scope: "/Supercards/" }
           });
         });

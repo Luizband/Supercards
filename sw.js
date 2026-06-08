@@ -1,3 +1,22 @@
+// Importa o Firebase para rodar em segundo plano
+importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
+
+// Configurações do seu projeto
+firebase.initializeApp({
+  apiKey: "AIzaSyCU3lFTgfrDMaD9jwR7X7ivYPmGQh4VE1g",
+  authDomain: "supercards-tcg.firebaseapp.com",
+  projectId: "supercards-tcg",
+  storageBucket: "supercards-tcg.firebasestorage.app",
+  messagingSenderId: "862316380615",
+  appId: "1:862316380615:web:b3f28056ebc967673999e2"
+});
+
+// Ativa o ouvinte de notificações com o jogo fechado
+const messaging = firebase.messaging();
+
+// ----------------------------------------------------
+
 const CACHE_NAME = "supercards-cache-v1";
 const urlsToCache = [
   "./",

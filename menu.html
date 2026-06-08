@@ -46,6 +46,18 @@
             to { opacity: 1; transform: translateY(0); }
         }
     </style>
+
+    <!-- CÓDIGO DO ONESIGNAL -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "51293d65-6260-42cb-896c-fad4a8c9a16b",
+        });
+      });
+    </script>
+    
 </head>
 <body class="fixed inset-0 px-4 pt-4 flex justify-center overflow-hidden w-screen">
 
@@ -162,6 +174,10 @@
             <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 w-full max-w-xs shadow-2xl flex flex-col items-center gap-4">
                 <h2 class="text-[#7a32a8] font-black text-xl text-center uppercase tracking-wider mb-2">Configurações</h2>
                 
+                <button id="btn-toggle-notif" onclick="window.toggleNotificacoes()" class="w-full py-3 bg-[#bc7bd4] hover:bg-[#dca3e8] text-[#7a32a8] font-black text-sm rounded-full shadow-md transition-transform hover:scale-105 uppercase">
+                    ATIVAR NOTIFICAÇÕES
+                </button>
+                
                 <button id="btn-sair" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-black text-sm rounded-full shadow-md transition-transform hover:scale-105 uppercase">
                     SAIR DA CONTA
                 </button>
@@ -243,6 +259,37 @@
             if (nivel >= 16 && nivel <= 25) return 1600;
             return 3000;
         }
+
+        // FUNÇÃO DE NOTIFICAÇÕES PUSH (ONESIGNAL)
+        window.toggleNotificacoes = function() {
+            window.OneSignalDeferred.push(async function(OneSignal) {
+                // Verifica se já está inscrito no sistema
+                const optIn = OneSignal.User.PushSubscription.optedIn;
+                const btn = document.getElementById('btn-toggle-notif');
+                
+                if (optIn) {
+                    // Desliga as notificações se já tiver
+                    await OneSignal.User.PushSubscription.optOut();
+                    btn.innerText = "ATIVAR NOTIFICAÇÕES";
+                    window.mostrarToast("Notificações desativadas.");
+                } else {
+                    // Pede permissão para ligar (Mostra o pop-up nativo)
+                    await OneSignal.Slidedown.promptPush();
+                    window.mostrarToast("Aguardando sua permissão... ");
+                }
+            });
+        };
+
+        // Ouve automaticamente quando o jogador clica em "Permitir" e muda o botão
+        window.OneSignalDeferred.push(function(OneSignal) {
+            OneSignal.User.PushSubscription.addEventListener("change", function(event) {
+                const btn = document.getElementById('btn-toggle-notif');
+                if (event.current.optedIn && btn) {
+                    btn.innerText = "DESATIVAR NOTIFICAÇÕES";
+                    window.mostrarToast("Notificações ativadas com sucesso!");
+                }
+            });
+        });
 
         window.acionarGatilhoMissao = async function(missaoId, redirectUrl) {
             let atrasoRedirect = 0;
@@ -434,6 +481,14 @@
                             document.getElementById('texto-sem-foto').classList.add('hidden');
                         }
                     }
+
+                    // Muda o texto do botão de configurações se já estiver inscrito no OneSignal
+                    window.OneSignalDeferred.push(function(OneSignal) {
+                        if (OneSignal.User.PushSubscription.optedIn) {
+                            const btnNotif = document.getElementById('btn-toggle-notif');
+                            if (btnNotif) btnNotif.innerText = "DESATIVAR NOTIFICAÇÕES";
+                        }
+                    });
 
                     let finalXp = ganhouBadge ? novoXp : xpAtual;
                     let maxXp = calcularXPMaximo(nivelAtual);

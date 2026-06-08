@@ -270,8 +270,13 @@
                     const permission = await Notification.requestPermission();
                     if (permission === 'granted') {
                         window.mostrarToast("Gerando conexão... ");
+
+                        // Avisa o Firebase para usar o seu sw.js
+                        const swRegistration = await navigator.serviceWorker.register('./sw.js');
+                        
                         const token = await getToken(messaging, { 
-                            vapidKey: "BEFpnwf3HBwqpYQcebT67jh-dswfmBaJshBJWBF--o0dhTcmsBAiB2jKitF2Hj1nxFVimbKUHQGeAlDUouLsN98" 
+                            vapidKey: "BEFpnwf3HBwqpYQcebT67jh-dswfmBaJshBJWBF--o0dhTcmsBAiB2jKitF2Hj1nxFVimbKUHQGeAlDUouLsN98"
+                            serviceWorkerRegistration: swRegistration
                         });
                         
                         if (token) {

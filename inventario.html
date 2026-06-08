@@ -512,9 +512,16 @@
                 if (deltaBasico !== 0) updates["inventario.pacoteBasico"] = increment(deltaBasico);
                 if (deltaPremium !== 0) updates["inventario.pacotePremium"] = increment(deltaPremium);
 
+                // Agrupa e conta as cartas repetidas do mesmo pacote
+                let contagemCartas = {};
                 cartasSorteadaTemp.forEach(id => {
-                    updates[`colecao.${id}`] = increment(1);
+                    contagemCartas[id] = (contagemCartas[id] || 0) + 1;
                 });
+
+                // Envia a instrução para o banco com o incremento exato (1, 2, 3...)
+                for (let id in contagemCartas) {
+                    updates[`colecao.${id}`] = increment(contagemCartas[id]);
+                }
 
                 if (atualizouMissao) updates.missoesDiarias = pacoteMissoes;
                 if (notificacoesNovas.length > 0) updates.notificacoes = arrayUnion(...notificacoesNovas);

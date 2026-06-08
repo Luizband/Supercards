@@ -47,13 +47,15 @@
         }
     </style>
 
-    <!-- CÓDIGO DO ONESIGNAL -->
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script>
       window.OneSignalDeferred = window.OneSignalDeferred || [];
       OneSignalDeferred.push(async function(OneSignal) {
         await OneSignal.init({
           appId: "51293d65-6260-42cb-896c-fad4a8c9a16b",
+          // AS DUAS LINHAS QUE CORRIGEM O GITHUB PAGES:
+          serviceWorkerPath: "/Supercards/sw.js",
+          serviceWorkerParam: { scope: "/Supercards/" }
         });
       });
     </script>

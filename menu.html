@@ -262,31 +262,38 @@
 
         // FUNÇÃO DE NOTIFICAÇÕES PUSH (ONESIGNAL)
         window.toggleNotificacoes = function() {
+            window.mostrarToast("Processando... "); 
+            
             window.OneSignalDeferred.push(async function(OneSignal) {
-                // Verifica se já está inscrito no sistema
-                const optIn = OneSignal.User.PushSubscription.optedIn;
-                const btn = document.getElementById('btn-toggle-notif');
+                const inscrito = OneSignal.User.PushSubscription.optedIn;
                 
-                if (optIn) {
-                    // Desliga as notificações se já tiver
+                if (inscrito) {
+                    // Se está inscrito, pede para sair do servidor
                     await OneSignal.User.PushSubscription.optOut();
-                    btn.innerText = "ATIVAR NOTIFICAÇÕES";
-                    window.mostrarToast("Notificações desativadas.");
                 } else {
-                    // Pede permissão para ligar (Mostra o pop-up nativo)
-                    await OneSignal.Slidedown.promptPush();
-                    window.mostrarToast("Aguardando sua permissão... ");
+                    // Verifica se o celular já liberou a permissão nas configurações
+                    if (Notification.permission === "granted") {
+                        // Reconecta silenciosamente, sem pedir pop-up
+                        await OneSignal.User.PushSubscription.optIn();
+                    } else {
+                        // Se for a primeira vez, mostra o pop-up
+                        await OneSignal.Slidedown.promptPush();
+                    }
                 }
             });
         };
 
-        // Ouve automaticamente quando o jogador clica em "Permitir" e muda o botão
+        // O Escutador continua igual (deixe-o como já estava no seu código)
         window.OneSignalDeferred.push(function(OneSignal) {
             OneSignal.User.PushSubscription.addEventListener("change", function(event) {
                 const btn = document.getElementById('btn-toggle-notif');
-                if (event.current.optedIn && btn) {
-                    btn.innerText = "DESATIVAR NOTIFICAÇÕES";
+                
+                if (event.current.optedIn) {
+                    if (btn) btn.innerText = "DESATIVAR NOTIFICAÇÕES";
                     window.mostrarToast("Notificações ativadas com sucesso!");
+                } else {
+                    if (btn) btn.innerText = "ATIVAR NOTIFICAÇÕES";
+                    window.mostrarToast("Notificações desativadas.");
                 }
             });
         });

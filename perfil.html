@@ -258,11 +258,24 @@
                     }
 
                     const stats = dados.estatisticas || {};
+                    
+                    // --- MATEMÁTICA REAL DAS CARTAS ---
+                    // O jogo ignora o stats.totalCartas e soma a coleção real do jogador
+                    let totalCartasVerdadeiro = 0;
+                    if (dados.colecao) {
+                        for (let idCarta in dados.colecao) {
+                            // Só soma se for maior que zero (ignora os bugs negativos do passado)
+                            if (dados.colecao[idCarta] > 0) {
+                                totalCartasVerdadeiro += dados.colecao[idCarta];
+                            }
+                        }
+                    }
+
                     document.getElementById('stat-pacotes').innerText = stats.pacotesAbertos || 0;
-                    document.getElementById('stat-cartas').innerText = stats.totalCartas || 0;
+                    document.getElementById('stat-cartas').innerText = totalCartasVerdadeiro; // Usa a soma verdadeira
                     document.getElementById('stat-recicladas').innerText = stats.cartasRecicladas || 0;
                     document.getElementById('stat-batalhas').innerText = stats.batalhasVencidas || 0;
-                    document.getElementById('stat-trocas').innerText = stats.trocasFeitas || 0;
+                    document.getElementById('stat-trocas').innerText = stats.trocasFeitas || 0;;
 
                     const gridBadges = document.getElementById('grid-badges');
                     const msgSemBadges = document.getElementById('mensagem-sem-badges');

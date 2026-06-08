@@ -132,8 +132,8 @@
             <div id="recompensas-final" class="hidden bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 w-full max-w-xs flex flex-col items-center gap-2 mb-8 shadow-2xl">
                 <span class="text-[#7a32a8] font-black text-lg tracking-widest uppercase">Recompensas</span>
                 <div class="flex w-full justify-around mt-2">
-                    <span class="text-black font-black text-base">+10 XP</span>
-                    <span class="text-black font-black text-base flex items-center gap-1">+10 <img src="moedas.png" class="w-5 h-5 object-contain"></span>
+                    <span class="text-black font-black text-base">+20 XP</span>
+                    <span class="text-black font-black text-base flex items-center gap-1">+20 <img src="moedas.png" class="w-5 h-5 object-contain"></span>
                 </div>
             </div>
 
@@ -368,8 +368,8 @@
                             if (vitoria) {
                                 ups['estatisticas.batalhasVencidas'] = increment(1); 
                                 let va = (d.estatisticas?.batalhasVencidas || 0) + 1;
-                                let xpB = 10;
-                                let moB = 10;
+                                let xpB = 20;
+                                let moB = 20;
                                 
                                 if (va >= 30 && (!d.badges || !d.badges['badge-005'])) { 
                                     ups['badges.badge-005'] = true; xpB += 50; moB += 50; localStorage.setItem('novaBadge', 'Guerreiro'); 

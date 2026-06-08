@@ -468,8 +468,20 @@
                     document.getElementById('modal-amigo-nivel').innerText = dados.nivel || 1;
                     
                     const stats = dados.estatisticas || {};
+                    
+                    // --- MATEMÁTICA REAL DAS CARTAS DO AMIGO ---
+                    // Ignora o número do Firebase e soma a coleção real que o amigo possui
+                    let totalCartasVerdadeiro = 0;
+                    if (dados.colecao) {
+                        for (let idCarta in dados.colecao) {
+                            if (dados.colecao[idCarta] > 0) {
+                                totalCartasVerdadeiro += dados.colecao[idCarta];
+                            }
+                        }
+                    }
+
                     document.getElementById('modal-amigo-vitorias').innerText = stats.batalhasVencidas || 0;
-                    document.getElementById('modal-amigo-cartas').innerText = stats.totalCartas || 0;
+                    document.getElementById('modal-amigo-cartas').innerText = totalCartasVerdadeiro; // Usa a soma verdadeira
                     document.getElementById('modal-amigo-trocas').innerText = stats.trocasFeitas || 0;
 
                     // Renderiza as badges

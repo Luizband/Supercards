@@ -367,6 +367,28 @@
                     
                     let temNotifNaoLida = (dados.notificacoes || []).some(n => n.lida === false);
 
+                    // --- INICIALIZAÇÃO DE MISSÕES DIÁRIAS ---
+                    let pacoteMissoes = dados.missoesDiarias || {};
+                    
+                    if (pacoteMissoes.dataReset !== hoje) {
+                        const todasMissoes = [
+                            { id: "abrir_pacote", desc: "Abra 2 pacotes de cartas", meta: 2, xp: 20, moedas: 10, progresso: 0, resgatada: false },
+                            { id: "reciclar", desc: "Recicle 1 carta", meta: 1, xp: 20, moedas: 10, progresso: 0, resgatada: false },
+                            { id: "comprar_loja", desc: "Compre 1 pacote na loja", meta: 1, xp: 20, moedas: 10, progresso: 0, resgatada: false },
+                            { id: "jogar_partida", desc: "Jogue 3 partidas na Arena", meta: 3, xp: 30, moedas: 15, progresso: 0, resgatada: false }
+                        ];
+                        
+                        const sorteadas = todasMissoes.sort(() => 0.5 - Math.random()).slice(0, 3);
+                        
+                        // Guarda no objeto de atualização global do Menu
+                        docAtualizacao.missoesDiarias = {
+                            dataReset: hoje,
+                            lista: sorteadas
+                        };
+                        atualizouLogin = true; // Informa o sistema que deve gravar as alterações
+                    }
+                    // --- FIM DA INICIALIZAÇÃO DE MISSÕES ---
+
                     // --- INÍCIO DO SINCRONIZADOR DE NOME ---
                     if (!dados.nomeDisplay || !dados.nome) {
                         docAtualizacao.nomeDisplay = nomeParaSalvar;

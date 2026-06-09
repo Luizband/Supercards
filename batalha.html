@@ -384,7 +384,24 @@
         window.enviarDesafio = async function(uidAlvo, nomeAlvo) {
             if (!currentUserDoc.deckPadrao || !currentUserDoc.decks || !currentUserDoc.decks[currentUserDoc.deckPadrao]) return window.mostrarToast("Selecione um Deck Padrão completo!");
             const deck = currentUserDoc.decks[currentUserDoc.deckPadrao].cartas;
-            if (deck.length < 20) return window.mostrarToast("Seu Deck Padrão precisa de 20 cartas.");
+           // --- NOVA VALIDAÇÃO PROFISSIONAL ---
+            let contagemDeck = {};
+            let deckEValido = true;
+            const colecaoPlayer = currentUserDoc.colecao || {};
+
+            // Conta as cópias e verifica contra a coleção
+            deck.forEach(id => { contagemDeck[id] = (contagemDeck[id] || 0) + 1; });
+            
+            for (let id in contagemDeck) {
+                if ((colecaoPlayer[id] || 0) < contagemDeck[id]) {
+                    deckEValido = false;
+                }
+            }
+
+            if (deck.length < 20 || !deckEValido) {
+                return window.mostrarToast("Seu Deck Padrão possui cartas que você reciclou! Vá na aba Decks para corrigi-lo.");
+            }
+            // --- FIM DA VALIDAÇÃO ---
 
             window.mostrarToast("Enviando convite...");
             try {
@@ -408,7 +425,24 @@
         window.aceitarDesafio = async function(id) {
             if (!currentUserDoc.deckPadrao || !currentUserDoc.decks || !currentUserDoc.decks[currentUserDoc.deckPadrao]) return window.mostrarToast("Selecione um Deck Padrão completo!");
             const deck = currentUserDoc.decks[currentUserDoc.deckPadrao].cartas;
-            if (deck.length < 20) return window.mostrarToast("Seu Deck Padrão precisa de 20 cartas.");
+            // --- NOVA VALIDAÇÃO PROFISSIONAL ---
+            let contagemDeck = {};
+            let deckEValido = true;
+            const colecaoPlayer = currentUserDoc.colecao || {};
+
+            // Conta as cópias e verifica contra a coleção
+            deck.forEach(id => { contagemDeck[id] = (contagemDeck[id] || 0) + 1; });
+            
+            for (let id in contagemDeck) {
+                if ((colecaoPlayer[id] || 0) < contagemDeck[id]) {
+                    deckEValido = false;
+                }
+            }
+
+            if (deck.length < 20 || !deckEValido) {
+                return window.mostrarToast("Seu Deck Padrão possui cartas que você reciclou! Vá na aba Decks para corrigi-lo.");
+            }
+            // --- FIM DA VALIDAÇÃO ---
 
             window.mostrarToast("Entrando na sala...");
             try {
@@ -445,7 +479,25 @@
                 return window.mostrarToast("Você precisa selecionar um Deck Padrão!");
             }
             const deck = currentUserDoc.decks[currentUserDoc.deckPadrao].cartas;
-            if (deck.length < 20) return window.mostrarToast("Seu Deck Padrão está incompleto.");
+            
+            // --- NOVA VALIDAÇÃO PROFISSIONAL ---
+            let contagemDeck = {};
+            let deckEValido = true;
+            const colecaoPlayer = currentUserDoc.colecao || {};
+
+            // Conta as cópias e verifica contra a coleção
+            deck.forEach(id => { contagemDeck[id] = (contagemDeck[id] || 0) + 1; });
+            
+            for (let id in contagemDeck) {
+                if ((colecaoPlayer[id] || 0) < contagemDeck[id]) {
+                    deckEValido = false;
+                }
+            }
+
+            if (deck.length < 20 || !deckEValido) {
+                return window.mostrarToast("Seu Deck Padrão possui cartas que você reciclou! Vá na aba Decks para corrigi-lo.");
+            }
+            // --- FIM DA VALIDAÇÃO ---
 
             document.getElementById('modal-busca').classList.remove('hidden');
 

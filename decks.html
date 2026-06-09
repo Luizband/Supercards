@@ -277,10 +277,16 @@
                 deckParaExcluir = id;
                 document.getElementById('modal-excluir').classList.remove('hidden');
             } else if (modoEdicao) {
-                // Envia para o construtor carregando as informações deste deck específico
                 window.location.href = `construtor.html?editar=${id}`;
             } else {
                 // Modo Normal: Define como Padrão
+                const deckInfo = meusDecks[id];
+                
+                // VERIFICA SE O DECK É VÁLIDO ANTES DE DEFINIR COMO PADRÃO
+                if (deckInfo.isInvalid) {
+                    return window.mostrarToast("Este deck está incompleto! Faltam cartas na sua coleção. Edite-o primeiro.");
+                }
+
                 if (deckPadrao === id) return;
                 
                 try {
@@ -294,7 +300,7 @@
                 }
             }
         };
-
+        
         window.fecharModalExcluir = function() {
             document.getElementById('modal-excluir').classList.add('hidden');
             deckParaExcluir = null;
@@ -330,6 +336,7 @@
             }
         });
 
+        // --- NOVA FUNÇÃO DE RENDERIZAÇÃO COM VERIFICAÇÃO DE VALIDADE ---
         function renderizarDecks() {
             const grid = document.getElementById('grid-decks');
             const msgVazio = document.getElementById('msg-sem-decks');
@@ -346,6 +353,33 @@
                     const deck = meusDecks[id];
                     const isPadrao = (id === deckPadrao);
                     
+                    // LÓGICA DE VALIDAÇÃO DO DECK (Verifica contra a coleção)
+                    let cartasValidas = 0;
+                    let contagemDeck = {};
+                    
+                    // Conta quantas cópias de cada carta o deck pede
+                    (deck.cartas || []).forEach(cartaId => {
+                        contagemDeck[cartaId] = (contagemDeck[cartaId] || 0) + 1;
+                    });
+
+                    // Verifica se o jogador tem a quantidade exigida na coleção
+                    for (let cartaId in contagemDeck) {
+                        const qtdNecessaria = contagemDeck[cartaId];
+                        const qtdPossuida = window.colecaoGlobal[cartaId] || 0; // Usando a variável global que vamos criar abaixo
+                        
+                        if (qtdPossuida >= qtdNecessaria) {
+                            cartasValidas += qtdNecessaria;
+                        } else {
+                            // Se ele tem 1 na coleção, mas o deck pede 2, soma só 1 como válida
+                            cartasValidas += qtdPossuida; 
+                        }
+                    }
+
+                    // Se não tiver as 20 cartas válidas, marca o deck como inválido
+                    deck.isInvalid = (cartasValidas < 20);
+
+                    // FIM DA VALIDAÇÃO
+                    
                     let classesCaixa = "bg-[#dca3e8] w-full aspect-square rounded-[20px] flex items-center justify-center p-3 shadow-lg border-4 transition-all relative";
                     let textoIndicador = "";
 
@@ -353,6 +387,10 @@
                         classesCaixa += " shake-danger bg-red-200 cursor-pointer border-red-500";
                     } else if (modoEdicao) {
                         classesCaixa += " animate-pulse bg-blue-200 cursor-pointer border-blue-500";
+                    } else if (deck.isInvalid && !modoExclusao && !modoEdicao) {
+                         // VISUAL DE DECK INVÁLIDO
+                         classesCaixa += " border-red-500 bg-red-300 opacity-80 cursor-not-allowed";
+                         textoIndicador = `<div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-white z-10 shadow-sm animate-pulse">Incompleto</div>`;
                     } else if (isPadrao) {
                         classesCaixa += " border-[#8b3dff] cursor-pointer ring-4 ring-[#8b3dff]/30";
                         textoIndicador = `<div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#8b3dff] text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-white z-10 shadow-sm">Padrão</div>`;
@@ -376,6 +414,8 @@
                 });
             }
         }
+        
+        window.colecaoGlobal = {}; // Adicione esta linha global
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -387,6 +427,7 @@
                     const dados = docSnap.data();
                     meusDecks = dados.decks || {};
                     deckPadrao = dados.deckPadrao || "";
+                    window.colecaoGlobal = dados.colecao || {}; // Salva a coleção para validação
                     
                     renderizarDecks();
                 }

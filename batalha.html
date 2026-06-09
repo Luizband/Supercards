@@ -383,7 +383,7 @@
         // Ações do Lobby
         window.enviarDesafio = async function(uidAlvo, nomeAlvo) {
             if (!currentUserDoc.deckPadrao || !currentUserDoc.decks || !currentUserDoc.decks[currentUserDoc.deckPadrao]) return window.mostrarToast("Selecione um Deck Padrão completo!");
-            const deck = currentUserDoc.decks[currentUserDoc.deckPadrao].cartas;
+            const deck = currentUserDoc.decks[currentUserDoc.deckPadrao].cartas || [];
            // --- NOVA VALIDAÇÃO PROFISSIONAL ---
             let contagemDeck = {};
             let deckEValido = true;
@@ -424,7 +424,7 @@
 
         window.aceitarDesafio = async function(id) {
             if (!currentUserDoc.deckPadrao || !currentUserDoc.decks || !currentUserDoc.decks[currentUserDoc.deckPadrao]) return window.mostrarToast("Selecione um Deck Padrão completo!");
-            const deck = currentUserDoc.decks[currentUserDoc.deckPadrao].cartas;
+            const deck = currentUserDoc.decks[currentUserDoc.deckPadrao].cartas || [];
             // --- NOVA VALIDAÇÃO PROFISSIONAL ---
             let contagemDeck = {};
             let deckEValido = true;
@@ -478,7 +478,7 @@
             if (!currentUserDoc.deckPadrao || !currentUserDoc.decks || !currentUserDoc.decks[currentUserDoc.deckPadrao]) {
                 return window.mostrarToast("Você precisa selecionar um Deck Padrão!");
             }
-            const deck = currentUserDoc.decks[currentUserDoc.deckPadrao].cartas;
+            const deck = currentUserDoc.decks[currentUserDoc.deckPadrao].cartas || [];
             
             // --- NOVA VALIDAÇÃO PROFISSIONAL ---
             let contagemDeck = {};

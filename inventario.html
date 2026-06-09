@@ -262,13 +262,19 @@
                 const inventario = dadosJogador.inventario || {};
                 const qtdBasico = inventario.pacoteBasico || 0;
                 const qtdPremium = inventario.pacotePremium || 0;
+                const qtdGratis = inventario.pacoteGratis || 0; // Puxa o pacote novo do banco
                 
                 const lista = document.getElementById('lista-pacotes');
                 lista.innerHTML = '';
 
-                if (qtdBasico <= 0 && qtdPremium <= 0) {
+                if (qtdBasico <= 0 && qtdPremium <= 0 && qtdGratis <= 0) { // Adicionou qtdGratis aqui
                     lista.innerHTML = '<span class="text-center text-[#7a32a8] font-black mt-10">Você não possui pacotes.</span>';
                     return;
+                }
+
+                // Renderiza o Pacote Grátis se tiver
+                if (qtdGratis > 0) {
+                    lista.innerHTML += criarHTMLPacote('gratis', 'Pacote Diário', '5 Cartas Aleatórias', qtdGratis, 'pacotegratis.png');
                 }
 
                 if (qtdBasico > 0) {
@@ -320,7 +326,8 @@
             containerRevelacao.classList.remove('anim-pop'); // Remove qualquer animação travada
             containerRevelacao.style.opacity = '0'; // Esconde o container até a nova carta estar pronta
 
-            const campo = tipo === 'basico' ? 'pacoteBasico' : 'pacotePremium';
+            // O código agora sabe identificar os 3 tipos de pacote
+            const campo = tipo === 'basico' ? 'pacoteBasico' : (tipo === 'premium' ? 'pacotePremium' : 'pacoteGratis');
             let qtd = (dadosJogador.inventario && dadosJogador.inventario[campo]) || 0;
             
             if (qtd <= 0) {
@@ -426,7 +433,7 @@
             window.mostrarToast("Guardando na coleção... ⏳");
 
             try {
-                const campo = tipoPacoteTemp === 'basico' ? 'pacoteBasico' : 'pacotePremium';
+                const campo = tipoPacoteTemp === 'basico' ? 'pacoteBasico' : (tipoPacoteTemp === 'premium' ? 'pacotePremium' : 'pacoteGratis');
                 
                 let pacotesAbertosAtuais = (dadosJogador.estatisticas?.pacotesAbertos || 0) + 1;
                 let badgesJogador = dadosJogador.badges || {};
@@ -499,6 +506,7 @@
 
                 let deltaBasico = (campo === 'pacoteBasico' ? -1 : 0) + pacotesBasicosGanhos;
                 let deltaPremium = (campo === 'pacotePremium' ? -1 : 0) + pacotesPremiumGanhos;
+                let deltaGratis = (campo === 'pacoteGratis' ? -1 : 0); // Nova lógica do grátis
 
                 let updates = {
                     "estatisticas.pacotesAbertos": increment(1),
@@ -511,6 +519,7 @@
 
                 if (deltaBasico !== 0) updates["inventario.pacoteBasico"] = increment(deltaBasico);
                 if (deltaPremium !== 0) updates["inventario.pacotePremium"] = increment(deltaPremium);
+                if (deltaGratis !== 0) updates["inventario.pacoteGratis"] = increment(deltaGratis); // Desconta o grátis se usou
 
                 // Agrupa e conta as cartas repetidas do mesmo pacote
                 let contagemCartas = {};

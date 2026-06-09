@@ -223,6 +223,12 @@
             grid.innerHTML = "";
             let cartasPreenchidas = 0;
 
+            // MÁGICA: Conta quantas cartas estão no deck atual para cruzar com a coleção
+            const contagemDeck = {};
+            deckState.forEach(id => {
+                if (id) contagemDeck[id] = (contagemDeck[id] || 0) + 1;
+            });
+
             for (let i = 0; i < 20; i++) {
                 const idCarta = deckState[i];
                 const div = document.createElement('div');
@@ -233,7 +239,23 @@
                     const info = INFO_CARTAS[idCarta];
                     const imagemExibida = info.miniatura || info.imagem;
 
-                    div.innerHTML = `<img src="${imagemExibida}" class="w-full h-full object-cover rounded-md shadow-md border-2 border-transparent hover:border-red-500 transition-colors">`;
+                    // Verifica se a carta é "Fantasma" (exige mais cópias do que o jogador possui)
+                    const qtdPossuida = colecaoJogador[idCarta] || 0;
+                    const isFaltando = contagemDeck[idCarta] > qtdPossuida;
+
+                    if (isFaltando) {
+                        // VISUAL DE CARTA FALTANDO
+                        div.innerHTML = `
+                            <img src="${imagemExibida}" class="w-full h-full object-cover rounded-md shadow-md border-2 border-red-500 grayscale opacity-50">
+                            <div class="absolute inset-0 bg-red-900/30 flex items-center justify-center rounded-md pointer-events-none">
+                                <span class="text-white font-black text-[10px] bg-red-600 px-2 py-0.5 rounded-sm transform -rotate-12 border border-white shadow-lg tracking-widest">FALTA</span>
+                            </div>
+                        `;
+                    } else {
+                        // VISUAL NORMAL
+                        div.innerHTML = `<img src="${imagemExibida}" class="w-full h-full object-cover rounded-md shadow-md border-2 border-transparent hover:border-red-500 transition-colors">`;
+                    }
+
                     div.onclick = () => removerCartaDoSlot(i);
                 } else {
                     div.innerHTML = `<div class="w-6 h-6 border-2 border-white/30 rounded-full flex items-center justify-center"><span class="text-white/30 font-black text-xs">+</span></div>`;
@@ -301,10 +323,14 @@
 
                     const imagemExibida = info.miniatura || info.imagem;
 
+                    // TRATAMENTO PARA NÚMEROS NEGATIVOS (CARTA FANTASMA)
+                    let textoDisp = copiasDisponiveis < 0 ? "FALTA!" : `${copiasDisponiveis} DISP.`;
+                    let corFundoDisp = copiasDisponiveis < 0 ? "bg-red-600" : "bg-black/80";
+
                     divCarta.innerHTML = `
                         <img src="${imagemExibida}" class="w-full h-full object-cover">
-                        <div class="absolute bottom-0 left-0 w-full bg-black/80 py-1 flex justify-center items-center">
-                            <span class="text-white text-[9px] font-black tracking-widest">${copiasDisponiveis} DISP.</span>
+                        <div class="absolute bottom-0 left-0 w-full ${corFundoDisp} py-1 flex justify-center items-center">
+                            <span class="text-white text-[9px] font-black tracking-widest">${textoDisp}</span>
                         </div>
                     `;
                     
@@ -319,7 +345,7 @@
                 container.innerHTML = `<span class="text-white col-span-4 text-center text-sm font-bold mt-10">Você não possui cartas disponíveis.</span>`;
             }
         }
-
+        
         // --- SISTEMA DE ZOOM E CONFIRMAÇÃO ---
         window.abrirZoomCarta = function(idCarta) {
             cartaEmZoomId = idCarta;

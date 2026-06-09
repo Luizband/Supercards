@@ -73,7 +73,7 @@
             <div onclick="window.resgatarBonus()" class="bg-gradient-to-br from-[#bc7bd4] to-[#7a32a8] rounded-3xl p-4 shadow-xl border-2 border-[#dca3e8] flex flex-col items-center relative overflow-hidden cursor-pointer transform active:scale-95 transition-transform z-10 w-full">
                 <h2 class="text-white font-black text-xl mb-1 drop-shadow-md pointer-events-none">Bônus Diário</h2>
                 <p class="text-[#7a32a8] bg-[#dca3e8] px-3 py-0.5 rounded-full text-xs font-black mb-2 shadow-sm pointer-events-none">1 Pacote Básico Grátis</p>
-                <img src="pacote1.png" alt="Pacote Diário" class="w-20 h-28 object-contain drop-shadow-2xl pointer-events-none mb-3">
+                <img src="pacotegratis.png" alt="Pacote Diário" class="w-20 h-28 object-contain drop-shadow-2xl pointer-events-none mb-3">
                 <div id="status-bonus" class="bg-[#22c55e] text-white font-black py-2 w-full text-center rounded-full shadow-md pointer-events-none text-sm">
                     PEGAR PACOTE
                 </div>
@@ -212,7 +212,7 @@
                 }
                 
                 await setDoc(ref, {
-                    inventario: { pacoteBasico: increment(1) },
+                    inventario: { pacoteGratis: increment(1) },
                     ultimoResgateDiario: hoje
                 }, { merge: true });
                 

@@ -240,16 +240,24 @@
 
                 // OTIMIZAÇÃO DE MINIATURA:
                 // Tenta puxar a info.miniatura. Se ela não existir no cartas.js, usa a info.imagem como fallback.
+            
                 const imagemExibida = possuiCarta ? (info.miniatura || info.imagem) : "fundo_carta.png";
                 
+                // Adicionamos 'relative' na div da carta e a badge (bolinha) de quantidade no final
                 divCarta.innerHTML = `
                     <span class="text-black font-black text-[10px] mb-0.5">${idFormatado}</span>
-                    <div class="bg-gray-800 w-full aspect-[2.5/3.5] flex items-center justify-center rounded-md overflow-hidden shadow-md border-2 border-transparent ${possuiCarta ? 'hover:border-[#8b3dff]' : ''}">
+                    <div class="relative bg-gray-800 w-full aspect-[2.5/3.5] flex items-center justify-center rounded-md overflow-hidden shadow-md border-2 border-transparent ${possuiCarta ? 'hover:border-[#8b3dff]' : ''}">
                         <img src="${imagemExibida}" class="w-full h-full object-cover">
+                        
+                        ${possuiCarta ? `
+                        <div class="absolute bottom-1 right-1 bg-black/80 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full border border-white/40 shadow-md">
+                            x${quantidade}
+                        </div>` : ''}
                     </div>
                 `;
 
                 if (possuiCarta) {
+               
                     divCarta.addEventListener('click', () => abrirModal(idFormatado, info, quantidade));
                 }
 

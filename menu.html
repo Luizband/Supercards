@@ -366,19 +366,34 @@
                     let notificacoesNovas = [];
                     
                     let temNotifNaoLida = (dados.notificacoes || []).some(n => n.lida === false);
-
+                    
                     // --- INICIALIZAÇÃO DE MISSÕES DIÁRIAS ---
                     let pacoteMissoes = dados.missoesDiarias || {};
                     
-                    if (pacoteMissoes.dataReset !== hoje) {
-                        const todasMissoes = [
-                            { id: "abrir_pacote", desc: "Abra 2 pacotes de cartas", meta: 2, xp: 20, moedas: 10, progresso: 0, resgatada: false },
-                            { id: "reciclar", desc: "Recicle 1 carta", meta: 1, xp: 20, moedas: 10, progresso: 0, resgatada: false },
-                            { id: "comprar_loja", desc: "Compre 1 pacote na loja", meta: 1, xp: 20, moedas: 10, progresso: 0, resgatada: false },
-                            { id: "jogar_partida", desc: "Jogue 3 partidas na Arena", meta: 3, xp: 30, moedas: 15, progresso: 0, resgatada: false }
+                    if (pacoteMissoes.dataReset !== hoje || !pacoteMissoes.lista || pacoteMissoes.lista.length !== 5) {
+                        
+                        // O MESMO POOL DO SEU ARQUIVO DE MISSÕES
+                        const POOL_MISSOES = [
+                            { id: "login", desc: "Fazer login no jogo", meta: 1 },
+                            { id: "troca", desc: "Realizar uma troca", meta: 1 },
+                            { id: "reciclar", desc: "Reciclar uma carta", meta: 1 },
+                            { id: "comprar", desc: "Comprar algo na loja", meta: 1 },
+                            { id: "abrir_colecao", desc: "Abrir a coleção", meta: 1 },
+                            { id: "batalhar", desc: "Batalhar uma vez", meta: 1 },
+                            { id: "ganhar_partida", desc: "Ganhar uma partida", meta: 1 },
+                            { id: "abrir_pacote", desc: "Abrir um pacote de cartas", meta: 1 }
                         ];
                         
-                        const sorteadas = todasMissoes.sort(() => 0.5 - Math.random()).slice(0, 3);
+                        // Sorteia as 5 missões exatamente como no missoes.html
+                        const sorteadas = [...POOL_MISSOES].sort(() => 0.5 - Math.random()).slice(0, 5).map(m => {
+                            return {
+                                id: m.id,
+                                desc: m.desc,
+                                meta: m.meta,
+                                progresso: (m.id === "login") ? 1 : 0, // Já dá o ponto de login
+                                resgatada: false
+                            };
+                        });
                         
                         // Guarda no objeto de atualização global do Menu
                         docAtualizacao.missoesDiarias = {
@@ -388,6 +403,7 @@
                         atualizouLogin = true; // Informa o sistema que deve gravar as alterações
                     }
                     // --- FIM DA INICIALIZAÇÃO DE MISSÕES ---
+                    
 
                     // --- INÍCIO DO SINCRONIZADOR DE NOME ---
                     if (!dados.nomeDisplay || !dados.nome) {

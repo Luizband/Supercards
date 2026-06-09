@@ -162,7 +162,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         
         import { INFO_CARTAS, TABELA_FRAGMENTOS } from './cartas.js';
 
@@ -457,15 +457,13 @@
                 let nivelAtual = dados.nivel || 1;
                 let xpAtual = dados.xp || 0;
 
-                // ATUALIZAÇÃO DO BANCO: Agora remove 1 do totalCartas corretamente
+                // ATUALIZAÇÃO DO BANCO CORRIGIDA
                 let docAtualizacao = {
                     [`colecao.${cartaAtivaNoModal}`]: increment(-1),
-                    fragmentos: increment(ganhoFragmentos),
-                    estatisticas: { 
-                        cartasRecicladas: increment(1),
-                        totalCartas: increment(-1) // <--- CORREÇÃO DA ESTATÍSTICA AQUI
-                    },
-                    badges: badgesJogador
+                    "fragmentos": increment(ganhoFragmentos),
+                    "estatisticas.cartasRecicladas": increment(1),
+                    "estatisticas.totalCartas": increment(-1),
+                    "badges": badgesJogador
                 };
 
                 if (atualizouMissao) {
@@ -483,11 +481,12 @@
                         subiuNivel = true;
                         bonusMoedas += 30;
                         
-                        docAtualizacao.inventario = { pacoteBasico: increment(1) };
+                        // Atualizando inventário com updateDoc (usando o caminho de ponto)
+                        docAtualizacao["inventario.pacoteBasico"] = increment(1);
                         let textoRecompensaNotif = "1 Pacote Básico e 30 Moedas";
 
                         if (nivelAtual === 10 || nivelAtual === 20 || nivelAtual === 30) {
-                            docAtualizacao.inventario.pacotePremium = increment(1);
+                            docAtualizacao["inventario.pacotePremium"] = increment(1);
                             textoRecompensaNotif = "1 Pacote Básico, 1 Pacote Premium e 30 Moedas";
                             msgLevelUp = `🎉 LEVEL UP! Nível ${nivelAtual} alcançado!<br><span class="text-xs">Recompensas: 1 Pacote Básico, 1 Pacote Premium e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom"></span>`;
                         } else {
@@ -517,7 +516,8 @@
                     docAtualizacao.notificacoes = arrayUnion(...notificacoesNovas);
                 }
 
-                await setDoc(dbUserRef, docAtualizacao, { merge: true });
+                // Trocado de setDoc para updateDoc!
+                await updateDoc(dbUserRef, docAtualizacao);
 
                 // Atualiza a tela após sucesso no banco
                 colecaoJogador[cartaAtivaNoModal] -= 1;

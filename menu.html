@@ -254,6 +254,19 @@
             return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
         }
 
+        // Guarda a data em que o menu foi aberto
+        const dataAberturaMenu = obterGameDay();
+
+        // Toda vez que o jogador voltar a olhar para a tela (tirar do segundo plano)
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible") {
+                // Se a data de agora for diferente da data em que ele abriu o app, recarrega!
+                if (obterGameDay() !== dataAberturaMenu) {
+                    window.location.reload();
+                }
+            }
+        });
+
         function calcularXPMaximo(nivel) {
             if (nivel >= 1 && nivel <= 5) return 200;
             if (nivel >= 6 && nivel <= 15) return 750;

@@ -527,20 +527,24 @@
                 // Trocado de setDoc para updateDoc!
                 await updateDoc(dbUserRef, docAtualizacao);
 
-                // Atualiza a tela após sucesso no banco
+                // --- ATUALIZAÇÃO IMEDIATA DA INTERFACE ---
                 colecaoJogador[cartaAtivaNoModal] -= 1;
                 document.getElementById('modal-copias').innerText = colecaoJogador[cartaAtivaNoModal];
                 
                 document.getElementById('modal-confirmar-reciclar').classList.add('hidden');
                 
+                // MUDANÇA AQUI: Renderiza a grade SEMPRE, para a bolinha mudar na mesma hora!
+                renderizarGridCartas();
+                
+                // Só fecha o modal grande (do zoom) se não sobrou nenhuma cópia
                 if (colecaoJogador[cartaAtivaNoModal] === 0) {
                     modal.classList.add('hidden');
-                    renderizarGridCartas();
                 }
 
                 window.mostrarToast(`Carta reciclada! Você ganhou ${ganhoFragmentos} fragmento(s).`);
                 
                 let atraso = 500;
+                
                 if (atualizouMissao) {
                     setTimeout(() => window.mostrarToast(msgMissaoProgresso), atraso);
                     atraso += 500;

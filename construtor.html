@@ -217,17 +217,14 @@
             }, 3000);
         };
 
-        // --- LÓGICA DA GRADE (20 SLOTS) ---
+        // --- LÓGICA DA GRADE (20 SLOTS) CORRIGIDA ---
         function renderizarGrade() {
             const grid = document.getElementById('grid-construtor');
             grid.innerHTML = "";
             let cartasPreenchidas = 0;
 
-            // MÁGICA: Conta quantas cartas estão no deck atual para cruzar com a coleção
-            const contagemDeck = {};
-            deckState.forEach(id => {
-                if (id) contagemDeck[id] = (contagemDeck[id] || 0) + 1;
-            });
+            // NOVO: Conta quantas vezes JÁ renderizamos cada carta neste loop
+            let copiasRenderizadas = {};
 
             for (let i = 0; i < 20; i++) {
                 const idCarta = deckState[i];
@@ -239,9 +236,12 @@
                     const info = INFO_CARTAS[idCarta];
                     const imagemExibida = info.miniatura || info.imagem;
 
-                    // Verifica se a carta é "Fantasma" (exige mais cópias do que o jogador possui)
+                    // Adiciona 1 na contagem de vezes que esta carta apareceu
+                    copiasRenderizadas[idCarta] = (copiasRenderizadas[idCarta] || 0) + 1;
                     const qtdPossuida = colecaoJogador[idCarta] || 0;
-                    const isFaltando = contagemDeck[idCarta] > qtdPossuida;
+
+                    // A MÁGICA: Só dá FALTA se ESTA CÓPIA ESPECÍFICA exceder o limite da coleção
+                    const isFaltando = copiasRenderizadas[idCarta] > qtdPossuida;
 
                     if (isFaltando) {
                         // VISUAL DE CARTA FALTANDO

@@ -603,5 +603,23 @@
             }
         });
     </script>
+    <script>
+        let tempoInativo = 0;
+        
+        // Se o jogador mexer o rato, tocar no ecrã ou carregar numa tecla, o tempo zera
+        const resetarTempo = () => tempoInativo = 0;
+        window.addEventListener('mousemove', resetarTempo);
+        window.addEventListener('touchstart', resetarTempo);
+        window.addEventListener('keydown', resetarTempo);
+
+        // A cada 1 minuto (60000 milissegundos), o contador soma
+        setInterval(() => {
+            tempoInativo += 60000;
+            // Se atingir 30 minutos (1.800.000 ms), redireciona para o menu
+            if (tempoInativo >= 1800000) {
+                window.location.href = 'menu.html';
+            }
+        }, 60000);
+    </script>
 </body>
 </html>

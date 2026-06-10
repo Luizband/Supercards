@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Supercards - Arena DUO (2x2)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Fundo combinando o Roxo e o Verde da sua imagem de rascunho */
+        body {
+            background: linear-gradient(90deg, #7a32a8 0%, #4ade80 100%);
+            background-size: cover;
+            background-position: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overscroll-behavior: none; /* Evita que a tela puxe no mobile */
+        }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Animação para a vez do jogador */
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0px rgba(220, 163, 232, 0.7); }
+            100% { box-shadow: 0 0 0 10px rgba(220, 163, 232, 0); }
+        }
+        .vez-ativa { animation: pulse-ring 1.5s infinite; border-color: #dca3e8 !important; }
+
+        /* Efeito Hover nas Cartas do Jogador (sem quebrar o layout) */
+        .hover-carta { transition: transform 0.2s ease, z-index 0s; }
+        .hover-carta:hover { transform: translateY(-15px) scale(1.15); z-index: 50 !important; }
+
+        /* MENSAGEM DE BLOQUEIO SE O CELULAR ESTIVER EM PÉ (PORTRAIT) */
+        #aviso-retrato { display: none; }
+        @media (orientation: portrait) {
+            #main-arena { display: none !important; }
+            #aviso-retrato { display: flex; }
+        }
+    </style>
+</head>
+<body class="fixed inset-0 overflow-hidden w-screen h-screen text-white select-none">
+
+    <!-- TELA DE BLOQUEIO PORTRAIT -->
+    <div id="aviso-retrato" class="w-full h-full bg-black/95 flex-col items-center justify-center p-6 text-center z-[9999] absolute inset-0">
+        <span class="text-6xl mb-4">🔄</span>
+        <h1 class="text-2xl font-black text-[#dca3e8] uppercase tracking-widest mb-2">Vire o Celular</h1>
+        <p class="text-sm text-gray-300 font-bold">O modo Arena 2x2 só pode ser jogado com a tela na horizontal.</p>
+    </div>
+
+    <!-- ARENA DUO (LANDSCAPE) -->
+    <div id="main-arena" class="w-full h-full relative flex items-center justify-center">
+
+        <!-- Fundo com a Logo suave -->
+        <img src="logo.png" class="absolute w-[40%] max-w-[300px] opacity-10 grayscale object-contain pointer-events-none z-0">
+
+        <!-- ========================================== -->
+        <!-- HUD SUPERIOR (Toasts, Turno, Montante e Desistir) -->
+        <!-- ========================================== -->
+        <div class="absolute top-2 w-full px-4 flex justify-between items-start z-50 pointer-events-none">
+            <!-- Toast de Avisos (Esquerda) -->
+            <div class="bg-[#dca3e8] text-[#7a32a8] font-black text-[10px] px-4 py-1.5 rounded-full shadow-lg border-2 border-[#bc7bd4] uppercase pointer-events-auto">
+                Aguardando Jogadores...
+            </div>
+
+            <!-- Botões e Status (Direita) -->
+            <div class="flex items-center gap-3 pointer-events-auto">
+                <!-- Pote / Montante -->
+                <div class="bg-black/60 border border-white/20 rounded-lg px-3 py-1 flex items-center gap-2 shadow-lg backdrop-blur-sm">
+                    <img src="fundo_carta.png" class="w-4 h-5 object-cover rounded-[2px] opacity-80">
+                    <div class="flex flex-col leading-none">
+                        <span class="text-[8px] text-gray-300 font-bold uppercase tracking-wider">Montante</span>
+                        <span class="text-sm text-[#4ade80] font-black" id="pote-cartas">0</span>
+                    </div>
+                </div>
+                <button class="bg-red-600 hover:bg-red-700 text-white font-black text-[10px] px-3 py-1.5 rounded-full shadow-md border border-red-800 uppercase tracking-widest transition-transform active:scale-95">Desistir</button>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- JOGADOR PARCEIRO (TOPO) -->
+        <!-- ========================================== -->
+        <div class="absolute top-2 left-1/2 transform -translate-x-1/2 flex items-start gap-4 z-10">
+            <div class="flex flex-col items-center">
+                <img src="fundo_carta.png" class="w-10 h-10 rounded-full border-2 border-black/50 object-cover shadow-md bg-gray-800">
+                <span class="bg-black/80 px-2 py-0.5 rounded text-[8px] font-black mt-1 uppercase border border-white/10">Parceiro</span>
+            </div>
+            <!-- Cartas na mão do parceiro -->
+            <div class="flex -space-x-3 mt-1 opacity-90">
+                <img src="fundo_carta.png" class="w-8 aspect-[2.5/3.5] rounded shadow-md border border-black/30">
+                <img src="fundo_carta.png" class="w-8 aspect-[2.5/3.5] rounded shadow-md border border-black/30">
+                <img src="fundo_carta.png" class="w-8 aspect-[2.5/3.5] rounded shadow-md border border-black/30">
+                <img src="fundo_carta.png" class="w-8 aspect-[2.5/3.5] rounded shadow-md border border-black/30">
+                <img src="fundo_carta.png" class="w-8 aspect-[2.5/3.5] rounded shadow-md border border-black/30">
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- OPONENTE 1 (ESQUERDA) -->
+        <!-- ========================================== -->
+        <div class="absolute left-4 top-1/2 transform -translate-y-1/2 flex items-center gap-3 z-10">
+            <div class="flex flex-col items-center">
+                <img src="fundo_carta.png" class="w-10 h-10 rounded-full border-2 border-black/50 object-cover shadow-md bg-gray-800">
+                <span class="bg-black/80 px-2 py-0.5 rounded text-[8px] font-black mt-1 uppercase text-red-400 border border-white/10">Inimigo 1</span>
+            </div>
+            <!-- Cartas empilhadas verticalmente -->
+            <div class="flex flex-col -space-y-4 opacity-90">
+                <img src="fundo_carta.png" class="w-9 aspect-[3.5/2.5] rounded shadow-md border border-black/30 transform rotate-90">
+                <img src="fundo_carta.png" class="w-9 aspect-[3.5/2.5] rounded shadow-md border border-black/30 transform rotate-90">
+                <img src="fundo_carta.png" class="w-9 aspect-[3.5/2.5] rounded shadow-md border border-black/30 transform rotate-90">
+                <img src="fundo_carta.png" class="w-9 aspect-[3.5/2.5] rounded shadow-md border border-black/30 transform rotate-90">
+                <img src="fundo_carta.png" class="w-9 aspect-[3.5/2.5] rounded shadow-md border border-black/30 transform rotate-90">
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- OPONENTE 2 (DIREITA) -->
+        <!-- ========================================== -->
+        <div class="absolute right-4 top-1/2 transform -translate-y-1/2 flex flex-row-reverse items-center gap-3 z-10">
+            <div class="flex flex-col items-center">
+                <img src="fundo_carta.png" class="w-10 h-10 rounded-full border-2 border-black/50 object-cover shadow-md bg-gray-800">
+                <span class="bg-black/80 px-2 py-0.5 rounded text-[8px] font-black mt-1 uppercase text-red-400 border border-white/10">Inimigo 2</span>
+            </div>
+            <div class="flex flex-col -space-y-4 opacity-90">
+                <img src="fundo_carta.png" class="w-9 aspect-[3.5/2.5] rounded shadow-md border border-black/30 transform -rotate-90">
+                <img src="fundo_carta.png" class="w-9 aspect-[3.5/2.5] rounded shadow-md border border-black/30 transform -rotate-90">
+                <img src="fundo_carta.png" class="w-9 aspect-[3.5/2.5] rounded shadow-md border border-black/30 transform -rotate-90">
+                <img src="fundo_carta.png" class="w-9 aspect-[3.5/2.5] rounded shadow-md border border-black/30 transform -rotate-90">
+                <img src="fundo_carta.png" class="w-9 aspect-[3.5/2.5] rounded shadow-md border border-black/30 transform -rotate-90">
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VOCÊ (BASE DA TELA) -->
+        <!-- ========================================== -->
+        <div class="absolute bottom-2 w-full px-6 flex justify-between items-end z-40">
+            <!-- Seu Deck e Descarte -->
+            <div class="flex flex-col items-center mb-2">
+                <img src="fundo_carta.png" class="w-10 aspect-[2.5/3.5] rounded border border-black shadow-lg brightness-50">
+                <span class="text-white font-black text-xs -mt-5 z-10 drop-shadow-[0_2px_2px_rgba(0,0,0,1)]">20</span>
+            </div>
+
+            <!-- Sua Mão (Interativa) -->
+            <div class="flex -space-x-4 mb-1">
+                <div class="w-[65px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-xl border-2 border-black hover:border-[#4ade80] cursor-pointer hover-carta relative overflow-hidden"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
+                <div class="w-[65px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-xl border-2 border-black hover:border-[#4ade80] cursor-pointer hover-carta relative overflow-hidden"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
+                <div class="w-[65px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-xl border-2 border-black hover:border-[#4ade80] cursor-pointer hover-carta relative overflow-hidden"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
+                <div class="w-[65px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-xl border-2 border-black hover:border-[#4ade80] cursor-pointer hover-carta relative overflow-hidden"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
+                <div class="w-[65px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-xl border-2 border-black hover:border-[#4ade80] cursor-pointer hover-carta relative overflow-hidden"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
+            </div>
+
+            <!-- Seu Perfil (Aba Ativa) -->
+            <div class="flex flex-col items-center mb-2">
+                <div class="w-12 h-12 rounded-full border-2 border-[#dca3e8] object-cover shadow-[0_0_15px_#dca3e8] bg-gray-800 vez-ativa"></div>
+                <span class="bg-[#dca3e8] text-[#7a32a8] px-3 py-0.5 rounded-full text-[10px] font-black mt-1 uppercase border-2 border-[#bc7bd4]">Você</span>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- O CAMPO DE BATALHA (O LOSANGO CENTRAL) -->
+        <!-- ========================================== -->
+        <!-- Adicionei uma leve transparência preta atrás para dar foco na mesa -->
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[280px] h-[160px] bg-black/20 rounded-[4rem] backdrop-blur-[2px] border border-white/10 z-20 flex justify-center items-center">
+            
+            <div class="relative w-full h-full">
+                <!-- Carta do Parceiro (Topo) -->
+                <div class="absolute top-1 left-1/2 transform -translate-x-1/2 w-[55px] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-2xl border border-white/50 z-10"><img src="fundo_carta.png" class="w-full h-full object-cover rounded-md"></div>
+                
+                <!-- Carta do Oponente 1 (Esquerda) -->
+                <div class="absolute top-1/2 left-10 transform -translate-y-1/2 w-[55px] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-2xl border border-red-500/50 z-20"><img src="fundo_carta.png" class="w-full h-full object-cover rounded-md"></div>
+                
+                <!-- Carta do Oponente 2 (Direita) -->
+                <div class="absolute top-1/2 right-10 transform -translate-y-1/2 w-[55px] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-2xl border border-red-500/50 z-20"><img src="fundo_carta.png" class="w-full h-full object-cover rounded-md"></div>
+                
+                <!-- Sua Carta (Base) -->
+                <div class="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-[55px] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-2xl border-2 border-[#4ade80] z-30"><img src="fundo_carta.png" class="w-full h-full object-cover rounded-md"></div>
+                
+                <!-- Indicador de Atributo no centro das cartas -->
+                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/80 px-2 py-1 rounded shadow-lg border border-[#dca3e8] z-40">
+                    <span class="text-[#dca3e8] font-black text-[9px] uppercase tracking-widest drop-shadow">AURA</span>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

@@ -43,5 +43,11 @@ export const INFO_BADGES = {
         nome: "Coleção Natal",
         descricao: "Completou as cartas de natal 009 e 027.",
         imagem: "badges/badge-009.png"
+
+     },
+    "badge-010": {
+        nome: "Campeão do 1° Torneio",
+        descricao: "Ganhou o 1° Torneio de Supercards Eliminatórias Md3",
+        imagem: "badges/badge-010.png"    
     }
 };

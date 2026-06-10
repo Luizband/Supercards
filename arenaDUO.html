@@ -13,21 +13,24 @@
             background-position: center;
             background-repeat: no-repeat;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overscroll-behavior: none;
+            overscroll-behavior: none; /* Evita que a tela puxe no mobile */
         }
         
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+        /* Animação para a vez do jogador */
         @keyframes pulse-ring {
             0% { box-shadow: 0 0 0 0px rgba(220, 163, 232, 0.7); }
             100% { box-shadow: 0 0 0 12px rgba(220, 163, 232, 0); }
         }
         .vez-ativa { animation: pulse-ring 1.5s infinite; border-color: #dca3e8 !important; }
 
+        /* Efeito Hover nas Cartas da Mão */
         .hover-carta { transition: transform 0.2s ease, z-index 0s; }
         .hover-carta:hover { transform: translateY(-15px) scale(1.15); z-index: 50 !important; }
 
+        /* MENSAGEM DE BLOQUEIO SE O CELULAR ESTIVER EM PÉ (PORTRAIT) */
         #aviso-retrato { display: none; }
         @media (orientation: portrait) {
             #main-arena { display: none !important; }
@@ -37,19 +40,26 @@
 </head>
 <body class="fixed inset-0 overflow-hidden w-screen h-screen text-white select-none">
 
+    <!-- TELA DE BLOQUEIO PORTRAIT -->
     <div id="aviso-retrato" class="w-full h-full bg-black/95 flex-col items-center justify-center p-6 text-center z-[9999] absolute inset-0">
         <span class="text-6xl mb-4">🔄</span>
         <h1 class="text-2xl font-black text-[#dca3e8] uppercase tracking-widest mb-2">Vire o Celular</h1>
         <p class="text-sm text-gray-300 font-bold">O modo Arena 2x2 só pode ser jogado com a tela na horizontal.</p>
     </div>
 
+    <!-- ARENA DUO (LANDSCAPE) -->
     <div id="main-arena" class="w-full h-full relative flex items-center justify-center">
 
+        <!-- ========================================== -->
+        <!-- HUD SUPERIOR -->
+        <!-- ========================================== -->
         <div class="absolute top-3 w-full px-6 flex justify-between items-start z-50 pointer-events-none">
+            <!-- Toast de Avisos (Esquerda) -->
             <div class="bg-[#dca3e8] text-[#7a32a8] font-black text-xs px-5 py-2 rounded-full shadow-lg border-2 border-[#bc7bd4] uppercase pointer-events-auto">
                 Aguardando Jogadores...
             </div>
 
+            <!-- Botões e Status (Direita) -->
             <div class="flex items-center gap-4 pointer-events-auto">
                 <div class="bg-black/70 border border-white/20 rounded-lg px-4 py-1.5 flex items-center gap-3 shadow-lg backdrop-blur-sm">
                     <img src="fundo_carta.png" class="w-5 h-6 object-cover rounded-[2px] opacity-80 border border-black">
@@ -58,25 +68,37 @@
                         <span class="text-base text-white font-black" id="deck-count">15</span>
                     </div>
                 </div>
-                <button class="bg-red-600 hover:bg-red-700 text-white font-black text-[11px] px-4 py-2 rounded-full shadow-md border-2 border-red-800 uppercase tracking-widest transition-transform active:scale-95">Desistir</button>
+                <button onclick="document.getElementById('modal-desistir').classList.remove('hidden')" class="bg-red-600 hover:bg-red-700 text-white font-black text-[11px] px-4 py-2 rounded-full shadow-md border-2 border-red-800 uppercase tracking-widest transition-transform active:scale-95">Desistir</button>
             </div>
         </div>
 
+        <!-- ========================================== -->
+        <!-- JOGADOR PARCEIRO (TOPO) -->
+        <!-- ========================================== -->
         <div class="absolute top-4 left-1/2 transform -translate-x-1/2 flex flex-col items-center z-10">
             <img src="fundo_carta.png" class="w-14 h-14 rounded-full border-2 border-black/50 object-cover shadow-md bg-gray-800">
             <span class="bg-black/90 px-3 py-1 rounded text-[9px] font-black mt-1 uppercase border border-white/20 shadow-lg">Parceiro</span>
         </div>
 
+        <!-- ========================================== -->
+        <!-- OPONENTE 1 (ESQUERDA) -->
+        <!-- ========================================== -->
         <div class="absolute left-6 top-1/2 transform -translate-y-1/2 flex flex-col items-center z-10">
             <img src="fundo_carta.png" class="w-14 h-14 rounded-full border-2 border-black/50 object-cover shadow-md bg-gray-800">
             <span class="bg-black/90 px-2 py-1 rounded text-[9px] font-black mt-1 uppercase text-red-400 border border-white/20 shadow-lg">Inimigo 1</span>
         </div>
 
+        <!-- ========================================== -->
+        <!-- OPONENTE 2 (DIREITA) -->
+        <!-- ========================================== -->
         <div class="absolute right-6 top-1/2 transform -translate-y-1/2 flex flex-col items-center z-10">
             <img src="fundo_carta.png" class="w-14 h-14 rounded-full border-2 border-black/50 object-cover shadow-md bg-gray-800">
             <span class="bg-black/90 px-2 py-1 rounded text-[9px] font-black mt-1 uppercase text-red-400 border border-white/20 shadow-lg">Inimigo 2</span>
         </div>
 
+        <!-- ========================================== -->
+        <!-- O CAMPO DE BATALHA (Bandeja Reta) -->
+        <!-- ========================================== -->
         <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/30 backdrop-blur-md border border-white/10 px-8 py-5 rounded-[2.5rem] flex justify-center items-center gap-3 z-20 shadow-2xl">
             <div class="w-[60px] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-lg border-2 border-red-500 cursor-pointer hover:scale-105 transition-transform"><img src="fundo_carta.png" class="w-full h-full object-cover rounded-sm"></div>
             <div class="w-[60px] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-lg border-2 border-gray-400 cursor-pointer hover:scale-105 transition-transform"><img src="fundo_carta.png" class="w-full h-full object-cover rounded-sm"></div>
@@ -84,6 +106,9 @@
             <div class="w-[60px] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-lg border-2 border-red-500 cursor-pointer hover:scale-105 transition-transform"><img src="fundo_carta.png" class="w-full h-full object-cover rounded-sm"></div>
         </div>
 
+        <!-- ========================================== -->
+        <!-- VOCÊ (BASE DA TELA) -->
+        <!-- ========================================== -->
         <div class="absolute bottom-1 w-full flex justify-center z-40">
             <div class="flex -space-x-4 mb-1">
                 <div class="w-[75px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-2xl border-2 border-black hover:border-[#4ade80] cursor-pointer hover-carta relative overflow-hidden"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
@@ -94,11 +119,130 @@
             </div>
         </div>
 
+        <!-- Seu Perfil isolado -->
         <div class="absolute bottom-4 right-8 flex flex-col items-center z-40">
             <div class="w-16 h-16 rounded-full border-2 border-[#dca3e8] object-cover shadow-[0_0_15px_#dca3e8] bg-gray-800 vez-ativa"></div>
             <span class="bg-[#dca3e8] text-[#7a32a8] px-4 py-1 rounded-full text-[10px] font-black mt-2 uppercase border-2 border-[#bc7bd4] shadow-lg">Você</span>
         </div>
 
+    </div>
+
+    <!-- ====================================================================== -->
+    <!-- ÁREA DE MODAIS (Iniciam ocultos pela classe "hidden")                  -->
+    <!-- ====================================================================== -->
+
+    <!-- MODAL 1: ZOOM / ESCOLHER AÇÃO -->
+    <div id="modal-zoom" class="hidden fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 backdrop-blur-md">
+        <button onclick="document.getElementById('modal-zoom').classList.add('hidden')" class="absolute top-4 right-8 text-white font-black text-3xl hover:text-gray-300 transition-colors z-50 drop-shadow-md">X</button>
+        
+        <div class="flex gap-8 items-center w-full max-w-3xl justify-center">
+            <!-- Imagem da Carta Gigante -->
+            <div class="flex flex-col items-center">
+                <h2 id="titulo-acao" class="text-white font-black text-xl uppercase tracking-wider mb-2 drop-shadow-md">SUA CARTA</h2>
+                <img id="zoom-img" src="fundo_carta.png" class="w-[200px] aspect-[2.5/3.5] object-cover drop-shadow-[0_0_20px_rgba(220,163,232,0.4)] rounded-xl border-4 border-[#bc7bd4]">
+            </div>
+
+            <!-- Painéis de Ação (Direita) -->
+            <div class="w-full max-w-[200px] flex flex-col justify-center">
+                <!-- PAINEL DE ATACANTE (Escolher Atributo) -->
+                <div id="painel-atributos" class="grid grid-cols-1 gap-3 w-full">
+                    <button class="bg-blue-600 hover:bg-blue-500 text-white font-black text-sm py-3 rounded-xl shadow-lg border-2 border-blue-400 uppercase tracking-widest transition-transform active:scale-95">AURA</button>
+                    <button class="bg-pink-500 hover:bg-pink-400 text-white font-black text-sm py-3 rounded-xl shadow-lg border-2 border-pink-300 uppercase tracking-widest transition-transform active:scale-95">FOFURA</button>
+                    <button class="bg-yellow-500 hover:bg-yellow-400 text-black font-black text-sm py-3 rounded-xl shadow-lg border-2 border-yellow-300 uppercase tracking-widest transition-transform active:scale-95">DIVERSÃO</button>
+                    <button class="bg-purple-600 hover:bg-purple-500 text-white font-black text-sm py-3 rounded-xl shadow-lg border-2 border-purple-400 uppercase tracking-widest transition-transform active:scale-95">ALEATÓRIO</button>
+                </div>
+
+                <!-- PAINEL DE DEFENSOR -->
+                <div id="painel-defesa" class="w-full hidden mt-8">
+                    <span class="text-[#dca3e8] font-black text-[10px] uppercase text-center block mb-2">Atributo da Rodada</span>
+                    <button id="btn-defender" class="w-full bg-red-600 hover:bg-red-500 text-white font-black text-sm py-4 rounded-xl shadow-lg border-2 border-red-400 uppercase tracking-widest transition-transform active:scale-95 animate-pulse">DEFENDER</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: O EMBATE (CLASH DE 4 CARTAS) -->
+    <div id="modal-embate" class="hidden fixed inset-0 bg-black/95 z-[150] flex flex-col items-center justify-center p-4 backdrop-blur-md">
+        <h2 id="embate-atributo-titulo" class="text-[#dca3e8] font-black text-2xl uppercase tracking-widest mb-6 drop-shadow-lg absolute top-4">ATRIBUTO: AURA</h2>
+        
+        <div class="flex items-center gap-6 mt-6 w-full justify-center">
+            <!-- DUPLA ALIADA -->
+            <div class="flex gap-4 p-4 rounded-xl border-2 border-[#4ade80] bg-[#4ade80]/10 relative shadow-[0_0_30px_rgba(74,222,128,0.2)]">
+                <span class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#4ade80] text-black font-black text-[10px] px-3 py-0.5 rounded-full uppercase tracking-widest">Sua Dupla</span>
+                
+                <div class="flex flex-col items-center gap-2">
+                    <span class="text-white font-black text-[9px] uppercase truncate w-20 text-center">Você</span>
+                    <div class="w-20 aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-2xl border-2 border-white"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
+                    <div class="bg-black/80 px-4 py-1 rounded border border-white/20"><span class="text-white font-black text-xl">57</span></div>
+                </div>
+
+                <div class="flex flex-col items-center gap-2">
+                    <span class="text-gray-300 font-black text-[9px] uppercase truncate w-20 text-center">Parceiro</span>
+                    <div class="w-20 aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-2xl border-2 border-gray-400"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
+                    <div class="bg-black/80 px-4 py-1 rounded border border-white/20"><span class="text-gray-300 font-black text-xl">42</span></div>
+                </div>
+            </div>
+
+            <span class="text-white font-black text-4xl mx-2 drop-shadow-[0_0_10px_#fff] italic opacity-80">VS</span>
+
+            <!-- DUPLA INIMIGA -->
+            <div class="flex gap-4 p-4 rounded-xl border-2 border-red-500 bg-red-500/10 relative shadow-[0_0_30px_rgba(239,68,68,0.2)]">
+                <span class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-red-500 text-white font-black text-[10px] px-3 py-0.5 rounded-full uppercase tracking-widest">Inimigos</span>
+                
+                <div class="flex flex-col items-center gap-2">
+                    <span class="text-red-300 font-black text-[9px] uppercase truncate w-20 text-center">Inimigo 1</span>
+                    <div class="w-20 aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-2xl border-2 border-red-400"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
+                    <div class="bg-black/80 px-4 py-1 rounded border border-white/20"><span class="text-red-300 font-black text-xl">60</span></div>
+                </div>
+
+                <div class="flex flex-col items-center gap-2">
+                    <span class="text-red-300 font-black text-[9px] uppercase truncate w-20 text-center">Inimigo 2</span>
+                    <div class="w-20 aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-2xl border-2 border-red-400"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
+                    <div class="bg-black/80 px-4 py-1 rounded border border-white/20"><span class="text-red-300 font-black text-xl">15</span></div>
+                </div>
+            </div>
+        </div>
+        <!-- Aviso de desempate -->
+        <span class="text-yellow-400 font-black text-[10px] uppercase mt-4 tracking-widest hidden" id="aviso-desempate">Desempate Matemático Aplicado!</span>
+    </div>
+
+    <!-- MODAL 3: RESULTADO FINAL DA PARTIDA -->
+    <div id="modal-resultado-final" class="hidden fixed inset-0 bg-black/95 z-[300] flex flex-col items-center justify-center p-4 backdrop-blur-md">
+        <h1 id="texto-vitoria" class="text-5xl font-black text-[#4ade80] uppercase tracking-widest mb-2 drop-shadow-[0_0_20px_#4ade80] text-center">VITÓRIA!</h1>
+        
+        <div class="flex items-center gap-6 my-6 bg-black/50 px-8 py-3 rounded-2xl border border-white/10">
+            <div class="flex flex-col items-center">
+                <span class="text-[#4ade80] font-black text-xs uppercase">Sua Dupla</span>
+                <span class="text-white font-black text-4xl">45 <span class="text-sm">Pts</span></span>
+            </div>
+            <span class="text-gray-500 font-black text-xl">X</span>
+            <div class="flex flex-col items-center">
+                <span class="text-red-500 font-black text-xs uppercase">Inimigos</span>
+                <span class="text-white font-black text-4xl opacity-50">32 <span class="text-sm">Pts</span></span>
+            </div>
+        </div>
+        
+        <div id="recompensas-final" class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-4 w-full max-w-sm flex flex-col items-center gap-2 mb-6 shadow-2xl">
+            <span class="text-[#7a32a8] font-black text-sm tracking-widest uppercase">Recompensas 2x2</span>
+            <div class="flex w-full justify-around mt-1">
+                <span class="text-black font-black text-base">+40 XP</span>
+                <span class="text-black font-black text-base flex items-center gap-1">+30 <img src="moedas.png" class="w-5 h-5 object-contain"></span>
+            </div>
+        </div>
+
+        <button onclick="window.location.href='batalha.html'" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-4 px-16 rounded-full shadow-lg border-2 border-white tracking-widest text-lg transition-transform active:scale-95">FINALIZAR</button>
+    </div>
+
+    <!-- MODAL 4: CONFIRMAR DESISTÊNCIA -->
+    <div id="modal-desistir" class="hidden fixed inset-0 bg-black/80 z-[400] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl relative">
+            <h2 class="text-red-600 font-black text-xl mb-2 uppercase drop-shadow-sm">Abandonar a Dupla?</h2>
+            <p class="text-[#7a32a8] font-bold text-xs mb-6">Se você sair agora, seu parceiro jogará sozinho e a derrota será garantida.</p>
+            <div class="flex justify-center gap-4">
+                <button onclick="document.getElementById('modal-desistir').classList.add('hidden')" class="flex-1 bg-gray-500 text-white font-black py-3 rounded-full shadow-md uppercase text-sm border-2 border-gray-600">Ficar</button>
+                <button class="flex-1 bg-red-600 text-white font-black py-3 rounded-full shadow-md uppercase text-sm border-2 border-red-800">Desistir</button>
+            </div>
+        </div>
     </div>
 
 </body>

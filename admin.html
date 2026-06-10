@@ -3,44 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Admin - Enviar Mensagem</title>
+    <title>Painel Admin - Supercards</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background-color: #1a1a1a; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    </style>
 </head>
-<body class="h-[100dvh] p-6 flex flex-col items-center justify-center">
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-4">
 
-    <div class="bg-gray-800 w-full max-w-md rounded-2xl p-6 shadow-2xl border-2 border-purple-500">
-        <h1 class="text-purple-400 font-black text-2xl mb-6 text-center">PAINEL DE COMANDO</h1>
+    <div id="login-screen" class="bg-gray-800 p-8 rounded-2xl w-full max-w-sm border border-purple-500 shadow-2xl">
+        <h2 class="text-center font-black text-xl mb-6 text-purple-400 uppercase tracking-widest">Login Administrativo</h2>
+        <input id="email-admin" type="email" placeholder="E-mail" class="w-full bg-gray-900 p-3 rounded mb-4 border border-gray-700">
+        <input id="senha-admin" type="password" placeholder="Senha" class="w-full bg-gray-900 p-3 rounded mb-6 border border-gray-700">
+        <button id="btn-login" class="w-full bg-purple-600 py-3 rounded font-black hover:bg-purple-700 transition-all">ENTRAR</button>
+    </div>
 
-        <div class="flex flex-col gap-4">
-            <div>
-                <label class="text-white font-bold text-sm mb-1 block">Título da Mensagem:</label>
-                <input id="input-titulo" type="text" placeholder="Ex: 🎁 Presente de Atualização!" class="w-full bg-gray-900 text-white border border-gray-600 rounded-lg p-3 focus:outline-none focus:border-purple-500 font-bold">
+    <div id="admin-panel" class="hidden w-full max-w-2xl bg-gray-800 p-8 rounded-2xl border border-purple-500 shadow-2xl">
+        <h1 class="text-purple-400 font-black text-2xl text-center mb-8 uppercase tracking-widest">Painel de Comando</h1>
+
+        <div class="mb-10 p-4 border-b border-gray-700 pb-8">
+            <h2 class="text-white font-bold text-lg mb-4 underline">📬 Enviar Mensagem para Todos</h2>
+            <div class="flex flex-col gap-3">
+                <input id="input-titulo" type="text" placeholder="Título" class="w-full bg-gray-900 p-3 rounded border border-gray-600">
+                <textarea id="input-texto" rows="3" placeholder="Texto da mensagem..." class="w-full bg-gray-900 p-3 rounded border border-gray-600 resize-none"></textarea>
+                <button id="btn-enviar-msg" class="bg-purple-600 hover:bg-purple-700 py-3 rounded font-black transition-all">ENVIAR PARA TODOS</button>
             </div>
-
-            <div>
-                <label class="text-white font-bold text-sm mb-1 block">Texto da Mensagem:</label>
-                <!-- Dica: Você pode usar <img src="moedas.png"> aqui dentro! -->
-                <textarea id="input-texto" rows="5" placeholder="Escreva sua mensagem aqui..." class="w-full bg-gray-900 text-white border border-gray-600 rounded-lg p-3 focus:outline-none focus:border-purple-500 font-bold resize-none"></textarea>
-            </div>
-
-            <button id="btn-enviar" class="bg-purple-600 hover:bg-purple-700 text-white font-black py-4 rounded-xl shadow-lg transition-transform hover:scale-105 mt-4">
-                ENVIAR PARA TODOS OS JOGADORES
-            </button>
-            
             <p id="status-msg" class="text-center font-bold text-sm mt-2 hidden"></p>
+        </div>
+
+        <div>
+            <h2 class="text-white font-bold text-lg mb-4 underline">👤 Gerenciar Jogador</h2>
+            <div class="flex gap-2 mb-6">
+                <input id="input-uid" type="text" placeholder="Cole o UID do Jogador aqui" class="flex-1 bg-gray-900 p-3 rounded border border-gray-600">
+                <button id="btn-buscar" class="bg-blue-600 px-6 py-2 rounded font-black hover:bg-blue-700">BUSCAR</button>
+            </div>
+
+            <div id="painel-acoes" class="hidden grid grid-cols-2 gap-3">
+                <h2 id="nome-usuario" class="col-span-2 text-center font-black text-purple-300 mb-2"></h2>
+                <button onclick="alterarDados('moedas', 100)" class="bg-yellow-600 hover:bg-yellow-700 p-3 rounded font-black">+100 MOEDAS</button>
+                <button onclick="alterarDados('nivel', 1)" class="bg-blue-600 hover:bg-blue-700 p-3 rounded font-black">+1 NÍVEL</button>
+                <button onclick="darItem('pacoteBasico', 1)" class="bg-green-700 hover:bg-green-800 p-3 rounded font-black">+1 PACOTE BÁSICO</button>
+            </div>
         </div>
     </div>
 
-    <!-- SCRIPT DO FIREBASE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        // NOVO: Importamos o collection e o getDocs para puxar todos os jogadores
-        import { getFirestore, collection, getDocs, doc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-        const firebaseConfig = {
+        const firebaseConfig = { 
           apiKey: "AIzaSyCU3lFTgfrDMaD9jwR7X7ivYPmGQh4VE1g",
           authDomain: "supercards-tcg.firebaseapp.com",
           projectId: "supercards-tcg",
@@ -48,73 +57,52 @@
           messagingSenderId: "862316380615",
           appId: "1:862316380615:web:b3f28056ebc967673999e2"
         };
-
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getFirestore(app);
 
-        const btnEnviar = document.getElementById('btn-enviar');
-        const statusMsg = document.getElementById('status-msg');
-
-        btnEnviar.addEventListener('click', async () => {
-            const titulo = document.getElementById('input-titulo').value.trim();
-            const texto = document.getElementById('input-texto').value.trim();
-
-            if (!titulo || !texto) {
-                mostrarStatus("Preencha o título e o texto!", "text-red-500");
-                return;
-            }
-
-            btnEnviar.disabled = true;
-            btnEnviar.innerText = "ENVIANDO...";
-            mostrarStatus("Buscando jogadores...", "text-yellow-400");
-
+        // LOGIN
+        document.getElementById('btn-login').addEventListener('click', async () => {
+            const email = document.getElementById('email-admin').value;
+            const senha = document.getElementById('senha-admin').value;
             try {
-                // 1. Pega a coleção inteira de usuários
-                const usersSnapshot = await getDocs(collection(db, "users"));
-                let contador = 0;
-
-                // 2. Cria o "pacote" da mensagem
-                const novaMensagem = {
-                    id: "admin_msg_" + Date.now(),
-                    titulo: titulo,
-                    texto: texto,
-                    lida: false,
-                    data: new Date().toISOString()
-                };
-
-                // 3. Roda um loop disparando a mensagem para o perfil de cada um
-                const promessas = [];
-                usersSnapshot.forEach((userDoc) => {
-                    const userRef = doc(db, "users", userDoc.id);
-                    // Adicionamos a promessa de atualização na lista
-                    const promessa = updateDoc(userRef, {
-                        notificacoes: arrayUnion(novaMensagem)
-                    });
-                    promessas.push(promessa);
-                    contador++;
-                });
-
-                // Espera todas as mensagens serem entregues
-                await Promise.all(promessas);
-
-                mostrarStatus(`Sucesso! Mensagem enviada para ${contador} jogador(es).`, "text-green-500");
-                document.getElementById('input-titulo').value = "";
-                document.getElementById('input-texto').value = "";
-
-            } catch (error) {
-                console.error(error);
-                mostrarStatus("Erro ao enviar mensagens. Olhe o console.", "text-red-500");
-            } finally {
-                btnEnviar.disabled = false;
-                btnEnviar.innerText = "ENVIAR PARA TODOS OS JOGADORES";
-            }
+                await signInWithEmailAndPassword(auth, email, senha);
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('admin-panel').classList.remove('hidden');
+            } catch (e) { alert("Acesso negado!"); }
         });
 
-        function mostrarStatus(msg, corClasse) {
-            statusMsg.innerText = msg;
-            statusMsg.className = `text-center font-bold text-sm mt-2 ${corClasse}`;
-            statusMsg.classList.remove('hidden');
-        }
+        // ENVIO DE MENSAGEM
+        document.getElementById('btn-enviar-msg').addEventListener('click', async () => {
+            const titulo = document.getElementById('input-titulo').value.trim();
+            const texto = document.getElementById('input-texto').value.trim();
+            if (!titulo || !texto) return alert("Preencha tudo!");
+
+            const users = await getDocs(collection(db, "users"));
+            const msg = { id: "admin_"+Date.now(), titulo, texto, lida: false, data: new Date().toISOString() };
+            
+            users.forEach(async (u) => {
+                await updateDoc(doc(db, "users", u.id), { notificacoes: arrayUnion(msg) });
+            });
+            alert("Enviado para todos!");
+        });
+
+        // BUSCA
+        document.getElementById('btn-buscar').addEventListener('click', async () => {
+            const uid = document.getElementById('input-uid').value.trim();
+            const snap = await getDoc(doc(db, "users", uid));
+            if(snap.exists()) {
+                window.currentUser = uid;
+                document.getElementById('nome-usuario').innerText = "Jogador: " + (snap.data().nome || "Sem nome");
+                document.getElementById('painel-acoes').classList.remove('hidden');
+            } else { alert("Usuário não encontrado!"); }
+        });
+
+        // ALTERAÇÕES
+        window.alterarDados = async (campo, valor) => {
+            await updateDoc(doc(db, "users", window.currentUser), { [campo]: increment(valor) });
+            alert("Dados atualizados!");
+        };
     </script>
 </body>
 </html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Supercards - Saguão 2x2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(180deg, #1a1a1a 0%, #2d1b36 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="h-[100dvh] flex flex-col items-center justify-start overflow-hidden text-white relative">
+
+    <div class="w-full max-w-sm flex flex-col h-full relative px-4 pb-4 pt-6">
+        
+        <header class="relative flex items-center justify-between mb-6 z-10">
+            <button onclick="window.location.href='batalha.html'" class="bg-[#dca3e8] hover:bg-[#bc7bd4] transition-colors rounded-full flex items-center justify-center w-10 h-10 shadow-md text-[#7a32a8] font-black text-xl z-50">
+                ←
+            </button>
+            <div class="flex flex-col items-center absolute left-1/2 transform -translate-x-1/2 w-full pointer-events-none">
+                <h1 class="text-white font-black text-2xl drop-shadow-lg tracking-widest uppercase">Saguão 2x2</h1>
+                <span id="status-sala" class="text-[#dca3e8] font-bold text-xs uppercase tracking-widest bg-black/50 px-3 py-0.5 rounded-full mt-1 border border-[#dca3e8]/30">Aguardando...</span>
+            </div>
+        </header>
+
+        <div class="flex-grow flex flex-col gap-4 overflow-y-auto no-scrollbar z-10 pb-20">
+            
+            <div class="bg-blue-900/20 border-2 border-blue-500/50 rounded-2xl p-3 shadow-[0_0_15px_rgba(59,130,246,0.15)]">
+                <h2 class="text-blue-400 font-black text-sm uppercase tracking-widest text-center mb-3">Equipe Azul</h2>
+                
+                <div class="flex flex-col gap-3">
+                    <div class="bg-black/40 border border-blue-500/30 rounded-xl p-2 flex items-center justify-between relative">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-full border-2 border-blue-400 overflow-hidden bg-gray-800">
+                                <img src="fundo_carta.png" class="w-full h-full object-cover">
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-white font-black text-sm uppercase flex items-center gap-1">Você <span class="text-[10px] bg-yellow-500 text-black px-1.5 rounded-sm">HOST</span></span>
+                                <span class="text-red-400 font-bold text-[10px] uppercase">Não Pronto</span>
+                            </div>
+                        </div>
+                        <button class="bg-gray-700 hover:bg-gray-600 p-2 rounded-lg transition-colors border border-gray-500" title="Mudar de Lado">
+                            <span class="text-sm">🔄</span>
+                        </button>
+                    </div>
+
+                    <div onclick="abrirModalConvite()" class="bg-black/20 border-2 border-dashed border-blue-500/30 rounded-xl p-2 flex items-center justify-center cursor-pointer hover:bg-blue-900/30 transition-colors h-[68px]">
+                        <span class="text-blue-400 font-black text-xs uppercase tracking-widest flex items-center gap-2">
+                            <span class="text-lg">+</span> Adicionar Jogador
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-center -my-2 z-20">
+                <span class="bg-[#1a1a1a] text-gray-500 font-black text-sm italic px-4 py-1 rounded-full border border-gray-800">VS</span>
+            </div>
+
+            <div class="bg-red-900/20 border-2 border-red-500/50 rounded-2xl p-3 shadow-[0_0_15px_rgba(239,68,68,0.15)]">
+                <h2 class="text-red-400 font-black text-sm uppercase tracking-widest text-center mb-3">Equipe Vermelha</h2>
+                
+                <div class="flex flex-col gap-3">
+                    <div class="bg-black/40 border border-red-500/30 rounded-xl p-2 flex items-center justify-between relative">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-full border-2 border-red-400 overflow-hidden bg-gray-800">
+                                <img src="fundo_carta.png" class="w-full h-full object-cover">
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-white font-black text-sm uppercase">Adversário</span>
+                                <span class="text-green-400 font-bold text-[10px] uppercase">Pronto</span>
+                            </div>
+                        </div>
+                        <button class="bg-gray-700 hover:bg-gray-600 p-2 rounded-lg transition-colors border border-gray-500" title="Mudar de Lado">
+                            <span class="text-sm">🔄</span>
+                        </button>
+                    </div>
+
+                    <div onclick="abrirModalConvite()" class="bg-black/20 border-2 border-dashed border-red-500/30 rounded-xl p-2 flex items-center justify-center cursor-pointer hover:bg-red-900/30 transition-colors h-[68px]">
+                        <span class="text-red-400 font-black text-xs uppercase tracking-widest flex items-center gap-2">
+                            <span class="text-lg">+</span> Adicionar Jogador
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+
+        <div class="absolute bottom-4 w-[calc(100%-2rem)] left-4 z-20 flex gap-2">
+            <button id="btn-pronto" class="flex-1 bg-green-600 hover:bg-green-500 border-2 border-green-400 text-white font-black text-sm py-4 rounded-xl shadow-lg uppercase tracking-widest transition-transform active:scale-95">ESTOU PRONTO</button>
+            
+            <button id="btn-iniciar" disabled class="hidden bg-[#7a32a8] text-[#dca3e8] border-2 border-[#bc7bd4] font-black text-sm px-6 rounded-xl shadow-lg uppercase tracking-widest opacity-50 cursor-not-allowed">INICIAR</button>
+        </div>
+
+    </div>
+
+    <div id="modal-convite" class="hidden fixed inset-0 bg-black/90 z-[100] flex flex-col items-center justify-end p-4 backdrop-blur-sm">
+        <div class="bg-[#2d1b36] border-t-4 border-[#bc7bd4] w-full max-w-sm rounded-t-3xl p-6 shadow-2xl pb-10">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-white font-black text-lg uppercase tracking-widest">Convidar Amigo</h2>
+                <button onclick="fecharModalConvite()" class="text-gray-400 hover:text-white font-black text-xl">X</button>
+            </div>
+            
+            <div class="flex gap-2 mb-6">
+                <input type="text" id="input-buscar" placeholder="Nome do jogador..." class="flex-1 bg-black/50 border border-[#bc7bd4]/50 rounded-lg px-4 py-3 text-white font-bold text-sm focus:outline-none focus:border-[#4ade80]">
+                <button class="bg-[#bc7bd4] text-[#7a32a8] font-black px-4 rounded-lg">BUSCAR</button>
+            </div>
+
+            <div class="flex flex-col gap-2 max-h-[40vh] overflow-y-auto no-scrollbar" id="lista-busca">
+                <div class="bg-black/40 border border-white/10 rounded-xl p-3 flex items-center justify-between">
+                    <span class="text-white font-black text-sm uppercase">Jessie</span>
+                    <button class="bg-[#4ade80] hover:bg-green-400 text-black font-black text-[10px] px-3 py-1.5 rounded-lg uppercase tracking-widest">Convidar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function abrirModalConvite() {
+            document.getElementById('modal-convite').classList.remove('hidden');
+        }
+        function fecharModalConvite() {
+            document.getElementById('modal-convite').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

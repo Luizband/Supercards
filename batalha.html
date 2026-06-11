@@ -91,11 +91,11 @@
         <main class="flex flex-col items-center w-full flex-grow overflow-y-auto no-scrollbar pb-32">
             <h1 class="text-[#dca3e8] font-black text-2xl text-center mb-6 drop-shadow-md uppercase tracking-wider">BATALHAS</h1>
 
-            <!-- CARROSSEL DE BOTÕES (Visual Original, Rolagem Suave) -->
-            <div class="flex overflow-x-auto gap-4 w-full max-w-[280px] mb-4 snap-x snap-mandatory pb-2 items-start" style="scrollbar-width: thin; scrollbar-color: #7a32a8 transparent;">
+            <!-- CARROSSEL DE BOTÕES (Visual Original, Sem Barra Feia) -->
+            <div class="grid grid-flow-col auto-cols-[128px] gap-6 w-full max-w-[280px] mb-4 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-2 pt-2">
                 
                 <!-- Botão 1: Buscar Partida -->
-                <div onclick="buscarPartida()" class="flex flex-col items-center group cursor-pointer snap-start" style="min-width: calc(50% - 8px); max-width: calc(50% - 8px);">
+                <div onclick="buscarPartida()" class="flex flex-col items-center group cursor-pointer snap-start">
                     <div class="bg-[#dca3e8] w-full aspect-square rounded-[24px] flex items-center justify-center p-4 shadow-xl hover:scale-105 transition-transform border-4 border-transparent hover:border-[#8b3dff]/50">
                         <img src="vs.png" class="w-full h-full object-contain drop-shadow-lg">
                     </div>
@@ -103,7 +103,7 @@
                 </div>
 
                 <!-- Botão 2: Meus Decks -->
-                <div onclick="window.location.href='decks.html'" class="flex flex-col items-center group cursor-pointer snap-start" style="min-width: calc(50% - 8px); max-width: calc(50% - 8px);">
+                <div onclick="window.location.href='decks.html'" class="flex flex-col items-center group cursor-pointer snap-start">
                     <div class="bg-[#dca3e8] w-full aspect-square rounded-[24px] flex items-center justify-center p-4 shadow-xl hover:scale-105 transition-transform border-4 border-transparent hover:border-[#8b3dff]/50 relative">
                         <img src="colecao.png" class="w-[80%] h-[80%] object-contain drop-shadow-lg opacity-90">
                     </div>
@@ -111,7 +111,7 @@
                 </div>
 
                 <!-- Botão 3: Torneios (BLOQUEADO TEMPORARIAMENTE) -->
-                <div onclick="window.mostrarToast('Ainda em desenvolvimento! 🛠️')" class="flex flex-col items-center group cursor-pointer snap-start" style="min-width: calc(50% - 8px); max-width: calc(50% - 8px);">
+                <div onclick="window.mostrarToast('Ainda em desenvolvimento! 🛠️')" class="flex flex-col items-center group cursor-pointer snap-start">
                     <div class="bg-[#dca3e8] w-full aspect-square rounded-[24px] flex items-center justify-center p-4 shadow-xl hover:scale-105 transition-transform border-4 border-transparent hover:border-[#8b3dff]/50 relative">
                         <img src="logotorneio.png" class="w-[80%] h-[80%] object-contain drop-shadow-lg opacity-90">
                     </div>

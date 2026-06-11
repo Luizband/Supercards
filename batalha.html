@@ -227,6 +227,27 @@
             setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
         };
 
+        // --- NOVA FUNÇÃO DE TROCAR ABAS ---
+        window.mudarAbaMenu = function(abaSelecionada) {
+            // Esconde todas as páginas
+            document.getElementById('page-jogar').classList.add('hidden');
+            document.getElementById('page-eventos').classList.add('hidden');
+            
+            // Tira o destaque das duas abas
+            const tabs = ['jogar', 'eventos'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                btn.classList.replace('text-[#dca3e8]', 'text-[#dca3e8]/50');
+                btn.classList.replace('border-[#dca3e8]', 'border-transparent');
+            });
+
+            // Mostra a página certa e destaca a aba clicada
+            document.getElementById(`page-${abaSelecionada}`).classList.remove('hidden');
+            const btnAtivo = document.getElementById(`tab-${abaSelecionada}`);
+            btnAtivo.classList.replace('text-[#dca3e8]/50', 'text-[#dca3e8]');
+            btnAtivo.classList.replace('border-transparent', 'border-[#dca3e8]');
+        };
+
         // ===============================================
         // SISTEMA DE LOBBY / DESAFIOS PRIVADOS (NOVO)
         // ===============================================

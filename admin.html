@@ -14,7 +14,6 @@
 </head>
 <body class="min-h-screen p-4 flex flex-col items-center">
 
-    <!-- TELA DE LOGIN -->
     <div id="login-screen" class="bg-gray-800 p-8 rounded-2xl w-full max-w-sm border-2 border-purple-500 shadow-[0_0_30px_rgba(168,85,247,0.2)] mt-20">
         <h2 class="text-center font-black text-2xl mb-6 text-purple-400 uppercase tracking-widest">Painel Admin</h2>
         <input id="email-admin" type="email" placeholder="E-mail" class="w-full bg-gray-900 p-3 rounded-lg mb-4 border border-gray-600 focus:border-purple-500 outline-none font-bold">
@@ -22,7 +21,6 @@
         <button id="btn-login" class="w-full bg-purple-600 hover:bg-purple-500 py-3 rounded-lg font-black transition-all uppercase tracking-widest">Acessar Sistema</button>
     </div>
 
-    <!-- PAINEL DE CONTROLE -->
     <div id="admin-panel" class="hidden w-full max-w-5xl bg-gray-800 p-6 rounded-2xl border-2 border-purple-500 shadow-2xl relative flex flex-col gap-8">
         
         <header class="border-b border-gray-700 pb-4 flex justify-between items-center">
@@ -30,7 +28,6 @@
             <button onclick="location.reload()" class="text-gray-400 hover:text-red-500 font-bold uppercase text-sm">Desconectar</button>
         </header>
 
-        <!-- NOVO MÓDULO: CHAVE MESTRA DA MANUTENÇÃO -->
         <div class="bg-gray-900 p-5 rounded-xl border-2 border-red-900 flex justify-between items-center">
             <div>
                 <h2 class="font-black text-lg text-red-400 flex items-center gap-2">🚨 Status do Servidor</h2>
@@ -42,7 +39,16 @@
             </div>
         </div>
 
-        <!-- MÓDULO 1: ENVIAR MENSAGEM GLOBAL -->
+        <div class="bg-gray-900 p-5 rounded-xl border-2 border-yellow-700 flex justify-between items-center">
+            <div>
+                <h2 class="font-black text-lg text-yellow-400 flex items-center gap-2">🏆 Gestão de Torneios</h2>
+                <p class="text-xs text-gray-400 mt-1">Gera as 18 rodadas (ida e volta) e cria a Tabela de Classificação.</p>
+            </div>
+            <div>
+                <button onclick="gerarTabelaTorneio('brasileirao_01')" id="btn-gerar-torneio" class="bg-yellow-600 hover:bg-yellow-500 text-black px-6 py-3 rounded font-black uppercase text-sm shadow-lg">Iniciar Brasileirão (Sortear Tabela)</button>
+            </div>
+        </div>
+
         <div class="bg-gray-900 p-5 rounded-xl border border-gray-700">
             <h2 class="font-black text-lg mb-4 text-blue-400 flex items-center gap-2">📢 Aviso Global</h2>
             <div class="flex gap-3">
@@ -52,7 +58,6 @@
             </div>
         </div>
 
-        <!-- MÓDULO 2: BUSCA E EDIÇÃO DE JOGADOR -->
         <div class="bg-gray-900 p-5 rounded-xl border border-gray-700 flex flex-col gap-6">
             
             <div class="flex flex-col gap-2 border-b border-gray-700 pb-6">
@@ -63,7 +68,6 @@
                 </div>
             </div>
 
-            <!-- ÁREA DO JOGADOR -->
             <div id="painel-jogador" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="flex flex-col gap-6">
                     <div class="bg-gray-800 p-4 rounded-lg border border-purple-500/50">
@@ -129,7 +133,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        // IMPORTANTE: Adicionei o 'setDoc' nos imports para criar o documento de configuração se não existir
         import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, setDoc, arrayUnion, arrayRemove, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = { 
@@ -165,22 +168,110 @@
         });
 
         // ==========================================
-        // NOVA FUNÇÃO: CHAVE MESTRA DE MANUTENÇÃO
+        // ALGORITMO DO TORNEIO (ROUND ROBIN)
         // ==========================================
-        window.alternarManutencao = async (status) => {
-            if(status && !confirm("TEM CERTEZA? Ligar a manutenção vai expulsar todos os jogadores online IMEDIATAMENTE!")) return;
-            
+        window.gerarTabelaTorneio = async (idTorneio) => {
+            const btn = document.getElementById('btn-gerar-torneio');
+            btn.innerText = "PROCESSANDO..."; btn.disabled = true;
+
             try {
-                // Usamos setDoc com { merge: true } para criar o documento 'configuracao' caso seja a primeira vez
-                await setDoc(doc(db, "sistema", "configuracao"), { emManutencao: status }, { merge: true });
-                alert(status ? "⛔ MANUTENÇÃO LIGADA! Todos os acessos foram bloqueados." : "✅ JOGO LIBERADO! Jogadores já podem entrar.");
-            } catch(e) { 
-                alert("Erro ao alterar o status do servidor."); 
-                console.error(e);
+                const docTorneio = await getDoc(doc(db, "torneios", idTorneio));
+                
+                if (!docTorneio.exists()) {
+                    alert("O torneio não existe! Alguém precisa se inscrever primeiro para criar a sala.");
+                    throw new Error("Torneio não encontrado");
+                }
+
+                const dados = docTorneio.data();
+                const inscritos = dados.inscritos || [];
+
+                // Verifica se tem 10 pessoas exatas (Você pode mudar isso depois se quiser testar com menos)
+                if (inscritos.length !== 10) {
+                    alert(`Não é possível iniciar! O torneio precisa de 10 inscritos, mas atualmente tem ${inscritos.length}.`);
+                    throw new Error("Número de jogadores inválido");
+                }
+
+                if (dados.status !== "aberto") {
+                    alert("Este torneio já foi iniciado ou finalizado!");
+                    throw new Error("Status inválido");
+                }
+
+                // Embaralha os jogadores para os confrontos serem aleatórios
+                let jogadores = [...inscritos].sort(() => Math.random() - 0.5);
+                
+                // --- MOTOR DO ROUND ROBIN (Circle Method) ---
+                let rodadas = {};
+                let numJogadores = jogadores.length;
+                let rodadasIda = numJogadores - 1; // 9 rodadas
+
+                // Gerando IDA (Rodadas 1 a 9)
+                for (let r = 0; r < rodadasIda; r++) {
+                    let confrontosDaRodada = [];
+                    for (let i = 0; i < numJogadores / 2; i++) {
+                        let p1 = jogadores[i];
+                        let p2 = jogadores[numJogadores - 1 - i];
+                        
+                        // Garante que não haja jogo contra "ninguém" em chaves ímpares (não se aplica aqui pois são 10)
+                        confrontosDaRodada.push({
+                            jogador1: p1,
+                            jogador2: p2,
+                            status: 'pendente', // pendente, andamento, finalizado
+                            vencedor: null // uid do vencedor ou 'empate'
+                        });
+                    }
+                    
+                    rodadas[r + 1] = { finalizada: false, confrontos: confrontosDaRodada };
+
+                    // Rotaciona os jogadores (mantendo o índice 0 fixo)
+                    jogadores.splice(1, 0, jogadores.pop());
+                }
+
+                // Gerando VOLTA (Rodadas 10 a 18) - Invertendo mando de campo
+                for (let r = 1; r <= rodadasIda; r++) {
+                    let confrontosVolta = rodadas[r].confrontos.map(jogo => {
+                        return {
+                            jogador1: jogo.jogador2, // Inverte P1 e P2
+                            jogador2: jogo.jogador1,
+                            status: 'pendente',
+                            vencedor: null
+                        };
+                    });
+                    rodadas[r + 9] = { finalizada: false, confrontos: confrontosVolta };
+                }
+
+                // Criando Tabela de Classificação Zerada
+                let tabelaZerada = {};
+                inscritos.forEach(uid => {
+                    tabelaZerada[uid] = { pontos: 0, vitorias: 0, empates: 0, derrotas: 0 };
+                });
+
+                // SALVANDO TUDO NO BANCO
+                await updateDoc(doc(db, "torneios", idTorneio), {
+                    status: "em_andamento",
+                    rodadaAtual: 1, // Começa na rodada 1
+                    rodadas: rodadas,
+                    classificacao: tabelaZerada,
+                    iniciadoEm: new Date().toISOString()
+                });
+
+                alert("✅ SUCESSO! Tabela gerada, confrontos criados e torneio iniciado com sucesso.");
+            } catch(e) {
+                console.error("Erro ao gerar torneio:", e);
+            } finally {
+                btn.innerText = "Iniciar Brasileirão (Sortear Tabela)"; btn.disabled = false;
             }
         };
 
-        // (As outras funções de envio de mensagem, busca e salvar dados continuam iguais)
+
+        // MANUTENÇÃO E OUTROS SCRIPTS MANTIDOS INTACTOS...
+        window.alternarManutencao = async (status) => {
+            if(status && !confirm("TEM CERTEZA? Ligar a manutenção vai expulsar todos os jogadores online IMEDIATAMENTE!")) return;
+            try {
+                await setDoc(doc(db, "sistema", "configuracao"), { emManutencao: status }, { merge: true });
+                alert(status ? "⛔ MANUTENÇÃO LIGADA! Todos os acessos foram bloqueados." : "✅ JOGO LIBERADO! Jogadores já podem entrar.");
+            } catch(e) { alert("Erro ao alterar o status do servidor."); }
+        };
+
         document.getElementById('btn-enviar-msg').addEventListener('click', async () => {
             const titulo = document.getElementById('input-titulo').value.trim();
             const texto = document.getElementById('input-texto').value.trim();

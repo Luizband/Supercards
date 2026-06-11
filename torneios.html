@@ -26,17 +26,14 @@
         <!-- CARD: BRASILEIRÃO SUPERCARDS -->
         <div class="bg-gray-800 rounded-2xl border-4 border-[#bc7bd4] shadow-[0_0_20px_rgba(188,123,212,0.2)] overflow-hidden flex flex-col relative group cursor-pointer" onclick="abrirModalTorneio()">
             
-            <!-- Banner / Logo do Torneio -->
             <div class="h-32 bg-gray-900 flex items-center justify-center border-b-2 border-gray-700 relative overflow-hidden">
-                <!-- AQUI ENTRARÁ A SUA LOGO -->
-                <img id="img-logo-torneio" src="NOME_DA_SUA_LOGO.png" alt="Brasileirão Supercards" class="h-[90%] object-contain drop-shadow-xl z-10">
+                <!-- AQUI ESTÁ A SUA LOGO -->
+                <img id="img-logo-torneio" src="logobrasileirao.png" alt="Brasileirão Supercards" class="h-[90%] object-contain drop-shadow-xl z-10">
                 
-                <!-- Fundo decorativo -->
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-0"></div>
-                <span class="absolute top-2 right-2 bg-green-500 text-black text-[10px] font-black px-2 py-1 rounded uppercase shadow-md z-20 animate-pulse">Inscrições Abertas</span>
+                <span id="badge-status" class="absolute top-2 right-2 bg-green-500 text-black text-[10px] font-black px-2 py-1 rounded uppercase shadow-md z-20 animate-pulse">Carregando...</span>
             </div>
 
-            <!-- Informações Rápidas -->
             <div class="p-4 flex flex-col gap-2">
                 <h2 class="text-white font-black text-lg uppercase tracking-wide">Brasileirão Supercards</h2>
                 
@@ -47,21 +44,16 @@
                     </div>
                     <div class="flex flex-col items-end">
                         <span class="text-gray-400 text-[10px] font-bold uppercase">Inscritos</span>
-                        <span class="text-green-400 text-sm font-black">0 / 10</span>
+                        <span id="contador-inscritos-card" class="text-green-400 text-sm font-black">0 / 10</span>
                     </div>
                 </div>
 
                 <button class="w-full mt-3 bg-[#7a32a8] text-white font-black text-xs py-3 rounded-xl uppercase tracking-widest shadow-lg border border-[#bc7bd4]">Ver Detalhes</button>
             </div>
         </div>
-
-        <!-- Pode ter outros torneios listados aqui futuramente... -->
-
     </main>
 
-    <!-- ========================================== -->
     <!-- MODAL DE DETALHES DO TORNEIO -->
-    <!-- ========================================== -->
     <div id="modal-torneio" class="hidden fixed inset-0 bg-black/90 z-[100] flex flex-col items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-gray-800 border-4 border-[#7a32a8] rounded-2xl w-full max-w-sm shadow-2xl relative flex flex-col max-h-[85vh]">
             
@@ -70,14 +62,10 @@
             <div class="p-6 overflow-y-auto no-scrollbar flex-grow">
                 <h2 class="text-[#dca3e8] font-black text-xl text-center uppercase tracking-widest mb-4">Brasileirão Supercards</h2>
                 
-                <!-- Abas (Regras / Premiação / Inscritos) -->
                 <div class="flex justify-around mb-4 border-b border-gray-600 pb-2">
                     <button class="text-white font-black text-xs uppercase border-b-2 border-[#bc7bd4] pb-1">Regras</button>
-                    <button class="text-gray-500 font-bold text-xs uppercase pb-1">Premiação</button>
-                    <button class="text-gray-500 font-bold text-xs uppercase pb-1">Inscritos</button>
                 </div>
 
-                <!-- Conteúdo da Aba Regras -->
                 <div class="flex flex-col gap-4 text-sm text-gray-300 font-bold">
                     <div class="bg-gray-900 p-3 rounded-lg border border-gray-700">
                         <p class="text-white text-xs uppercase mb-1">⚔️ Formato:</p>
@@ -95,25 +83,22 @@
                 </div>
             </div>
 
-            <!-- Rodapé do Modal com Botão -->
+            <!-- RODAPÉ E BOTÃO DE INSCRIÇÃO -->
             <div class="p-4 bg-gray-900 border-t-2 border-[#7a32a8] rounded-b-xl flex justify-center">
-                <button id="btn-inscrever" class="w-full bg-green-600 hover:bg-green-500 text-white font-black py-4 rounded-xl shadow-lg border-2 border-green-400 uppercase tracking-widest transition-transform active:scale-95 text-lg">
-                    GARANTIR VAGA
+                <button id="btn-inscrever" class="w-full bg-gray-600 text-white font-black py-4 rounded-xl shadow-lg border-2 border-gray-500 uppercase tracking-widest transition-transform active:scale-95 text-lg" disabled>
+                    CARREGANDO...
                 </button>
             </div>
 
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- SCRIPTS (Visual e Firebase) -->
-    <!-- ========================================== -->
+    <!-- SCRIPTS -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, getDoc, setDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-        // Configuração do Firebase
         const firebaseConfig = { 
           apiKey: "AIzaSyCU3lFTgfrDMaD9jwR7X7ivYPmGQh4VE1g",
           authDomain: "supercards-tcg.firebaseapp.com",
@@ -126,13 +111,11 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Funções de Controle do Modal (Visual)
-        window.abrirModalTorneio = function() {
-            document.getElementById('modal-torneio').classList.remove('hidden');
-        };
-        window.fecharModalTorneio = function() {
-            document.getElementById('modal-torneio').classList.add('hidden');
-        };
+        let currentUserUid = null;
+        const ID_TORNEIO = "brasileirao_01"; // ID do documento no banco
+
+        window.abrirModalTorneio = () => document.getElementById('modal-torneio').classList.remove('hidden');
+        window.fecharModalTorneio = () => document.getElementById('modal-torneio').classList.add('hidden');
 
         // Guarda-Costas da Manutenção
         onSnapshot(doc(db, "sistema", "configuracao"), (docSnap) => {
@@ -141,10 +124,78 @@
             }
         });
 
-        // Verifica o jogador
-        onAuthStateChanged(auth, (user) => {
-            if (!user) { window.location.href = "index.html"; }
-            // A lógica de puxar os torneios do banco entrará aqui nos próximos passos!
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) return window.location.href = "index.html";
+            currentUserUid = user.uid;
+
+            const torneioRef = doc(db, "torneios", ID_TORNEIO);
+
+            // Garante que o documento do torneio exista (Cria automático se for a primeira vez)
+            const checkSnap = await getDoc(torneioRef);
+            if (!checkSnap.exists()) {
+                await setDoc(torneioRef, {
+                    nome: "Brasileirão Supercards",
+                    status: "aberto",
+                    inscritos: [],
+                    maxInscritos: 10
+                });
+            }
+
+            // Escuta o torneio em TEMPO REAL
+            onSnapshot(torneioRef, (docSnap) => {
+                if (!docSnap.exists()) return;
+                
+                const dados = docSnap.data();
+                const totalInscritos = dados.inscritos.length;
+                const max = dados.maxInscritos;
+                const jaInscrito = dados.inscritos.includes(currentUserUid);
+
+                // Atualiza contadores no visual
+                document.getElementById('contador-inscritos-card').innerText = `${totalInscritos} / ${max}`;
+                
+                const badge = document.getElementById('badge-status');
+                const btn = document.getElementById('btn-inscrever');
+
+                // Lógica de status do botão
+                if (jaInscrito) {
+                    badge.innerText = "Você está participando!";
+                    badge.className = "absolute top-2 right-2 bg-blue-500 text-white text-[10px] font-black px-2 py-1 rounded uppercase shadow-md z-20";
+                    
+                    btn.innerText = "VOCÊ ESTÁ INSCRITO";
+                    btn.className = "w-full bg-blue-600 text-white font-black py-4 rounded-xl shadow-lg border-2 border-blue-400 uppercase tracking-widest text-lg opacity-80 cursor-not-allowed";
+                    btn.onclick = null;
+                } 
+                else if (totalInscritos >= max || dados.status !== "aberto") {
+                    badge.innerText = "Inscrições Encerradas";
+                    badge.className = "absolute top-2 right-2 bg-red-500 text-white text-[10px] font-black px-2 py-1 rounded uppercase shadow-md z-20";
+                    
+                    btn.innerText = "TORNEIO LOTADO";
+                    btn.className = "w-full bg-red-600 text-white font-black py-4 rounded-xl shadow-lg border-2 border-red-400 uppercase tracking-widest text-lg opacity-80 cursor-not-allowed";
+                    btn.onclick = null;
+                } 
+                else {
+                    badge.innerText = "Inscrições Abertas";
+                    badge.className = "absolute top-2 right-2 bg-green-500 text-black text-[10px] font-black px-2 py-1 rounded uppercase shadow-md z-20 animate-pulse";
+                    
+                    btn.innerText = "GARANTIR VAGA";
+                    btn.className = "w-full bg-green-600 hover:bg-green-500 text-white font-black py-4 rounded-xl shadow-lg border-2 border-green-400 uppercase tracking-widest transition-transform active:scale-95 text-lg";
+                    
+                    // Ação de inscrever
+                    btn.onclick = async () => {
+                        btn.innerText = "PROCESSANDO...";
+                        btn.disabled = true;
+                        try {
+                            await updateDoc(torneioRef, {
+                                inscritos: arrayUnion(currentUserUid)
+                            });
+                        } catch (error) {
+                            alert("Erro ao se inscrever. Tente novamente.");
+                            btn.innerText = "GARANTIR VAGA";
+                            btn.disabled = false;
+                        }
+                    };
+                }
+            });
         });
     </script>
 </body>

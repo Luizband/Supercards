@@ -93,7 +93,7 @@
 
             <div class="w-full max-w-[280px] flex-shrink-0 flex flex-col items-center mb-6">
                 
-                <div id="carrossel-modos" class="flex overflow-x-auto gap-4 w-full no-scrollbar snap-x snap-mandatory scroll-smooth pb-2 pt-2 mb-2">
+                <div id="carrossel-modos" onscroll="atualizarPontinhos(this)" class="flex overflow-x-auto gap-4 w-full no-scrollbar snap-x snap-mandatory scroll-smooth pb-2 pt-2 mb-2">
                     
                     <div onclick="buscarPartida()" class="flex flex-col items-center group cursor-pointer snap-start flex-shrink-0" style="width: calc(50% - 8px);">
                         <div class="bg-[#dca3e8] w-full aspect-square rounded-[24px] flex items-center justify-center p-4 shadow-xl hover:scale-105 transition-transform border-4 border-transparent hover:border-[#8b3dff]/50">
@@ -121,8 +121,8 @@
                 <div class="bg-black/20 border border-[#bc7bd4]/30 rounded-full px-4 py-1.5 flex items-center gap-5 shadow-inner">
                     <button onclick="document.getElementById('carrossel-modos').scrollBy({left: -150, behavior: 'smooth'})" class="text-[#dca3e8] hover:text-white active:scale-90 transition-transform text-[10px]">◀</button>
                     <div class="flex gap-1.5 pointer-events-none">
-                        <div class="w-1.5 h-1.5 bg-[#dca3e8] rounded-full shadow-md"></div>
-                        <div class="w-1.5 h-1.5 bg-[#dca3e8]/30 rounded-full shadow-md"></div>
+                        <div id="ponto-1" class="w-1.5 h-1.5 bg-[#dca3e8] rounded-full shadow-md transition-colors duration-300"></div>
+                        <div id="ponto-2" class="w-1.5 h-1.5 bg-[#dca3e8]/30 rounded-full shadow-md transition-colors duration-300"></div>
                     </div>
                     <button onclick="document.getElementById('carrossel-modos').scrollBy({left: 150, behavior: 'smooth'})" class="text-[#dca3e8] hover:text-white active:scale-90 transition-transform text-[10px]">▶</button>
                 </div>
@@ -230,7 +230,22 @@
             setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
         };
 
-       
+       // ===============================================
+        // ANIMAÇÃO DOS INDICADORES DO CARROSSEL
+        // ===============================================
+        window.atualizarPontinhos = function(carrossel) {
+            const p1 = document.getElementById('ponto-1');
+            const p2 = document.getElementById('ponto-2');
+            
+            // Se a tela rolou mais de 50 pixels pra direita, acende a bolinha 2
+            if (carrossel.scrollLeft > 50) {
+                p1.className = "w-1.5 h-1.5 bg-[#dca3e8]/30 rounded-full shadow-md transition-colors duration-300"; // Apaga a 1
+                p2.className = "w-1.5 h-1.5 bg-[#dca3e8] rounded-full shadow-md transition-colors duration-300";    // Acende a 2
+            } else {
+                p1.className = "w-1.5 h-1.5 bg-[#dca3e8] rounded-full shadow-md transition-colors duration-300";    // Acende a 1
+                p2.className = "w-1.5 h-1.5 bg-[#dca3e8]/30 rounded-full shadow-md transition-colors duration-300"; // Apaga a 2
+            }
+        };
 
         // ===============================================
         // SISTEMA DE LOBBY / DESAFIOS PRIVADOS (NOVO)

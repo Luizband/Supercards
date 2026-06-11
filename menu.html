@@ -225,13 +225,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- GUARDA-COSTAS DA MANUTENÇÃO ---
-        onSnapshot(doc(db, "sistema", "configuracao"), (docSnap) => {
-            if (docSnap.exists() && docSnap.data().emManutencao === true) {
-                window.location.href = "manutencao.html";
-            }
-        });
-
         document.getElementById('btn-config').addEventListener('click', () => { 
             document.getElementById('modal-config').classList.remove('hidden'); 
         });
@@ -365,6 +358,17 @@
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
+                // --- GUARDA-COSTAS DA MANUTENÇÃO (AGORA NO LUGAR CERTO) ---
+                onSnapshot(doc(db, "sistema", "configuracao"), (docSnap) => {
+                    console.log("Status do Servidor:", docSnap.data()); // Mostra no F12
+                    if (docSnap.exists() && docSnap.data().emManutencao === true) {
+                        window.location.href = "manutencao.html";
+                    }
+                }, (error) => {
+                    console.error("Erro no Guarda-Costas:", error);
+                });
+                // ----------------------------------------------------------
+                
                 // Pegamos o nome do Google (ou e-mail) logo no início da função
                 const nomeParaSalvar = user.displayName || "JOGADOR";
                 document.getElementById('player-name').innerText = nomeParaSalvar.toUpperCase();

@@ -8,16 +8,13 @@
     <style>
         body { background-color: #111827; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        /* Scrollbar customizada para o visualizador de JSON */
         pre::-webkit-scrollbar { width: 8px; height: 8px; }
         pre::-webkit-scrollbar-thumb { background: #6b7280; border-radius: 4px; }
     </style>
 </head>
 <body class="min-h-screen p-4 flex flex-col items-center">
 
-    <!-- ========================================== -->
     <!-- TELA DE LOGIN -->
-    <!-- ========================================== -->
     <div id="login-screen" class="bg-gray-800 p-8 rounded-2xl w-full max-w-sm border-2 border-purple-500 shadow-[0_0_30px_rgba(168,85,247,0.2)] mt-20">
         <h2 class="text-center font-black text-2xl mb-6 text-purple-400 uppercase tracking-widest">Painel Admin</h2>
         <input id="email-admin" type="email" placeholder="E-mail" class="w-full bg-gray-900 p-3 rounded-lg mb-4 border border-gray-600 focus:border-purple-500 outline-none font-bold">
@@ -25,15 +22,25 @@
         <button id="btn-login" class="w-full bg-purple-600 hover:bg-purple-500 py-3 rounded-lg font-black transition-all uppercase tracking-widest">Acessar Sistema</button>
     </div>
 
-    <!-- ========================================== -->
-    <!-- PAINEL DE CONTROLE (Oculto até logar) -->
-    <!-- ========================================== -->
+    <!-- PAINEL DE CONTROLE -->
     <div id="admin-panel" class="hidden w-full max-w-5xl bg-gray-800 p-6 rounded-2xl border-2 border-purple-500 shadow-2xl relative flex flex-col gap-8">
         
         <header class="border-b border-gray-700 pb-4 flex justify-between items-center">
             <h1 class="text-purple-400 font-black text-3xl uppercase tracking-widest">Controle Central</h1>
             <button onclick="location.reload()" class="text-gray-400 hover:text-red-500 font-bold uppercase text-sm">Desconectar</button>
         </header>
+
+        <!-- NOVO MÓDULO: CHAVE MESTRA DA MANUTENÇÃO -->
+        <div class="bg-gray-900 p-5 rounded-xl border-2 border-red-900 flex justify-between items-center">
+            <div>
+                <h2 class="font-black text-lg text-red-400 flex items-center gap-2">🚨 Status do Servidor</h2>
+                <p class="text-xs text-gray-400 mt-1">Ligar a manutenção expulsa IMEDIATAMENTE todos os jogadores online para uma tela de aviso.</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="alternarManutencao(true)" class="bg-red-600 hover:bg-red-500 px-6 py-3 rounded font-black uppercase text-sm shadow-lg border border-red-400">Trancar Jogo</button>
+                <button onclick="alternarManutencao(false)" class="bg-green-600 hover:bg-green-500 px-6 py-3 rounded font-black uppercase text-sm shadow-lg border border-green-400">Liberar Jogo</button>
+            </div>
+        </div>
 
         <!-- MÓDULO 1: ENVIAR MENSAGEM GLOBAL -->
         <div class="bg-gray-900 p-5 rounded-xl border border-gray-700">
@@ -56,10 +63,8 @@
                 </div>
             </div>
 
-            <!-- ÁREA DO JOGADOR (Só aparece após buscar) -->
+            <!-- ÁREA DO JOGADOR -->
             <div id="painel-jogador" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
-                
-                <!-- Coluna Esquerda: Edição Rápida -->
                 <div class="flex flex-col gap-6">
                     <div class="bg-gray-800 p-4 rounded-lg border border-purple-500/50">
                         <span class="text-gray-400 text-xs font-bold uppercase">Editando:</span>
@@ -67,7 +72,6 @@
                         <span id="lbl-uid-jogador" class="text-gray-500 text-[10px] font-mono">UID</span>
                     </div>
 
-                    <!-- Edição de Valores Base -->
                     <div class="bg-gray-800 p-4 rounded-lg border border-gray-600 grid grid-cols-2 gap-4">
                         <div>
                             <label class="text-xs font-bold text-gray-400 uppercase">Moedas</label>
@@ -87,7 +91,6 @@
                         </div>
                     </div>
 
-                    <!-- Gerenciador de Pacotes -->
                     <div class="bg-gray-800 p-4 rounded-lg border border-gray-600">
                         <h4 class="font-black text-sm text-gray-300 uppercase mb-3">📦 Inventário (Pacotes)</h4>
                         <div class="grid grid-cols-2 gap-4">
@@ -102,7 +105,6 @@
                         </div>
                     </div>
 
-                    <!-- Injetor de Cartas / Badges -->
                     <div class="bg-gray-800 p-4 rounded-lg border border-gray-600">
                         <h4 class="font-black text-sm text-gray-300 uppercase mb-3">🃏 Forçar Carta na Coleção</h4>
                         <div class="flex gap-2">
@@ -113,7 +115,6 @@
                     </div>
                 </div>
 
-                <!-- Coluna Direita: Visão Raio-X do Banco (JSON) -->
                 <div class="flex flex-col h-full">
                     <h4 class="font-black text-sm text-gray-300 uppercase mb-2 flex justify-between">
                         <span>💾 Raio-X do Banco de Dados</span>
@@ -121,18 +122,15 @@
                     </h4>
                     <pre id="json-viewer" class="bg-black p-4 rounded-lg border border-gray-700 text-green-400 text-xs font-mono overflow-auto flex-1 max-h-[600px] shadow-inner"></pre>
                 </div>
-
             </div>
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- SCRIPTS -->
-    <!-- ========================================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, arrayUnion, arrayRemove, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        // IMPORTANTE: Adicionei o 'setDoc' nos imports para criar o documento de configuração se não existir
+        import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, setDoc, arrayUnion, arrayRemove, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = { 
           apiKey: "AIzaSyCU3lFTgfrDMaD9jwR7X7ivYPmGQh4VE1g",
@@ -146,7 +144,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // LOGIN COM TRAVA EXCLUSIVA
         const EMAIL_ADMIN_EXCLUSIVO = "adm@adm.com";
 
         document.getElementById('btn-login').addEventListener('click', async () => {
@@ -154,19 +151,11 @@
             const senha = document.getElementById('senha-admin').value.trim();
             
             if (!email || !senha) return alert("Preencha tudo!");
-
-            // TRAVA DE SEGURANÇA MÁXIMA: Bloqueia qualquer e-mail diferente
-            if (email !== EMAIL_ADMIN_EXCLUSIVO) {
-                alert("Acesso Negado! Você não é o Administrador Supremo.");
-                return;
-            }
+            if (email !== EMAIL_ADMIN_EXCLUSIVO) { alert("Acesso Negado!"); return; }
 
             try {
                 document.getElementById('btn-login').innerText = "Verificando...";
-                
-                // O Firebase vai verificar se a senha "adm153045" está correta
                 await signInWithEmailAndPassword(auth, email, senha);
-                
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('admin-panel').classList.remove('hidden');
             } catch (e) { 
@@ -174,7 +163,24 @@
                 document.getElementById('btn-login').innerText = "Acessar Sistema";
             }
         });
-        // ENVIO DE MENSAGEM GLOBAL
+
+        // ==========================================
+        // NOVA FUNÇÃO: CHAVE MESTRA DE MANUTENÇÃO
+        // ==========================================
+        window.alternarManutencao = async (status) => {
+            if(status && !confirm("TEM CERTEZA? Ligar a manutenção vai expulsar todos os jogadores online IMEDIATAMENTE!")) return;
+            
+            try {
+                // Usamos setDoc com { merge: true } para criar o documento 'configuracao' caso seja a primeira vez
+                await setDoc(doc(db, "sistema", "configuracao"), { emManutencao: status }, { merge: true });
+                alert(status ? "⛔ MANUTENÇÃO LIGADA! Todos os acessos foram bloqueados." : "✅ JOGO LIBERADO! Jogadores já podem entrar.");
+            } catch(e) { 
+                alert("Erro ao alterar o status do servidor."); 
+                console.error(e);
+            }
+        };
+
+        // (As outras funções de envio de mensagem, busca e salvar dados continuam iguais)
         document.getElementById('btn-enviar-msg').addEventListener('click', async () => {
             const titulo = document.getElementById('input-titulo').value.trim();
             const texto = document.getElementById('input-texto').value.trim();
@@ -187,13 +193,12 @@
                 const users = await getDocs(collection(db, "users"));
                 const msg = { id: "admin_"+Date.now(), titulo, texto, lida: false, data: new Date().toISOString() };
                 users.forEach(async (u) => { await updateDoc(doc(db, "users", u.id), { notificacoes: arrayUnion(msg) }); });
-                alert("Aviso enviado para a caixa de correio de todos os jogadores!");
+                alert("Aviso enviado!");
                 document.getElementById('input-titulo').value = ''; document.getElementById('input-texto').value = '';
             } catch(e) { alert("Erro ao enviar mensagem."); }
             btn.innerText = "Disparar"; btn.disabled = false;
         });
 
-        // BUSCA INTELIGENTE (Por Nome ou UID)
         document.getElementById('btn-buscar').addEventListener('click', async () => {
             const buscaStr = document.getElementById('input-busca').value.trim();
             if (!buscaStr) return alert("Digite um Nome ou UID!");
@@ -203,7 +208,6 @@
             
             try {
                 let userDoc = null;
-                // Se a string for curta, assumimos que é uma busca por Nome. Se for longa, é UID.
                 if (buscaStr.length < 20) {
                     const q = query(collection(db, "users"), where("nome", "==", buscaStr));
                     const querySnapshot = await getDocs(q);
@@ -218,48 +222,37 @@
                     await window.carregarJogador(userDoc.id);
                     document.getElementById('painel-jogador').classList.remove('hidden');
                 } else {
-                    alert("Jogador não encontrado! Verifique se o nome está escrito exatamente igual (maiúsculas e minúsculas).");
+                    alert("Jogador não encontrado!");
                     document.getElementById('painel-jogador').classList.add('hidden');
                 }
-            } catch (error) { alert("Erro ao buscar no banco."); console.error(error); }
+            } catch (error) { alert("Erro ao buscar no banco."); }
             btn.innerText = "Buscar";
         });
 
-        // CARREGA DADOS DO JOGADOR NA TELA
         window.carregarJogador = async (uid) => {
             const snap = await getDoc(doc(db, "users", uid));
             if(!snap.exists()) return;
             const data = snap.data();
-
-            // Preenche os rótulos principais
             document.getElementById('lbl-nome-jogador').innerText = data.nome || "Sem Nome";
             document.getElementById('lbl-uid-jogador').innerText = "UID: " + uid;
-
-            // Preenche os inputs editáveis
             document.getElementById('edit-moedas').value = data.moedas || 0;
             document.getElementById('edit-frag').value = data.fragmentos || 0;
             document.getElementById('edit-nivel').value = data.nivel || 1;
             document.getElementById('edit-xp').value = data.xp || 0;
-            
-            // Inventário
             document.getElementById('edit-pac-basico').value = (data.inventario && data.inventario.pacoteBasico) || 0;
             document.getElementById('edit-pac-premium').value = (data.inventario && data.inventario.pacotePremium) || 0;
-
-            // Preenche o JSON viewer (Raio-X)
             document.getElementById('json-viewer').innerText = JSON.stringify(data, null, 4);
         };
 
-        // FUNÇÃO DE SALVAR CAMPO BÁSICO (Moedas, Nivel, etc)
         window.salvarCampo = async (campo) => {
             const inputId = `edit-${campo === 'fragmentos' ? 'frag' : campo}`;
             const valor = Number(document.getElementById(inputId).value);
             try {
                 await updateDoc(doc(db, "users", window.currentUserUid), { [campo]: valor });
-                window.carregarJogador(window.currentUserUid); // Atualiza Raio-X
+                window.carregarJogador(window.currentUserUid);
             } catch(e) { alert("Erro ao salvar " + campo); }
         };
 
-        // FUNÇÃO DE SALVAR CAMPO ANINHADO (inventario.pacoteBasico)
         window.salvarNested = async (caminhoBD, inputId) => {
             const valor = Number(document.getElementById(inputId).value);
             try {
@@ -268,11 +261,9 @@
             } catch(e) { alert("Erro ao salvar pacote"); }
         };
 
-        // FUNÇÃO DE ADICIONAR/REMOVER ARRAYS (Cartas, Badges)
         window.gerenciarArray = async (campoArray, inputId, acao) => {
             const valorStr = document.getElementById(inputId).value.trim();
             if(!valorStr) return alert("Digite o ID primeiro!");
-            
             try {
                 const docRef = doc(db, "users", window.currentUserUid);
                 if (acao === 'add') {

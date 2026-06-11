@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supercards - Torneios</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #111827; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="text-white min-h-screen flex flex-col p-4 w-full max-w-sm mx-auto border-x-2 border-[#dca3e8]/30 shadow-2xl relative overflow-x-hidden">
+
+    <!-- CABEÇALHO -->
+    <header class="flex items-center justify-between mt-4 mb-8">
+        <button onclick="window.location.href='menu.html'" class="bg-[#7a32a8] hover:bg-purple-600 p-2 rounded-full shadow-md border-2 border-[#bc7bd4] transition-transform active:scale-95">
+            <span class="text-white font-black px-2">⬅ VOLTAR</span>
+        </button>
+        <h1 class="text-[#dca3e8] font-black text-2xl uppercase tracking-widest drop-shadow-md">Torneios</h1>
+    </header>
+
+    <!-- LISTA DE TORNEIOS -->
+    <main class="flex-grow flex flex-col gap-6 overflow-y-auto no-scrollbar pb-10">
+        
+        <!-- CARD: BRASILEIRÃO SUPERCARDS -->
+        <div class="bg-gray-800 rounded-2xl border-4 border-[#bc7bd4] shadow-[0_0_20px_rgba(188,123,212,0.2)] overflow-hidden flex flex-col relative group cursor-pointer" onclick="abrirModalTorneio()">
+            
+            <!-- Banner / Logo do Torneio -->
+            <div class="h-32 bg-gray-900 flex items-center justify-center border-b-2 border-gray-700 relative overflow-hidden">
+                <!-- AQUI ENTRARÁ A SUA LOGO -->
+                <img id="img-logo-torneio" src="NOME_DA_SUA_LOGO.png" alt="Brasileirão Supercards" class="h-[90%] object-contain drop-shadow-xl z-10">
+                
+                <!-- Fundo decorativo -->
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-0"></div>
+                <span class="absolute top-2 right-2 bg-green-500 text-black text-[10px] font-black px-2 py-1 rounded uppercase shadow-md z-20 animate-pulse">Inscrições Abertas</span>
+            </div>
+
+            <!-- Informações Rápidas -->
+            <div class="p-4 flex flex-col gap-2">
+                <h2 class="text-white font-black text-lg uppercase tracking-wide">Brasileirão Supercards</h2>
+                
+                <div class="flex justify-between items-center mt-2">
+                    <div class="flex flex-col">
+                        <span class="text-gray-400 text-[10px] font-bold uppercase">Formato</span>
+                        <span class="text-[#dca3e8] text-xs font-black uppercase">Pontos Corridos</span>
+                    </div>
+                    <div class="flex flex-col items-end">
+                        <span class="text-gray-400 text-[10px] font-bold uppercase">Inscritos</span>
+                        <span class="text-green-400 text-sm font-black">0 / 10</span>
+                    </div>
+                </div>
+
+                <button class="w-full mt-3 bg-[#7a32a8] text-white font-black text-xs py-3 rounded-xl uppercase tracking-widest shadow-lg border border-[#bc7bd4]">Ver Detalhes</button>
+            </div>
+        </div>
+
+        <!-- Pode ter outros torneios listados aqui futuramente... -->
+
+    </main>
+
+    <!-- ========================================== -->
+    <!-- MODAL DE DETALHES DO TORNEIO -->
+    <!-- ========================================== -->
+    <div id="modal-torneio" class="hidden fixed inset-0 bg-black/90 z-[100] flex flex-col items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-gray-800 border-4 border-[#7a32a8] rounded-2xl w-full max-w-sm shadow-2xl relative flex flex-col max-h-[85vh]">
+            
+            <button onclick="fecharModalTorneio()" class="absolute -top-4 -right-2 bg-red-600 text-white font-black w-8 h-8 rounded-full border-2 border-white z-50">X</button>
+            
+            <div class="p-6 overflow-y-auto no-scrollbar flex-grow">
+                <h2 class="text-[#dca3e8] font-black text-xl text-center uppercase tracking-widest mb-4">Brasileirão Supercards</h2>
+                
+                <!-- Abas (Regras / Premiação / Inscritos) -->
+                <div class="flex justify-around mb-4 border-b border-gray-600 pb-2">
+                    <button class="text-white font-black text-xs uppercase border-b-2 border-[#bc7bd4] pb-1">Regras</button>
+                    <button class="text-gray-500 font-bold text-xs uppercase pb-1">Premiação</button>
+                    <button class="text-gray-500 font-bold text-xs uppercase pb-1">Inscritos</button>
+                </div>
+
+                <!-- Conteúdo da Aba Regras -->
+                <div class="flex flex-col gap-4 text-sm text-gray-300 font-bold">
+                    <div class="bg-gray-900 p-3 rounded-lg border border-gray-700">
+                        <p class="text-white text-xs uppercase mb-1">⚔️ Formato:</p>
+                        <p class="text-xs font-normal">Ida e Volta. Você enfrentará todos os outros 9 competidores duas vezes (total de 18 partidas por jogador).</p>
+                    </div>
+
+                    <div class="bg-gray-900 p-3 rounded-lg border border-gray-700">
+                        <p class="text-white text-xs uppercase mb-1">🏆 Pontuação:</p>
+                        <ul class="text-xs font-normal list-disc list-inside space-y-1">
+                            <li><span class="text-green-400 font-bold">Vitória:</span> +3 Pontos</li>
+                            <li><span class="text-yellow-400 font-bold">Empate:</span> +1 Ponto</li>
+                            <li><span class="text-red-400 font-bold">Derrota:</span> 0 Pontos</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rodapé do Modal com Botão -->
+            <div class="p-4 bg-gray-900 border-t-2 border-[#7a32a8] rounded-b-xl flex justify-center">
+                <button id="btn-inscrever" class="w-full bg-green-600 hover:bg-green-500 text-white font-black py-4 rounded-xl shadow-lg border-2 border-green-400 uppercase tracking-widest transition-transform active:scale-95 text-lg">
+                    GARANTIR VAGA
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SCRIPTS (Visual e Firebase) -->
+    <!-- ========================================== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        // Configuração do Firebase
+        const firebaseConfig = { 
+          apiKey: "AIzaSyCU3lFTgfrDMaD9jwR7X7ivYPmGQh4VE1g",
+          authDomain: "supercards-tcg.firebaseapp.com",
+          projectId: "supercards-tcg",
+          storageBucket: "supercards-tcg.firebasestorage.app",
+          messagingSenderId: "862316380615",
+          appId: "1:862316380615:web:b3f28056ebc967673999e2"
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Funções de Controle do Modal (Visual)
+        window.abrirModalTorneio = function() {
+            document.getElementById('modal-torneio').classList.remove('hidden');
+        };
+        window.fecharModalTorneio = function() {
+            document.getElementById('modal-torneio').classList.add('hidden');
+        };
+
+        // Guarda-Costas da Manutenção
+        onSnapshot(doc(db, "sistema", "configuracao"), (docSnap) => {
+            if (docSnap.exists() && docSnap.data().emManutencao === true) {
+                window.location.href = "manutencao.html";
+            }
+        });
+
+        // Verifica o jogador
+        onAuthStateChanged(auth, (user) => {
+            if (!user) { window.location.href = "index.html"; }
+            // A lógica de puxar os torneios do banco entrará aqui nos próximos passos!
+        });
+    </script>
+</body>
+</html>

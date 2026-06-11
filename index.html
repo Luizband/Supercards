@@ -72,7 +72,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyCU3lFTgfrDMaD9jwR7X7ivYPmGQh4VE1g",
@@ -86,6 +86,15 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+
+        // --- GUARDA-COSTAS DA MANUTENÇÃO (NA PORTA DE ENTRADA) ---
+        onSnapshot(doc(db, "sistema", "configuracao"), (docSnap) => {
+            if (docSnap.exists() && docSnap.data().emManutencao === true) {
+                // Se a manutenção estiver ligada, bloqueia a tela de login na mesma hora!
+                window.location.href = "manutencao.html";
+            }
+        });
+        // ----------------------------------------------------------
 
         onAuthStateChanged(auth, (user) => {
             if (user) {

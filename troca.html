@@ -330,7 +330,7 @@
 
         document.getElementById('input-busca-amigo').addEventListener('input', (event) => carregarListaAmigos(event.target.value));
 
-        // --- BLOQUEIOS E BOTÕES DE CONVITE ---
+       // --- BLOQUEIOS E BOTÕES DE CONVITE ---
         document.getElementById('btn-enviar-convite').addEventListener('click', async () => {
             if (trocaAtivaId) {
                 window.fecharModalTrocas();
@@ -338,7 +338,14 @@
             }
             if (!amigoSelecionadoId) return window.mostrarToast("Selecione um amigo na lista primeiro!");
 
+            // TRAVA VISUAL: Mostra que está carregando e impede cliques duplos
+            const btnEnviar = document.getElementById('btn-enviar-convite');
+            btnEnviar.innerText = "ENVIANDO...";
+            btnEnviar.classList.add('opacity-50', 'cursor-not-allowed');
+            btnEnviar.disabled = true;
+
             try {
+                // 1. Cria o convite de troca na coleção 'trocas' (Isso sempre vai funcionar)
                 await addDoc(collection(db, "trocas"), {
                     remetenteId: currentUserUid,
                     remetenteNome: currentUserName,
@@ -353,27 +360,39 @@
                     dataCriacao: serverTimestamp()
                 });
 
-                // INJETA A NOTIFICAÇÃO NA CAIXA DE ENTRADA DO AMIGO
-                await updateDoc(doc(db, "users", amigoSelecionadoId), {
-                    notificacoes: arrayUnion({
-                        id: "notif_convite_troca_" + Date.now(),
-                        titulo: "🔄 Convite de Troca",
-                        texto: `${currentUserName} quer trocar cartas com você! Vá até a mesa de trocas para aceitar ou recusar.`,
-                        lida: false,
-                        data: new Date().toISOString()
-                    })
-                });
+                // 2. Tenta injetar a notificação. Se o Firebase bloquear por segurança, a troca não quebra!
+                try {
+                    await updateDoc(doc(db, "users", amigoSelecionadoId), {
+                        notificacoes: arrayUnion({
+                            id: "notif_convite_troca_" + Date.now(),
+                            titulo: "🔄 Convite de Troca",
+                            texto: `${currentUserName} quer trocar cartas com você! Vá até a mesa de trocas para aceitar ou recusar.`,
+                            lida: false,
+                            data: new Date().toISOString()
+                        })
+                    });
+                } catch(eNotif) {
+                    console.log("Notificação bloqueada pelo Firebase, mas a troca foi criada com sucesso.", eNotif);
+                }
 
                 window.mostrarToast(`Convite enviado para ${amigoSelecionadoNome}!`);
+                
+                // Limpa as variáveis e o modal para a próxima
                 amigoSelecionadoId = null;
                 amigoSelecionadoNome = null;
                 document.getElementById('input-busca-amigo').value = "";
                 document.getElementById('lista-amigos').innerHTML = '<span class="text-[#7a32a8] text-[10px] font-bold text-center mt-2">Pesquise o nome do jogador.</span>';
                 
-                window.fecharModalTrocas(); // Fecha após enviar o convite
+                window.fecharModalTrocas(); 
 
             } catch (error) {
                 console.error("Erro ao enviar:", error);
+                window.mostrarToast("Erro interno: " + error.message); // Se der erro grave, agora você vê na tela!
+            } finally {
+                // Restaura o botão ao estado normal
+                btnEnviar.innerText = "ENVIAR CONVITE DE TROCA";
+                btnEnviar.classList.remove('opacity-50', 'cursor-not-allowed');
+                btnEnviar.disabled = false;
             }
         });
 

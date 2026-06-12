@@ -49,5 +49,10 @@ export const INFO_BADGES = {
         nome: "Campeão do 1° Torneio",
         descricao: "Ganhou o 1° Torneio de Supercards Eliminatórias Md3",
         imagem: "badges/badge-010.png"    
+     },
+    "badge-011": {
+        nome: "Campeão Brasileirão Supercards 2026",
+        descricao: "Ganhou o Brasileirão Supercards de 2026",
+        imagem: "badges/badge-011.png" 
     }
 };

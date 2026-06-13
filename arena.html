@@ -530,19 +530,32 @@
                             let p1Data = mySnap.data() || {};
                             let p2Data = oppSnap.data() || {};
                             
-                            let j1Deck = [...(p1Data.deckPadrao||[])]; 
-                            let j2Deck = [...(p2Data.deckPadrao||[])];
+                            // 1. CORREÇÃO DAS CARTAS: Puxa as cartas reais do deck, e não as letras do nome!
+                            let j1Deck = (p1Data.decks && p1Data.deckPadrao && p1Data.decks[p1Data.deckPadrao]) ? [...p1Data.decks[p1Data.deckPadrao].cartas] : [];
                             
-                            // SE O OPONENTE FOR UM BOT, DAMOS 20 CARTAS ALEATÓRIAS PRA ELE!
+                            let j2Deck = [];
                             if(p2Uid.startsWith('bot_')) { 
                                 j2Deck = Object.keys(INFO_CARTAS).slice(0, 20); 
+                            } else if (p2Data.decks && p2Data.deckPadrao && p2Data.decks[p2Data.deckPadrao]) {
+                                j2Deck = [...p2Data.decks[p2Data.deckPadrao].cartas];
                             }
+
+                            // Trava de segurança extra
+                            if(j1Deck.length < 20) j1Deck = Object.keys(INFO_CARTAS).slice(0, 20);
+                            if(j2Deck.length < 20) j2Deck = Object.keys(INFO_CARTAS).slice(0, 20);
                             
                             await setDoc(doc(db, "partidas", salaId), {
                                 status: 'aguardando',
                                 jogador1: { uid: p1Uid, nome: p1Data.nomeDisplay || p1Data.nome || 'JOGADOR 1', foto: p1Data.fotoPerfil || 'fundo_carta.png', deck: j1Deck },
                                 jogador2: { uid: p2Uid, nome: p2Data.nomeDisplay || p2Data.nome || 'JOGADOR 2', foto: p2Data.fotoPerfil || 'fundo_carta.png', deck: j2Deck }
                             });
+
+                            // 2. CORREÇÃO DO LOOP INFINITO: Limpa a "sala de espera" no torneio assim que a partida é criada!
+                            try {
+                                await updateDoc(doc(db, "torneios", window.torneioId), {
+                                    [`lobbies.${salaId}`]: []
+                                });
+                            } catch(e) {}
                         }
                     } catch(e) { console.error("Erro ao montar sala torneio:", e); }
                 } else {

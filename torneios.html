@@ -125,7 +125,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, getDoc, setDoc, updateDoc, arrayUnion, collection, query, where, getDocs, documentId } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove, collection, query, where, getDocs, documentId } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = { 
           apiKey: "AIzaSyCU3lFTgfrDMaD9jwR7X7ivYPmGQh4VE1g", authDomain: "supercards-tcg.firebaseapp.com",
@@ -143,6 +143,7 @@
         
         window.torneioDadosGlobal = null;
         window.rodadaExibida = 0;
+        window.redirecionandoArena = false; // Trava para não abrir a janela duas vezes
 
         window.abrirModalTorneio = () => document.getElementById('modal-torneio').classList.remove('hidden');
         window.fecharModalTorneio = () => document.getElementById('modal-torneio').classList.add('hidden');
@@ -159,16 +160,35 @@
             btn.classList.add('text-white', 'border-b-2', 'border-[#bc7bd4]');
         };
 
-        window.entrarNaArena = async (idAdversario) => {
+        // LÓGICA EXCLUSIVA DE ENTRADA IMEDIATA PARA BOTS
+        window.entrarNaArenaBot = (idAdversario) => {
             const btn = event.target;
             btn.innerText = "ENTRANDO...";
             btn.disabled = true;
-            try {
-                localStorage.setItem("torneioAdversario", idAdversario);
-                localStorage.setItem("torneioId", ID_TORNEIO);
-                window.location.href = "arena.html";
-            } catch(e) { console.error("Erro na Arena:", e); btn.innerText = "JOGAR PARTIDA"; btn.disabled = false; }
+            localStorage.setItem("torneioAdversario", idAdversario);
+            localStorage.setItem("torneioId", ID_TORNEIO);
+            window.location.href = "arena.html";
         };
+
+        // ====== LÓGICA DA SALA DE ESPERA (LOBBY) ======
+        window.marcarPronto = async (salaId) => {
+            try {
+                const torneioRef = doc(db, "torneios", ID_TORNEIO);
+                await updateDoc(torneioRef, {
+                    [`lobbies.${salaId}`]: arrayUnion(currentUserUid)
+                });
+            } catch (e) { console.error("Erro ao confirmar:", e); }
+        };
+
+        window.cancelarPronto = async (salaId) => {
+            try {
+                const torneioRef = doc(db, "torneios", ID_TORNEIO);
+                await updateDoc(torneioRef, {
+                    [`lobbies.${salaId}`]: arrayRemove(currentUserUid)
+                });
+            } catch (e) { console.error("Erro ao cancelar:", e); }
+        };
+        // ===============================================
 
         async function preencherDictNomes(listaUids) {
             if(!listaUids || listaUids.length === 0) return;
@@ -253,7 +273,6 @@
             const dados = window.torneioDadosGlobal;
             const rodadaAtualReal = dados.rodadaAtual;
             const jogos = dados.rodadas[window.rodadaExibida].confrontos;
-            
             const maxRodadas = Object.keys(dados.rodadas).length;
             
             let btnAnterior = window.rodadaExibida > 1 ? `<button onclick="window.mudarRodadaVisual(-1)" class="text-purple-400 font-black text-2xl px-3 hover:text-white transition-all">&lt;</button>` : `<div class="w-10"></div>`;
@@ -300,7 +319,43 @@
                 
                 if (myMatch && jogo.status !== 'finalizado' && window.rodadaExibida === rodadaAtualReal) {
                     const idAdv = isP1 ? jogo.jogador2 : jogo.jogador1;
-                    actionBtn = `<button onclick="window.entrarNaArena('${idAdv}')" class="mt-3 w-full bg-green-600 hover:bg-green-500 py-3 rounded-lg text-white font-black text-xs uppercase shadow-lg border-2 border-green-400">JOGAR PARTIDA</button>`;
+                    const ehBot = idAdv.startsWith('bot_');
+                    
+                    if (ehBot) {
+                        // CONTRA BOT NÃO PRECISA DE LOBBY
+                        actionBtn = `<button onclick="window.entrarNaArenaBot('${idAdv}')" class="mt-3 w-full bg-green-600 hover:bg-green-500 py-3 rounded-lg text-white font-black text-xs uppercase shadow-lg border-2 border-green-400">⚔️ JOGAR PARTIDA</button>`;
+                    } else {
+                        // LÓGICA DA SALA DE ESPERA (HUMANO VS HUMANO)
+                        const ids = [currentUserUid, idAdv].sort();
+                        const salaId = `tourney_${ID_TORNEIO}_${ids[0]}_${ids[1]}`;
+                        const prontos = (dados.lobbies && dados.lobbies[salaId]) || [];
+                        
+                        if (prontos.includes(currentUserUid) && prontos.includes(idAdv)) {
+                            // OS DOIS CLICARAM (REDIRECIONAMENTO SINCRONIZADO)
+                            actionBtn = `<button class="mt-3 w-full bg-blue-600 py-3 rounded-lg text-white font-black text-xs uppercase shadow-[0_0_20px_rgba(37,99,235,0.8)] border-2 border-blue-400 animate-pulse">🚀 INICIANDO PARTIDA...</button>`;
+                            
+                            if (!window.redirecionandoArena) {
+                                window.redirecionandoArena = true;
+                                setTimeout(() => {
+                                    localStorage.setItem("torneioAdversario", idAdv);
+                                    localStorage.setItem("torneioId", ID_TORNEIO);
+                                    window.location.href = "arena.html";
+                                }, 1500);
+                            }
+                        } 
+                        else if (prontos.includes(currentUserUid)) {
+                            // SÓ EU CLIQUEI (ESPERANDO O OUTRO)
+                            actionBtn = `<button onclick="window.cancelarPronto('${salaId}')" class="mt-3 w-full bg-yellow-600 hover:bg-yellow-500 py-3 rounded-lg text-white font-black text-xs uppercase shadow-lg border-2 border-yellow-400 animate-pulse">⏳ ESPERANDO ADVERSÁRIO (CANCELAR)</button>`;
+                        } 
+                        else if (prontos.includes(idAdv)) {
+                            // SÓ O OPONENTE CLICOU (CORRE PRA ENTRAR)
+                            actionBtn = `<button onclick="window.marcarPronto('${salaId}')" class="mt-3 w-full bg-green-500 hover:bg-green-400 py-3 rounded-lg text-white font-black text-xs uppercase shadow-[0_0_15px_rgba(74,222,128,0.8)] border-2 border-white animate-bounce">⚔️ OPONENTE ESPERANDO! ENTRAR</button>`;
+                        } 
+                        else {
+                            // ESTADO INICIAL
+                            actionBtn = `<button onclick="window.marcarPronto('${salaId}')" class="mt-3 w-full bg-green-600 hover:bg-green-500 py-3 rounded-lg text-white font-black text-xs uppercase shadow-lg border-2 border-green-400">⚔️ JOGAR PARTIDA</button>`;
+                        }
+                    }
                 } 
                 else if (myMatch && jogo.status !== 'finalizado' && window.rodadaExibida > rodadaAtualReal) {
                     actionBtn = `<div class="mt-3 w-full bg-gray-800 py-2 rounded-lg text-gray-500 font-bold text-[10px] uppercase text-center border border-gray-700">Partida Bloqueada</div>`;
@@ -327,6 +382,9 @@
         onAuthStateChanged(auth, async (user) => {
             if (!user) return window.location.href = "index.html";
             currentUserUid = user.uid;
+            
+            // Se ele voltar para a tela de torneio, destrava o redirecionamento
+            window.redirecionandoArena = false;
 
             const torneioRef = doc(db, "torneios", ID_TORNEIO);
             const checkSnap = await getDoc(torneioRef);

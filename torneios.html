@@ -102,7 +102,6 @@
                     <div class="text-center text-xs text-gray-400 mt-4">Carregando lista de heróis...</div>
                 </div>
 
-                <!-- NOVAS ABAS DE JOGO (TABELA E CONFRONTOS) -->
                 <div id="conteudo-classificacao" class="tab-content hidden flex flex-col gap-2 overflow-x-auto no-scrollbar pb-2">
                     <div class="text-center text-xs text-gray-400 mt-4 animate-pulse">Calculando Tabela...</div>
                 </div>
@@ -138,7 +137,7 @@
 
         let currentUserUid = null;
         let inscritosCache = []; 
-        let dictNomes = {}; // Dicionário para guardar nomes dos uids
+        let dictNomes = {}; 
         const ID_TORNEIO = "brasileirao_01"; 
 
         window.abrirModalTorneio = () => document.getElementById('modal-torneio').classList.remove('hidden');
@@ -156,7 +155,6 @@
             btn.classList.add('text-white', 'border-b-2', 'border-[#bc7bd4]');
         };
 
-        // TRAVA DO DECK PARA ENTRAR NA BATALHA
         window.entrarNaArena = async (idAdversario) => {
             const btn = event.target;
             btn.innerText = "VERIFICANDO DECK...";
@@ -229,7 +227,6 @@
         }
 
         function renderizarTabelaERodada(dados) {
-            // TABELA
             const classArray = Object.keys(dados.classificacao).map(uid => {
                 return { uid, nome: (dictNomes[uid]?.nome || "BOT").substring(0,10), ...dados.classificacao[uid] };
             });
@@ -252,7 +249,6 @@
             htmlTabela += `</table>`;
             document.getElementById('conteudo-classificacao').innerHTML = htmlTabela;
 
-            // RODADA
             const rodadaAtual = dados.rodadaAtual;
             const jogos = dados.rodadas[rodadaAtual].confrontos;
             let htmlRodada = `<h3 class="text-center text-[#dca3e8] font-black uppercase text-sm mb-3">Rodada ${rodadaAtual}</h3>`;
@@ -315,7 +311,6 @@
                 const btn = document.getElementById('btn-inscrever');
                 const areaBotao = document.getElementById('area-botao-inscricao');
 
-                // LÓGICA DE INTERFACE DINÂMICA
                 if (dados.status === "em_andamento" || dados.status === "finalizado") {
                     badge.innerText = "Torneio em Andamento";
                     badge.className = "absolute top-2 right-2 bg-purple-600 text-white text-[10px] font-black px-2 py-1 rounded uppercase shadow-md z-20";
@@ -323,9 +318,8 @@
                     document.getElementById('tab-inscritos').classList.add('hidden');
                     document.getElementById('tab-classificacao').classList.remove('hidden');
                     document.getElementById('tab-rodada').classList.remove('hidden');
-                    areaBotao.classList.add('hidden'); // Esconde botão de inscrever
+                    areaBotao.classList.add('hidden'); 
 
-                    // Se a aba atual for inscritos (que foi escondida), joga pra Tabela
                     if(!document.getElementById('conteudo-inscritos').classList.contains('hidden')) {
                         mudarAbaTorneio('classificacao');
                     }
@@ -336,6 +330,7 @@
                     badge.innerText = "Você está inscrito!";
                     badge.className = "absolute top-2 right-2 bg-blue-500 text-white text-[10px] font-black px-2 py-1 rounded uppercase shadow-md z-20";
                     btn.innerText = "AGUARDANDO SORTEIO...";
+                    btn.disabled = true;
                     btn.className = "w-full bg-blue-600 text-white font-black py-4 rounded-xl shadow-lg border-2 border-blue-400 uppercase tracking-widest text-lg opacity-80 cursor-not-allowed";
                     btn.onclick = null;
                 } 
@@ -343,6 +338,7 @@
                     badge.innerText = "Torneio Lotado";
                     badge.className = "absolute top-2 right-2 bg-red-500 text-white text-[10px] font-black px-2 py-1 rounded uppercase shadow-md z-20";
                     btn.innerText = "LOTADO";
+                    btn.disabled = true;
                     btn.className = "w-full bg-red-600 text-white font-black py-4 rounded-xl shadow-lg border-2 border-red-400 uppercase tracking-widest text-lg opacity-80 cursor-not-allowed";
                     btn.onclick = null;
                 } 
@@ -350,6 +346,7 @@
                     badge.innerText = "Inscrições Abertas";
                     badge.className = "absolute top-2 right-2 bg-green-500 text-black text-[10px] font-black px-2 py-1 rounded uppercase shadow-md z-20 animate-pulse";
                     btn.innerText = "GARANTIR VAGA";
+                    btn.disabled = false; // <-- AQUI ESTAVA O ERRO!
                     btn.className = "w-full bg-green-600 hover:bg-green-500 text-white font-black py-4 rounded-xl shadow-lg border-2 border-green-400 uppercase tracking-widest transition-transform active:scale-95 text-lg";
                     
                     btn.onclick = async () => {

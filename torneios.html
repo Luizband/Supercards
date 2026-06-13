@@ -451,11 +451,62 @@
                     btn.className = "w-full bg-green-600 hover:bg-green-500 text-white font-black py-4 rounded-xl shadow-lg border-2 border-green-400 uppercase tracking-widest transition-transform active:scale-95 text-lg";
                     
                     btn.onclick = async () => {
-                        btn.innerText = "PROCESSANDO..."; btn.disabled = true;
+                        btn.innerText = "VERIFICANDO DECK..."; 
+                        btn.disabled = true;
+                        
                         try {
+                            // 1. Puxa os dados do jogador
+                            const snapJogador = await getDoc(doc(db, "users", currentUserUid));
+                            const dadosJogador = snapJogador.data();
+                            
+                            // 2. Verifica se ele tem um deck padrão selecionado
+                            const deckId = dadosJogador.deckPadrao;
+                            if (!deckId || !dadosJogador.decks || !dadosJogador.decks[deckId]) {
+                                alert("⚠️ ACESSO NEGADO: Você precisa ir na aba DECKS, criar um deck e defini-lo como Padrão antes de se inscrever!");
+                                btn.innerText = "GARANTIR VAGA"; btn.disabled = false;
+                                return;
+                            }
+                            
+                            // 3. Puxa as cartas do deck selecionado
+                            const deckSelecionado = dadosJogador.decks[deckId].cartas || [];
+                            
+                            // 4. Verifica se o deck tem exatamente 20 cartas
+                            if (deckSelecionado.length !== 20) {
+                                alert("⚠️ ACESSO NEGADO: O seu Deck Padrão está incompleto. Ele precisa ter exatamente 20 cartas para o Torneio!");
+                                btn.innerText = "GARANTIR VAGA"; btn.disabled = false;
+                                return;
+                            }
+                            
+                            // 5. Verifica se ele ainda possui as cartas (não foram trocadas/recicladas)
+                            let cartasValidas = 0;
+                            let contagemDeck = {};
+                            deckSelecionado.forEach(c => contagemDeck[c] = (contagemDeck[c] || 0) + 1);
+                            
+                            const colecaoJogador = dadosJogador.colecao || {};
+                            for (let cId in contagemDeck) {
+                                const qtdNecessaria = contagemDeck[cId];
+                                const qtdPossuida = colecaoJogador[cId] || 0;
+                                if (qtdPossuida >= qtdNecessaria) {
+                                    cartasValidas += qtdNecessaria;
+                                } else {
+                                    cartasValidas += qtdPossuida; 
+                                }
+                            }
+                            
+                            if (cartasValidas < 20) {
+                                alert("⚠️ ACESSO NEGADO: Seu Deck Padrão possui cartas que foram trocadas ou vendidas. Vá até a aba DECKS e atualize-o!");
+                                btn.innerText = "GARANTIR VAGA"; btn.disabled = false;
+                                return;
+                            }
+
+                            // 6. Tudo perfeito? Inscreve no torneio!
+                            btn.innerText = "INSCREVENDO...";
                             await updateDoc(torneioRef, { inscritos: arrayUnion(currentUserUid) });
+                            
                         } catch (error) {
-                            alert("Erro na inscrição!"); btn.innerText = "GARANTIR VAGA"; btn.disabled = false;
+                            console.error(error);
+                            alert("Erro na inscrição! Verifique sua internet."); 
+                            btn.innerText = "GARANTIR VAGA"; btn.disabled = false;
                         }
                     };
                 }

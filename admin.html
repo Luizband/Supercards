@@ -28,43 +28,48 @@
             <button onclick="location.reload()" class="text-gray-400 hover:text-red-500 font-bold uppercase text-sm">Desconectar</button>
         </header>
 
-        <div class="bg-gray-900 p-5 rounded-xl border-2 border-red-900 flex justify-between items-center">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-gray-900 p-5 rounded-xl border-2 border-red-900 flex justify-between items-center">
+                <div>
+                    <h2 class="font-black text-lg text-red-400 flex items-center gap-2">🚨 Status do Servidor</h2>
+                    <p class="text-xs text-gray-400 mt-1">Ligar manutenção expulsa os jogadores.</p>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <button onclick="alternarManutencao(true)" class="bg-red-600 hover:bg-red-500 px-4 py-2 rounded font-black uppercase text-[10px] shadow-lg">Trancar Jogo</button>
+                    <button onclick="alternarManutencao(false)" class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded font-black uppercase text-[10px] shadow-lg">Liberar Jogo</button>
+                </div>
+            </div>
+
+            <div class="bg-gray-900 p-5 rounded-xl border-2 border-yellow-700 flex justify-between items-center">
+                <div>
+                    <h2 class="font-black text-lg text-yellow-400 flex items-center gap-2">🏆 Gestão de Torneios</h2>
+                    <p class="text-xs text-gray-400 mt-1">Gera a tabela de 8 jogadores (Bots + Contas).</p>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <button onclick="gerarTabelaTorneio('brasileirao_01')" id="btn-gerar-torneio" class="bg-yellow-600 hover:bg-yellow-500 text-black px-4 py-2 rounded font-black uppercase text-[10px] shadow-lg transition-transform active:scale-95">1. Iniciar Brasileirão</button>
+                    <button onclick="liberarProximaRodada('brasileirao_01')" id="btn-avancar-rodada" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded font-black uppercase text-[10px] shadow-lg transition-transform active:scale-95">2. Liberar Próxima Rodada</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gray-900 p-5 rounded-xl border-2 border-cyan-700 flex justify-between items-center">
             <div>
-                <h2 class="font-black text-lg text-red-400 flex items-center gap-2">🚨 Status do Servidor</h2>
-                <p class="text-xs text-gray-400 mt-1">Ligar a manutenção expulsa IMEDIATAMENTE todos os jogadores online para uma tela de aviso.</p>
+                <h2 class="font-black text-lg text-cyan-400 flex items-center gap-2">🤖 Central de Testes (Bots)</h2>
+                <p class="text-xs text-gray-400 mt-1">Cria fantasmas e simula os resultados das partidas entre eles.</p>
             </div>
             <div class="flex gap-2">
-                <button onclick="alternarManutencao(true)" class="bg-red-600 hover:bg-red-500 px-6 py-3 rounded font-black uppercase text-sm shadow-lg border border-red-400">Trancar Jogo</button>
-                <button onclick="alternarManutencao(false)" class="bg-green-600 hover:bg-green-500 px-6 py-3 rounded font-black uppercase text-sm shadow-lg border border-green-400">Liberar Jogo</button>
-            </div>
-        </div>
-
-        <div class="bg-gray-900 p-5 rounded-xl border-2 border-yellow-700 flex justify-between items-center">
-            <div>
-                <h2 class="font-black text-lg text-yellow-400 flex items-center gap-2">🏆 Gestão de Torneios</h2>
-                <p class="text-xs text-gray-400 mt-1">Gera a tabela e controla o avanço seguro das rodadas.</p>
-            </div>
-            <div class="flex flex-col gap-2">
-                <button onclick="gerarTabelaTorneio('brasileirao_01')" id="btn-gerar-torneio" class="bg-yellow-600 hover:bg-yellow-500 text-black px-6 py-2 rounded font-black uppercase text-xs shadow-lg transition-transform active:scale-95">1. Iniciar Brasileirão</button>
-                <button onclick="liberarProximaRodada('brasileirao_01')" id="btn-avancar-rodada" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded font-black uppercase text-xs shadow-lg transition-transform active:scale-95">2. Liberar Próxima Rodada</button>
-            </div>
-        </div>
-
-        <div class="bg-gray-900 p-5 rounded-xl border border-gray-700">
-            <h2 class="font-black text-lg mb-4 text-blue-400 flex items-center gap-2">📢 Aviso Global</h2>
-            <div class="flex gap-3">
-                <input id="input-titulo" type="text" placeholder="Título do Aviso" class="w-1/3 bg-gray-800 p-3 rounded border border-gray-600 focus:border-blue-500 outline-none">
-                <input id="input-texto" type="text" placeholder="Texto da mensagem..." class="flex-1 bg-gray-800 p-3 rounded border border-gray-600 focus:border-blue-500 outline-none">
-                <button id="btn-enviar-msg" class="bg-blue-600 hover:bg-blue-500 px-6 rounded font-black transition-all uppercase">Disparar</button>
+                <button onclick="injetarBots()" class="bg-cyan-600 hover:bg-cyan-500 px-4 py-2 rounded font-black uppercase text-xs shadow-lg">Injetar 6 Bots</button>
+                <button onclick="simularBots()" class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded font-black uppercase text-xs shadow-lg">Simular Jogos dos Bots</button>
+                <button onclick="resetarTorneio()" class="bg-red-700 hover:bg-red-600 px-4 py-2 rounded font-black uppercase text-xs shadow-lg">Resetar Torneio</button>
             </div>
         </div>
 
         <div class="bg-gray-900 p-5 rounded-xl border border-gray-700 flex flex-col gap-6">
             
             <div class="flex flex-col gap-2 border-b border-gray-700 pb-6">
-                <h2 class="font-black text-lg text-green-400 flex items-center gap-2">🎯 Localizar Jogador</h2>
+                <h2 class="font-black text-lg text-green-400 flex items-center gap-2">🎯 Localizar Jogador (Busca Inteligente)</h2>
                 <div class="flex gap-3">
-                    <input id="input-busca" type="text" placeholder="Digite o NOME EXATO ou o UID do jogador..." class="flex-1 bg-gray-800 p-4 rounded-lg border border-gray-600 focus:border-green-500 outline-none font-bold text-lg">
+                    <input id="input-busca" type="text" placeholder="Digite QUALQUER PARTE do nome ou o UID..." class="flex-1 bg-gray-800 p-4 rounded-lg border border-gray-600 focus:border-green-500 outline-none font-bold text-lg">
                     <button id="btn-buscar" class="bg-green-600 hover:bg-green-500 px-8 rounded-lg font-black transition-all uppercase text-lg shadow-lg">Buscar</button>
                 </div>
             </div>
@@ -95,29 +100,6 @@
                             <div class="flex"><input type="number" id="edit-xp" class="w-full bg-gray-900 p-2 rounded-l border border-gray-600 text-white font-bold"><button onclick="salvarCampo('xp')" class="bg-cyan-600 px-3 rounded-r font-bold hover:bg-cyan-500">Salvar</button></div>
                         </div>
                     </div>
-
-                    <div class="bg-gray-800 p-4 rounded-lg border border-gray-600">
-                        <h4 class="font-black text-sm text-gray-300 uppercase mb-3">📦 Inventário (Pacotes)</h4>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="text-xs font-bold text-gray-400">P. Básico</label>
-                                <div class="flex"><input type="number" id="edit-pac-basico" class="w-full bg-gray-900 p-2 rounded-l border border-gray-600 font-bold"><button onclick="salvarNested('inventario.pacoteBasico', 'edit-pac-basico')" class="bg-gray-600 px-3 rounded-r font-bold hover:bg-gray-500">OK</button></div>
-                            </div>
-                            <div>
-                                <label class="text-xs font-bold text-gray-400">P. Premium</label>
-                                <div class="flex"><input type="number" id="edit-pac-premium" class="w-full bg-gray-900 p-2 rounded-l border border-gray-600 font-bold"><button onclick="salvarNested('inventario.pacotePremium', 'edit-pac-premium')" class="bg-yellow-600 px-3 rounded-r font-bold hover:bg-yellow-500">OK</button></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-gray-800 p-4 rounded-lg border border-gray-600">
-                        <h4 class="font-black text-sm text-gray-300 uppercase mb-3">🃏 Forçar Carta na Coleção</h4>
-                        <div class="flex gap-2">
-                            <input type="text" id="edit-carta-id" placeholder="ID da Carta (Ex: 001)" class="flex-1 bg-gray-900 p-2 rounded border border-gray-600 font-bold text-center">
-                            <button onclick="gerenciarArray('cartas', 'edit-carta-id', 'add')" class="bg-green-600 hover:bg-green-500 px-4 rounded font-bold">Dar Carta</button>
-                            <button onclick="gerenciarArray('cartas', 'edit-carta-id', 'remove')" class="bg-red-600 hover:bg-red-500 px-4 rounded font-bold">Tirar Carta</button>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="flex flex-col h-full">
@@ -125,7 +107,7 @@
                         <span>💾 Raio-X do Banco de Dados</span>
                         <button onclick="carregarJogador(window.currentUserUid)" class="text-blue-400 hover:underline">Atualizar Visão</button>
                     </h4>
-                    <pre id="json-viewer" class="bg-black p-4 rounded-lg border border-gray-700 text-green-400 text-xs font-mono overflow-auto flex-1 max-h-[600px] shadow-inner"></pre>
+                    <pre id="json-viewer" class="bg-black p-4 rounded-lg border border-gray-700 text-green-400 text-xs font-mono overflow-auto flex-1 max-h-[400px] shadow-inner"></pre>
                 </div>
             </div>
         </div>
@@ -153,20 +135,85 @@
         document.getElementById('btn-login').addEventListener('click', async () => {
             const email = document.getElementById('email-admin').value.trim();
             const senha = document.getElementById('senha-admin').value.trim();
-            
-            if (!email || !senha) return alert("Preencha tudo!");
-            if (email !== EMAIL_ADMIN_EXCLUSIVO) { alert("Acesso Negado!"); return; }
-
+            if (!email || !senha) return;
             try {
                 document.getElementById('btn-login').innerText = "Verificando...";
                 await signInWithEmailAndPassword(auth, email, senha);
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('admin-panel').classList.remove('hidden');
-            } catch (e) { 
-                alert("Senha incorreta ou acesso negado!"); 
-                document.getElementById('btn-login').innerText = "Acessar Sistema";
-            }
+            } catch (e) { alert("Acesso negado!"); document.getElementById('btn-login').innerText = "Acessar Sistema"; }
         });
+
+        // ==========================================
+        // GESTÃO DOS BOTS E TESTES
+        // ==========================================
+        window.injetarBots = async () => {
+            if(!confirm("Criar 6 Bots e inscrevê-los no Brasileirão agora?")) return;
+            try {
+                for(let i=1; i<=6; i++) {
+                    const botId = `bot_0${i}`;
+                    await setDoc(doc(db, "users", botId), {
+                        nome: `BOT TESTADOR 0${i}`, nomeDisplay: `BOT 0${i}`,
+                        fotoPerfil: "fundo_carta.png", nivel: 99, isBot: true
+                    }, {merge: true});
+                    await updateDoc(doc(db, "torneios", "brasileirao_01"), {
+                        inscritos: arrayUnion(botId)
+                    });
+                }
+                alert("✅ 6 Bots Injetados com sucesso! Inscreva suas 2 contas e inicie o torneio.");
+            } catch(e) { console.error(e); alert("Erro ao injetar bots."); }
+        };
+
+        window.simularBots = async () => {
+             try {
+                 const tDoc = await getDoc(doc(db, "torneios", "brasileirao_01"));
+                 const dados = tDoc.data();
+                 const rodada = dados.rodadaAtual;
+                 let atualizou = false;
+                 
+                 dados.rodadas[rodada].confrontos.forEach(jogo => {
+                     // Se o jogo for BOT vs BOT e ainda não acabou
+                     if(jogo.status !== 'finalizado' && jogo.jogador1.startsWith('bot_') && jogo.jogador2.startsWith('bot_')) {
+                         jogo.status = 'finalizado';
+                         const r = Math.random();
+                         if(r < 0.33) {
+                             jogo.vencedor = jogo.jogador1;
+                             dados.classificacao[jogo.jogador1].pontos += 3;
+                             dados.classificacao[jogo.jogador1].vitorias += 1;
+                             dados.classificacao[jogo.jogador2].derrotas += 1;
+                             dados.classificacao[jogo.jogador1].saldoPontos += Math.floor(Math.random()*5);
+                         } else if (r < 0.66) {
+                             jogo.vencedor = jogo.jogador2;
+                             dados.classificacao[jogo.jogador2].pontos += 3;
+                             dados.classificacao[jogo.jogador2].vitorias += 1;
+                             dados.classificacao[jogo.jogador1].derrotas += 1;
+                             dados.classificacao[jogo.jogador2].saldoPontos += Math.floor(Math.random()*5);
+                         } else {
+                             jogo.vencedor = 'empate';
+                             dados.classificacao[jogo.jogador1].pontos += 1;
+                             dados.classificacao[jogo.jogador1].empates += 1;
+                             dados.classificacao[jogo.jogador2].pontos += 1;
+                             dados.classificacao[jogo.jogador2].empates += 1;
+                         }
+                         atualizou = true;
+                     }
+                 });
+                 if(atualizou) {
+                     await updateDoc(doc(db, "torneios", "brasileirao_01"), {
+                         rodadas: dados.rodadas, classificacao: dados.classificacao
+                     });
+                     alert(`✅ Resultados da Rodada ${rodada} gerados para os Bots!`);
+                 } else { alert("Nenhum jogo entre dois Bots pendente nesta rodada."); }
+             } catch(e) { console.error(e); }
+        };
+
+        window.resetarTorneio = async () => {
+             if(!confirm("🚨 ATENÇÃO! Isso vai apagar a tabela e resetar o Brasileirão inteiro. Certeza?")) return;
+             await setDoc(doc(db, "torneios", "brasileirao_01"), {
+                 nome: "Brasileirão Supercards", status: "aberto", inscritos: [], maxInscritos: 8
+             });
+             alert("✅ Torneio Resetado!");
+        };
 
         // ==========================================
         // ALGORITMO DO TORNEIO (ROUND ROBIN)
@@ -177,18 +224,13 @@
 
             try {
                 const docTorneio = await getDoc(doc(db, "torneios", idTorneio));
-                
-                if (!docTorneio.exists()) {
-                    alert("O torneio não existe! Alguém precisa se inscrever primeiro para criar a sala.");
-                    throw new Error("Torneio não encontrado");
-                }
+                if (!docTorneio.exists()) throw new Error("Torneio não encontrado");
 
                 const dados = docTorneio.data();
                 const inscritos = dados.inscritos || [];
 
-                // Verifica se tem 10 pessoas exatas (Você pode mudar isso depois se quiser testar com menos)
-                if (inscritos.length !== 10) {
-                    alert(`Não é possível iniciar! O torneio precisa de 10 inscritos, mas atualmente tem ${inscritos.length}.`);
+                if (inscritos.length !== 8) {
+                    alert(`O torneio precisa de exatamente 8 inscritos (Você + 7 Bots), mas atualmente tem ${inscritos.length}.`);
                     throw new Error("Número de jogadores inválido");
                 }
 
@@ -197,160 +239,89 @@
                     throw new Error("Status inválido");
                 }
 
-                // Embaralha os jogadores para os confrontos serem aleatórios
                 let jogadores = [...inscritos].sort(() => Math.random() - 0.5);
-                
-                // --- MOTOR DO ROUND ROBIN (Circle Method) ---
                 let rodadas = {};
                 let numJogadores = jogadores.length;
-                let rodadasIda = numJogadores - 1; // 9 rodadas
+                let rodadasIda = numJogadores - 1; 
 
-                // Gerando IDA (Rodadas 1 a 9)
                 for (let r = 0; r < rodadasIda; r++) {
                     let confrontosDaRodada = [];
                     for (let i = 0; i < numJogadores / 2; i++) {
                         let p1 = jogadores[i];
                         let p2 = jogadores[numJogadores - 1 - i];
-                        
-                        // Garante que não haja jogo contra "ninguém" em chaves ímpares (não se aplica aqui pois são 10)
-                        confrontosDaRodada.push({
-                            jogador1: p1,
-                            jogador2: p2,
-                            status: 'pendente', // pendente, andamento, finalizado
-                            vencedor: null // uid do vencedor ou 'empate'
-                        });
+                        confrontosDaRodada.push({ jogador1: p1, jogador2: p2, status: 'pendente', vencedor: null });
                     }
-                    
                     rodadas[r + 1] = { finalizada: false, confrontos: confrontosDaRodada };
-
-                    // Rotaciona os jogadores (mantendo o índice 0 fixo)
                     jogadores.splice(1, 0, jogadores.pop());
                 }
 
-                // Gerando VOLTA (Rodadas 10 a 18) - Invertendo mando de campo
                 for (let r = 1; r <= rodadasIda; r++) {
                     let confrontosVolta = rodadas[r].confrontos.map(jogo => {
-                        return {
-                            jogador1: jogo.jogador2, // Inverte P1 e P2
-                            jogador2: jogo.jogador1,
-                            status: 'pendente',
-                            vencedor: null
-                        };
+                        return { jogador1: jogo.jogador2, jogador2: jogo.jogador1, status: 'pendente', vencedor: null };
                     });
-                    rodadas[r + 9] = { finalizada: false, confrontos: confrontosVolta };
+                    rodadas[r + rodadasIda] = { finalizada: false, confrontos: confrontosVolta };
                 }
 
-                // Criando Tabela de Classificação Zerada
                 let tabelaZerada = {};
                 inscritos.forEach(uid => {
                     tabelaZerada[uid] = { pontos: 0, vitorias: 0, empates: 0, derrotas: 0, saldoPontos: 0 };
                 });
 
-                // SALVANDO TUDO NO BANCO
                 await updateDoc(doc(db, "torneios", idTorneio), {
-                    status: "em_andamento",
-                    rodadaAtual: 1, // Começa na rodada 1
-                    rodadas: rodadas,
-                    classificacao: tabelaZerada,
-                    iniciadoEm: new Date().toISOString()
+                    status: "em_andamento", rodadaAtual: 1, rodadas: rodadas,
+                    classificacao: tabelaZerada, iniciadoEm: new Date().toISOString()
                 });
 
-                alert("✅ SUCESSO! Tabela gerada, confrontos criados e torneio iniciado com sucesso.");
-            } catch(e) {
-                console.error("Erro ao gerar torneio:", e);
-            } finally {
+                alert("✅ SUCESSO! Tabela gerada, confrontos criados e torneio iniciado.");
+            } catch(e) { console.error("Erro:", e); } finally {
                 btn.innerText = "1. Iniciar Brasileirão"; btn.disabled = false;
             }
         };
 
-        // ==========================================
-        // ALGORITMO PARA AVANÇAR A RODADA
-        // ==========================================
         window.liberarProximaRodada = async (idTorneio) => {
             const btn = document.getElementById('btn-avancar-rodada');
             btn.innerText = "VERIFICANDO..."; btn.disabled = true;
 
             try {
                 const docTorneio = await getDoc(doc(db, "torneios", idTorneio));
-                if (!docTorneio.exists()) throw new Error("Torneio não encontrado");
-
                 const dados = docTorneio.data();
-                
-                if (dados.status !== "em_andamento") {
-                    alert("O torneio não está em andamento! Você precisa iniciar o campeonato primeiro.");
-                    throw new Error("Status inválido");
-                }
+                if (dados.status !== "em_andamento") throw new Error("Status inválido");
 
                 const rodadaAtual = dados.rodadaAtual;
                 const totalRodadas = Object.keys(dados.rodadas).length;
 
-                if (rodadaAtual >= totalRodadas) {
-                    alert("O torneio já está na última rodada! Todos os jogos já foram liberados.");
-                    throw new Error("Fim das rodadas");
-                }
+                if (rodadaAtual >= totalRodadas) return alert("O torneio já está na última rodada!");
 
-                // TRAVA DE SEGURANÇA: Verifica se todos os jogos da rodada atual acabaram
-                const jogosDaRodada = dados.rodadas[rodadaAtual].confrontos;
-                const jogosPendentes = jogosDaRodada.filter(jogo => jogo.status !== 'finalizado');
+                const jogosPendentes = dados.rodadas[rodadaAtual].confrontos.filter(jogo => jogo.status !== 'finalizado');
+                if (jogosPendentes.length > 0) return alert(`🚨 NÃO PERMITIDO! Faltam ${jogosPendentes.length} jogos para a Rodada ${rodadaAtual} acabar.`);
 
-                if (jogosPendentes.length > 0) {
-                    alert(`🚨 NÃO PERMITIDO! Ainda faltam ${jogosPendentes.length} jogos para a Rodada ${rodadaAtual} acabar. Todos precisam jogar antes de avançar!`);
-                    throw new Error("Rodada incompleta");
-                }
-
-                // Se passou pela trava, atualiza o banco para a próxima rodada!
-                await updateDoc(doc(db, "torneios", idTorneio), {
-                    rodadaAtual: rodadaAtual + 1
-                });
-
-                alert(`✅ SUCESSO! A Rodada ${rodadaAtual + 1} foi liberada para os jogadores.`);
-            } catch(e) {
-                console.error("Erro ao avançar rodada:", e);
-            } finally {
+                await updateDoc(doc(db, "torneios", idTorneio), { rodadaAtual: rodadaAtual + 1 });
+                alert(`✅ A Rodada ${rodadaAtual + 1} foi liberada!`);
+            } catch(e) {} finally {
                 btn.innerText = "2. Liberar Próxima Rodada"; btn.disabled = false;
             }
         };
 
-        // MANUTENÇÃO E OUTROS SCRIPTS MANTIDOS INTACTOS...
-        window.alternarManutencao = async (status) => {
-            if(status && !confirm("TEM CERTEZA? Ligar a manutenção vai expulsar todos os jogadores online IMEDIATAMENTE!")) return;
-            try {
-                await setDoc(doc(db, "sistema", "configuracao"), { emManutencao: status }, { merge: true });
-                alert(status ? "⛔ MANUTENÇÃO LIGADA! Todos os acessos foram bloqueados." : "✅ JOGO LIBERADO! Jogadores já podem entrar.");
-            } catch(e) { alert("Erro ao alterar o status do servidor."); }
-        };
-
-        document.getElementById('btn-enviar-msg').addEventListener('click', async () => {
-            const titulo = document.getElementById('input-titulo').value.trim();
-            const texto = document.getElementById('input-texto').value.trim();
-            if (!titulo || !texto) return alert("Preencha título e texto!");
-
-            const btn = document.getElementById('btn-enviar-msg');
-            btn.innerText = "Enviando..."; btn.disabled = true;
-
-            try {
-                const users = await getDocs(collection(db, "users"));
-                const msg = { id: "admin_"+Date.now(), titulo, texto, lida: false, data: new Date().toISOString() };
-                users.forEach(async (u) => { await updateDoc(doc(db, "users", u.id), { notificacoes: arrayUnion(msg) }); });
-                alert("Aviso enviado!");
-                document.getElementById('input-titulo').value = ''; document.getElementById('input-texto').value = '';
-            } catch(e) { alert("Erro ao enviar mensagem."); }
-            btn.innerText = "Disparar"; btn.disabled = false;
-        });
-
+        // NOVA BUSCA INTELIGENTE DE JOGADORES (Ignora maiúsculas e minúsculas e busca em display e nome)
         document.getElementById('btn-buscar').addEventListener('click', async () => {
-            const buscaStr = document.getElementById('input-busca').value.trim();
+            const buscaStr = document.getElementById('input-busca').value.trim().toLowerCase();
             if (!buscaStr) return alert("Digite um Nome ou UID!");
 
             const btn = document.getElementById('btn-buscar');
-            btn.innerText = "...";
+            btn.innerText = "Buscando...";
             
             try {
                 let userDoc = null;
                 if (buscaStr.length < 20) {
-                    const q = query(collection(db, "users"), where("nome", "==", buscaStr));
-                    const querySnapshot = await getDocs(q);
-                    if (!querySnapshot.empty) { userDoc = querySnapshot.docs[0]; }
+                    const querySnapshot = await getDocs(collection(db, "users"));
+                    querySnapshot.forEach(doc => {
+                        const data = doc.data();
+                        const nome = (data.nome || "").toLowerCase();
+                        const nomeDisplay = (data.nomeDisplay || "").toLowerCase();
+                        if (nome.includes(buscaStr) || nomeDisplay.includes(buscaStr)) {
+                            userDoc = doc;
+                        }
+                    });
                 } else {
                     const snap = await getDoc(doc(db, "users", buscaStr));
                     if (snap.exists()) userDoc = snap;
@@ -368,53 +339,30 @@
             btn.innerText = "Buscar";
         });
 
+        window.alternarManutencao = async (status) => {
+            if(status && !confirm("TEM CERTEZA?")) return;
+            await setDoc(doc(db, "sistema", "configuracao"), { emManutencao: status }, { merge: true });
+            alert(status ? "⛔ MANUTENÇÃO LIGADA!" : "✅ JOGO LIBERADO!");
+        };
+
         window.carregarJogador = async (uid) => {
             const snap = await getDoc(doc(db, "users", uid));
             if(!snap.exists()) return;
             const data = snap.data();
-            document.getElementById('lbl-nome-jogador').innerText = data.nome || "Sem Nome";
+            document.getElementById('lbl-nome-jogador').innerText = data.nomeDisplay || data.nome || "Sem Nome";
             document.getElementById('lbl-uid-jogador').innerText = "UID: " + uid;
             document.getElementById('edit-moedas').value = data.moedas || 0;
             document.getElementById('edit-frag').value = data.fragmentos || 0;
             document.getElementById('edit-nivel').value = data.nivel || 1;
             document.getElementById('edit-xp').value = data.xp || 0;
-            document.getElementById('edit-pac-basico').value = (data.inventario && data.inventario.pacoteBasico) || 0;
-            document.getElementById('edit-pac-premium').value = (data.inventario && data.inventario.pacotePremium) || 0;
             document.getElementById('json-viewer').innerText = JSON.stringify(data, null, 4);
         };
 
         window.salvarCampo = async (campo) => {
             const inputId = `edit-${campo === 'fragmentos' ? 'frag' : campo}`;
             const valor = Number(document.getElementById(inputId).value);
-            try {
-                await updateDoc(doc(db, "users", window.currentUserUid), { [campo]: valor });
-                window.carregarJogador(window.currentUserUid);
-            } catch(e) { alert("Erro ao salvar " + campo); }
-        };
-
-        window.salvarNested = async (caminhoBD, inputId) => {
-            const valor = Number(document.getElementById(inputId).value);
-            try {
-                await updateDoc(doc(db, "users", window.currentUserUid), { [caminhoBD]: valor });
-                window.carregarJogador(window.currentUserUid);
-            } catch(e) { alert("Erro ao salvar pacote"); }
-        };
-
-        window.gerenciarArray = async (campoArray, inputId, acao) => {
-            const valorStr = document.getElementById(inputId).value.trim();
-            if(!valorStr) return alert("Digite o ID primeiro!");
-            try {
-                const docRef = doc(db, "users", window.currentUserUid);
-                if (acao === 'add') {
-                    await updateDoc(docRef, { [campoArray]: arrayUnion(valorStr) });
-                    alert(`Item ${valorStr} ADICIONADO ao perfil!`);
-                } else {
-                    await updateDoc(docRef, { [campoArray]: arrayRemove(valorStr) });
-                    alert(`Item ${valorStr} REMOVIDO do perfil!`);
-                }
-                document.getElementById(inputId).value = '';
-                window.carregarJogador(window.currentUserUid);
-            } catch(e) { alert("Erro ao modificar a coleção."); }
+            await updateDoc(doc(db, "users", window.currentUserUid), { [campo]: valor });
+            window.carregarJogador(window.currentUserUid);
         };
     </script>
 </body>

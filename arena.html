@@ -128,7 +128,6 @@
         <div id="modal-resultado-final" class="hidden fixed inset-0 bg-black/95 z-[300] flex flex-col items-center justify-center p-4">
             <h1 id="texto-vitoria" class="text-4xl font-black text-white uppercase tracking-widest mb-6 drop-shadow-2xl text-center"></h1>
             
-            <!-- CAIXA DE RECOMPENSAS (SÓ APARECE SE GANHAR) -->
             <div id="recompensas-final" class="hidden bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 w-full max-w-xs flex flex-col items-center gap-2 mb-8 shadow-2xl">
                 <span class="text-[#7a32a8] font-black text-lg tracking-widest uppercase">Recompensas</span>
                 <div class="flex w-full justify-around mt-2">
@@ -137,7 +136,7 @@
                 </div>
             </div>
 
-            <button onclick="window.location.href='batalha.html'" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-4 px-12 rounded-full shadow-lg border-2 border-white tracking-widest text-lg">FINALIZAR</button>
+            <button id="btn-finalizar-batalha" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-4 px-12 rounded-full shadow-lg border-2 border-white tracking-widest text-lg">FINALIZAR</button>
         </div>
 
     </div>
@@ -145,7 +144,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, deleteDoc, getDoc, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, deleteDoc, getDoc, increment, arrayUnion, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         import { INFO_CARTAS } from './cartas.js';
 
         const app = initializeApp({
@@ -168,6 +167,11 @@
         let cartaFocadaId = null;
         let ultimoEstadoToast = null; 
         let etapaFim = 0, pointsJ1 = 0, pointsJ2 = 0;
+
+        // Variaveis de Integração Segura do Torneio
+        window.isTorneio = false;
+        window.torneioId = null;
+        window.torneioOpp = null;
 
         function shuffle(array) {
             let currentIndex = array.length, randomIndex;
@@ -200,7 +204,131 @@
                 myMao.innerHTML += `<div onclick="abrirZoomCarta('${id}')" class="w-[26%] max-w-[100px] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-2xl border-2 border-black hover:border-[#4ade80] cursor-pointer hover-carta relative overflow-hidden" style="z-index: ${i};"><img src="${info.miniatura || info.imagem}" class="w-full h-full object-cover"></div>`;
             });
             document.getElementById('arena-combate').classList.add('hidden');
+
+            // === INJEÇÃO DO BOTÃO DE FORÇAR VITÓRIA PARA BOTS NO TORNEIO ===
+            if (window.isTorneio && window.torneioOpp && window.torneioOpp.startsWith('bot_')) {
+                if (!document.getElementById('btn-forcar-bot')) {
+                    const container = document.querySelector('.w-full.h-full.max-w-sm.relative');
+                    const btn = document.createElement('button');
+                    btn.id = 'btn-forcar-bot';
+                    btn.innerHTML = 'FORÇAR VITÓRIA (BOT)';
+                    btn.className = 'absolute top-32 left-1/2 transform -translate-x-1/2 bg-red-600 hover:bg-red-500 text-white font-black px-6 py-2 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.8)] z-[60] border-2 border-white animate-pulse text-xs tracking-widest uppercase';
+                    btn.onclick = window.forcarVitoriaBot;
+                    container.appendChild(btn);
+                }
+            }
         }
+
+        // ====== LÓGICA DE REGISTRO DO TORNEIO (Invisível na casual) ======
+        window.registrarResultadoTorneio = async function(vencedorUid, placar1, placar2) {
+            try {
+                const tRef = doc(db, "torneios", window.torneioId);
+                const tSnap = await getDoc(tRef);
+                if (!tSnap.exists()) return;
+                const dados = tSnap.data();
+                const rodada = dados.rodadaAtual;
+                let atualizou = false;
+                
+                const uidHost = dadosSala.jogador1.uid;
+                const uidAdv = dadosSala.jogador2.uid;
+
+                dados.rodadas[rodada].confrontos.forEach(jogo => {
+                    if(jogo.status !== 'finalizado' && 
+                      ((jogo.jogador1 === uidHost && jogo.jogador2 === uidAdv) || 
+                       (jogo.jogador1 === uidAdv && jogo.jogador2 === uidHost))) {
+                        
+                        jogo.status = 'finalizado';
+                        jogo.vencedor = vencedorUid;
+                        
+                        if (jogo.jogador1 === uidHost) {
+                            jogo.placar1 = placar1; jogo.placar2 = placar2;
+                        } else {
+                            jogo.placar1 = placar2; jogo.placar2 = placar1;
+                        }
+                        
+                        if (vencedorUid === jogo.jogador1) {
+                            dados.classificacao[jogo.jogador1].pontos += 3;
+                            dados.classificacao[jogo.jogador1].vitorias += 1;
+                            dados.classificacao[jogo.jogador2].derrotas += 1;
+                        } else if (vencedorUid === jogo.jogador2) {
+                            dados.classificacao[jogo.jogador2].pontos += 3;
+                            dados.classificacao[jogo.jogador2].vitorias += 1;
+                            dados.classificacao[jogo.jogador1].derrotas += 1;
+                        } else { 
+                            dados.classificacao[jogo.jogador1].pontos += 1;
+                            dados.classificacao[jogo.jogador1].empates += 1;
+                            dados.classificacao[jogo.jogador2].pontos += 1;
+                            dados.classificacao[jogo.jogador2].empates += 1;
+                        }
+                        
+                        dados.classificacao[jogo.jogador1].saldoPontos += jogo.placar1;
+                        dados.classificacao[jogo.jogador2].saldoPontos += jogo.placar2;
+                        
+                        atualizou = true;
+                    }
+                });
+                if(atualizou) await updateDoc(tRef, { rodadas: dados.rodadas, classificacao: dados.classificacao });
+            } catch(e) { console.error("Erro ao registrar pontos no torneio:", e); }
+        };
+
+        window.forcarVitoriaBot = async () => {
+            if(!confirm("FORÇAR VITÓRIA PARA TESTE: Pular a partida contra o bot e ir para o torneio?")) return;
+            document.getElementById('btn-forcar-bot').innerText = "PROCESSANDO...";
+            
+            let myScore = Math.floor(Math.random() * 10) + 20; 
+            let botScore = Math.floor(Math.random() * 10) + 5; 
+            let p1Score = myScore; let p2Score = botScore;
+            
+            await window.registrarResultadoTorneio(currentUserUid, p1Score, p2Score);
+            await window.concederRecompensasArena(true); 
+            
+            try{ await deleteDoc(doc(db, "partidas", salaId)); }catch(e){}
+            window.location.href = 'torneios.html';
+        };
+
+        // ====== RECOMPENSAS PADRÃO (Isoladas para não quebrar nada) ======
+        window.concederRecompensasArena = async function(vitoria) {
+            if (!window.dadosSalvos) {
+                window.dadosSalvos = true;
+                try {
+                    const s = await getDoc(doc(db, "users", currentUserUid));
+                    if(s.exists()) {
+                        let d = s.data(); let ups = {};
+                        let ms = d.missoesDiarias || {}; let aM = false;
+                        
+                        (ms.lista || []).forEach(m => { 
+                            if(["batalhar","jogar_batalha","jogar"].includes(m.id) && m.progresso < m.meta) { m.progresso++; aM = true; } 
+                            if(vitoria && ["ganhar_partida","vencer_batalha","vencer"].includes(m.id) && m.progresso < m.meta) { m.progresso++; aM = true; } 
+                        });
+                        if(aM) ups.missoesDiarias = ms;
+
+                        if (vitoria) {
+                            ups['estatisticas.batalhasVencidas'] = increment(1); 
+                            let va = (d.estatisticas?.batalhasVencidas || 0) + 1;
+                            let xpB = 20; let moB = 20;
+                            
+                            if (va >= 30 && (!d.badges || !d.badges['badge-005'])) { 
+                                ups['badges.badge-005'] = true; xpB += 50; moB += 50; localStorage.setItem('novaBadge', 'Guerreiro'); 
+                            }
+                            
+                            let nA = d.nivel || 1; let nx = (d.xp || 0) + xpB; let sub = false; let pb = 0; let pp = 0;
+                            let mx = (nA <= 5) ? 200 : (nA <= 15 ? 750 : (nA <= 25 ? 1600 : 3000));
+                            while (nx >= mx && nA < 30) {
+                                nx -= mx; nA++; sub = true; moB += 30; pb++;
+                                if ([10, 20, 30].includes(nA)) pp++;
+                                mx = (nA <= 5) ? 200 : (nA <= 15 ? 750 : (nA <= 25 ? 1600 : 3000));
+                            }
+                            
+                            ups.xp = nx; ups.nivel = nA; ups.moedas = increment(moB);
+                            if(pb > 0) ups['inventario.pacoteBasico'] = increment(pb); 
+                            if(pp > 0) ups['inventario.pacotePremium'] = increment(pp);
+                            if(sub) localStorage.setItem('novoLevel', nA);
+                        }
+                        if(Object.keys(ups).length > 0) await updateDoc(doc(db, "users", currentUserUid), ups);
+                    }
+                } catch(e) { console.error("Erro ao salvar recompensas:", e); }
+            }
+        };
 
         function dispararToastsDeTurno() {
             if (dadosSala.status === 'finalizada') return;
@@ -213,14 +341,9 @@
             if (dadosSala.statusTurno === 'aguardando_ataque') window.mostrarToast(`Vez de ${nAtacante} escolher uma carta e atributo`);
             else if (dadosSala.statusTurno === 'aguardando_defesa') window.mostrarToast(`Vez de ${nDefensor} defender com ${dadosSala.atributoTurno.toUpperCase()}`);
             else if (dadosSala.statusTurno === 'exibindo_resultado') {
-                if (dadosSala.vencedorTurno === 'anuladas') {
-                    window.mostrarToast(`Empate absoluto! As cartas se ANULARAM.`);
-                } else if (dadosSala.vencedorTurno === 'desempate') {
-                    // TOAST NOVO DE DESEMPATE SEM MODAL EXTRA
-                    window.mostrarToast(`EMPATE!<br><span class="text-xs font-normal">${dadosSala.nomeVencedorTurno} venceu no atributo extra (${dadosSala.valorDesempate}).</span>`);
-                } else {
-                    window.mostrarToast(`${dadosSala.nomeVencedorTurno} ganhou o turno!`);
-                }
+                if (dadosSala.vencedorTurno === 'anuladas') window.mostrarToast(`Empate absoluto! As cartas se ANULARAM.`);
+                else if (dadosSala.vencedorTurno === 'desempate') window.mostrarToast(`EMPATE!<br><span class="text-xs font-normal">${dadosSala.nomeVencedorTurno} venceu no atributo extra (${dadosSala.valorDesempate}).</span>`);
+                else window.mostrarToast(`${dadosSala.nomeVencedorTurno} ganhou o turno!`);
             }
         }
 
@@ -337,61 +460,30 @@
                 const myP = minhaRole === 'jogador1' ? pointsJ1 : pointsJ2;
                 const oppP = minhaRole === 'jogador1' ? pointsJ2 : pointsJ1;
                 const vitoria = myP > oppP;
+                const isEmpate = myP === oppP;
                 
-                document.getElementById('texto-vitoria').innerText = vitoria ? "VITÓRIA!" : (myP === oppP ? "EMPATE" : "DERROTA");
+                document.getElementById('texto-vitoria').innerText = vitoria ? "VITÓRIA!" : (isEmpate ? "EMPATE" : "DERROTA");
                 
-                // EXIBE AS RECOMPENSAS APENAS SE GANHAR
-                if (vitoria) {
-                    document.getElementById('recompensas-final').classList.remove('hidden');
-                } else {
-                    document.getElementById('recompensas-final').classList.add('hidden');
-                }
+                if (vitoria) document.getElementById('recompensas-final').classList.remove('hidden');
+                else document.getElementById('recompensas-final').classList.add('hidden');
 
                 document.getElementById('modal-resultado-final').classList.remove('hidden');
 
-                if (!window.dadosSalvos) {
-                    window.dadosSalvos = true;
-                    try {
-                        const s = await getDoc(doc(db, "users", currentUserUid));
-                        if(s.exists()) {
-                            let d = s.data();
-                            let ups = {};
-                            
-                            let ms = d.missoesDiarias || {}; 
-                            let aM = false;
-                            (ms.lista || []).forEach(m => { 
-                                if(["batalhar","jogar_batalha","jogar"].includes(m.id) && m.progresso < m.meta) { m.progresso++; aM = true; } 
-                                if(vitoria && ["ganhar_partida","vencer_batalha","vencer"].includes(m.id) && m.progresso < m.meta) { m.progresso++; aM = true; } 
-                            });
-                            if(aM) ups.missoesDiarias = ms;
+                // Concede XP e Moedas Padrão
+                await window.concederRecompensasArena(vitoria);
 
-                            if (vitoria) {
-                                ups['estatisticas.batalhasVencidas'] = increment(1); 
-                                let va = (d.estatisticas?.batalhasVencidas || 0) + 1;
-                                let xpB = 20;
-                                let moB = 20;
-                                
-                                if (va >= 30 && (!d.badges || !d.badges['badge-005'])) { 
-                                    ups['badges.badge-005'] = true; xpB += 50; moB += 50; localStorage.setItem('novaBadge', 'Guerreiro'); 
-                                }
-                                
-                                let nA = d.nivel || 1; let nx = (d.xp || 0) + xpB; let sub = false; let pb = 0; let pp = 0;
-                                let mx = (nA <= 5) ? 200 : (nA <= 15 ? 750 : (nA <= 25 ? 1600 : 3000));
-                                while (nx >= mx && nA < 30) {
-                                    nx -= mx; nA++; sub = true; moB += 30; pb++;
-                                    if ([10, 20, 30].includes(nA)) pp++;
-                                    mx = (nA <= 5) ? 200 : (nA <= 15 ? 750 : (nA <= 25 ? 1600 : 3000));
-                                }
-                                
-                                ups.xp = nx; ups.nivel = nA; ups.moedas = increment(moB);
-                                if(pb > 0) ups['inventario.pacoteBasico'] = increment(pb); 
-                                if(pp > 0) ups['inventario.pacotePremium'] = increment(pp);
-                                if(sub) localStorage.setItem('novoLevel', nA);
-                            }
-
-                            if(Object.keys(ups).length > 0) await updateDoc(doc(db, "users", currentUserUid), ups);
-                        }
-                    } catch(e) { console.error("Erro ao salvar:", e); }
+                // SE FOR UMA PARTIDA OFICIAL DO TORNEIO (E SÓ SE FOR), REGISTRA OS PONTOS
+                // O Host registra para evitar que os dois jogadores tentem atualizar o placar ao mesmo tempo
+                if (window.isTorneio && isHost) {
+                    let vencedorUid = null;
+                    if (vitoria) vencedorUid = currentUserUid;
+                    else if (!isEmpate) vencedorUid = dadosSala[oppRole].uid;
+                    else vencedorUid = 'empate';
+                    
+                    let p1Score = minhaRole === 'jogador1' ? myP : oppP;
+                    let p2Score = minhaRole === 'jogador2' ? myP : oppP;
+                    
+                    await window.registrarResultadoTorneio(vencedorUid, p1Score, p2Score);
                 }
             }
         };
@@ -400,26 +492,71 @@
 
         window.abrirModalDesistir = function() { document.getElementById('modal-desistir').classList.remove('hidden'); };
         window.fecharModalDesistir = function() { document.getElementById('modal-desistir').classList.add('hidden'); };
-        window.confirmarDesistencia = async function() { if(salaId) try{ await deleteDoc(doc(db, "partidas", salaId)); }catch(e){} window.location.href = 'batalha.html'; };
+        window.confirmarDesistencia = async function() { 
+            if(salaId) try{ await deleteDoc(doc(db, "partidas", salaId)); }catch(e){} 
+            window.location.href = window.isTorneio ? 'torneios.html' : 'batalha.html'; 
+        };
 
-        onAuthStateChanged(auth, (user) => {
+        // Redireciona para o lugar certo no final da batalha
+        document.getElementById('btn-finalizar-batalha').onclick = () => {
+            window.location.href = window.isTorneio ? 'torneios.html' : 'batalha.html';
+        };
+
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUserUid = user.uid;
-                salaId = new URLSearchParams(window.location.search).get('sala');
+
+                // === LEÃO DE CHÁCARA DO TORNEIO (Invisível para partidas casuais) ===
+                let tAdv = localStorage.getItem("torneioAdversario");
+                let tId = localStorage.getItem("torneioId");
+                
+                if (tAdv && tId) {
+                    window.isTorneio = true; window.torneioId = tId; window.torneioOpp = tAdv;
+                    localStorage.removeItem("torneioAdversario"); localStorage.removeItem("torneioId");
+
+                    let ids = [currentUserUid, tAdv].sort();
+                    salaId = `tourney_${tId}_${ids[0]}_${ids[1]}`;
+                    window.history.replaceState({}, document.title, `arena.html?sala=${salaId}`);
+                    
+                    try {
+                        const salaSnap = await getDoc(doc(db, "partidas", salaId));
+                        if (!salaSnap.exists()) {
+                            let p1Uid = ids[0]; let p2Uid = ids[1];
+                            const mySnap = await getDoc(doc(db, "users", currentUserUid));
+                            const oppSnap = await getDoc(doc(db, "users", tAdv));
+                            let p1Data = p1Uid === currentUserUid ? mySnap.data() : oppSnap.data();
+                            let p2Data = p2Uid === currentUserUid ? mySnap.data() : oppSnap.data();
+                            
+                            let j1Deck = [...(p1Data.deckPadrao||[])]; let j2Deck = [...(p2Data.deckPadrao||[])];
+                            if(j2Deck.length === 0 && p2Uid.startsWith('bot_')) { j2Deck = Object.keys(INFO_CARTAS).slice(0, 12); }
+                            if(j1Deck.length === 0 && p1Uid.startsWith('bot_')) { j1Deck = Object.keys(INFO_CARTAS).slice(0, 12); }
+                            
+                            await setDoc(doc(db, "partidas", salaId), {
+                                status: 'aguardando',
+                                jogador1: { uid: p1Uid, nome: p1Data.nomeDisplay || p1Data.nome || 'JOGADOR 1', foto: p1Data.fotoPerfil || 'fundo_carta.png', deck: j1Deck },
+                                jogador2: { uid: p2Uid, nome: p2Data.nomeDisplay || p2Data.nome || 'JOGADOR 2', foto: p2Data.fotoPerfil || 'fundo_carta.png', deck: j2Deck }
+                            });
+                        }
+                    } catch(e) { console.error("Erro ao montar sala torneio:", e); }
+                } else {
+                    // SE NÃO TIVER PULSEIRA DO TORNEIO, SEGUE O BAILE NORMAL
+                    salaId = new URLSearchParams(window.location.search).get('sala');
+                }
+                // === FIM DA BARREIRA ===
+
                 if (!salaId) return window.location.href = 'batalha.html';
 
                 onSnapshot(doc(db, "partidas", salaId), (docSnap) => {
-                    if (!docSnap.exists()) return window.location.href = 'batalha.html';
+                    if (!docSnap.exists()) return window.location.href = window.isTorneio ? 'torneios.html' : 'batalha.html';
                     dadosSala = docSnap.data();
 
                     if (dadosSala.jogador1?.uid === dadosSala.jogador2?.uid) {
-                        alert("Você tentou jogar contra você mesmo em duas abas! Isso corrompe a partida. Use contas diferentes para testar.");
-                        return window.location.href = 'batalha.html';
+                        alert("ERRO!"); return window.location.href = window.isTorneio ? 'torneios.html' : 'batalha.html';
                     }
 
                     if (dadosSala.jogador1?.uid === currentUserUid) { minhaRole = 'jogador1'; oppRole = 'jogador2'; isHost = true; }
                     else if (dadosSala.jogador2?.uid === currentUserUid) { minhaRole = 'jogador2'; oppRole = 'jogador1'; isHost = false; }
-                    else return window.location.href = 'batalha.html';
+                    else return window.location.href = window.isTorneio ? 'torneios.html' : 'batalha.html';
 
                     if (!dadosSala.jogador2) return; 
 

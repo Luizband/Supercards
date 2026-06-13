@@ -473,7 +473,6 @@
                 await window.concederRecompensasArena(vitoria);
 
                 // SE FOR UMA PARTIDA OFICIAL DO TORNEIO (E SÓ SE FOR), REGISTRA OS PONTOS
-                // O Host registra para evitar que os dois jogadores tentem atualizar o placar ao mesmo tempo
                 if (window.isTorneio && isHost) {
                     let vencedorUid = null;
                     if (vitoria) vencedorUid = currentUserUid;
@@ -497,7 +496,6 @@
             window.location.href = window.isTorneio ? 'torneios.html' : 'batalha.html'; 
         };
 
-        // Redireciona para o lugar certo no final da batalha
         document.getElementById('btn-finalizar-batalha').onclick = () => {
             window.location.href = window.isTorneio ? 'torneios.html' : 'batalha.html';
         };
@@ -521,15 +519,24 @@
                     try {
                         const salaSnap = await getDoc(doc(db, "partidas", salaId));
                         if (!salaSnap.exists()) {
-                            let p1Uid = ids[0]; let p2Uid = ids[1];
-                            const mySnap = await getDoc(doc(db, "users", currentUserUid));
-                            const oppSnap = await getDoc(doc(db, "users", tAdv));
-                            let p1Data = p1Uid === currentUserUid ? mySnap.data() : oppSnap.data();
-                            let p2Data = p2Uid === currentUserUid ? mySnap.data() : oppSnap.data();
                             
-                            let j1Deck = [...(p1Data.deckPadrao||[])]; let j2Deck = [...(p2Data.deckPadrao||[])];
-                            if(j2Deck.length === 0 && p2Uid.startsWith('bot_')) { j2Deck = Object.keys(INFO_CARTAS).slice(0, 12); }
-                            if(j1Deck.length === 0 && p1Uid.startsWith('bot_')) { j1Deck = Object.keys(INFO_CARTAS).slice(0, 12); }
+                            // QUEM ABRE A SALA SEMPRE SERÁ O HOST (JOGADOR 1)
+                            let p1Uid = currentUserUid; 
+                            let p2Uid = tAdv;
+                            
+                            const mySnap = await getDoc(doc(db, "users", p1Uid));
+                            const oppSnap = await getDoc(doc(db, "users", p2Uid));
+                            
+                            let p1Data = mySnap.data() || {};
+                            let p2Data = oppSnap.data() || {};
+                            
+                            let j1Deck = [...(p1Data.deckPadrao||[])]; 
+                            let j2Deck = [...(p2Data.deckPadrao||[])];
+                            
+                            // SE O OPONENTE FOR UM BOT, DAMOS 20 CARTAS ALEATÓRIAS PRA ELE!
+                            if(p2Uid.startsWith('bot_')) { 
+                                j2Deck = Object.keys(INFO_CARTAS).slice(0, 20); 
+                            }
                             
                             await setDoc(doc(db, "partidas", salaId), {
                                 status: 'aguardando',
@@ -539,7 +546,6 @@
                         }
                     } catch(e) { console.error("Erro ao montar sala torneio:", e); }
                 } else {
-                    // SE NÃO TIVER PULSEIRA DO TORNEIO, SEGUE O BAILE NORMAL
                     salaId = new URLSearchParams(window.location.search).get('sala');
                 }
                 // === FIM DA BARREIRA ===

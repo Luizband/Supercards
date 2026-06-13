@@ -3,185 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Supercards - Amigos</title>
+    <title>Supercards - Painel GOD MODE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            background-image: url('fundotela.png');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+        body { background-color: #111827; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        #toast-container {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 9999;
-            width: 90%;
-            max-width: 350px;
-            pointer-events: none;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .toast-msg {
-            background: #dca3e8;
-            color: #7a32a8;
-            border: 3px solid #7a32a8;
-            padding: 12px 20px;
-            border-radius: 9999px;
-            box-shadow: 0 10px 15px rgba(0,0,0,0.3);
-            text-align: center;
-            font-weight: 900;
-            font-size: 0.85rem;
-            animation: slideDown 0.3s ease-out forwards;
-            pointer-events: auto;
-        }
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        pre::-webkit-scrollbar { width: 8px; height: 8px; }
+        pre::-webkit-scrollbar-thumb { background: #6b7280; border-radius: 4px; }
     </style>
 </head>
-<body class="h-[100dvh] p-4 flex justify-center overflow-hidden">
+<body class="min-h-screen p-4 flex flex-col items-center">
 
-    <div id="toast-container"></div>
+    <div id="login-screen" class="bg-gray-800 p-8 rounded-2xl w-full max-w-sm border-2 border-purple-500 shadow-[0_0_30px_rgba(168,85,247,0.2)] mt-20">
+        <h2 class="text-center font-black text-2xl mb-6 text-purple-400 uppercase tracking-widest">Painel Admin</h2>
+        <input id="email-admin" type="email" placeholder="E-mail" class="w-full bg-gray-900 p-3 rounded-lg mb-4 border border-gray-600 focus:border-purple-500 outline-none font-bold">
+        <input id="senha-admin" type="password" placeholder="Senha" class="w-full bg-gray-900 p-3 rounded-lg mb-6 border border-gray-600 focus:border-purple-500 outline-none font-bold">
+        <button id="btn-login" class="w-full bg-purple-600 hover:bg-purple-500 py-3 rounded-lg font-black transition-all uppercase tracking-widest">Acessar Sistema</button>
+    </div>
 
-    <div class="w-full max-w-sm flex flex-col h-full relative">
+    <div id="admin-panel" class="hidden w-full max-w-5xl bg-gray-800 p-6 rounded-2xl border-2 border-purple-500 shadow-2xl relative flex flex-col gap-8">
         
-        <header class="flex items-center gap-4 mt-4 mb-6">
-            <div class="relative flex-shrink-0">
-                <div class="bg-[#dca3e8] w-24 h-24 rounded-full flex items-center justify-center text-[#7a32a8] font-black text-xl shadow-lg border-2 border-[#bc7bd4] relative overflow-hidden">
-                    <span id="texto-sem-foto">FOTO</span>
-                    <img id="img-perfil-global" src="" class="hidden w-full h-full object-cover absolute inset-0">
-                </div>
-                
-                <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-[#bc7bd4] w-8 h-8 rounded-full flex items-center justify-center shadow-md border-2 border-[#dca3e8] z-30">
-                    <span id="player-level" class="text-[#7a32a8] font-black text-sm">--</span>
-                </div>
-            </div>
-
-            <div class="flex flex-col flex-grow gap-2 justify-center">
-                <div class="flex items-center gap-2 w-full">
-                    <div class="bg-[#dca3e8] rounded-full px-3 py-2 flex items-center justify-center shadow-md flex-grow overflow-hidden">
-                        <span id="player-name" class="text-[#7a32a8] font-black text-base tracking-wide uppercase truncate max-w-[130px]">JOGADOR</span>
-                    </div>
-                    
-                    <div class="bg-[#dca3e8] rounded-full px-3 py-2 flex items-center justify-center gap-1 shadow-md flex-shrink-0">
-                        <span id="player-coins" class="text-[#7a32a8] font-black text-sm">0</span>
-                        <img src="moedas.png" class="w-4 h-4 object-contain">
-                    </div>
-                </div>
-                
-                <div class="flex flex-col items-center mt-1 w-full">
-                    <div class="w-full bg-transparent border border-[#dca3e8] rounded-full h-3 overflow-hidden shadow-inner">
-                        <div id="barra-xp" class="bg-[#dca3e8] h-full transition-all duration-500" style="width: 0%;"></div>
-                    </div>
-                    <span id="texto-xp" class="text-white text-[10px] font-bold mt-1">0/0 xp</span>
-                </div>
-            </div>
+        <header class="border-b border-gray-700 pb-4 flex justify-between items-center">
+            <h1 class="text-purple-400 font-black text-3xl uppercase tracking-widest">Controle Central</h1>
+            <button onclick="location.reload()" class="text-gray-400 hover:text-red-500 font-bold uppercase text-sm">Desconectar</button>
         </header>
 
-        <div class="flex flex-col items-center w-full mb-4 z-10 relative">
-            <h1 class="text-[#dca3e8] font-black text-2xl drop-shadow-md uppercase tracking-wider mb-3">AMIGOS</h1>
-            
-            <button onclick="abrirModalBusca()" class="bg-[#dca3e8] hover:bg-[#bc7bd4] text-[#7a32a8] font-black text-xs py-2.5 px-6 rounded-full shadow-md border-2 border-[#bc7bd4] uppercase tracking-wide transition-transform hover:scale-105 flex items-center gap-2">
-                <span>🔍 Adicionar / Convites</span>
-                <span id="notificacao-convite" class="hidden flex h-3 w-3 relative">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-3 w-3 bg-red-600 border border-white"></span>
-                </span>
-            </button>
-        </div>
-
-        <main class="bg-[#dca3e8] rounded-[2rem] flex flex-col flex-grow p-4 shadow-xl overflow-hidden mb-16 relative border-2 border-[#bc7bd4]">
-            
-            <div id="lista-amigos" class="flex flex-col gap-3 overflow-y-auto no-scrollbar pb-10 h-full">
-                <span class="text-[#7a32a8] font-bold text-xs text-center mt-10 animate-pulse">Carregando amigos...</span>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-gray-900 p-5 rounded-xl border-2 border-red-900 flex justify-between items-center">
+                <div>
+                    <h2 class="font-black text-lg text-red-400 flex items-center gap-2">🚨 Status do Servidor</h2>
+                    <p class="text-xs text-gray-400 mt-1">Ligar manutenção expulsa os jogadores.</p>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <button onclick="alternarManutencao(true)" class="bg-red-600 hover:bg-red-500 px-4 py-2 rounded font-black uppercase text-[10px] shadow-lg">Trancar Jogo</button>
+                    <button onclick="alternarManutencao(false)" class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded font-black uppercase text-[10px] shadow-lg">Liberar Jogo</button>
+                </div>
             </div>
 
-        </main>
-
-        <footer class="mt-auto flex justify-center pb-2 z-10 absolute bottom-4 left-0 w-full pointer-events-none">
-            <button onclick="window.location.href='batalha.html'" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-2.5 px-10 rounded-full shadow-lg transition-transform hover:-translate-y-1 pointer-events-auto border-2 border-[#dca3e8] uppercase text-sm tracking-wider">
-                VOLTAR
-            </button>
-        </footer>
-
-        <div id="modal-adicionar" class="hidden fixed inset-0 bg-black/90 z-[100] flex flex-col items-center justify-center p-4 backdrop-blur-md pointer-events-auto">
-            <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-5 w-full max-w-sm shadow-2xl flex flex-col h-[80%] max-h-[600px] relative">
-                
-                <button onclick="fecharModalBusca()" class="absolute top-2 right-4 text-[#7a32a8] font-black text-xl hover:text-purple-600 transition-colors">X</button>
-                
-                <h2 class="text-[#7a32a8] font-black text-lg text-center uppercase tracking-wider mb-4">Adicionar Amigos</h2>
-
-                <input type="text" id="input-busca-jogador" placeholder="Digite o nome do jogador..." class="mb-4 w-full bg-[#bc7bd4] text-[#7a32a8] placeholder-[#7a32a8]/70 font-black text-xs rounded-full px-4 py-2 outline-none border-2 border-[#7a32a8]/30 focus:border-[#7a32a8] transition-colors shadow-inner flex-shrink-0 text-center uppercase">
-                
-                <div id="resultado-busca" class="flex flex-col gap-2 overflow-y-auto no-scrollbar flex-grow mb-4 bg-white/30 rounded-xl p-2 border border-[#7a32a8]/20 min-h-[120px]">
-                    <span class="text-[#7a32a8] text-[10px] font-bold text-center mt-2">Nenhum jogador pesquisado.</span>
+            <div class="bg-gray-900 p-5 rounded-xl border-2 border-yellow-700 flex justify-between items-center">
+                <div>
+                    <h2 class="font-black text-lg text-yellow-400 flex items-center gap-2">🏆 Gestão de Torneios</h2>
+                    <p class="text-xs text-gray-400 mt-1">Gera a tabela de 8 jogadores (Bots + Contas).</p>
                 </div>
-
-                <div class="w-full h-px bg-[#7a32a8]/20 mb-4 flex-shrink-0"></div>
-
-                <h2 class="text-[#7a32a8] font-black text-sm text-center uppercase tracking-wider mb-2">Convites Recebidos</h2>
-                
-                <div id="lista-convites" class="flex flex-col gap-2 overflow-y-auto no-scrollbar h-[35%] min-h-[120px] bg-white/30 rounded-xl p-2 border border-[#7a32a8]/20">
-                    <span class="text-[#7a32a8] text-[10px] font-bold text-center mt-2">Nenhum convite pendente.</span>
+                <div class="flex flex-col gap-2">
+                    <button onclick="gerarTabelaTorneio('brasileirao_01')" id="btn-gerar-torneio" class="bg-yellow-600 hover:bg-yellow-500 text-black px-4 py-2 rounded font-black uppercase text-[10px] shadow-lg transition-transform active:scale-95">1. Iniciar Brasileirão</button>
+                    <button onclick="liberarProximaRodada('brasileirao_01')" id="btn-avancar-rodada" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded font-black uppercase text-[10px] shadow-lg transition-transform active:scale-95">2. Liberar Próxima Rodada</button>
                 </div>
-
             </div>
         </div>
 
-        <div id="modal-perfil-amigo" class="hidden fixed inset-0 bg-black/90 z-[150] flex flex-col items-center justify-center p-4 backdrop-blur-md pointer-events-auto">
-            <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-[2rem] w-full max-w-sm shadow-2xl flex flex-col items-center p-6 relative">
-                
-                <button onclick="fecharModalPerfil()" class="absolute top-4 right-5 text-[#7a32a8] font-black text-2xl hover:text-purple-600 transition-colors z-50">X</button>
+        <div class="bg-gray-900 p-5 rounded-xl border-2 border-cyan-700 flex justify-between items-center">
+            <div>
+                <h2 class="font-black text-lg text-cyan-400 flex items-center gap-2">🤖 Central de Testes (Bots)</h2>
+                <p class="text-xs text-gray-400 mt-1">Cria fantasmas e simula os resultados das partidas entre eles.</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="injetarBots()" class="bg-cyan-600 hover:bg-cyan-500 px-4 py-2 rounded font-black uppercase text-xs shadow-lg">Injetar 6 Bots</button>
+                <button onclick="simularBots()" class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded font-black uppercase text-xs shadow-lg">Simular Jogos dos Bots</button>
+                <button onclick="resetarTorneio()" class="bg-red-700 hover:bg-red-600 px-4 py-2 rounded font-black uppercase text-xs shadow-lg">Resetar Torneio</button>
+            </div>
+        </div>
 
-                <div class="flex flex-col items-center mb-6 mt-2 relative">
-                    <div class="bg-[#bc7bd4] w-28 h-28 rounded-full border-4 border-[#7a32a8] flex items-center justify-center overflow-hidden shadow-lg mb-3">
-                        <img id="modal-amigo-foto" src="fundo_carta.png" class="w-full h-full object-cover">
-                    </div>
-                    <div class="absolute bottom-[28px] bg-[#7a32a8] border-2 border-[#dca3e8] rounded-full w-8 h-8 flex items-center justify-center shadow-md">
-                        <span id="modal-amigo-nivel" class="text-white font-black text-sm">--</span>
-                    </div>
-                    <h2 id="modal-amigo-nome" class="text-[#7a32a8] font-black text-2xl uppercase tracking-widest drop-shadow-sm text-center mt-1">NOME DO AMIGO</h2>
+        <div class="bg-gray-900 p-5 rounded-xl border border-gray-700 flex flex-col gap-6">
+            
+            <div class="flex flex-col gap-2 border-b border-gray-700 pb-6">
+                <h2 class="font-black text-lg text-green-400 flex items-center gap-2">🎯 Localizar Jogador (Busca Inteligente)</h2>
+                <div class="flex gap-3">
+                    <input id="input-busca" type="text" placeholder="Digite QUALQUER PARTE do nome ou o UID..." class="flex-1 bg-gray-800 p-4 rounded-lg border border-gray-600 focus:border-green-500 outline-none font-bold text-lg">
+                    <button id="btn-buscar" class="bg-green-600 hover:bg-green-500 px-8 rounded-lg font-black transition-all uppercase text-lg shadow-lg">Buscar</button>
                 </div>
+            </div>
 
-                <div class="w-full bg-[#bc7bd4]/30 rounded-2xl p-4 mb-4 border border-[#7a32a8]/20">
-                    <h3 class="text-[#7a32a8] font-black text-sm text-center uppercase mb-2">Estatísticas</h3>
-                    <ul class="text-[#7a32a8] font-bold text-xs space-y-1.5">
-                        <li class="flex justify-between border-b border-[#7a32a8]/10 pb-1"><span>Batalhas Vencidas:</span> <span id="modal-amigo-vitorias">0</span></li>
-                        <li class="flex justify-between border-b border-[#7a32a8]/10 pb-1"><span>Cartas na Coleção:</span> <span id="modal-amigo-cartas">0</span></li>
-                        <li class="flex justify-between"><span>Trocas Realizadas:</span> <span id="modal-amigo-trocas">0</span></li>
-                    </ul>
-                </div>
+            <div id="painel-jogador" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="flex flex-col gap-6">
+                    <div class="bg-gray-800 p-4 rounded-lg border border-purple-500/50">
+                        <span class="text-gray-400 text-xs font-bold uppercase">Editando:</span>
+                        <h3 id="lbl-nome-jogador" class="text-3xl font-black text-purple-300 uppercase truncate">NOME</h3>
+                        <span id="lbl-uid-jogador" class="text-gray-500 text-[10px] font-mono">UID</span>
+                    </div>
 
-                <div class="w-full">
-                    <h3 class="text-[#7a32a8] font-black text-sm text-center uppercase mb-2">Badges Conquistadas</h3>
-                    <div id="modal-amigo-badges" class="grid grid-cols-4 gap-2 place-items-center bg-[#bc7bd4]/30 rounded-2xl p-3 border border-[#7a32a8]/20 min-h-[80px]">
+                    <div class="bg-gray-800 p-4 rounded-lg border border-gray-600 grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs font-bold text-gray-400 uppercase">Moedas</label>
+                            <div class="flex"><input type="number" id="edit-moedas" class="w-full bg-gray-900 p-2 rounded-l border border-gray-600 text-white font-bold"><button onclick="salvarCampo('moedas')" class="bg-yellow-600 px-3 rounded-r font-bold hover:bg-yellow-500">Salvar</button></div>
                         </div>
+                        <div>
+                            <label class="text-xs font-bold text-gray-400 uppercase">Fragmentos</label>
+                            <div class="flex"><input type="number" id="edit-frag" class="w-full bg-gray-900 p-2 rounded-l border border-gray-600 text-white font-bold"><button onclick="salvarCampo('fragmentos')" class="bg-fuchsia-600 px-3 rounded-r font-bold hover:bg-fuchsia-500">Salvar</button></div>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-gray-400 uppercase">Nível</label>
+                            <div class="flex"><input type="number" id="edit-nivel" class="w-full bg-gray-900 p-2 rounded-l border border-gray-600 text-white font-bold"><button onclick="salvarCampo('nivel')" class="bg-blue-600 px-3 rounded-r font-bold hover:bg-blue-500">Salvar</button></div>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-gray-400 uppercase">XP Atual</label>
+                            <div class="flex"><input type="number" id="edit-xp" class="w-full bg-gray-900 p-2 rounded-l border border-gray-600 text-white font-bold"><button onclick="salvarCampo('xp')" class="bg-cyan-600 px-3 rounded-r font-bold hover:bg-cyan-500">Salvar</button></div>
+                        </div>
+                    </div>
                 </div>
 
+                <div class="flex flex-col h-full">
+                    <h4 class="font-black text-sm text-gray-300 uppercase mb-2 flex justify-between">
+                        <span>💾 Raio-X do Banco de Dados</span>
+                        <button onclick="carregarJogador(window.currentUserUid)" class="text-blue-400 hover:underline">Atualizar Visão</button>
+                    </h4>
+                    <pre id="json-viewer" class="bg-black p-4 rounded-lg border border-gray-700 text-green-400 text-xs font-mono overflow-auto flex-1 max-h-[400px] shadow-inner"></pre>
+                </div>
             </div>
         </div>
-
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, updateDoc, collection, query, orderBy, startAt, endAt, limit, getDocs, arrayUnion, serverTimestamp, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-        
-        // Importa o banco de badges para podermos renderizar os ícones
-        import { INFO_BADGES } from './badges.js';
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, setDoc, arrayUnion, arrayRemove, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-        const firebaseConfig = {
+        const firebaseConfig = { 
           apiKey: "AIzaSyCU3lFTgfrDMaD9jwR7X7ivYPmGQh4VE1g",
           authDomain: "supercards-tcg.firebaseapp.com",
           projectId: "supercards-tcg",
@@ -189,383 +126,244 @@
           messagingSenderId: "862316380615",
           appId: "1:862316380615:web:b3f28056ebc967673999e2"
         };
-
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let currentUserUid = null;
-        let currentUserData = null;
-        
-        window.mostrarToast = function(mensagem) {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = 'toast-msg';
-            toast.innerHTML = mensagem;
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transition = 'opacity 0.5s ease';
-                setTimeout(() => toast.remove(), 500); 
-            }, 3000);
-        };
+        const EMAIL_ADMIN_EXCLUSIVO = "adm@adm.com";
 
-        function calcularXPMaximo(nivel) {
-            if (nivel >= 1 && nivel <= 5) return 200;
-            if (nivel >= 6 && nivel <= 15) return 750;
-            if (nivel >= 16 && nivel <= 25) return 1600;
-            return 3000;
-        }
-
-        // ==========================================
-        // RENDERIZAÇÃO DA LISTA DE AMIGOS
-        // ==========================================
-        async function carregarMeusAmigos() {
-            const container = document.getElementById('lista-amigos');
-            const listaUids = currentUserData.amigos || [];
-            
-            if (listaUids.length === 0) {
-                container.innerHTML = `
-                    <div class="flex flex-col items-center justify-center h-full opacity-70 mt-10">
-                        <span class="text-[#7a32a8] text-4xl mb-2">👤</span>
-                        <p class="text-[#7a32a8] font-black text-sm uppercase text-center">Nenhum amigo<br>adicionado.</p>
-                    </div>`;
-                return;
-            }
-
-            container.innerHTML = '';
-            
-            for (let uid of listaUids) {
-                try {
-                    const snapAmigo = await getDoc(doc(db, "users", uid));
-                    if (snapAmigo.exists()) {
-                        const dadosAmigo = snapAmigo.data();
-                        const nome = (dadosAmigo.nomeDisplay || dadosAmigo.nome || "JOGADOR").toUpperCase();
-                        const nivel = dadosAmigo.nivel || 1;
-                        const foto = dadosAmigo.fotoPerfil || "fundo_carta.png";
-                        
-                        const item = document.createElement('div');
-                        // Removido o flex-between para centralizar o amigo já que não há botão
-                        item.className = "bg-white/40 border-2 border-white/50 rounded-xl p-3 shadow-sm hover:bg-white/60 transition-colors cursor-pointer group";
-                        item.onclick = () => abrirPerfilAmigo(uid);
-                        
-                        item.innerHTML = `
-                            <div class="flex items-center gap-4">
-                                <div class="relative">
-                                    <img src="${foto}" class="w-14 h-14 rounded-full object-cover border-2 border-[#7a32a8] group-hover:scale-105 transition-transform">
-                                    <div class="absolute -bottom-1 -right-1 bg-[#7a32a8] rounded-full w-6 h-6 flex items-center justify-center border border-white">
-                                        <span class="text-white font-black text-[10px]">${nivel}</span>
-                                    </div>
-                                </div>
-                                <span class="text-[#7a32a8] font-black text-base uppercase truncate max-w-[200px]">${nome}</span>
-                            </div>
-                        `;
-                        container.appendChild(item);
-                    }
-                } catch(e) {
-                    console.error("Erro ao carregar amigo:", e);
-                }
-            }
-        }
-
-        // ==========================================
-        // BUSCA E CONVITES (MODAL)
-        // ==========================================
-        window.abrirModalBusca = function() {
-            document.getElementById('input-busca-jogador').value = "";
-            document.getElementById('resultado-busca').innerHTML = '<span class="text-[#7a32a8] text-[10px] font-bold text-center mt-2">Pesquise para adicionar...</span>';
-            renderizarConvitesRecebidos();
-            document.getElementById('modal-adicionar').classList.remove('hidden');
-        };
-
-        window.fecharModalBusca = function() {
-            document.getElementById('modal-adicionar').classList.add('hidden');
-            carregarMeusAmigos(); // Atualiza a tela de trás caso tenha aceitado alguém
-        };
-
-       // Pesquisa Jogadores
-        document.getElementById('input-busca-jogador').addEventListener('input', async (event) => {
-            const termoBusca = event.target.value;
-            const termoNormalizado = termoBusca.toLowerCase().trim();
-            const container = document.getElementById('resultado-busca');
-            
-            if (termoNormalizado === "") {
-                container.innerHTML = '<span class="text-[#7a32a8] text-[10px] font-bold text-center mt-2">Pesquise para adicionar...</span>';
-                return;
-            }
-
-            container.innerHTML = '<span class="text-[#7a32a8] text-[10px] font-bold text-center mt-2 animate-pulse">Buscando...</span>';
-
+        document.getElementById('btn-login').addEventListener('click', async () => {
+            const email = document.getElementById('email-admin').value.trim();
+            const senha = document.getElementById('senha-admin').value.trim();
+            if (!email || !senha) return;
             try {
-                // Traz uma lista de usuários para filtrar no JS (ignora maiúscula/minúscula)
-                const usersRef = collection(db, "users");
-                const q = query(usersRef, limit(50));
-                const snap = await getDocs(q);
-                
-                container.innerHTML = '';
-                let temResultado = false;
-
-                snap.forEach(docSnap => {
-                    if (docSnap.id !== currentUserUid) {
-                        const dados = docSnap.data();
-                        // Lê o campo 'nome' que é o padrão do seu banco de dados
-                        const nomeDb = dados.nome || dados.nomeDisplay || "JOGADOR";
-                        
-                        // Faz a checagem flexível
-                        if (nomeDb.toLowerCase().includes(termoNormalizado)) {
-                            temResultado = true;
-                            const nomeFormatado = nomeDb.toUpperCase();
-                            const nivel = dados.nivel || 1;
-                            
-                            // Verifica se já são amigos
-                            const jaAmigo = (currentUserData.amigos || []).includes(docSnap.id);
-
-                            const div = document.createElement('div');
-                            div.className = "flex items-center justify-between bg-white border border-[#7a32a8]/20 rounded-lg p-2 shadow-sm";
-                            
-                            let htmlBotao = jaAmigo 
-                                ? `<span class="text-[#7a32a8]/50 font-black text-[10px] uppercase">JÁ AMIGO</span>`
-                                : `<button onclick="enviarPedidoAmizade('${docSnap.id}', '${nomeFormatado}')" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black text-[9px] py-1.5 px-3 rounded-full shadow-sm uppercase transition-transform hover:scale-105">ADICIONAR</button>`;
-
-                            div.innerHTML = `
-                                <div class="flex flex-col">
-                                    <span class="text-[#7a32a8] font-black text-xs uppercase">${nomeFormatado}</span>
-                                    <span class="text-[#7a32a8]/70 font-bold text-[9px]">Nível ${nivel}</span>
-                                </div>
-                                ${htmlBotao}
-                            `;
-                            container.appendChild(div);
-                        }
-                    }
-                });
-
-                if (!temResultado) {
-                    container.innerHTML = '<span class="text-[#7a32a8] text-[10px] font-bold text-center mt-2">Nenhum jogador encontrado.</span>';
-                }
-
-            } catch (e) {
-                console.error(e);
-            }
+                document.getElementById('btn-login').innerText = "Verificando...";
+                await signInWithEmailAndPassword(auth, email, senha);
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('admin-panel').classList.remove('hidden');
+            } catch (e) { alert("Acesso negado!"); document.getElementById('btn-login').innerText = "Acessar Sistema"; }
         });
 
-        window.enviarPedidoAmizade = async function(alvoUid, alvoNome) {
-            window.mostrarToast(`Enviando pedido para ${alvoNome}...`);
+        // ==========================================
+        // GESTÃO DOS BOTS E TESTES
+        // ==========================================
+        window.injetarBots = async () => {
+            if(!confirm("Criar 6 Bots e inscrevê-los no Brasileirão agora?")) return;
             try {
-                const pedidoObj = {
-                    uid: currentUserUid,
-                    nome: currentUserData.nomeDisplay || "JOGADOR",
-                    foto: currentUserData.fotoPerfil || "",
-                    nivel: currentUserData.nivel || 1
-                };
-
-                // Adiciona o pedido no array do alvo
-                await updateDoc(doc(db, "users", alvoUid), {
-                    convitesAmizade: arrayUnion(pedidoObj),
-                    // Opcional: Envia notificação para a caixa de entrada dele
-                    notificacoes: arrayUnion({
-                        id: "notif_amizade_" + Date.now(),
-                        titulo: "👋 Novo Pedido de Amizade",
-                        texto: `${pedidoObj.nome} enviou um pedido de amizade para você!`,
-                        lida: false,
-                        data: new Date().toISOString()
-                    })
-                });
-
-                window.mostrarToast(`✅ Pedido enviado para ${alvoNome}!`);
-                
-                // Limpa a busca para evitar enviar duas vezes
-                document.getElementById('input-busca-jogador').value = "";
-                document.getElementById('resultado-busca').innerHTML = '<span class="text-[#7a32a8] text-[10px] font-bold text-center mt-2">Pesquise para adicionar...</span>';
-
-            } catch (e) {
-                console.error("Erro ao adicionar:", e);
-                window.mostrarToast("Erro ao enviar pedido de amizade.");
-            }
-        };
-
-        function renderizarConvitesRecebidos() {
-            const container = document.getElementById('lista-convites');
-            let convites = currentUserData.convitesAmizade || [];
-            
-            if (convites.length > 0) {
-                document.getElementById('notificacao-convite').classList.remove('hidden');
-            } else {
-                document.getElementById('notificacao-convite').classList.add('hidden');
-                container.innerHTML = '<span class="text-[#7a32a8] text-[10px] font-bold text-center mt-2">Nenhum convite pendente.</span>';
-                return;
-            }
-
-            container.innerHTML = '';
-            
-            convites.forEach(convite => {
-                const div = document.createElement('div');
-                div.className = "flex items-center justify-between bg-white border border-[#7a32a8]/20 rounded-lg p-2 shadow-sm gap-2";
-                
-                div.innerHTML = `
-                    <div class="flex items-center gap-2 overflow-hidden">
-                        <img src="${convite.foto || 'fundo_carta.png'}" class="w-8 h-8 rounded-full object-cover border border-[#7a32a8] flex-shrink-0">
-                        <div class="flex flex-col overflow-hidden">
-                            <span class="text-[#7a32a8] font-black text-xs uppercase truncate">${convite.nome}</span>
-                            <span class="text-[#7a32a8]/70 font-bold text-[9px]">Nível ${convite.nivel}</span>
-                        </div>
-                    </div>
-                    <div class="flex gap-1 flex-shrink-0">
-                        <button onclick="responderConvite('${convite.uid}', false)" class="bg-red-500 hover:bg-red-600 text-white font-black text-[9px] py-1.5 px-2.5 rounded-md shadow-sm">X</button>
-                        <button onclick="responderConvite('${convite.uid}', true)" class="bg-[#22c55e] hover:bg-green-600 text-white font-black text-[9px] py-1.5 px-2.5 rounded-md shadow-sm uppercase">ACEITAR</button>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        window.responderConvite = async function(remetenteUid, aceitou) {
-            try {
-                // Filtra o convite para remover do array local
-                let novaListaConvites = (currentUserData.convitesAmizade || []).filter(c => c.uid !== remetenteUid);
-                
-                let updates = { convitesAmizade: novaListaConvites };
-                
-                if (aceitou) {
-                    updates.amigos = arrayUnion(remetenteUid);
-                    // Adiciona você na lista do amigo também
-                    await updateDoc(doc(db, "users", remetenteUid), {
-                        amigos: arrayUnion(currentUserUid)
+                for(let i=1; i<=6; i++) {
+                    const botId = `bot_0${i}`;
+                    await setDoc(doc(db, "users", botId), {
+                        nome: `BOT TESTADOR 0${i}`, nomeDisplay: `BOT 0${i}`,
+                        fotoPerfil: "fundo_carta.png", nivel: 99, isBot: true
+                    }, {merge: true});
+                    await updateDoc(doc(db, "torneios", "brasileirao_01"), {
+                        inscritos: arrayUnion(botId)
                     });
-                    window.mostrarToast("🎉 Amigo adicionado com sucesso!");
-                } else {
-                    window.mostrarToast("Convite recusado.");
                 }
-
-                await updateDoc(doc(db, "users", currentUserUid), updates);
-                
-                // Atualiza o dado local e re-renderiza
-                currentUserData.convitesAmizade = novaListaConvites;
-                if(aceitou) {
-                    if(!currentUserData.amigos) currentUserData.amigos = [];
-                    currentUserData.amigos.push(remetenteUid);
-                }
-                
-                renderizarConvitesRecebidos();
-
-            } catch (e) {
-                console.error("Erro ao responder convite:", e);
-            }
+                alert("✅ 6 Bots Injetados com sucesso! Inscreva suas 2 contas e inicie o torneio.");
+            } catch(e) { console.error(e); alert("Erro ao injetar bots."); }
         };
 
+        window.simularBots = async () => {
+             try {
+                 const tDoc = await getDoc(doc(db, "torneios", "brasileirao_01"));
+                 const dados = tDoc.data();
+                 const rodada = dados.rodadaAtual;
+                 let atualizou = false;
+                 
+                 dados.rodadas[rodada].confrontos.forEach(jogo => {
+                     // Se o jogo for BOT vs BOT e ainda não acabou
+                     if(jogo.status !== 'finalizado' && jogo.jogador1.startsWith('bot_') && jogo.jogador2.startsWith('bot_')) {
+                         jogo.status = 'finalizado';
+                         const r = Math.random();
+                         if(r < 0.33) {
+                             jogo.vencedor = jogo.jogador1;
+                             dados.classificacao[jogo.jogador1].pontos += 3;
+                             dados.classificacao[jogo.jogador1].vitorias += 1;
+                             dados.classificacao[jogo.jogador2].derrotas += 1;
+                             dados.classificacao[jogo.jogador1].saldoPontos += Math.floor(Math.random()*5);
+                         } else if (r < 0.66) {
+                             jogo.vencedor = jogo.jogador2;
+                             dados.classificacao[jogo.jogador2].pontos += 3;
+                             dados.classificacao[jogo.jogador2].vitorias += 1;
+                             dados.classificacao[jogo.jogador1].derrotas += 1;
+                             dados.classificacao[jogo.jogador2].saldoPontos += Math.floor(Math.random()*5);
+                         } else {
+                             jogo.vencedor = 'empate';
+                             dados.classificacao[jogo.jogador1].pontos += 1;
+                             dados.classificacao[jogo.jogador1].empates += 1;
+                             dados.classificacao[jogo.jogador2].pontos += 1;
+                             dados.classificacao[jogo.jogador2].empates += 1;
+                         }
+                         atualizou = true;
+                     }
+                 });
+                 if(atualizou) {
+                     await updateDoc(doc(db, "torneios", "brasileirao_01"), {
+                         rodadas: dados.rodadas, classificacao: dados.classificacao
+                     });
+                     alert(`✅ Resultados da Rodada ${rodada} gerados para os Bots!`);
+                 } else { alert("Nenhum jogo entre dois Bots pendente nesta rodada."); }
+             } catch(e) { console.error(e); }
+        };
+
+        window.resetarTorneio = async () => {
+             if(!confirm("🚨 ATENÇÃO! Isso vai apagar a tabela e resetar o Brasileirão inteiro. Certeza?")) return;
+             await setDoc(doc(db, "torneios", "brasileirao_01"), {
+                 nome: "Brasileirão Supercards", status: "aberto", inscritos: [], maxInscritos: 8
+             });
+             alert("✅ Torneio Resetado!");
+        };
 
         // ==========================================
-        // PERFIL MODO LEITURA (MODAL)
+        // ALGORITMO DO TORNEIO (ROUND ROBIN)
         // ==========================================
-        window.abrirPerfilAmigo = async function(uidAmigo) {
-            window.mostrarToast("Carregando perfil... ⏳");
+        window.gerarTabelaTorneio = async (idTorneio) => {
+            const btn = document.getElementById('btn-gerar-torneio');
+            btn.innerText = "PROCESSANDO..."; btn.disabled = true;
+
             try {
-                const snap = await getDoc(doc(db, "users", uidAmigo));
-                if (snap.exists()) {
-                    const dados = snap.data();
-                    
-                    document.getElementById('modal-amigo-foto').src = dados.fotoPerfil || "fundo_carta.png";
-                    document.getElementById('modal-amigo-nome').innerText = (dados.nomeDisplay || dados.nome || "JOGADOR").toUpperCase();
-                    document.getElementById('modal-amigo-nivel').innerText = dados.nivel || 1;
-                    
-                    const stats = dados.estatisticas || {};
-                    
-                    // --- MATEMÁTICA REAL DAS CARTAS DO AMIGO ---
-                    // Ignora o número do Firebase e soma a coleção real que o amigo possui
-                    let totalCartasVerdadeiro = 0;
-                    if (dados.colecao) {
-                        for (let idCarta in dados.colecao) {
-                            if (dados.colecao[idCarta] > 0) {
-                                totalCartasVerdadeiro += dados.colecao[idCarta];
-                            }
+                const docTorneio = await getDoc(doc(db, "torneios", idTorneio));
+                if (!docTorneio.exists()) throw new Error("Torneio não encontrado");
+
+                const dados = docTorneio.data();
+                const inscritos = dados.inscritos || [];
+
+                if (inscritos.length !== 8) {
+                    alert(`O torneio precisa de exatamente 8 inscritos (Você + 7 Bots), mas atualmente tem ${inscritos.length}.`);
+                    throw new Error("Número de jogadores inválido");
+                }
+
+                if (dados.status !== "aberto") {
+                    alert("Este torneio já foi iniciado ou finalizado!");
+                    throw new Error("Status inválido");
+                }
+
+                let jogadores = [...inscritos].sort(() => Math.random() - 0.5);
+                let rodadas = {};
+                let numJogadores = jogadores.length;
+                let rodadasIda = numJogadores - 1; 
+
+                for (let r = 0; r < rodadasIda; r++) {
+                    let confrontosDaRodada = [];
+                    for (let i = 0; i < numJogadores / 2; i++) {
+                        let p1 = jogadores[i];
+                        let p2 = jogadores[numJogadores - 1 - i];
+                        confrontosDaRodada.push({ jogador1: p1, jogador2: p2, status: 'pendente', vencedor: null });
+                    }
+                    rodadas[r + 1] = { finalizada: false, confrontos: confrontosDaRodada };
+                    jogadores.splice(1, 0, jogadores.pop());
+                }
+
+                for (let r = 1; r <= rodadasIda; r++) {
+                    let confrontosVolta = rodadas[r].confrontos.map(jogo => {
+                        return { jogador1: jogo.jogador2, jogador2: jogo.jogador1, status: 'pendente', vencedor: null };
+                    });
+                    rodadas[r + rodadasIda] = { finalizada: false, confrontos: confrontosVolta };
+                }
+
+                let tabelaZerada = {};
+                inscritos.forEach(uid => {
+                    tabelaZerada[uid] = { pontos: 0, vitorias: 0, empates: 0, derrotas: 0, saldoPontos: 0 };
+                });
+
+                await updateDoc(doc(db, "torneios", idTorneio), {
+                    status: "em_andamento", rodadaAtual: 1, rodadas: rodadas,
+                    classificacao: tabelaZerada, iniciadoEm: new Date().toISOString()
+                });
+
+                alert("✅ SUCESSO! Tabela gerada, confrontos criados e torneio iniciado.");
+            } catch(e) { console.error("Erro:", e); } finally {
+                btn.innerText = "1. Iniciar Brasileirão"; btn.disabled = false;
+            }
+        };
+
+        window.liberarProximaRodada = async (idTorneio) => {
+            const btn = document.getElementById('btn-avancar-rodada');
+            btn.innerText = "VERIFICANDO..."; btn.disabled = true;
+
+            try {
+                const docTorneio = await getDoc(doc(db, "torneios", idTorneio));
+                const dados = docTorneio.data();
+                if (dados.status !== "em_andamento") throw new Error("Status inválido");
+
+                const rodadaAtual = dados.rodadaAtual;
+                const totalRodadas = Object.keys(dados.rodadas).length;
+
+                if (rodadaAtual >= totalRodadas) return alert("O torneio já está na última rodada!");
+
+                const jogosPendentes = dados.rodadas[rodadaAtual].confrontos.filter(jogo => jogo.status !== 'finalizado');
+                if (jogosPendentes.length > 0) return alert(`🚨 NÃO PERMITIDO! Faltam ${jogosPendentes.length} jogos para a Rodada ${rodadaAtual} acabar.`);
+
+                await updateDoc(doc(db, "torneios", idTorneio), { rodadaAtual: rodadaAtual + 1 });
+                alert(`✅ A Rodada ${rodadaAtual + 1} foi liberada!`);
+            } catch(e) {} finally {
+                btn.innerText = "2. Liberar Próxima Rodada"; btn.disabled = false;
+            }
+        };
+
+        // NOVA BUSCA INTELIGENTE DE JOGADORES (Ignora maiúsculas e minúsculas e busca em display e nome)
+        document.getElementById('btn-buscar').addEventListener('click', async () => {
+            const buscaStr = document.getElementById('input-busca').value.trim().toLowerCase();
+            if (!buscaStr) return alert("Digite um Nome ou UID!");
+
+            const btn = document.getElementById('btn-buscar');
+            btn.innerText = "Buscando...";
+            
+            try {
+                let userDoc = null;
+                if (buscaStr.length < 20) {
+                    const querySnapshot = await getDocs(collection(db, "users"));
+                    querySnapshot.forEach(doc => {
+                        const data = doc.data();
+                        const nome = (data.nome || "").toLowerCase();
+                        const nomeDisplay = (data.nomeDisplay || "").toLowerCase();
+                        if (nome.includes(buscaStr) || nomeDisplay.includes(buscaStr)) {
+                            userDoc = doc;
                         }
-                    }
-
-                    document.getElementById('modal-amigo-vitorias').innerText = stats.batalhasVencidas || 0;
-                    document.getElementById('modal-amigo-cartas').innerText = totalCartasVerdadeiro; // Usa a soma verdadeira
-                    document.getElementById('modal-amigo-trocas').innerText = stats.trocasFeitas || 0;
-
-                    // Renderiza as badges
-                    const gridBadges = document.getElementById('modal-amigo-badges');
-                    gridBadges.innerHTML = "";
-                    const badgesConquistadas = dados.badges || {};
-                    const chaves = Object.keys(badgesConquistadas);
-
-                    if (chaves.length === 0) {
-                        gridBadges.innerHTML = `<span class="text-[#7a32a8]/60 font-bold text-[10px] col-span-4 text-center">Nenhuma badge ainda.</span>`;
-                    } else {
-                        chaves.forEach(badgeId => {
-                            const info = INFO_BADGES[badgeId];
-                            if (info) {
-                                gridBadges.innerHTML += `
-                                    <div class="flex flex-col items-center">
-                                        <img src="${info.imagem}" class="w-10 h-10 object-contain drop-shadow-sm mb-0.5">
-                                        <span class="text-[#7a32a8] font-black text-[7px] text-center leading-tight uppercase">${info.nome}</span>
-                                    </div>
-                                `;
-                            }
-                        });
-                    }
-
-                    document.getElementById('modal-perfil-amigo').classList.remove('hidden');
+                    });
+                } else {
+                    const snap = await getDoc(doc(db, "users", buscaStr));
+                    if (snap.exists()) userDoc = snap;
                 }
-            } catch (e) {
-                console.error(e);
-                window.mostrarToast("Erro ao carregar perfil do amigo.");
-            }
-        };
 
-        window.fecharModalPerfil = function() {
-            document.getElementById('modal-perfil-amigo').classList.add('hidden');
-        };
-
-        // ==========================================
-        // INICIALIZAÇÃO
-        // ==========================================
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUserUid = user.uid;
-                const docRef = doc(db, "users", user.uid);
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
-                    currentUserData = docSnap.data();
-
-                    // AUTO-CURA: Salva o nome no banco se estiver faltando
-                    if (!currentUserData.nomeDisplay && !currentUserData.nome && user.displayName) {
-                        updateDoc(docRef, { nomeDisplay: user.displayName });
-                        currentUserData.nomeDisplay = user.displayName;
-                    }
-                    
-                    document.getElementById('player-name').innerText = user.displayName?.toUpperCase() || "JOGADOR";
-                    document.getElementById('player-coins').innerText = currentUserData.moedas || 0;
-                    
-                    let nivelAtual = currentUserData.nivel || 1;
-                    let xpAtual = currentUserData.xp || 0;
-                    document.getElementById('player-level').innerText = nivelAtual;
-
-                    if (currentUserData.fotoPerfil) {
-                        const imgElement = document.getElementById('img-perfil-global');
-                        imgElement.src = currentUserData.fotoPerfil;
-                        imgElement.classList.remove('hidden');
-                        document.getElementById('texto-sem-foto').classList.add('hidden');
-                    }
-
-                    let maxXp = calcularXPMaximo(nivelAtual);
-                    let porcentagem = Math.min((xpAtual / maxXp) * 100, 100);
-                    document.getElementById('barra-xp').style.width = `${porcentagem}%`;
-                    document.getElementById('texto-xp').innerText = `${xpAtual}/${maxXp} xp`;
-
-                    // Mostra o "Ping" vermelho no topo se tiver convites pendentes
-                    if (currentUserData.convitesAmizade && currentUserData.convitesAmizade.length > 0) {
-                        document.getElementById('notificacao-convite').classList.remove('hidden');
-                    }
-
-                    carregarMeusAmigos();
+                if (userDoc) {
+                    window.currentUserUid = userDoc.id;
+                    await window.carregarJogador(userDoc.id);
+                    document.getElementById('painel-jogador').classList.remove('hidden');
+                } else {
+                    alert("Jogador não encontrado!");
+                    document.getElementById('painel-jogador').classList.add('hidden');
                 }
-            } else {
-                window.location.href = "index.html";
-            }
+            } catch (error) { alert("Erro ao buscar no banco."); }
+            btn.innerText = "Buscar";
         });
+
+        window.alternarManutencao = async (status) => {
+            if(status && !confirm("TEM CERTEZA?")) return;
+            await setDoc(doc(db, "sistema", "configuracao"), { emManutencao: status }, { merge: true });
+            alert(status ? "⛔ MANUTENÇÃO LIGADA!" : "✅ JOGO LIBERADO!");
+        };
+
+        window.carregarJogador = async (uid) => {
+            const snap = await getDoc(doc(db, "users", uid));
+            if(!snap.exists()) return;
+            const data = snap.data();
+            document.getElementById('lbl-nome-jogador').innerText = data.nomeDisplay || data.nome || "Sem Nome";
+            document.getElementById('lbl-uid-jogador').innerText = "UID: " + uid;
+            document.getElementById('edit-moedas').value = data.moedas || 0;
+            document.getElementById('edit-frag').value = data.fragmentos || 0;
+            document.getElementById('edit-nivel').value = data.nivel || 1;
+            document.getElementById('edit-xp').value = data.xp || 0;
+            document.getElementById('json-viewer').innerText = JSON.stringify(data, null, 4);
+        };
+
+        window.salvarCampo = async (campo) => {
+            const inputId = `edit-${campo === 'fragmentos' ? 'frag' : campo}`;
+            const valor = Number(document.getElementById(inputId).value);
+            await updateDoc(doc(db, "users", window.currentUserUid), { [campo]: valor });
+            window.carregarJogador(window.currentUserUid);
+        };
     </script>
 </body>
 </html>

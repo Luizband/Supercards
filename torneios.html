@@ -238,7 +238,9 @@
             const classArray = Object.keys(dados.classificacao).map(uid => {
                 return { uid, nome: (dictNomes[uid]?.nome || "BOT").substring(0,10), ...dados.classificacao[uid] };
             });
-            classArray.sort((a,b) => b.pontos - a.pontos || b.vitorias - a.vitorias || b.saldoPontos - a.saldoPontos);
+            
+            // Ordem: Pontos > Vitórias > Saldo > Menos Derrotas
+            classArray.sort((a,b) => b.pontos - a.pontos || b.vitorias - a.vitorias || b.saldoPontos - a.saldoPontos || a.derrotas - b.derrotas);
             
             let htmlTabela = `<table class="w-full text-xs text-center text-gray-300 bg-gray-900 rounded-lg overflow-hidden border border-gray-700">
                 <tr class="text-white bg-gray-800 border-b-2 border-purple-500">
@@ -257,7 +259,7 @@
             htmlTabela += `</table>`;
             document.getElementById('conteudo-classificacao').innerHTML = htmlTabela;
         }
-
+        
         window.mudarRodadaVisual = (direcao) => {
             if(!window.torneioDadosGlobal) return;
             const maxRodadas = Object.keys(window.torneioDadosGlobal.rodadas).length;

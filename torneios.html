@@ -67,9 +67,9 @@
 
                 <div id="conteudo-regras" class="tab-content flex flex-col text-sm font-bold">
                     <div class="bg-gray-900 p-4 rounded-lg border border-gray-700 text-xs font-normal text-gray-300 leading-relaxed text-justify space-y-3">
-                        <p>Ida e Volta. Você enfrentará todos os outros 7 competidores duas vezes (total de 14 partidas por jogador).</p>
-                        <p>As rodadas são liberadas toda <span class="text-white font-bold">Quarta e Domingo</span>, e quando todas as partidas da rodada atual forem concluídas.</p>
-                        <p>O critério de desempate segue sendo os dados da tabela: primeiro <span class="text-green-400 font-bold">Vitórias</span>, seguido de <span class="text-yellow-400 font-bold">Saldo de Pontos</span>.</p>
+                        <p>Você enfrentará todos os outros 7 competidores duas vezes (total de 14 partidas por jogador).</p>
+                        <p>Uma nova rodada será liberada toda <span class="text-white font-bold">Quarta e Domingo</span>, e quando todas as partidas da rodada anterior forem concluídas.</p>
+                        <p>O critério de desempate segue sendo os dados da tabela: primeiro <span class="text-green-400 font-bold">Vitórias</span>, seguido de <span class="text-yellow-400 font-bold">Saldo de Pontos</span>. As vitórias rendem <span class="text-green-400 font-bold">3 pontos</span> na tabela e os empates rendem <span class="text-yellow-400 font-bold">1 ponto</span>.</p>
                         <p>O saldo de pontos é a somatória dos pontos que você conseguiu fazer em cada partida na Arena.</p>
                         <p class="text-center font-black text-[#dca3e8] mt-2 border-t border-gray-700 pt-3">Ao final da 14ª rodada, declaramos o campeão!</p>
                     </div>
@@ -77,10 +77,10 @@
 
                 <div id="conteudo-premiacao" class="tab-content hidden flex flex-col gap-3 text-sm font-bold">
                     <div class="flex items-center gap-3 bg-gray-900 p-3 rounded-lg border border-yellow-500/50 shadow-[0_0_10px_rgba(234,179,8,0.1)]">
-                        <span class="text-3xl drop-shadow-md">🥇</span>
+                        <img src="badges/badge-011.png" alt="Campeão" class="w-10 h-10 object-contain drop-shadow-md">
                         <div class="flex flex-col">
                             <span class="text-yellow-400 font-black uppercase text-xs tracking-wide">1º Lugar (Campeão)</span>
-                            <span class="text-white text-[10px] font-normal">600 Moedas + 400 Fragmentos + Badge Exclusiva (badge-011)</span>
+                            <span class="text-white text-[10px] font-normal">600 Moedas + 400 Fragmentos + Badge Exclusiva</span>
                         </div>
                     </div>
                     <div class="flex items-center gap-3 bg-gray-900 p-3 rounded-lg border border-gray-400/50">
@@ -276,17 +276,14 @@
                 const isP2 = jogo.jogador2 === currentUserUid;
                 const myMatch = isP1 || isP2;
                 
-                // LÓGICA DE CORES DOS NOMES E PLACAR
                 let corN1 = isP1 ? 'text-purple-400 text-sm' : 'text-gray-300';
                 let corN2 = isP2 ? 'text-purple-400 text-sm' : 'text-gray-300';
                 
                 let statusText = `<span class="text-yellow-500 font-bold ${window.rodadaExibida === rodadaAtualReal ? 'animate-pulse' : ''}">AGUARDANDO</span>`;
                 
                 if (jogo.status === 'finalizado') {
-                    // Placar Pill
                     statusText = `<span class="text-white font-black bg-gray-800 px-3 py-1 rounded border border-gray-600 shadow-inner">${jogo.placar1 || 0} <span class="text-gray-500 text-[10px] mx-1">X</span> ${jogo.placar2 || 0}</span>`;
                     
-                    // Destaque de Vencedor
                     if (jogo.vencedor === jogo.jogador1) {
                         corN1 = 'text-green-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.5)] text-sm';
                         corN2 = 'text-gray-500 opacity-60';

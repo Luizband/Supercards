@@ -172,29 +172,46 @@
                  let atualizou = false;
                  
                  dados.rodadas[rodada].confrontos.forEach(jogo => {
-                     // Se o jogo for BOT vs BOT e ainda não acabou
                      if(jogo.status !== 'finalizado' && jogo.jogador1.startsWith('bot_') && jogo.jogador2.startsWith('bot_')) {
                          jogo.status = 'finalizado';
                          const r = Math.random();
+                         let p1Score = 0, p2Score = 0;
+
                          if(r < 0.33) {
+                             // JOGADOR 1 GANHA
                              jogo.vencedor = jogo.jogador1;
+                             p1Score = Math.floor(Math.random() * 10) + 20; // 20 a 29
+                             p2Score = Math.floor(Math.random() * 10) + 5;  // 5 a 14
                              dados.classificacao[jogo.jogador1].pontos += 3;
                              dados.classificacao[jogo.jogador1].vitorias += 1;
                              dados.classificacao[jogo.jogador2].derrotas += 1;
-                             dados.classificacao[jogo.jogador1].saldoPontos += Math.floor(Math.random()*5);
                          } else if (r < 0.66) {
+                             // JOGADOR 2 GANHA
                              jogo.vencedor = jogo.jogador2;
+                             p2Score = Math.floor(Math.random() * 10) + 20;
+                             p1Score = Math.floor(Math.random() * 10) + 5;
                              dados.classificacao[jogo.jogador2].pontos += 3;
                              dados.classificacao[jogo.jogador2].vitorias += 1;
                              dados.classificacao[jogo.jogador1].derrotas += 1;
-                             dados.classificacao[jogo.jogador2].saldoPontos += Math.floor(Math.random()*5);
                          } else {
+                             // EMPATE
                              jogo.vencedor = 'empate';
+                             p1Score = Math.floor(Math.random() * 5) + 15; // 15 a 19
+                             p2Score = p1Score; // Pontos iguais
                              dados.classificacao[jogo.jogador1].pontos += 1;
                              dados.classificacao[jogo.jogador1].empates += 1;
                              dados.classificacao[jogo.jogador2].pontos += 1;
                              dados.classificacao[jogo.jogador2].empates += 1;
                          }
+                         
+                         // Salva o placar exato gerado para mostrar na tela
+                         jogo.placar1 = p1Score;
+                         jogo.placar2 = p2Score;
+                         
+                         // O Saldo passa a ser exatamente o total de pontos da partida
+                         dados.classificacao[jogo.jogador1].saldoPontos += p1Score;
+                         dados.classificacao[jogo.jogador2].saldoPontos += p2Score;
+
                          atualizou = true;
                      }
                  });
@@ -202,7 +219,7 @@
                      await updateDoc(doc(db, "torneios", "brasileirao_01"), {
                          rodadas: dados.rodadas, classificacao: dados.classificacao
                      });
-                     alert(`✅ Resultados da Rodada ${rodada} gerados para os Bots!`);
+                     alert(`✅ Resultados e Placares da Rodada ${rodada} gerados para os Bots!`);
                  } else { alert("Nenhum jogo entre dois Bots pendente nesta rodada."); }
              } catch(e) { console.error(e); }
         };
@@ -215,9 +232,6 @@
              alert("✅ Torneio Resetado!");
         };
 
-        // ==========================================
-        // ALGORITMO DO TORNEIO (ROUND ROBIN)
-        // ==========================================
         window.gerarTabelaTorneio = async (idTorneio) => {
             const btn = document.getElementById('btn-gerar-torneio');
             btn.innerText = "PROCESSANDO..."; btn.disabled = true;
@@ -249,7 +263,8 @@
                     for (let i = 0; i < numJogadores / 2; i++) {
                         let p1 = jogadores[i];
                         let p2 = jogadores[numJogadores - 1 - i];
-                        confrontosDaRodada.push({ jogador1: p1, jogador2: p2, status: 'pendente', vencedor: null });
+                        // Agora preparamos campos placar1 e placar2 para o futuro
+                        confrontosDaRodada.push({ jogador1: p1, jogador2: p2, status: 'pendente', vencedor: null, placar1: 0, placar2: 0 });
                     }
                     rodadas[r + 1] = { finalizada: false, confrontos: confrontosDaRodada };
                     jogadores.splice(1, 0, jogadores.pop());
@@ -257,7 +272,7 @@
 
                 for (let r = 1; r <= rodadasIda; r++) {
                     let confrontosVolta = rodadas[r].confrontos.map(jogo => {
-                        return { jogador1: jogo.jogador2, jogador2: jogo.jogador1, status: 'pendente', vencedor: null };
+                        return { jogador1: jogo.jogador2, jogador2: jogo.jogador1, status: 'pendente', vencedor: null, placar1: 0, placar2: 0 };
                     });
                     rodadas[r + rodadasIda] = { finalizada: false, confrontos: confrontosVolta };
                 }
@@ -302,7 +317,6 @@
             }
         };
 
-        // NOVA BUSCA INTELIGENTE DE JOGADORES (Ignora maiúsculas e minúsculas e busca em display e nome)
         document.getElementById('btn-buscar').addEventListener('click', async () => {
             const buscaStr = document.getElementById('input-busca').value.trim().toLowerCase();
             if (!buscaStr) return alert("Digite um Nome ou UID!");

@@ -40,11 +40,11 @@
                     </div>
                     <div class="flex flex-col items-end">
                         <span class="text-gray-400 text-[10px] font-bold uppercase">Inscritos</span>
-                        <span id="contador-inscritos-card" class="text-green-400 text-sm font-black">0 / 10</span>
+                        <span id="contador-inscritos-card" class="text-green-400 text-sm font-black">0 / 8</span>
                     </div>
                 </div>
 
-                <button class="w-full mt-3 bg-[#7a32a8] text-white font-black text-xs py-3 rounded-xl uppercase tracking-widest shadow-lg border border-[#bc7bd4]">Ver Detalhes</button>
+                <button class="w-full mt-3 bg-[#7a32a8] text-white font-black text-xs py-3 rounded-xl uppercase tracking-widest shadow-lg border border-[#bc7bd4]">Ver Detalhes / Jogar</button>
             </div>
         </div>
     </main>
@@ -55,20 +55,22 @@
             <button onclick="fecharModalTorneio()" class="absolute -top-4 -right-2 bg-red-600 text-white font-black w-8 h-8 rounded-full border-2 border-white z-50">X</button>
             
             <div class="p-6 overflow-y-auto no-scrollbar flex-grow">
-                <h2 class="text-[#dca3e8] font-black text-xl text-center uppercase tracking-widest mb-4">Brasileirão Supercards</h2>
+                <h2 class="text-[#dca3e8] font-black text-xl text-center uppercase tracking-widest mb-4">Brasileirão</h2>
                 
-                <div class="flex justify-around mb-4 border-b border-gray-600 pb-2">
-                    <button id="tab-regras" onclick="mudarAbaTorneio('regras')" class="tab-btn text-white font-black text-xs uppercase border-b-2 border-[#bc7bd4] pb-1 transition-colors">Regras</button>
-                    <button id="tab-premiacao" onclick="mudarAbaTorneio('premiacao')" class="tab-btn text-gray-500 font-bold text-xs uppercase pb-1 transition-colors">Premiação</button>
-                    <button id="tab-inscritos" onclick="mudarAbaTorneio('inscritos')" class="tab-btn text-gray-500 font-bold text-xs uppercase pb-1 transition-colors">Inscritos</button>
+                <!-- MENU DE ABAS -->
+                <div id="menu-abas" class="flex justify-around mb-4 border-b border-gray-600 pb-2 overflow-x-auto no-scrollbar">
+                    <button id="tab-regras" onclick="mudarAbaTorneio('regras')" class="tab-btn text-white font-black text-[10px] uppercase border-b-2 border-[#bc7bd4] pb-1 mx-1 shrink-0">Regras</button>
+                    <button id="tab-premiacao" onclick="mudarAbaTorneio('premiacao')" class="tab-btn text-gray-500 font-bold text-[10px] uppercase pb-1 mx-1 shrink-0">Prêmios</button>
+                    <button id="tab-inscritos" onclick="mudarAbaTorneio('inscritos')" class="tab-btn text-gray-500 font-bold text-[10px] uppercase pb-1 mx-1 shrink-0">Inscritos</button>
+                    <button id="tab-classificacao" onclick="mudarAbaTorneio('classificacao')" class="hidden tab-btn text-gray-500 font-bold text-[10px] uppercase pb-1 mx-1 shrink-0">Tabela</button>
+                    <button id="tab-rodada" onclick="mudarAbaTorneio('rodada')" class="hidden tab-btn text-gray-500 font-bold text-[10px] uppercase pb-1 mx-1 shrink-0">Rodada</button>
                 </div>
 
                 <div id="conteudo-regras" class="tab-content flex flex-col gap-4 text-sm text-gray-300 font-bold">
                     <div class="bg-gray-900 p-3 rounded-lg border border-gray-700">
                         <p class="text-white text-xs uppercase mb-1">⚔️ Formato:</p>
-                        <p class="text-xs font-normal">Ida e Volta. Você enfrentará todos os outros 9 competidores duas vezes (total de 18 partidas por jogador).</p>
+                        <p class="text-xs font-normal">Ida e Volta. Você enfrentará todos os outros 7 competidores duas vezes (total de 14 partidas por jogador).</p>
                     </div>
-
                     <div class="bg-gray-900 p-3 rounded-lg border border-gray-700">
                         <p class="text-white text-xs uppercase mb-1">🏆 Pontuação:</p>
                         <ul class="text-xs font-normal list-disc list-inside space-y-1">
@@ -83,22 +85,15 @@
                     <div class="flex items-center gap-3 bg-gray-900 p-3 rounded-lg border border-yellow-500/50">
                         <span class="text-2xl">🥇</span>
                         <div class="flex flex-col">
-                            <span class="text-yellow-400 font-black uppercase text-xs">1º Lugar (Campeão)</span>
-                            <span class="text-white text-xs font-normal">1000 Moedas + Badge Exclusiva</span>
+                            <span class="text-yellow-400 font-black uppercase text-xs">1º Lugar</span>
+                            <span class="text-white text-xs font-normal">1000 Moedas + Badge</span>
                         </div>
                     </div>
                     <div class="flex items-center gap-3 bg-gray-900 p-3 rounded-lg border border-gray-400/50">
                         <span class="text-2xl">🥈</span>
                         <div class="flex flex-col">
                             <span class="text-gray-300 font-black uppercase text-xs">2º Lugar</span>
-                            <span class="text-white text-xs font-normal">500 Moedas + 2 Pacotes Premium</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-3 bg-gray-900 p-3 rounded-lg border border-orange-700/50">
-                        <span class="text-2xl">🥉</span>
-                        <div class="flex flex-col">
-                            <span class="text-orange-400 font-black uppercase text-xs">3º Lugar</span>
-                            <span class="text-white text-xs font-normal">250 Moedas + 1 Pacote Básico</span>
+                            <span class="text-white text-xs font-normal">500 Moedas + 2 Premium</span>
                         </div>
                     </div>
                 </div>
@@ -107,9 +102,18 @@
                     <div class="text-center text-xs text-gray-400 mt-4">Carregando lista de heróis...</div>
                 </div>
 
+                <!-- NOVAS ABAS DE JOGO (TABELA E CONFRONTOS) -->
+                <div id="conteudo-classificacao" class="tab-content hidden flex flex-col gap-2 overflow-x-auto no-scrollbar pb-2">
+                    <div class="text-center text-xs text-gray-400 mt-4 animate-pulse">Calculando Tabela...</div>
+                </div>
+
+                <div id="conteudo-rodada" class="tab-content hidden flex flex-col gap-2 overflow-y-auto no-scrollbar max-h-[300px]">
+                    <div class="text-center text-xs text-gray-400 mt-4">Sorteando Confrontos...</div>
+                </div>
+
             </div>
 
-            <div class="p-4 bg-gray-900 border-t-2 border-[#7a32a8] rounded-b-xl flex justify-center">
+            <div id="area-botao-inscricao" class="p-4 bg-gray-900 border-t-2 border-[#7a32a8] rounded-b-xl flex justify-center">
                 <button id="btn-inscrever" class="w-full bg-gray-600 text-white font-black py-4 rounded-xl shadow-lg border-2 border-gray-500 uppercase tracking-widest transition-transform active:scale-95 text-lg" disabled>
                     CARREGANDO...
                 </button>
@@ -121,97 +125,169 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        // Importações extras para a busca dos inscritos (collection, query, where, getDocs, documentId)
         import { getFirestore, doc, onSnapshot, getDoc, setDoc, updateDoc, arrayUnion, collection, query, where, getDocs, documentId } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = { 
-          apiKey: "AIzaSyCU3lFTgfrDMaD9jwR7X7ivYPmGQh4VE1g",
-          authDomain: "supercards-tcg.firebaseapp.com",
-          projectId: "supercards-tcg",
-          storageBucket: "supercards-tcg.firebasestorage.app",
-          messagingSenderId: "862316380615",
-          appId: "1:862316380615:web:b3f28056ebc967673999e2"
+          apiKey: "AIzaSyCU3lFTgfrDMaD9jwR7X7ivYPmGQh4VE1g", authDomain: "supercards-tcg.firebaseapp.com",
+          projectId: "supercards-tcg", storageBucket: "supercards-tcg.firebasestorage.app",
+          messagingSenderId: "862316380615", appId: "1:862316380615:web:b3f28056ebc967673999e2"
         };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
         let currentUserUid = null;
-        let inscritosCache = []; // Para evitar carregar o banco toda hora
+        let inscritosCache = []; 
+        let dictNomes = {}; // Dicionário para guardar nomes dos uids
         const ID_TORNEIO = "brasileirao_01"; 
 
         window.abrirModalTorneio = () => document.getElementById('modal-torneio').classList.remove('hidden');
         window.fecharModalTorneio = () => document.getElementById('modal-torneio').classList.add('hidden');
 
-        // FUNÇÃO DAS ABAS
         window.mudarAbaTorneio = function(aba) {
-            // Esconde todo o conteúdo
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            
-            // Tira o destaque de todos os botões
             document.querySelectorAll('.tab-btn').forEach(el => {
-                el.classList.remove('text-white', 'font-black', 'border-b-2', 'border-[#bc7bd4]');
-                el.classList.add('text-gray-500', 'font-bold');
+                el.classList.remove('text-white', 'border-b-2', 'border-[#bc7bd4]');
+                el.classList.add('text-gray-500');
             });
-            
-            // Mostra o conteúdo e destaca o botão selecionado
             document.getElementById(`conteudo-${aba}`).classList.remove('hidden');
             const btn = document.getElementById(`tab-${aba}`);
-            btn.classList.remove('text-gray-500', 'font-bold');
-            btn.classList.add('text-white', 'font-black', 'border-b-2', 'border-[#bc7bd4]');
+            btn.classList.remove('text-gray-500');
+            btn.classList.add('text-white', 'border-b-2', 'border-[#bc7bd4]');
         };
 
-        // FUNÇÃO PARA BUSCAR E MONTAR A LISTA DE INSCRITOS
+        // TRAVA DO DECK PARA ENTRAR NA BATALHA
+        window.entrarNaArena = async (idAdversario) => {
+            const btn = event.target;
+            btn.innerText = "VERIFICANDO DECK...";
+            btn.disabled = true;
+            try {
+                const snap = await getDoc(doc(db, "users", currentUserUid));
+                const pData = snap.data();
+                const deck = pData.deckPadrao || [];
+                const cartas = pData.cartas || [];
+                
+                if(deck.length !== 12) {
+                    alert("⚠️ ACESSO NEGADO: Você precisa montar um Deck com exatamente 12 cartas na aba DECKS para jogar o Brasileirão!");
+                    btn.innerText = "JOGAR PARTIDA"; btn.disabled = false; return;
+                }
+                
+                const deckValido = deck.every(c => cartas.includes(c));
+                if(!deckValido) {
+                    alert("⚠️ ACESSO NEGADO: Seu Deck possui cartas que foram vendidas ou trocadas. Atualize seu deck!");
+                    btn.innerText = "JOGAR PARTIDA"; btn.disabled = false; return;
+                }
+                
+                localStorage.setItem("torneioAdversario", idAdversario);
+                localStorage.setItem("torneioId", ID_TORNEIO);
+                window.location.href = "arena.html";
+                
+            } catch(e) { console.error("Erro na verificação do deck:", e); btn.innerText = "JOGAR PARTIDA"; btn.disabled = false; }
+        };
+
+        async function preencherDictNomes(listaUids) {
+            if(!listaUids || listaUids.length === 0) return;
+            const uidsFaltantes = listaUids.filter(uid => !dictNomes[uid]);
+            if(uidsFaltantes.length === 0) return;
+
+            try {
+                const q = query(collection(db, "users"), where(documentId(), "in", uidsFaltantes));
+                const snap = await getDocs(q);
+                snap.forEach(userDoc => {
+                    const dados = userDoc.data();
+                    dictNomes[userDoc.id] = {
+                        nome: dados.nomeDisplay || dados.nome || "JOGADOR",
+                        foto: dados.fotoPerfil || "fundo_carta.png",
+                        nivel: dados.nivel || 1
+                    };
+                });
+            } catch (error) { console.error("Erro ao buscar nomes:", error); }
+        }
+
         async function renderizarListaInscritos(listaUids) {
             const container = document.getElementById('conteudo-inscritos');
-            
-            // Se a lista estiver vazia
-            if (!listaUids || listaUids.length === 0) {
-                container.innerHTML = '<div class="text-center text-xs text-gray-400 mt-4">Nenhum jogador inscrito ainda.</div>';
-                return;
-            }
-
-            // Se a lista não mudou, não precisa gastar leitura no banco!
+            if (!listaUids || listaUids.length === 0) return container.innerHTML = '<div class="text-center text-xs text-gray-400 mt-4">Nenhum inscrito ainda.</div>';
             if (JSON.stringify(listaUids) === JSON.stringify(inscritosCache)) return;
             inscritosCache = listaUids;
 
-            try {
-                // Acha todos os usuários do banco cujo ID está dentro da lista de inscritos
-                // O operador 'in' funciona perfeitamente até 10 itens!
-                const q = query(collection(db, "users"), where(documentId(), "in", listaUids));
-                const snap = await getDocs(q);
-                
-                container.innerHTML = ''; // Limpa o "Carregando..."
-                
-                snap.forEach(userDoc => {
-                    const dados = userDoc.data();
-                    const nome = dados.nomeDisplay || dados.nome || "JOGADOR";
-                    const foto = dados.fotoPerfil || "fundo_carta.png";
-                    const nivel = dados.nivel || 1;
-                    
-                    container.innerHTML += `
-                        <div class="flex items-center gap-3 bg-gray-900 p-2.5 rounded-lg border border-[#bc7bd4]/30 shadow-sm">
-                            <div class="w-10 h-10 rounded-full border-2 border-[#dca3e8] overflow-hidden flex-shrink-0 bg-black">
-                                <img src="${foto}" class="w-full h-full object-cover">
-                            </div>
-                            <div class="flex flex-col flex-grow">
-                                <span class="text-white font-black text-xs uppercase">${nome}</span>
-                                <span class="text-gray-400 font-bold text-[10px]">Nível ${nivel}</span>
-                            </div>
+            await preencherDictNomes(listaUids);
+            container.innerHTML = ''; 
+            
+            listaUids.forEach(uid => {
+                const info = dictNomes[uid] || {nome:"DESCONHECIDO", foto:"fundo_carta.png", nivel:0};
+                container.innerHTML += `
+                    <div class="flex items-center gap-3 bg-gray-900 p-2.5 rounded-lg border border-[#bc7bd4]/30 shadow-sm">
+                        <div class="w-10 h-10 rounded-full border-2 border-[#dca3e8] overflow-hidden flex-shrink-0 bg-black">
+                            <img src="${info.foto}" class="w-full h-full object-cover">
                         </div>
-                    `;
-                });
-            } catch (error) {
-                console.error("Erro ao carregar inscritos:", error);
-                container.innerHTML = '<div class="text-center text-xs text-red-400 mt-4">Erro ao carregar jogadores.</div>';
-            }
+                        <div class="flex flex-col flex-grow">
+                            <span class="text-white font-black text-xs uppercase">${info.nome}</span>
+                            <span class="text-gray-400 font-bold text-[10px]">Nível ${info.nivel}</span>
+                        </div>
+                    </div>`;
+            });
         }
 
-        // Guarda-Costas da Manutenção
+        function renderizarTabelaERodada(dados) {
+            // TABELA
+            const classArray = Object.keys(dados.classificacao).map(uid => {
+                return { uid, nome: (dictNomes[uid]?.nome || "BOT").substring(0,10), ...dados.classificacao[uid] };
+            });
+            classArray.sort((a,b) => b.pontos - a.pontos || b.vitorias - a.vitorias || b.saldoPontos - a.saldoPontos);
+            
+            let htmlTabela = `<table class="w-full text-xs text-center text-gray-300 bg-gray-900 rounded-lg overflow-hidden border border-gray-700">
+                <tr class="text-white bg-gray-800 border-b-2 border-purple-500">
+                    <th class="py-2 pl-2">#</th><th class="text-left">JOGADOR</th><th>PTS</th><th>V</th><th>E</th><th>D</th><th class="pr-2">SAL</th>
+                </tr>`;
+            classArray.forEach((p, i) => {
+                const isMe = p.uid === currentUserUid ? "bg-purple-900/60 font-black text-white" : "";
+                htmlTabela += `<tr class="border-b border-gray-700/50 ${isMe}">
+                    <td class="py-2 pl-2 font-black">${i+1}</td>
+                    <td class="text-left uppercase truncate max-w-[70px]">${p.nome}</td>
+                    <td class="text-green-400 font-bold">${p.pontos}</td>
+                    <td>${p.vitorias}</td><td>${p.empates}</td><td>${p.derrotas}</td>
+                    <td class="text-yellow-400 pr-2">${p.saldoPontos}</td>
+                </tr>`;
+            });
+            htmlTabela += `</table>`;
+            document.getElementById('conteudo-classificacao').innerHTML = htmlTabela;
+
+            // RODADA
+            const rodadaAtual = dados.rodadaAtual;
+            const jogos = dados.rodadas[rodadaAtual].confrontos;
+            let htmlRodada = `<h3 class="text-center text-[#dca3e8] font-black uppercase text-sm mb-3">Rodada ${rodadaAtual}</h3>`;
+            
+            jogos.forEach(jogo => {
+                const n1 = dictNomes[jogo.jogador1]?.nome || "BOT";
+                const n2 = dictNomes[jogo.jogador2]?.nome || "BOT";
+                const isP1 = jogo.jogador1 === currentUserUid;
+                const isP2 = jogo.jogador2 === currentUserUid;
+                const myMatch = isP1 || isP2;
+                
+                let statusText = jogo.status === 'finalizado' ? `<span class="text-green-500 font-bold">FINALIZADO</span>` : `<span class="text-yellow-500 font-bold animate-pulse">AGUARDANDO</span>`;
+                
+                let actionBtn = "";
+                if (myMatch && jogo.status !== 'finalizado') {
+                    const idAdv = isP1 ? jogo.jogador2 : jogo.jogador1;
+                    actionBtn = `<button onclick="window.entrarNaArena('${idAdv}')" class="mt-3 w-full bg-green-600 hover:bg-green-500 py-3 rounded-lg text-white font-black text-xs uppercase shadow-lg border-2 border-green-400">⚔️ ENTRAR NA ARENA</button>`;
+                }
+                
+                htmlRodada += `
+                    <div class="bg-gray-900 p-4 rounded-xl border-2 ${myMatch && jogo.status !== 'finalizado' ? 'border-green-500/50' : 'border-gray-700'} mb-3 flex flex-col shadow-md">
+                        <div class="flex justify-between items-center w-full text-xs font-black uppercase text-gray-300">
+                            <span class="w-2/5 text-right ${isP1 ? 'text-purple-400 text-sm' : ''} truncate">${n1}</span>
+                            <span class="w-1/5 text-center text-gray-600 font-bold">VS</span>
+                            <span class="w-2/5 text-left ${isP2 ? 'text-purple-400 text-sm' : ''} truncate">${n2}</span>
+                        </div>
+                        <div class="text-center mt-2 text-[10px] uppercase">${statusText}</div>
+                        ${actionBtn}
+                    </div>`;
+            });
+            document.getElementById('conteudo-rodada').innerHTML = htmlRodada;
+        }
+
         onSnapshot(doc(db, "sistema", "configuracao"), (docSnap) => {
-            if (docSnap.exists() && docSnap.data().emManutencao === true) {
-                window.location.href = "manutencao.html";
-            }
+            if (docSnap.exists() && docSnap.data().emManutencao === true) window.location.href = "manutencao.html";
         });
 
         onAuthStateChanged(auth, async (user) => {
@@ -219,46 +295,54 @@
             currentUserUid = user.uid;
 
             const torneioRef = doc(db, "torneios", ID_TORNEIO);
-
             const checkSnap = await getDoc(torneioRef);
             if (!checkSnap.exists()) {
-                await setDoc(torneioRef, {
-                    nome: "Brasileirão Supercards",
-                    status: "aberto",
-                    inscritos: [],
-                    maxInscritos: 10
-                });
+                await setDoc(torneioRef, { nome: "Brasileirão", status: "aberto", inscritos: [], maxInscritos: 8 });
             }
 
-            // Escuta o torneio
-            onSnapshot(torneioRef, (docSnap) => {
+            onSnapshot(torneioRef, async (docSnap) => {
                 if (!docSnap.exists()) return;
                 
                 const dados = docSnap.data();
                 const totalInscritos = dados.inscritos ? dados.inscritos.length : 0;
-                const max = dados.maxInscritos || 10;
+                const max = dados.maxInscritos || 8;
                 const jaInscrito = dados.inscritos && dados.inscritos.includes(currentUserUid);
 
-                // ATUALIZA A ABA DE INSCRITOS VISUALMENTE
-                renderizarListaInscritos(dados.inscritos || []);
-
-                // Atualiza contadores no card
+                await renderizarListaInscritos(dados.inscritos || []);
                 document.getElementById('contador-inscritos-card').innerText = `${totalInscritos} / ${max}`;
                 
                 const badge = document.getElementById('badge-status');
                 const btn = document.getElementById('btn-inscrever');
+                const areaBotao = document.getElementById('area-botao-inscricao');
 
-                if (jaInscrito) {
-                    badge.innerText = "Você está participando!";
+                // LÓGICA DE INTERFACE DINÂMICA
+                if (dados.status === "em_andamento" || dados.status === "finalizado") {
+                    badge.innerText = "Torneio em Andamento";
+                    badge.className = "absolute top-2 right-2 bg-purple-600 text-white text-[10px] font-black px-2 py-1 rounded uppercase shadow-md z-20";
+                    
+                    document.getElementById('tab-inscritos').classList.add('hidden');
+                    document.getElementById('tab-classificacao').classList.remove('hidden');
+                    document.getElementById('tab-rodada').classList.remove('hidden');
+                    areaBotao.classList.add('hidden'); // Esconde botão de inscrever
+
+                    // Se a aba atual for inscritos (que foi escondida), joga pra Tabela
+                    if(!document.getElementById('conteudo-inscritos').classList.contains('hidden')) {
+                        mudarAbaTorneio('classificacao');
+                    }
+                    
+                    renderizarTabelaERodada(dados);
+                } 
+                else if (jaInscrito) {
+                    badge.innerText = "Você está inscrito!";
                     badge.className = "absolute top-2 right-2 bg-blue-500 text-white text-[10px] font-black px-2 py-1 rounded uppercase shadow-md z-20";
-                    btn.innerText = "VOCÊ ESTÁ INSCRITO";
+                    btn.innerText = "AGUARDANDO SORTEIO...";
                     btn.className = "w-full bg-blue-600 text-white font-black py-4 rounded-xl shadow-lg border-2 border-blue-400 uppercase tracking-widest text-lg opacity-80 cursor-not-allowed";
                     btn.onclick = null;
                 } 
-                else if (totalInscritos >= max || dados.status !== "aberto") {
-                    badge.innerText = "Inscrições Encerradas";
+                else if (totalInscritos >= max) {
+                    badge.innerText = "Torneio Lotado";
                     badge.className = "absolute top-2 right-2 bg-red-500 text-white text-[10px] font-black px-2 py-1 rounded uppercase shadow-md z-20";
-                    btn.innerText = "TORNEIO LOTADO / FECHADO";
+                    btn.innerText = "LOTADO";
                     btn.className = "w-full bg-red-600 text-white font-black py-4 rounded-xl shadow-lg border-2 border-red-400 uppercase tracking-widest text-lg opacity-80 cursor-not-allowed";
                     btn.onclick = null;
                 } 
@@ -268,19 +352,12 @@
                     btn.innerText = "GARANTIR VAGA";
                     btn.className = "w-full bg-green-600 hover:bg-green-500 text-white font-black py-4 rounded-xl shadow-lg border-2 border-green-400 uppercase tracking-widest transition-transform active:scale-95 text-lg";
                     
-                    // AÇÃO DE INSCREVER BLINDADA
                     btn.onclick = async () => {
-                        btn.innerText = "PROCESSANDO...";
-                        btn.disabled = true;
+                        btn.innerText = "PROCESSANDO..."; btn.disabled = true;
                         try {
-                            await updateDoc(torneioRef, {
-                                inscritos: arrayUnion(currentUserUid)
-                            });
+                            await updateDoc(torneioRef, { inscritos: arrayUnion(currentUserUid) });
                         } catch (error) {
-                            console.error("Erro na inscrição:", error);
-                            alert("Não foi possível se inscrever! Verifique sua conexão e se as permissões do Firebase (Rules) estão corretas para a pasta 'torneios'.");
-                            btn.innerText = "GARANTIR VAGA";
-                            btn.disabled = false;
+                            alert("Erro na inscrição!"); btn.innerText = "GARANTIR VAGA"; btn.disabled = false;
                         }
                     };
                 }

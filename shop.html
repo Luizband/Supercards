@@ -344,18 +344,17 @@
                 deltaBasico += pacotesBasicosGanhos;
                 deltaPremium += pacotesPremiumGanhos;
                 
-                let atualizacaoInventario = {};
-                if (deltaBasico > 0) atualizacaoInventario.pacoteBasico = increment(deltaBasico);
-                if (deltaPremium > 0) atualizacaoInventario.pacotePremium = increment(deltaPremium);
-                
                 let pacoteAtualizacao = {
                     moedas: increment(-precoGasto + bonusMoedas),
-                    inventario: atualizacaoInventario,
-                    estatisticas: { moedasGastas: increment(precoGasto) },
+                    "estatisticas.moedasGastas": increment(precoGasto),
                     badges: badgesJogador,
                     xp: novoXp,
                     nivel: nivelAtual
                 };
+
+                // Adiciona pacotes cirurgicamente sem apagar os outros
+                if (deltaBasico > 0) pacoteAtualizacao["inventario.pacoteBasico"] = increment(deltaBasico);
+                if (deltaPremium > 0) pacoteAtualizacao["inventario.pacotePremium"] = increment(deltaPremium);
 
                 if (atualizouMissao) {
                     pacoteAtualizacao.missoesDiarias = pacoteMissoes;
@@ -365,7 +364,8 @@
                     pacoteAtualizacao.notificacoes = arrayUnion(...notificacoesNovas);
                 }
                 
-                await setDoc(ref, pacoteAtualizacao, { merge: true });
+                // updateDoc garante que os campos intocados fiquem 100% seguros
+                await updateDoc(ref, pacoteAtualizacao);
                 
                 window.saldoMoedas = window.saldoMoedas - precoGasto + bonusMoedas;
                 document.getElementById('player-coins').innerText = window.saldoMoedas;

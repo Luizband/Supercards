@@ -256,6 +256,9 @@
                     }
                 }
 
+                // Linha adicionada para atualizar o nome no topo da tela do inventário!
+                document.getElementById('player-name').innerText = (dadosJogador.nomeDisplay || dadosJogador.nome || "JOGADOR").toUpperCase();
+
                 document.getElementById('player-coins').innerText = dadosJogador.moedas || 0;
                 atualizarVisualBarraXP(dadosJogador.xp || 0, dadosJogador.nivel || 1);
                 

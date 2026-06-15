@@ -211,10 +211,10 @@
                     return;
                 }
                 
-                await setDoc(ref, {
-                    inventario: { pacoteGratis: increment(1) },
+                await updateDoc(ref, {
+                    "inventario.pacoteGratis": increment(1),
                     ultimoResgateDiario: hoje
-                }, { merge: true });
+                });
                 
                 window.mostrarMensagem("🎁 PACOTE RESGATADO COM SUCESSO!", "sucesso");
                 statusDiv.innerText = "JÁ PEGOU HOJE";

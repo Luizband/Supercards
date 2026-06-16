@@ -65,11 +65,17 @@
                 <img src="fundo_carta.png" class="w-14 object-contain drop-shadow-xl brightness-50 rounded-md border border-black">
                 <span id="player-deck-count" class="text-white font-black text-xl -mt-9 drop-shadow-[0_2px_4px_rgba(0,0,0,1)] z-10">0</span>
             </div>
+
+            <div id="aviso-atributo" class="absolute top-[20%] left-1/2 transform -translate-x-1/2 flex justify-center z-50 pointer-events-none hidden">
+                <span id="aviso-atributo-texto" class="text-white font-black text-sm uppercase tracking-widest animate-pulse drop-shadow-lg bg-black/80 px-6 py-2 rounded-full border border-white/30 text-center shadow-xl"></span>
+            </div>
+
             <div id="arena-combate" class="absolute -top-16 left-1/2 transform -translate-x-1/2 w-full h-32 flex justify-center items-center gap-4 z-40 hidden">
                 <div id="carta-jogada-player" class="w-[85px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-2xl border-2 border-white transform translate-y-10 transition-all duration-500"></div>
                 <div id="carta-jogada-opp" class="w-[85px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-2xl border-2 border-black transform -translate-y-10 transition-all duration-500"></div>
             </div>
-            <div id="mao-jogador" class="absolute bottom-12 left-1/2 transform -translate-x-1/2 w-full flex justify-center -space-x-6 px-2 z-30"></div>
+            
+            <div id="mao-jogador" class="absolute bottom-20 left-1/2 transform -translate-x-1/2 w-full flex justify-center -space-x-6 px-2 z-30"></div>
         </div>
 
         <!-- MODAIS DA ARENA -->
@@ -336,14 +342,35 @@
             if (ultimoEstadoToast === estado) return; ultimoEstadoToast = estado;
 
             const nAtacante = dadosSala.quemAtaca === dadosSala.jogador1.uid ? dadosSala.jogador1.nome : dadosSala.jogador2.nome;
-            const nDefensor = dadosSala.quemAtaca === dadosSala.jogador1.uid ? dadosSala.jogador2.nome : dadosSala.jogador1.nome;
 
-            if (dadosSala.statusTurno === 'aguardando_ataque') window.mostrarToast(`Vez de ${nAtacante} escolher uma carta e atributo`);
-            else if (dadosSala.statusTurno === 'aguardando_defesa') window.mostrarToast(`Vez de ${nDefensor} defender com ${dadosSala.atributoTurno.toUpperCase()}`);
+            if (dadosSala.statusTurno === 'aguardando_ataque') {
+                window.mostrarToast(`Vez de ${nAtacante} escolher uma carta e atributo`);
+            }
             else if (dadosSala.statusTurno === 'exibindo_resultado') {
                 if (dadosSala.vencedorTurno === 'anuladas') window.mostrarToast(`Empate absoluto! As cartas se ANULARAM.`);
                 else if (dadosSala.vencedorTurno === 'desempate') window.mostrarToast(`EMPATE!<br><span class="text-xs font-normal">${dadosSala.nomeVencedorTurno} venceu no atributo extra (${dadosSala.valorDesempate}).</span>`);
                 else window.mostrarToast(`${dadosSala.nomeVencedorTurno} ganhou o turno!`);
+            }
+        }
+
+        // NOVA FUNÇÃO: Controla o Atributo no centro da tela
+        function atualizarAtributoPiscando() {
+            const avisoDiv = document.getElementById('aviso-atributo');
+            const avisoTexto = document.getElementById('aviso-atributo-texto');
+            
+            // Só aparece na hora que alguém está defendendo
+            if (dadosSala.statusTurno === 'aguardando_defesa') {
+                avisoTexto.innerText = `${dadosSala.atributoTurno.toUpperCase()}`;
+                
+                // Se você for o defensor, a cor fica vermelha! Se for o atacante, fica amarela.
+                if (dadosSala.quemAtaca !== currentUserUid) {
+                    avisoTexto.className = "text-red-400 font-black text-sm uppercase tracking-widest animate-pulse drop-shadow-lg bg-black/80 px-6 py-2 rounded-full border border-red-500/50 text-center";
+                } else {
+                    avisoTexto.className = "text-yellow-400 font-black text-sm uppercase tracking-widest animate-pulse drop-shadow-lg bg-black/80 px-6 py-2 rounded-full border border-yellow-500/50 text-center";
+                }
+                avisoDiv.classList.remove('hidden');
+            } else {
+                avisoDiv.classList.add('hidden'); // Some no embate e no ataque
             }
         }
 
@@ -586,7 +613,7 @@
 
                     if (!dadosSala.jogador1.mao) return; 
 
-                    renderizarArena(); dispararToastsDeTurno();
+                    renderizarArena(); dispararToastsDeTurno(); atualizarAtributoPiscando();
 
                     if (dadosSala.statusTurno === 'exibindo_resultado') { if (!window.clashAtivo) { window.clashAtivo = true; exibirAnimacaoClash(); } }
                     else { window.clashAtivo = false; document.getElementById('modal-embate').classList.add('hidden'); }

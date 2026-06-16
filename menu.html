@@ -205,6 +205,21 @@
             </div>
         </div>
 
+        <!-- MODAL DE MENSAGEM GLOBAL -->
+        <div id="modal-mensagem-global" class="hidden fixed inset-0 bg-black/80 z-[300] flex flex-col items-center justify-center p-4 backdrop-blur-sm pointer-events-auto">
+            <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 w-full max-w-sm shadow-2xl flex flex-col items-center gap-4 relative max-h-[85vh]">
+                <button onclick="window.fecharMensagemGlobal()" class="absolute top-2 right-4 text-[#7a32a8] font-black text-xl hover:text-purple-600 transition-colors z-50">X</button>
+                
+                <h2 id="msg-global-titulo" class="text-[#7a32a8] font-black text-xl text-center uppercase tracking-wider mb-2 leading-tight"></h2>
+                
+                <img id="msg-global-img" src="" class="hidden w-full max-h-40 object-contain rounded-lg drop-shadow-md border-2 border-[#bc7bd4]">
+                
+                <div id="msg-global-texto" class="text-[#7a32a8] font-bold text-sm text-center w-full overflow-y-auto no-scrollbar whitespace-pre-wrap"></div>
+                
+                <button onclick="window.fecharMensagemGlobal()" class="w-full mt-2 bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-3 rounded-full shadow-md uppercase tracking-wider transition-transform hover:scale-105">Entendi</button>
+            </div>
+        </div>
+
     </div>
 
     <script type="module">
@@ -245,6 +260,20 @@
                 toast.style.transition = 'opacity 0.5s ease';
                 setTimeout(() => toast.remove(), 500); 
             }, 3000);
+        };
+
+        window.fecharMensagemGlobal = async function() {
+            document.getElementById('modal-mensagem-global').classList.add('hidden');
+            // Se houver uma mensagem ativa na tela e um jogador logado, salva o carimbo no banco dele!
+            if (window.msgGlobalIdAtual && auth.currentUser) {
+                try {
+                    await setDoc(doc(db, "users", auth.currentUser.uid), {
+                        ultimaMensagemLida: window.msgGlobalIdAtual
+                    }, { merge: true });
+                } catch (error) {
+                    console.error("Erro ao salvar mensagem lida:", error);
+                }
+            }
         };
 
         function obterGameDay(offsetDias = 0) {
@@ -358,14 +387,45 @@
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // --- GUARDA-COSTAS DA MANUTENÇÃO (AGORA NO LUGAR CERTO) ---
-                onSnapshot(doc(db, "sistema", "configuracao"), (docSnap) => {
-                    console.log("Status do Servidor:", docSnap.data()); // Mostra no F12
-                    if (docSnap.exists() && docSnap.data().emManutencao === true) {
-                        window.location.href = "manutencao.html";
+                // --- GUARDA-COSTAS E MENSAGEM GLOBAL ---
+                onSnapshot(doc(db, "sistema", "configuracao"), async (docSnap) => {
+                    if (docSnap.exists()) {
+                        const sysData = docSnap.data();
+                        
+                        // 1. Manutenção
+                        if (sysData.emManutencao === true) {
+                            window.location.href = "manutencao.html";
+                        }
+
+                        // 2. Sistema de Mensagem Global Pop-up
+                        const msg = sysData.mensagemGlobal;
+                        if (msg && msg.ativa) {
+                            // Verifica no doc do usuário qual foi a última mensagem que ele leu
+                            const mySnap = await getDoc(doc(db, "users", user.uid));
+                            if (mySnap.exists()) {
+                                const lida = mySnap.data().ultimaMensagemLida;
+                                // Se a mensagem atual tiver um ID diferente do que o jogador tem salvo, mostra!
+                                if (lida !== msg.id) {
+                                    document.getElementById('msg-global-titulo').innerText = msg.titulo;
+                                    document.getElementById('msg-global-texto').innerText = msg.texto;
+                                    
+                                    const imgEl = document.getElementById('msg-global-img');
+                                    if (msg.imagem && msg.imagem.trim() !== "") {
+                                        imgEl.src = msg.imagem;
+                                        imgEl.classList.remove('hidden');
+                                    } else {
+                                        imgEl.classList.add('hidden');
+                                    }
+                                    
+                                    // Guarda o ID numa variável da janela para salvar quando ele fechar
+                                    window.msgGlobalIdAtual = msg.id;
+                                    document.getElementById('modal-mensagem-global').classList.remove('hidden');
+                                }
+                            }
+                        }
                     }
                 }, (error) => {
-                    console.error("Erro no Guarda-Costas:", error);
+                    console.error("Erro no Listener do Sistema:", error);
                 });
                 // ----------------------------------------------------------
                 

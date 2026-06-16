@@ -89,7 +89,10 @@
         </header>
 
         <main class="flex flex-col items-center w-full flex-grow overflow-y-auto no-scrollbar pb-32">
-            <h1 class="text-[#dca3e8] font-black text-2xl text-center mb-6 drop-shadow-md uppercase tracking-wider">BATALHAS</h1>
+            <div class="flex items-center justify-center gap-3 mb-6">
+                <h1 class="text-[#dca3e8] font-black text-2xl drop-shadow-md uppercase tracking-wider">BATALHAS</h1>
+                <button onclick="abrirModalRegras()" class="bg-[#7a32a8] text-white font-black rounded-full w-7 h-7 flex items-center justify-center shadow-md border-2 border-[#bc7bd4] hover:scale-105 transition-transform pb-0.5">?</button>
+            </div>
 
             <div class="w-full max-w-[280px] flex-shrink-0 flex flex-col items-center mb-6">
                 
@@ -154,6 +157,29 @@
         <h2 class="text-[#dca3e8] font-black text-2xl text-center uppercase tracking-wider mb-8 animate-pulse">Procurando<br>Oponente...</h2>
         <div class="w-16 h-16 border-4 border-[#7a32a8] border-t-[#dca3e8] rounded-full animate-spin mb-8"></div>
         <button onclick="cancelarBusca()" class="bg-red-600 hover:bg-red-700 text-white font-black py-2.5 px-10 rounded-full shadow-xl uppercase text-sm tracking-wide">Cancelar</button>
+    </div>
+
+    <!-- MODAL DE REGRAS -->
+    <div id="modal-regras" class="hidden fixed inset-0 bg-black/90 z-[300] flex flex-col items-center justify-center p-4 backdrop-blur-md pointer-events-auto">
+        <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 w-full max-w-sm shadow-2xl relative flex flex-col max-h-[85vh]">
+            <button onclick="fecharModalRegras()" class="absolute top-2 right-4 text-[#7a32a8] font-black text-xl hover:text-purple-600 transition-colors z-50">X</button>
+            
+            <h2 class="text-[#7a32a8] font-black text-xl text-center uppercase tracking-wider mb-4 border-b-2 border-[#7a32a8]/30 pb-2 flex-shrink-0">Regras da Batalha</h2>
+            
+            <div class="text-[#7a32a8] font-bold text-sm leading-relaxed overflow-y-auto no-scrollbar flex-grow pr-1">
+                
+                <p class="mb-3"><b>1. O seu Deck:</b> Para entrar na Arena, você precisa de um deck com exatamente 20 cartas. Atenção aos limites: seu deck pode ter no máximo <b>1 Épica, 2 Lendárias e 7 Raras</b>. O restante deve ser de cartas Comuns. Não esqueça de marcá-lo como "Deck Padrão" na página de Decks!</p>
+
+                <p class="mb-3"><b>2. A Batalha:</b> A cada turno, o jogador atacante avalia sua carta e escolhe um atributo para o combate (Aura, Fofura, Diversão ou Aleatoriedade). O jogador defensor deve então olhar as cartas na sua mão e escolher uma para defender aquele atributo específico.</p>
+
+                <p class="mb-3"><b>3. A Revelação:</b> Após a escolha do defensor, as cartas são reveladas. Quem tiver o maior valor no atributo escolhido vence o embate. Em caso de empate, compare-se a carta com o segundo maior atributo vence. Caso as cartas sejam iguais, elas se anulam.</p>
+
+                <p class="mb-3"><b>4. Como Vencer:</b> O vencedor do turno captura as cartas da mesa para a sua pilha. O vencedor é aquele que tiver a maior somatória de pontos das cartas capturas para sua pilha.</p>
+
+            </div>
+            
+            <button onclick="fecharModalRegras()" class="mt-4 w-full bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-3 rounded-full shadow-md uppercase tracking-wider transition-colors flex-shrink-0">Entendi</button>
+        </div>
     </div>
 
     <div id="modal-desafio" class="hidden fixed inset-0 bg-black/90 z-[200] flex flex-col items-center justify-center p-4 backdrop-blur-md pointer-events-auto">
@@ -228,6 +254,13 @@
             toast.className = 'toast-msg'; toast.innerHTML = msg;
             container.appendChild(toast);
             setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
+        };
+        window.abrirModalRegras = function() {
+            document.getElementById('modal-regras').classList.remove('hidden');
+        };
+        
+        window.fecharModalRegras = function() {
+            document.getElementById('modal-regras').classList.add('hidden');
         };
 
        // ===============================================

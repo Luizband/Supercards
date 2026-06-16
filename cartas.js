@@ -117,8 +117,8 @@ for (let id in INFO_CARTAS) {
 
 // Tabela de fragmentos globais (já deixamos salvo aqui também)
 export const TABELA_FRAGMENTOS = {
-    "Comum": 2,
-    "Rara": 10,
-    "Épica": 100,
-    "Lendária": 40
+    'Comum': 5,
+    'Rara': 20,
+    'Lendária': 80,
+    'Épica': 150
 };

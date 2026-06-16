@@ -120,6 +120,12 @@
                             </button>
                         </div>
                     </div>
+                    <div class="bg-gray-800 p-4 rounded-lg border border-red-500/50 shadow-inner">
+                        <h4 class="text-xs font-bold text-gray-400 uppercase mb-3 flex items-center gap-2">🧹 Ações de Limpeza</h4>
+                        <button onclick="limparNotificacoes()" class="w-full bg-red-700 hover:bg-red-600 text-white font-black py-3 rounded-lg shadow border border-red-500 text-[10px] sm:text-xs uppercase transition-transform active:scale-95">
+                            Apagar Todas as Notificações
+                        </button>
+                    </div>
 
                 </div>
 
@@ -417,6 +423,37 @@
             } catch (error) {
                 console.error(error);
                 alert("Erro ao injetar pacote.");
+            } finally {
+                btn.innerText = textoOriginal;
+                btn.disabled = false;
+            }
+        };
+
+        // === NOVA FUNÇÃO: LIMPAR NOTIFICAÇÕES ===
+        window.limparNotificacoes = async () => {
+            if (!window.currentUserUid) return alert("Busque um jogador primeiro!");
+            
+            // Trava de segurança para não clicar sem querer
+            if (!confirm("🚨 TEM CERTEZA? Isso vai apagar TODAS as notificações da caixa de entrada deste jogador para liberar espaço no banco. Não pode ser desfeito!")) return;
+
+            const btn = event.target;
+            const textoOriginal = btn.innerText;
+            btn.innerText = "LIMPANDO...";
+            btn.disabled = true;
+
+            try {
+                // Substitui a gaveta de notificações do jogador por um array vazio []
+                await updateDoc(doc(db, "users", window.currentUserUid), { 
+                    notificacoes: [] 
+                });
+                
+                // Atualiza a tela de Raio-X
+                await window.carregarJogador(window.currentUserUid);
+                alert("✅ Caixa de notificações do jogador foi esvaziada com sucesso!");
+                
+            } catch (error) {
+                console.error(error);
+                alert("Erro ao limpar notificações.");
             } finally {
                 btn.innerText = textoOriginal;
                 btn.disabled = false;

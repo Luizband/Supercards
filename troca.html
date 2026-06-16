@@ -92,9 +92,10 @@
             </div>
         </header>
 
-        <h1 class="text-[#dca3e8] font-black text-xl text-center mb-3 mt-2 drop-shadow-md uppercase flex items-center justify-center gap-2">
-            TROCAS
-        </h1>
+        <div class="flex items-center justify-center gap-3 mb-3 mt-2">
+            <h1 class="text-[#dca3e8] font-black text-xl drop-shadow-md uppercase tracking-wider">TROCAS</h1>
+            <button onclick="abrirModalRegrasTroca()" class="bg-[#7a32a8] text-white font-black text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-md border-2 border-[#bc7bd4] hover:scale-105 transition-transform leading-none">?</button>
+        </div>
 
         <div class="flex justify-center w-full mb-4 z-10 relative">
             <button onclick="abrirModalTrocas()" class="bg-[#dca3e8] hover:bg-[#bc7bd4] text-[#7a32a8] font-black text-xs py-2.5 px-6 rounded-full shadow-md border-2 border-[#bc7bd4] uppercase tracking-wide transition-transform hover:scale-105 flex items-center gap-2">
@@ -196,6 +197,27 @@
 
     </div>
 
+    <div id="modal-regras-troca" class="hidden fixed inset-0 bg-black/90 z-[300] flex flex-col items-center justify-center p-4 backdrop-blur-md pointer-events-auto">
+            <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 w-full max-w-sm shadow-2xl relative flex flex-col max-h-[85vh]">
+                <button onclick="fecharModalRegrasTroca()" class="absolute top-2 right-4 text-[#7a32a8] font-black text-xl hover:text-purple-600 transition-colors z-50">X</button>
+                
+                <h2 class="text-[#7a32a8] font-black text-xl text-center uppercase tracking-wider mb-4 border-b-2 border-[#7a32a8]/30 pb-2 flex-shrink-0">Regras de Troca</h2>
+                
+                <div class="text-[#7a32a8] font-bold text-sm leading-relaxed overflow-y-auto no-scrollbar flex-grow pr-1">
+                    <p class="mb-3"><b>1. Como Trocar:</b> Convide um jogador e espere ele aceitar para abrir a mesa de troca. Só é possível oferecer cartas que você possua <b>cópias repetidas</b>.</p>
+                    <p class="mb-3"><b>2. Taxa da Transação:</b> Para a troca ser efetivada, os <b>dois jogadores</b> devem pagar o custo da transação. Esse custo é definido pela carta de <b>maior raridade</b> envolvida na mesa:</p>
+                    <ul class="list-disc pl-5 mb-3 space-y-1">
+                        <li><b>Apenas Comuns:</b> 10 Fragmentos</li>
+                        <li><b>Pelo menos 1 Rara:</b> 30 Fragmentos</li>
+                        <li><b>Pelo menos 1 Lendária:</b> 100 Fragmentos</li>
+                        <li><b>Pelo menos 1 Épica:</b> 200 Fragmentos</li>
+                    </ul>
+                </div>
+                
+                <button onclick="fecharModalRegrasTroca()" class="mt-4 w-full bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-3 rounded-full shadow-md uppercase tracking-wider transition-colors flex-shrink-0">Entendi</button>
+            </div>
+        </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -281,6 +303,14 @@
 
         window.fecharModalTrocas = function() {
             document.getElementById('modal-trocas').classList.add('hidden');
+        };
+
+        window.abrirModalRegrasTroca = function() {
+            document.getElementById('modal-regras-troca').classList.remove('hidden');
+        };
+
+        window.fecharModalRegrasTroca = function() {
+            document.getElementById('modal-regras-troca').classList.add('hidden');
         };
 
        // --- SISTEMA DE LISTAR E BUSCAR AMIGOS ---
@@ -549,25 +579,19 @@
             }
 
             btn.classList.add('opacity-50', 'cursor-not-allowed');
-            btn.innerHTML = "Processando... ⏳";
+            btn.innerHTML = "Aguardando... ⏳";
 
             try {
-                // Debita os fragmentos localmente
-                await updateDoc(doc(db, "users", currentUserUid), {
-                    fragmentos: increment(-custo)
-                });
-
-                // Avisa a mesa que você pagou
+                // APENAS avisa a mesa que você está pronto e aceitou os custos (Nenhum desconto é feito ainda!)
                 const campoPago = souRemetente ? 'pagoRemetente' : 'pagoDestinatario';
                 await updateDoc(doc(db, "trocas", trocaAtivaId), {
                     [campoPago]: true
                 });
 
                 window.mostrarToast("Aguardando o amigo confirmar...");
-                document.getElementById('player-fragmentos').innerText = fragmentos - custo;
             } catch(e) {
                 console.error(e);
-                window.mostrarToast("Erro ao processar pagamento.");
+                window.mostrarToast("Erro ao processar confirmação.");
             }
         });
 
@@ -695,7 +719,8 @@
                     "badges": badgesJogador,
                     "xp": novoXp,
                     "nivel": nivelAtual,
-                    "moedas": increment(bonusMoedas)
+                    "moedas": increment(bonusMoedas),
+                    "fragmentos": increment(-custo) // <--- O DESCONTO 100% SEGURO ENTRA AQUI!
                 };
 
                 if (pacotesBasicosGanhos > 0) updates["inventario.pacoteBasico"] = increment(pacotesBasicosGanhos);
@@ -708,6 +733,9 @@
                 // Recarrega coleção no JS para a tela não bugar depois
                 minhaColecao[cartaDada] = (minhaColecao[cartaDada] || 0) - 1;
                 minhaColecao[cartaRecebida] = (minhaColecao[cartaRecebida] || 0) + 1;
+                
+                // Atualiza a nova quantidade de fragmentos na tela do jogador
+                document.getElementById('player-fragmentos').innerText = Math.max(0, (dados.fragmentos || 0) - custo);
 
                 window.mostrarToast(`✨ Troca concluída com sucesso!<br><span class="text-xs">Você recebeu a carta ${cartaRecebida}</span>`);
                 

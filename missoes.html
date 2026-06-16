@@ -231,7 +231,7 @@
 
             let nivelAtual = dadosJogador.nivel || 1;
             let xpAtual = dadosJogador.xp || 0;
-            let novoXp = xpAtual + 20; // 20 XP da recompensa
+            let novoXp = xpAtual + 30; // 30 XP da recompensa
             let bonusMoedas = 10;      // 10 Moedas da recompensa
             
             let subiuNivel = false;
@@ -299,7 +299,7 @@
                 document.getElementById('player-coins').innerText = dadosJogador.moedas;
 
                 // Avisos na tela
-                window.mostrarToast(`Missão Resgatada!<br><span class="text-xs">+20 XP e +10 <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`);
+                window.mostrarToast(`Missão Resgatada!<br><span class="text-xs">+30 XP e +10 <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`);
                 if (subiuNivel) {
                     setTimeout(() => window.mostrarToast(msgLevelUpPopup), 1000);
                 }

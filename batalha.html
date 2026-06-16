@@ -297,6 +297,8 @@
             document.getElementById('modal-desafio').classList.add('hidden');
         };
 
+        let partidaSendoIniciada = false; // Flag global de proteção (O Escudo!)
+
         // Escutador global para achar convites ou lobbies ativos
         function escutarDesafios() {
             const q = query(collection(db, "partidas"), where("participantes", "array-contains", currentUserUid));
@@ -317,9 +319,17 @@
                     if (data.status === "lobby" || (data.status === "convite" && data.jogador1.uid === currentUserUid)) {
                         meuLobby = { id: d.id, ...data };
                     }
-                    // Se o lobby ficou verde pros dois e virou andamento, vai pra ARENA!
+                    
+                    // SISTEMA CAÇA-FANTASMAS: Tratamento das partidas em andamento
                     if (data.status === "andamento" && data.tipo === "desafio" && (data.jogador1.uid === currentUserUid || data.jogador2?.uid === currentUserUid)) {
-                        window.location.href = `arena.html?sala=${d.id}`;
+                        
+                        // Só entra na arena se acabou de apertar "PRONTO" ou se estava na sala
+                        if (partidaSendoIniciada || (lobbyAtivo && lobbyAtivo.id === d.id)) {
+                            window.location.href = `arena.html?sala=${d.id}`;
+                        } else {
+                            // Fantasma detectado! Deleta do banco para não puxar o jogador
+                            try { deleteDoc(doc(db, "partidas", d.id)); } catch(e) {}
+                        }
                     }
                 });
 
@@ -335,6 +345,7 @@
                 // LÓGICA DO HOST: Se os dois estão prontos, o Host muda o status para rodar o jogo
                 if (meuLobby && meuLobby.status === "lobby" && meuLobby.jogador1.uid === currentUserUid) {
                     if (meuLobby.jogador1.pronto && meuLobby.jogador2?.pronto) {
+                        partidaSendoIniciada = true; // Ativa o escudo para permitir o redirecionamento!
                         updateDoc(doc(db, "partidas", meuLobby.id), { status: "andamento" });
                     }
                 }

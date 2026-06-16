@@ -67,6 +67,23 @@
             </div>
         </div>
 
+        <!-- NOVA CAIXA: MENSAGEM GLOBAL -->
+        <div class="bg-gray-900 p-4 sm:p-5 rounded-xl border-2 border-fuchsia-700 flex flex-col gap-4">
+            <div>
+                <h2 class="font-black text-lg text-fuchsia-400 flex items-center gap-2">📢 Mensagem Global</h2>
+                <p class="text-xs text-gray-400 mt-1">Aparece como um pop-up único no menu para todos os jogadores.</p>
+            </div>
+            <div class="flex flex-col gap-2 w-full">
+                <input id="msg-titulo" type="text" placeholder="Título (ex: ATUALIZAÇÃO NO AR!)" class="bg-gray-800 p-2 rounded border border-gray-600 focus:border-fuchsia-500 outline-none text-sm font-bold text-white">
+                <textarea id="msg-texto" rows="3" placeholder="Escreva a mensagem aqui..." class="bg-gray-800 p-2 rounded border border-gray-600 focus:border-fuchsia-500 outline-none text-sm text-white font-bold"></textarea>
+                <input id="msg-imagem" type="text" placeholder="Cole a URL da Imagem (Deixe em branco se não quiser)" class="bg-gray-800 p-2 rounded border border-gray-600 focus:border-fuchsia-500 outline-none text-sm text-white font-bold">
+                <div class="flex gap-2 mt-2">
+                    <button onclick="enviarMensagemGlobal()" class="flex-1 bg-fuchsia-600 hover:bg-fuchsia-500 py-2 rounded font-black uppercase text-xs shadow-lg transition-transform active:scale-95">Disparar Mensagem</button>
+                    <button onclick="desativarMensagemGlobal()" class="bg-gray-600 hover:bg-gray-500 px-4 py-2 rounded font-black uppercase text-xs shadow-lg transition-transform active:scale-95">Desativar</button>
+                </div>
+            </div>
+        </div>
+
         <!-- CAIXA 4: LOCALIZAR JOGADOR -->
         <div class="bg-gray-900 p-4 sm:p-5 rounded-xl border border-gray-700 flex flex-col gap-6">
             
@@ -458,6 +475,45 @@
                 btn.innerText = textoOriginal;
                 btn.disabled = false;
             }
+        };
+
+        // ==========================================
+        // SISTEMA DE MENSAGEM GLOBAL
+        // ==========================================
+        window.enviarMensagemGlobal = async () => {
+            const titulo = document.getElementById('msg-titulo').value.trim();
+            const texto = document.getElementById('msg-texto').value.trim();
+            const imagem = document.getElementById('msg-imagem').value.trim();
+
+            if (!titulo || !texto) return alert("O Título e o Texto são obrigatórios!");
+            if (!confirm("🚨 TEM CERTEZA? O pop-up aparecerá para todos os jogadores assim que eles abrirem o menu!")) return;
+
+            try {
+                // Salva na raiz das configurações do sistema. O ID será a data de agora (único).
+                await setDoc(doc(db, "sistema", "configuracao"), {
+                    mensagemGlobal: {
+                        id: Date.now().toString(), // Cria um carimbo único para esta mensagem
+                        titulo: titulo,
+                        texto: texto,
+                        imagem: imagem,
+                        ativa: true
+                    }
+                }, { merge: true });
+                
+                alert("✅ MENSAGEM DISPARADA COM SUCESSO!");
+                document.getElementById('msg-titulo').value = '';
+                document.getElementById('msg-texto').value = '';
+                document.getElementById('msg-imagem').value = '';
+            } catch(e) { console.error(e); alert("Erro ao enviar mensagem."); }
+        };
+
+        window.desativarMensagemGlobal = async () => {
+            try {
+                await setDoc(doc(db, "sistema", "configuracao"), {
+                    mensagemGlobal: { ativa: false } // Desativa sem apagar
+                }, { merge: true });
+                alert("✅ A Mensagem foi desativada!");
+            } catch(e) { console.error(e); }
         };
 
     </script>

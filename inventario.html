@@ -177,11 +177,18 @@
             'Épica': '#a855f7'      
         };
 
-        const bancoRaridades = { 'Comum': [], 'Rara': [], 'Épica': [], 'Lendária': [] };
+        const bancoBase = { 'Comum': [], 'Rara': [], 'Lendária': [], 'Épica': [] };
+        const bancoPOI = { 'Comum': [], 'Rara': [], 'Lendária': [], 'Épica': [] };
+        const bancoGeral = { 'Comum': [], 'Rara': [], 'Lendária': [], 'Épica': [] };
+
         for (const [id, carta] of Object.entries(INFO_CARTAS)) {
-            if (bancoRaridades[carta.raridade]) {
-                bancoRaridades[carta.raridade].push(id);
+            let numId = parseInt(id); 
+            if (numId <= 52) {
+                if (bancoBase[carta.raridade]) bancoBase[carta.raridade].push(id);
+            } else {
+                if (bancoPOI[carta.raridade]) bancoPOI[carta.raridade].push(id);
             }
+            if (bancoGeral[carta.raridade]) bancoGeral[carta.raridade].push(id);
         }
 
         window.mostrarToast = function(mensagem) {
@@ -262,28 +269,30 @@
                 document.getElementById('player-coins').innerText = dadosJogador.moedas || 0;
                 atualizarVisualBarraXP(dadosJogador.xp || 0, dadosJogador.nivel || 1);
                 
-                const inventario = dadosJogador.inventario || {};
+               const inventario = dadosJogador.inventario || {};
                 const qtdBasico = inventario.pacoteBasico || 0;
                 const qtdPremium = inventario.pacotePremium || 0;
-                const qtdGratis = inventario.pacoteGratis || 0; // Puxa o pacote novo do banco
+                const qtdGratis = inventario.pacoteGratis || 0; 
+                const qtdExpansao = inventario.pacoteExpansao || 0;
                 
                 const lista = document.getElementById('lista-pacotes');
                 lista.innerHTML = '';
 
-                if (qtdBasico <= 0 && qtdPremium <= 0 && qtdGratis <= 0) { // Adicionou qtdGratis aqui
+                if (qtdBasico <= 0 && qtdPremium <= 0 && qtdGratis <= 0 && qtdExpansao <= 0) {
                     lista.innerHTML = '<span class="text-center text-[#7a32a8] font-black mt-10">Você não possui pacotes.</span>';
                     return;
                 }
 
-                // Renderiza o Pacote Grátis se tiver
                 if (qtdGratis > 0) {
                     lista.innerHTML += criarHTMLPacote('gratis', 'Pacote Diário', '5 Cartas Aleatórias', qtdGratis, 'pacotegratis.png');
                 }
-
                 if (qtdBasico > 0) {
                     lista.innerHTML += criarHTMLPacote('basico', 'Pacote Básico', '5 Cartas Aleatórias', qtdBasico, 'pacote1.png');
                 }
-
+                if (qtdExpansao > 0) {
+                    // COLOQUE O NOME DA IMAGEM DO PACOTE NOVO AQUI:
+                    lista.innerHTML += criarHTMLPacote('expansao', 'Para Onde Iremos', 'Apenas cartas dessa expansão', qtdExpansao, 'pacote-exp1.png');
+                }
                 if (qtdPremium > 0) {
                     lista.innerHTML += criarHTMLPacote('premium', 'Pacote Premium', 'Garante 1 Rara ou superior', qtdPremium, 'pacote2.png');
                 }
@@ -293,27 +302,45 @@
         function sortearCarta(tipoPacote, isSlot1) {
             const roll = Math.random() * 100;
             let raridade = 'Comum';
+            let poolSelecionado = bancoGeral; 
             
-            if (tipoPacote === 'premium' && isSlot1) {
-                if (roll <= 75) raridade = 'Rara';
-                else if (roll <= 95) raridade = 'Lendária';
-                else raridade = 'Épica';
+            if (tipoPacote === 'premium') {
+                poolSelecionado = bancoBase;
+                if (isSlot1) {
+                    if (roll <= 75) raridade = 'Rara';
+                    else if (roll <= 95) raridade = 'Lendária';
+                    else raridade = 'Épica';
+                } else {
+                    if (roll <= 40) raridade = 'Comum';
+                    else if (roll <= 82) raridade = 'Rara';
+                    else if (roll <= 97) raridade = 'Lendária';
+                    else raridade = 'Épica';
+                }
             } 
-            else if (tipoPacote === 'premium' && !isSlot1) {
+            else if (tipoPacote === 'expansao') {
+                poolSelecionado = bancoPOI;
                 if (roll <= 60) raridade = 'Comum';
                 else if (roll <= 90) raridade = 'Rara';
                 else if (roll <= 98) raridade = 'Lendária';
                 else raridade = 'Épica';
-            } 
-            else {
+            }
+            else if (tipoPacote === 'basico') {
+                poolSelecionado = bancoBase;
+                if (roll <= 80) raridade = 'Comum';
+                else if (roll <= 97) raridade = 'Rara';
+                else if (roll <= 99.5) raridade = 'Lendária';
+                else raridade = 'Épica';
+            }
+            else { 
+                poolSelecionado = bancoGeral;
                 if (roll <= 80) raridade = 'Comum';
                 else if (roll <= 97) raridade = 'Rara';
                 else if (roll <= 99.5) raridade = 'Lendária';
                 else raridade = 'Épica';
             }
 
-            let lista = bancoRaridades[raridade];
-            if (!lista || lista.length === 0) lista = bancoRaridades['Comum']; 
+            let lista = poolSelecionado[raridade];
+            if (!lista || lista.length === 0) lista = bancoGeral['Comum']; 
             return lista[Math.floor(Math.random() * lista.length)];
         }
 
@@ -329,8 +356,8 @@
             containerRevelacao.classList.remove('anim-pop'); // Remove qualquer animação travada
             containerRevelacao.style.opacity = '0'; // Esconde o container até a nova carta estar pronta
 
-            // O código agora sabe identificar os 3 tipos de pacote
-            const campo = tipo === 'basico' ? 'pacoteBasico' : (tipo === 'premium' ? 'pacotePremium' : 'pacoteGratis');
+            // O código agora sabe identificar os 4 tipos de pacote
+            const campo = tipo === 'basico' ? 'pacoteBasico' : (tipo === 'premium' ? 'pacotePremium' : (tipo === 'expansao' ? 'pacoteExpansao' : 'pacoteGratis'));
             let qtd = (dadosJogador.inventario && dadosJogador.inventario[campo]) || 0;
             
             if (qtd <= 0) {
@@ -436,7 +463,7 @@
             window.mostrarToast("Guardando na coleção... ⏳");
 
             try {
-                const campo = tipoPacoteTemp === 'basico' ? 'pacoteBasico' : (tipoPacoteTemp === 'premium' ? 'pacotePremium' : 'pacoteGratis');
+                const campo = tipoPacoteTemp === 'basico' ? 'pacoteBasico' : (tipoPacoteTemp === 'premium' ? 'pacotePremium' : (tipoPacoteTemp === 'expansao' ? 'pacoteExpansao' : 'pacoteGratis'));
                 
                 let pacotesAbertosAtuais = (dadosJogador.estatisticas?.pacotesAbertos || 0) + 1;
                 let badgesJogador = dadosJogador.badges || {};
@@ -509,7 +536,8 @@
 
                 let deltaBasico = (campo === 'pacoteBasico' ? -1 : 0) + pacotesBasicosGanhos;
                 let deltaPremium = (campo === 'pacotePremium' ? -1 : 0) + pacotesPremiumGanhos;
-                let deltaGratis = (campo === 'pacoteGratis' ? -1 : 0); // Nova lógica do grátis
+                let deltaGratis = (campo === 'pacoteGratis' ? -1 : 0);
+                let deltaExpansao = (campo === 'pacoteExpansao' ? -1 : 0);
 
                 let updates = {
                     "estatisticas.pacotesAbertos": increment(1),
@@ -522,7 +550,8 @@
 
                 if (deltaBasico !== 0) updates["inventario.pacoteBasico"] = increment(deltaBasico);
                 if (deltaPremium !== 0) updates["inventario.pacotePremium"] = increment(deltaPremium);
-                if (deltaGratis !== 0) updates["inventario.pacoteGratis"] = increment(deltaGratis); // Desconta o grátis se usou
+                if (deltaGratis !== 0) updates["inventario.pacoteGratis"] = increment(deltaGratis);
+                if (deltaExpansao !== 0) updates["inventario.pacoteExpansao"] = increment(deltaExpansao);
 
                 // Agrupa e conta as cartas repetidas do mesmo pacote
                 let contagemCartas = {};

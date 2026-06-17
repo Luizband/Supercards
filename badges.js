@@ -54,5 +54,20 @@ export const INFO_BADGES = {
         nome: "Campeão Brasileirão Supercards 2026",
         descricao: "Ganhou o Brasileirão Supercards de 2026",
         imagem: "badges/badge-011.png" 
+    },
+    "badge-012": {
+        nome: "Proletários de todos os países, uni-vos!",
+        descricao: "Completou as cartas 001, 080, 082 e 092.",
+        imagem: "badges/badge-012.png" 
+    },
+    "badge-013": {
+        nome: "Em nome do Pai",
+        descricao: "Completou as cartas 065 e 075.",
+        imagem: "badges/badge-013.png" 
+    },
+    "badge-014": {
+        nome: "Hora do banho",
+        descricao: "Completou as cartas 038, 076, 077, 089 e 090.",
+        imagem: "badges/badge-014.png" 
     }
 };

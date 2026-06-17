@@ -392,9 +392,15 @@
                     if (docSnap.exists()) {
                         const sysData = docSnap.data();
                         
-                        // 1. Manutenção
+                        // 1. Manutenção (Com Passe VIP para o Admin)
                         if (sysData.emManutencao === true) {
-                            window.location.href = "manutencao.html";
+                            // 👇 APAGUE O TEXTO ABAIXO E ESCREVA O SEU E-MAIL VERDADEIRO DENTRO DAS ASPAS
+                            const emailsAdmins = ["andra.luizfelipe@gmail.com"]; 
+                            
+                            if (!emailsAdmins.includes(user.email)) {
+                                // Se o e-mail de quem tentar entrar NÃO for o seu, ele expulsa!
+                                window.location.href = "manutencao.html";
+                            }
                         }
 
                         // 2. Sistema de Mensagem Global Pop-up

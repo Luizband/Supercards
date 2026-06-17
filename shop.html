@@ -81,6 +81,21 @@
                 </div>
             </div>
 
+            <!-- NOVO PACOTE EXPANSÃO -->
+            <div class="flex-shrink-0 relative bg-gradient-to-r from-[#5a189a] to-[#240046] backdrop-blur-sm rounded-3xl p-4 shadow-[0_0_20px_rgba(157,78,221,0.5)] flex items-center gap-4 border-2 border-[#c77dff] overflow-hidden">
+                <div class="absolute inset-0 bg-white/5 mix-blend-overlay pointer-events-none animate-pulse"></div>
+                <button onclick="window.abrirInfo(event, 'expansao')" class="absolute top-3 right-3 w-6 h-6 bg-white/20 hover:bg-white text-[#c77dff] rounded-full font-black text-xs shadow-sm z-20 flex items-center justify-center transition-colors">i</button>
+                <img src="pacote-exp1.png" class="w-20 h-28 object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] pointer-events-none relative z-10">
+                <div class="flex flex-col flex-grow relative z-10">
+                    <span class="bg-[#c77dff] text-white text-[9px] font-black px-2 py-0.5 rounded-full self-start mb-1 shadow-sm uppercase tracking-widest">Nova Expansão</span>
+                    <h2 class="text-[#e0aaff] font-black text-lg leading-tight pointer-events-none drop-shadow-md pr-6">Para Onde Iremos</h2>
+                    <p class="text-gray-300 text-[10px] font-bold mb-3 leading-tight pointer-events-none">Apenas cartas da expansão</p>
+                    <button onclick="window.iniciarCompra('expansao', 150)" class="bg-[#c77dff] hover:bg-[#9d4edd] text-white font-black py-2.5 px-4 rounded-xl shadow-[0_4px_10px_rgba(199,125,255,0.4)] transform active:scale-95 flex items-center justify-center gap-1 z-50 relative cursor-pointer border border-[#e0aaff]">
+                        150 <img src="moedas.png" class="w-4 h-4 pointer-events-none">
+                    </button>
+                </div>
+            </div>
+
             <!-- PACOTE BÁSICO -->
             <div class="flex-shrink-0 relative bg-[#dca3e8]/90 backdrop-blur-sm rounded-3xl p-4 shadow-lg flex items-center gap-4 border border-[#dca3e8]/50">
                 <button onclick="window.abrirInfo(event, 'basico')" class="absolute top-3 right-3 w-6 h-6 bg-white/60 hover:bg-white text-[#7a32a8] rounded-full font-black text-xs shadow-sm z-20 flex items-center justify-center transition-colors">i</button>
@@ -103,21 +118,6 @@
                     <p class="text-[#805500] text-[10px] font-bold mb-2 leading-tight pointer-events-none">Garante 1 Rara ou superior, somente da Starter Pack</p>
                     <button onclick="window.iniciarCompra('premium', 300)" class="bg-[#996600] hover:bg-[#805500] text-white font-black py-2 px-4 rounded-xl shadow-md transform active:scale-95 flex items-center justify-center gap-1 z-50 relative cursor-pointer">
                         300 <img src="moedas.png" class="w-4 h-4 pointer-events-none">
-                    </button>
-                </div>
-            </div>
-
-            <!-- NOVO PACOTE EXPANSÃO -->
-            <div class="flex-shrink-0 relative bg-gradient-to-r from-[#5a189a] to-[#240046] backdrop-blur-sm rounded-3xl p-4 shadow-[0_0_20px_rgba(157,78,221,0.5)] flex items-center gap-4 border-2 border-[#c77dff] overflow-hidden">
-                <div class="absolute inset-0 bg-white/5 mix-blend-overlay pointer-events-none animate-pulse"></div>
-                <button onclick="window.abrirInfo(event, 'expansao')" class="absolute top-3 right-3 w-6 h-6 bg-white/20 hover:bg-white text-[#c77dff] rounded-full font-black text-xs shadow-sm z-20 flex items-center justify-center transition-colors">i</button>
-                <img src="pacote-exp1.png" class="w-20 h-28 object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] pointer-events-none relative z-10">
-                <div class="flex flex-col flex-grow relative z-10">
-                    <span class="bg-[#c77dff] text-white text-[9px] font-black px-2 py-0.5 rounded-full self-start mb-1 shadow-sm uppercase tracking-widest">Nova Expansão</span>
-                    <h2 class="text-[#e0aaff] font-black text-lg leading-tight pointer-events-none drop-shadow-md pr-6">Para Onde Iremos</h2>
-                    <p class="text-gray-300 text-[10px] font-bold mb-3 leading-tight pointer-events-none">Apenas cartas da expansão</p>
-                    <button onclick="window.iniciarCompra('expansao', 150)" class="bg-[#c77dff] hover:bg-[#9d4edd] text-white font-black py-2.5 px-4 rounded-xl shadow-[0_4px_10px_rgba(199,125,255,0.4)] transform active:scale-95 flex items-center justify-center gap-1 z-50 relative cursor-pointer border border-[#e0aaff]">
-                        150 <img src="moedas.png" class="w-4 h-4 pointer-events-none">
                     </button>
                 </div>
             </div>

@@ -207,16 +207,17 @@
 
         <!-- MODAL DE MENSAGEM GLOBAL -->
         <div id="modal-mensagem-global" class="hidden fixed inset-0 bg-black/80 z-[300] flex flex-col items-center justify-center p-4 backdrop-blur-sm pointer-events-auto">
-            <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 w-full max-w-sm shadow-2xl flex flex-col items-center gap-4 relative max-h-[85vh]">
-                <button onclick="window.fecharMensagemGlobal()" class="absolute top-2 right-4 text-[#7a32a8] font-black text-xl hover:text-purple-600 transition-colors z-50">X</button>
+            <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-4 w-full max-w-sm shadow-2xl flex flex-col items-center gap-3 relative max-h-[90vh]">
+                <button onclick="window.fecharMensagemGlobal()" class="absolute top-1 right-3 text-[#7a32a8] font-black text-3xl hover:text-purple-600 transition-colors z-50 leading-none">&times;</button>
                 
-                <h2 id="msg-global-titulo" class="text-[#7a32a8] font-black text-xl text-center uppercase tracking-wider mb-2 leading-tight"></h2>
+                <h2 id="msg-global-titulo" class="text-[#7a32a8] font-black text-xl text-center uppercase tracking-wider mt-4 leading-tight"></h2>
                 
-                <img id="msg-global-img" src="" class="hidden w-full max-h-40 object-contain rounded-lg drop-shadow-md border-2 border-[#bc7bd4]">
+                <!-- A IMAGEM AGORA FICA GIGANTE (ATÉ 60% DA TELA) E SEM BORDA -->
+                <img id="msg-global-img" src="" class="hidden w-full max-h-[60vh] object-contain rounded-xl drop-shadow-xl">
                 
                 <div id="msg-global-texto" class="text-[#7a32a8] font-bold text-sm text-center w-full overflow-y-auto no-scrollbar whitespace-pre-wrap"></div>
                 
-                <button onclick="window.fecharMensagemGlobal()" class="w-full mt-2 bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-3 rounded-full shadow-md uppercase tracking-wider transition-transform hover:scale-105">Entendi</button>
+                <button onclick="window.fecharMensagemGlobal()" class="w-full mt-1 bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-3 rounded-full shadow-md uppercase tracking-wider transition-transform hover:scale-105">Entendi</button>
             </div>
         </div>
 

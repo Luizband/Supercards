@@ -310,6 +310,29 @@
                 }
             }
 
+            // --- NOVAS BADGES DA EXPANSÃO ---
+
+            // Badge-012: Proletários de todos os países, uni-vos!
+            if (!badgesJogador["badge-012"]) {
+                if (colecaoJogador["001"] > 0 && colecaoJogador["080"] > 0 && colecaoJogador["082"] > 0 && colecaoJogador["092"] > 0) {
+                    badgesJogador["badge-012"] = true; ganhouBadge = true; qtdBadges++;
+                }
+            }
+
+            // Badge-013: Em nome do Pai
+            if (!badgesJogador["badge-013"]) {
+                if (colecaoJogador["065"] > 0 && colecaoJogador["075"] > 0) {
+                    badgesJogador["badge-013"] = true; ganhouBadge = true; qtdBadges++;
+                }
+            }
+
+            // Badge-014: Hora do banho
+            if (!badgesJogador["badge-014"]) {
+                if (colecaoJogador["038"] > 0 && colecaoJogador["076"] > 0 && colecaoJogador["077"] > 0 && colecaoJogador["089"] > 0 && colecaoJogador["090"] > 0) {
+                    badgesJogador["badge-014"] = true; ganhouBadge = true; qtdBadges++;
+                }
+            }
+
             if (ganhouBadge) {
                 let xpAtual = dados.xp || 0;
                 let nivelAtual = dados.nivel || 1;

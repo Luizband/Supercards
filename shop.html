@@ -68,9 +68,10 @@
 
         <div id="mensagem-alerta" class="hidden w-full p-3 mb-4 text-center text-sm font-bold rounded-lg shadow-lg z-[100] relative"></div>
 
-        <main class="flex flex-col flex-grow gap-4 overflow-y-auto pb-4 no-scrollbar">
+        <main class="flex flex-col flex-grow gap-4 overflow-y-auto pb-20 no-scrollbar">
             
-            <div onclick="window.resgatarBonus()" class="bg-gradient-to-br from-[#bc7bd4] to-[#7a32a8] rounded-3xl p-4 shadow-xl border-2 border-[#dca3e8] flex flex-col items-center relative overflow-hidden cursor-pointer transform active:scale-95 transition-transform z-10 w-full">
+            <!-- PACOTE GRÁTIS -->
+            <div onclick="window.resgatarBonus()" class="flex-shrink-0 bg-gradient-to-br from-[#bc7bd4] to-[#7a32a8] rounded-3xl p-4 shadow-xl border-2 border-[#dca3e8] flex flex-col items-center relative overflow-hidden cursor-pointer transform active:scale-95 transition-transform z-10 w-full">
                 <button onclick="window.abrirInfo(event, 'gratis')" class="absolute top-3 right-3 w-7 h-7 bg-white/30 hover:bg-white text-[#7a32a8] rounded-full font-black text-sm shadow-md z-20 flex items-center justify-center transition-colors">i</button>
                 <h2 class="text-white font-black text-xl mb-1 drop-shadow-md pointer-events-none">Bônus Diário</h2>
                 <p class="text-[#7a32a8] bg-[#dca3e8] px-3 py-0.5 rounded-full text-xs font-black mb-2 shadow-sm pointer-events-none">1 Pacote Básico Grátis</p>
@@ -80,7 +81,8 @@
                 </div>
             </div>
 
-            <div class="relative bg-[#dca3e8]/90 backdrop-blur-sm rounded-3xl p-4 shadow-lg flex items-center gap-4 border border-[#dca3e8]/50">
+            <!-- PACOTE BÁSICO -->
+            <div class="flex-shrink-0 relative bg-[#dca3e8]/90 backdrop-blur-sm rounded-3xl p-4 shadow-lg flex items-center gap-4 border border-[#dca3e8]/50">
                 <button onclick="window.abrirInfo(event, 'basico')" class="absolute top-3 right-3 w-6 h-6 bg-white/60 hover:bg-white text-[#7a32a8] rounded-full font-black text-xs shadow-sm z-20 flex items-center justify-center transition-colors">i</button>
                 <img src="pacote1.png" class="w-16 h-24 object-contain drop-shadow-lg pointer-events-none">
                 <div class="flex flex-col flex-grow">
@@ -92,7 +94,8 @@
                 </div>
             </div>
 
-            <div class="relative bg-gradient-to-r from-[#ffd700]/80 to-[#ffaa00]/80 backdrop-blur-sm rounded-3xl p-4 shadow-lg flex items-center gap-4 border border-[#ffd700]">
+            <!-- PACOTE PREMIUM -->
+            <div class="flex-shrink-0 relative bg-gradient-to-r from-[#ffd700]/80 to-[#ffaa00]/80 backdrop-blur-sm rounded-3xl p-4 shadow-lg flex items-center gap-4 border border-[#ffd700]">
                 <button onclick="window.abrirInfo(event, 'premium')" class="absolute top-3 right-3 w-6 h-6 bg-white/60 hover:bg-white text-[#996600] rounded-full font-black text-xs shadow-sm z-20 flex items-center justify-center transition-colors">i</button>
                 <img src="pacote2.png" class="w-16 h-24 object-contain drop-shadow-lg pointer-events-none">
                 <div class="flex flex-col flex-grow">
@@ -104,7 +107,8 @@
                 </div>
             </div>
 
-            <div class="relative bg-gradient-to-r from-[#5a189a] to-[#240046] backdrop-blur-sm rounded-3xl p-4 shadow-[0_0_20px_rgba(157,78,221,0.5)] flex items-center gap-4 border-2 border-[#c77dff] overflow-hidden">
+            <!-- NOVO PACOTE EXPANSÃO -->
+            <div class="flex-shrink-0 relative bg-gradient-to-r from-[#5a189a] to-[#240046] backdrop-blur-sm rounded-3xl p-4 shadow-[0_0_20px_rgba(157,78,221,0.5)] flex items-center gap-4 border-2 border-[#c77dff] overflow-hidden">
                 <div class="absolute inset-0 bg-white/5 mix-blend-overlay pointer-events-none animate-pulse"></div>
                 <button onclick="window.abrirInfo(event, 'expansao')" class="absolute top-3 right-3 w-6 h-6 bg-white/20 hover:bg-white text-[#c77dff] rounded-full font-black text-xs shadow-sm z-20 flex items-center justify-center transition-colors">i</button>
                 <img src="pacote-exp1.png" class="w-20 h-28 object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] pointer-events-none relative z-10">

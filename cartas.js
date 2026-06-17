@@ -104,8 +104,68 @@ export const INFO_CARTAS = {
 
     "051": { nome: "Copão de Campari", raridade: "Épica", expansao: "base", pontos: 7, aura: 62, fofura: 61, diversao: 80, aleatoriedade: 90, imagem: "cartas/051.png" },
 
-    "052": { nome: "Jessie Malfoy", raridade: "Épica", expansao: "base", pontos: 7, aura: 90, fofura: 44, diversao: 65, aleatoriedade: 88, imagem: "cartas/052.png" }
-}; // Não esqueça que o arquivo termina com essa chave e ponto e vírgula!
+    "052": { nome: "Jessie Malfoy", raridade: "Épica", expansao: "base", pontos: 7, aura: 90, fofura: 44, diversao: 65, aleatoriedade: 88, imagem: "cartas/052.png" },
+
+    // --- EXPANSÃO: Para onde Iremos
+
+    "053": { nome: "Gutão em Pânico", raridade: "Comum", expansao: "poi", pontos: 1, aura: 67, fofura: 13, diversao: 11, aleatoriedade: 22, imagem: "cartas/053.png" }, 
+    "054": { nome: "Oie", raridade: "Comum", expansao: "poi", pontos: 1, aura: 14, fofura: 65, diversao: 18, aleatoriedade: 17, imagem: "cartas/054.png" }, 
+    "055": { nome: "Lolórigo", raridade: "Comum", expansao: "poi", pontos: 1, aura: 19, fofura: 14, diversao: 62, aleatoriedade: 58, imagem: "cartas/055.png" }, 
+    "056": { nome: "Callmaria", raridade: "Comum", expansao: "poi", pontos: 1, aura: 63, fofura: 64, diversao: 61, aleatoriedade: 12, imagem: "cartas/056.png" }, 
+    "057": { nome: "Seu Luiz", raridade: "Comum", expansao: "poi", pontos: 1, aura: 16, fofura: 62, diversao: 66, aleatoriedade: 61, imagem: "cartas/057.png" }, 
+    "058": { nome: "A viagem de Lily", raridade: "Comum", expansao: "poi", pontos: 1, aura: 27, fofura: 49, diversao: 11, aleatoriedade: 23, imagem: "cartas/058.png" }, 
+    "059": { nome: "Helias Moggado", raridade: "Comum", expansao: "poi", pontos: 1, aura: 60, fofura: 12, diversao: 67, aleatoriedade: 29, imagem: "cartas/059.png" }, 
+    "060": { nome: "Ñ sei q porra é essa", raridade: "Comum", expansao: "poi", pontos: 1, aura: 31, fofura: 13, diversao: 21, aleatoriedade: 47, imagem: "cartas/060.png" }, 
+    "061": { nome: "Ka belereira", raridade: "Comum", expansao: "poi", pontos: 1, aura: 61, fofura: 59, diversao: 13, aleatoriedade: 63, imagem: "cartas/061.png" }, 
+    "062": { nome: "Snapchatters", raridade: "Comum", expansao: "poi", pontos: 1, aura: 11, fofura: 66, diversao: 14, aleatoriedade: 64, imagem: "cartas/062.png" }, 
+    "063": { nome: "Comprem pacotinhos!", raridade: "Comum", expansao: "poi", pontos: 1, aura: 8, fofura: 7, diversao: 42, aleatoriedade: 46, imagem: "cartas/063.png" }, 
+
+    
+   
+    "064": { nome: "Majinfernal", raridade: "Comum", expansao: "poi", pontos: 2, aura: 68, fofura: 13, diversao: 22, aleatoriedade: 16, imagem: "cartas/064.png" }, 
+    "065": { nome: "João Católico", raridade: "Comum", expansao: "poi", pontos: 2, aura: 12, fofura: 67, diversao: 37, aleatoriedade: 14, imagem: "cartas/065.png" }, 
+    "066": { nome: "Chimichurri", raridade: "Comum", expansao: "poi", pontos: 2, aura: 21, fofura: 11, diversao: 68, aleatoriedade: 18, imagem: "cartas/066.png" }, 
+    "067": { nome: "Cigano Augusto", raridade: "Comum", expansao: "poi", pontos: 2, aura: 14, fofura: 27, diversao: 12, aleatoriedade: 68, imagem: "cartas/067.png" }, 
+    "068": { nome: "Torta da Dona Majin", raridade: "Comum", expansao: "poi", pontos: 2, aura: 62, fofura: 61, diversao: 59, aleatoriedade: 13, imagem: "cartas/068.png" }, 
+    "069": { nome: "VTNC", raridade: "Comum", expansao: "poi", pontos: 2, aura: 66, fofura: 18, diversao: 12, aleatoriedade: 67, imagem: "cartas/069.png" }, 
+    "070": { nome: "Abaporus Fumantes", raridade: "Comum", expansao: "poi", pontos: 2, aura: 12, fofura: 58, diversao: 57, aleatoriedade: 56, imagem: "cartas/070.png" }, 
+    "071": { nome: "This is me", raridade: "Comum", expansao: "poi", pontos: 2, aura: 12, fofura: 66, diversao: 63, aleatoriedade: 11, imagem: "cartas/071.png" }, 
+    "072": { nome: "Mijaela", raridade: "Comum", expansao: "poi", pontos: 2, aura: 37, fofura: 32, diversao: 29, aleatoriedade: 38, imagem: "cartas/072.png" },
+ 
+    "073": { nome: "Um guei que eu goste?", raridade: "Rara", expansao: "poi", pontos: 3, aura: 42, fofura: 65, diversao: 61, aleatoriedade: 41, imagem: "cartas/073.png" },
+    
+    "074": { nome: "Carvão de Alho", raridade: "Rara", expansao: "poi", pontos: 3, aura: 14, fofura: 11, diversao: 21, aleatoriedade: 79, imagem: "cartas/074.png" }, 
+
+    
+    "075": { nome: "Santa Mikaela", raridade: "Rara", expansao: "poi", pontos: 3, aura: 69, fofura: 16, diversao: 29, aleatoriedade: 38, imagem: "cartas/075.png" }, 
+    "076": { nome: "Hora da Natação N°2", raridade: "Rara", expansao: "poi", pontos: 3, aura: 31, fofura: 70, diversao: 27, aleatoriedade: 42, imagem: "cartas/076.png" }, 
+    "077": { nome: "Pós Banho Premium", raridade: "Rara", expansao: "poi", pontos: 3, aura: 22, fofura: 76, diversao: 64, aleatoriedade: 18, imagem: "cartas/077.png" }, 
+    "078": { nome: "Gugu Padrão", raridade: "Rara", expansao: "poi", pontos: 3, aura: 72, fofura: 51, diversao: 16, aleatoriedade: 69, imagem: "cartas/078.png" },
+    "079": { nome: "Feijão com Farinha", raridade: "Rara", expansao: "poi", pontos: 3, aura: 57, fofura: 61, diversao: 69, aleatoriedade: 22, imagem: "cartas/079.png" }, 
+    "080": { nome: "Proletária Laila", raridade: "Rara", expansao: "poi", pontos: 3, aura: 19, fofura: 63, diversao: 75, aleatoriedade: 72, imagem: "cartas/080.png" }, 
+    "081": { nome: "Esquece a Marge", raridade: "Rara", expansao: "poi", pontos: 3, aura: 78, fofura: 12, diversao: 15, aleatoriedade: 66, imagem: "cartas/081.png" }, 
+
+    
+    "082": { nome: "Uni-vos", raridade: "Rara", expansao: "poi", pontos: 4, aura: 75, fofura: 13, diversao: 11, aleatoriedade: 12, imagem: "cartas/082.png" }, 
+    "083": { nome: "50 tons de lorygo", raridade: "Rara", expansao: "poi", pontos: 4, aura: 12, fofura: 66, diversao: 71, aleatoriedade: 9, imagem: "cartas/083.png" }, 
+    "084": { nome: "O que trazer pra mim n°2", raridade: "Rara", expansao: "poi", pontos: 4, aura: 68, fofura: 67, diversao: 66, aleatoriedade: 78, imagem: "cartas/084.png" }, 
+    "085": { nome: "Piadas do pastor", raridade: "Rara", expansao: "poi", pontos: 4, aura: 72, fofura: 8, diversao: 74, aleatoriedade: 7, imagem: "cartas/085.png" }, 
+
+
+
+    "086": { nome: "Sargento Helias", raridade: "Lendária", expansao: "poi", pontos: 5, aura: 61, fofura: 64, diversao: 72, aleatoriedade: 83, imagem: "cartas/086.png" },
+    "087": { nome: "Dentro da minha X1", raridade: "Lendária", expansao: "poi", pontos: 5, aura: 91, fofura: 21, diversao: 78, aleatoriedade: 19, imagem: "cartas/087.png" }, 
+    "088": { nome: "GAG", raridade: "Lendária", expansao: "poi", pontos: 5, aura: 49, fofura: 62, diversao: 84, aleatoriedade: 28, imagem: "cartas/088.png" }, 
+    "089": { nome: "Skin Care", raridade: "Lendária", expansao: "poi", pontos: 5, aura: 14, fofura: 88, diversao: 29, aleatoriedade: 91, imagem: "cartas/089.png" }, 
+    "090": { nome: "Banho Premium", raridade: "Lendária", expansao: "poi", pontos: 5, aura: 78, fofura: 73, diversao: 76, aleatoriedade: 22, imagem: "cartas/090.png" }, 
+    "091": { nome: "Tem MD?", raridade: "Lendária", expansao: "poi", pontos: 5, aura: 89, fofura: 12, diversao: 86, aleatoriedade: 16, imagem: "cartas/091.png" }, 
+
+   
+    "092": { nome: "Dado a Conjuntura", raridade: "Épica", expansao: "poi", pontos: 7, aura: 89, fofura: 18, diversao: 90, aleatoriedade: 14, imagem: "cartas/092.png" }, 
+    "093": { nome: "Preenchimento Labial", raridade: "Épica", expansao: "poi", pontos: 7, aura: 84, fofura: 91, diversao: 82, aleatoriedade: 85, imagem: "cartas/093.png" }
+
+
+};
 
 // Este código adiciona automaticamente a propriedade "miniatura" 
 // em todas as cartas do banco, poupando o trabalho manual!

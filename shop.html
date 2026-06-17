@@ -71,6 +71,7 @@
         <main class="flex flex-col flex-grow gap-4 overflow-y-auto pb-4 no-scrollbar">
             
             <div onclick="window.resgatarBonus()" class="bg-gradient-to-br from-[#bc7bd4] to-[#7a32a8] rounded-3xl p-4 shadow-xl border-2 border-[#dca3e8] flex flex-col items-center relative overflow-hidden cursor-pointer transform active:scale-95 transition-transform z-10 w-full">
+                <button onclick="window.abrirInfo(event, 'gratis')" class="absolute top-3 right-3 w-7 h-7 bg-white/30 hover:bg-white text-[#7a32a8] rounded-full font-black text-sm shadow-md z-20 flex items-center justify-center transition-colors">i</button>
                 <h2 class="text-white font-black text-xl mb-1 drop-shadow-md pointer-events-none">Bônus Diário</h2>
                 <p class="text-[#7a32a8] bg-[#dca3e8] px-3 py-0.5 rounded-full text-xs font-black mb-2 shadow-sm pointer-events-none">1 Pacote Básico Grátis</p>
                 <img src="pacotegratis.png" alt="Pacote Diário" class="w-20 h-28 object-contain drop-shadow-2xl pointer-events-none mb-3">
@@ -79,10 +80,11 @@
                 </div>
             </div>
 
-            <div class="bg-[#dca3e8]/90 backdrop-blur-sm rounded-3xl p-4 shadow-lg flex items-center gap-4 border border-[#dca3e8]/50">
+            <div class="relative bg-[#dca3e8]/90 backdrop-blur-sm rounded-3xl p-4 shadow-lg flex items-center gap-4 border border-[#dca3e8]/50">
+                <button onclick="window.abrirInfo(event, 'basico')" class="absolute top-3 right-3 w-6 h-6 bg-white/60 hover:bg-white text-[#7a32a8] rounded-full font-black text-xs shadow-sm z-20 flex items-center justify-center transition-colors">i</button>
                 <img src="pacote1.png" class="w-16 h-24 object-contain drop-shadow-lg pointer-events-none">
                 <div class="flex flex-col flex-grow">
-                    <h2 class="text-[#7a32a8] font-black text-lg leading-tight pointer-events-none">Pacote Básico</h2>
+                    <h2 class="text-[#7a32a8] font-black text-lg leading-tight pointer-events-none pr-6">Pacote Básico</h2>
                     <p class="text-gray-700 text-xs font-bold mb-2 pointer-events-none">5 Cartas Aleatórias</p>
                     <button onclick="window.iniciarCompra('basico', 100)" class="bg-gray-700 hover:bg-gray-600 text-white font-black py-2 px-4 rounded-xl shadow-md transform active:scale-95 flex items-center justify-center gap-1 z-50 relative cursor-pointer">
                         100 <img src="moedas.png" class="w-4 h-4 pointer-events-none">
@@ -90,26 +92,50 @@
                 </div>
             </div>
 
-            <div class="bg-gradient-to-r from-[#ffd700]/80 to-[#ffaa00]/80 backdrop-blur-sm rounded-3xl p-4 shadow-lg flex items-center gap-4 border border-[#ffd700]">
+            <div class="relative bg-gradient-to-r from-[#ffd700]/80 to-[#ffaa00]/80 backdrop-blur-sm rounded-3xl p-4 shadow-lg flex items-center gap-4 border border-[#ffd700]">
+                <button onclick="window.abrirInfo(event, 'premium')" class="absolute top-3 right-3 w-6 h-6 bg-white/60 hover:bg-white text-[#996600] rounded-full font-black text-xs shadow-sm z-20 flex items-center justify-center transition-colors">i</button>
                 <img src="pacote2.png" class="w-16 h-24 object-contain drop-shadow-lg pointer-events-none">
                 <div class="flex flex-col flex-grow">
-                    <h2 class="text-[#996600] font-black text-lg leading-tight pointer-events-none">Pacote Premium</h2>
+                    <h2 class="text-[#996600] font-black text-lg leading-tight pointer-events-none pr-6">Pacote Premium</h2>
                     <p class="text-[#805500] text-[10px] font-bold mb-2 leading-tight pointer-events-none">Garante 1 Rara ou superior</p>
                     <button onclick="window.iniciarCompra('premium', 300)" class="bg-[#996600] hover:bg-[#805500] text-white font-black py-2 px-4 rounded-xl shadow-md transform active:scale-95 flex items-center justify-center gap-1 z-50 relative cursor-pointer">
                         300 <img src="moedas.png" class="w-4 h-4 pointer-events-none">
                     </button>
                 </div>
             </div>
+
+            <div class="relative bg-gradient-to-r from-[#5a189a] to-[#240046] backdrop-blur-sm rounded-3xl p-4 shadow-[0_0_20px_rgba(157,78,221,0.5)] flex items-center gap-4 border-2 border-[#c77dff] overflow-hidden">
+                <div class="absolute inset-0 bg-white/5 mix-blend-overlay pointer-events-none animate-pulse"></div>
+                <button onclick="window.abrirInfo(event, 'expansao')" class="absolute top-3 right-3 w-6 h-6 bg-white/20 hover:bg-white text-[#c77dff] rounded-full font-black text-xs shadow-sm z-20 flex items-center justify-center transition-colors">i</button>
+                <img src="pacote-exp1.png" class="w-20 h-28 object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] pointer-events-none relative z-10">
+                <div class="flex flex-col flex-grow relative z-10">
+                    <span class="bg-[#c77dff] text-white text-[9px] font-black px-2 py-0.5 rounded-full self-start mb-1 shadow-sm uppercase tracking-widest">Nova Expansão</span>
+                    <h2 class="text-[#e0aaff] font-black text-lg leading-tight pointer-events-none drop-shadow-md pr-6">Para Onde Iremos</h2>
+                    <p class="text-gray-300 text-[10px] font-bold mb-3 leading-tight pointer-events-none">Apenas cartas da expansão</p>
+                    <button onclick="window.iniciarCompra('expansao', 150)" class="bg-[#c77dff] hover:bg-[#9d4edd] text-white font-black py-2.5 px-4 rounded-xl shadow-[0_4px_10px_rgba(199,125,255,0.4)] transform active:scale-95 flex items-center justify-center gap-1 z-50 relative cursor-pointer border border-[#e0aaff]">
+                        150 <img src="moedas.png" class="w-4 h-4 pointer-events-none">
+                    </button>
+                </div>
+            </div>
+
         </main>
+        
     </div>
 
-    <!-- MODAL DE CONFIRMAÇÃO DE COMPRA -->
+    <div id="modal-info" class="hidden fixed inset-0 bg-black/80 z-[110] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 max-w-sm w-full shadow-2xl relative">
+            <button onclick="document.getElementById('modal-info').classList.add('hidden')" class="absolute top-2 right-4 text-[#7a32a8] font-black text-2xl hover:text-red-600 transition-colors cursor-pointer">&times;</button>
+            <h2 class="text-[#7a32a8] font-black text-xl mb-3 uppercase border-b-2 border-[#bc7bd4] pb-2" id="info-titulo">Título</h2>
+            <p class="text-[#4a1c6a] font-bold text-sm leading-relaxed" id="info-texto">Texto da informação.</p>
+        </div>
+    </div>
+
     <div id="modal-confirmacao" class="hidden fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 max-w-xs w-full text-center shadow-2xl">
             <h2 class="text-[#7a32a8] font-black text-xl mb-4" id="texto-confirmacao">Confirmar compra?</h2>
             <div class="flex justify-center gap-4 mt-6">
-                <button onclick="window.cancelarCompra()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-full shadow-md">NÃO</button>
-                <button onclick="window.confirmarCompra()" class="bg-[#22c55e] hover:bg-[#16a34a] text-white font-black py-2 px-6 rounded-full shadow-md">SIM</button>
+                <button id="btn-confirmar-nao" onclick="window.cancelarCompra()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-full shadow-md">NÃO</button>
+                <button id="btn-confirmar-sim" onclick="window.confirmarCompra()" class="bg-[#22c55e] hover:bg-[#16a34a] text-white font-black py-2 px-6 rounded-full shadow-md">SIM</button>
             </div>
         </div>
     </div>
@@ -165,6 +191,30 @@
             let agora = new Date();
             if (agora.getHours() < 6) agora.setDate(agora.getDate() - 1);
             return `${agora.getFullYear()}-${agora.getMonth() + 1}-${agora.getDate()}`;
+        };
+
+        window.abrirInfo = function(event, tipo) {
+            event.stopPropagation(); 
+            let titulo = "";
+            let texto = "";
+
+            if (tipo === 'gratis') {
+                titulo = "Bônus Diário";
+                texto = "Sorteia 5 cartas de <b>todas</b> as coleções lançadas no jogo até hoje (Mistura Starter Pack e Para Onde Iremos.).";
+            } else if (tipo === 'basico') {
+                titulo = "Pacote Básico";
+                texto = "Sorteia 5 cartas pertencentes exclusivamente à coleção base <b>Starter Pack 2026</b> (Cartas 001 a 052).";
+            } else if (tipo === 'premium') {
+                titulo = "Pacote Premium";
+                texto = "Sorteia 5 cartas da coleção <b>Starter Pack 2026</b>. Garantindo ao menos uma carta rara ou superior";
+            } else if (tipo === 'expansao') {
+                titulo = "Para Onde Iremos";
+                texto = "Sorteia 5 cartas pertencentes exclusivamente à nova expansão <b>Para Onde Iremos</b> (Cartas 053 a 093), com maiores chances de obter raridades superiores.";
+            }
+
+            document.getElementById('info-titulo').innerText = titulo;
+            document.getElementById('info-texto').innerHTML = texto;
+            document.getElementById('modal-info').classList.remove('hidden');
         };
 
         onAuthStateChanged(auth, async (user) => {
@@ -245,16 +295,40 @@
         };
 
         window.confirmarCompra = async function() {
-            document.getElementById('modal-confirmacao').classList.add('hidden');
-            if (!window.pacotePendente || !auth.currentUser) return;
+            const btnSim = document.getElementById('btn-confirmar-sim');
+            const btnNao = document.getElementById('btn-confirmar-nao');
+            
+            // TRAVA DE SEGURANÇA 1: Desativa o botão no milissegundo do clique
+            btnSim.disabled = true;
+            btnNao.disabled = true;
+            btnSim.innerText = "⏳...";
+
+            if (!window.pacotePendente || !auth.currentUser) {
+                document.getElementById('modal-confirmacao').classList.add('hidden');
+                btnSim.disabled = false; btnNao.disabled = false; btnSim.innerText = "SIM";
+                return;
+            }
             
             try {
                 const ref = doc(db, "users", auth.currentUser.uid);
-                const pacoteCampo = window.pacotePendente === 'basico' ? 'pacoteBasico' : 'pacotePremium';
+                
+                // Mapeia qual pacote foi selecionado
+                let pacoteCampo = '';
+                if (window.pacotePendente === 'basico') pacoteCampo = 'pacoteBasico';
+                else if (window.pacotePendente === 'premium') pacoteCampo = 'pacotePremium';
+                else if (window.pacotePendente === 'expansao') pacoteCampo = 'pacoteExpansao';
+                
                 const precoGasto = window.precoPendente;
                 
                 const snap = await getDoc(ref);
                 const dados = snap.exists() ? snap.data() : {};
+
+                // TRAVA DE SEGURANÇA 2: Checa no servidor se o jogador realmente tem saldo na hora da cobrança
+                if ((dados.moedas || 0) < precoGasto) {
+                    window.mostrarMensagem("Erro: Saldo insuficiente no servidor!", "erro");
+                    document.getElementById('modal-confirmacao').classList.add('hidden');
+                    return;
+                }
                 
                 let moedasGastas = (dados.estatisticas?.moedasGastas || 0) + precoGasto;
                 let badgesJogador = dados.badges || {};
@@ -341,6 +415,8 @@
                 
                 let deltaBasico = (pacoteCampo === 'pacoteBasico') ? 1 : 0;
                 let deltaPremium = (pacoteCampo === 'pacotePremium') ? 1 : 0;
+                let deltaExpansao = (pacoteCampo === 'pacoteExpansao') ? 1 : 0;
+                
                 deltaBasico += pacotesBasicosGanhos;
                 deltaPremium += pacotesPremiumGanhos;
                 
@@ -352,9 +428,10 @@
                     nivel: nivelAtual
                 };
 
-                // Adiciona pacotes cirurgicamente sem apagar os outros
+                // Adiciona os pacotes corretos
                 if (deltaBasico > 0) pacoteAtualizacao["inventario.pacoteBasico"] = increment(deltaBasico);
                 if (deltaPremium > 0) pacoteAtualizacao["inventario.pacotePremium"] = increment(deltaPremium);
+                if (deltaExpansao > 0) pacoteAtualizacao["inventario.pacoteExpansao"] = increment(deltaExpansao);
 
                 if (atualizouMissao) {
                     pacoteAtualizacao.missoesDiarias = pacoteMissoes;
@@ -364,10 +441,10 @@
                     pacoteAtualizacao.notificacoes = arrayUnion(...notificacoesNovas);
                 }
                 
-                // updateDoc garante que os campos intocados fiquem 100% seguros
                 await updateDoc(ref, pacoteAtualizacao);
                 
-                window.saldoMoedas = window.saldoMoedas - precoGasto + bonusMoedas;
+                // Atualiza o saldo perfeitamente no front-end
+                window.saldoMoedas = (dados.moedas || 0) - precoGasto + bonusMoedas;
                 document.getElementById('player-coins').innerText = window.saldoMoedas;
                 window.mostrarMensagem("Compra realizada com sucesso!", "sucesso");
                 
@@ -387,8 +464,14 @@
             } catch (e) {
                 console.error(e);
                 window.mostrarMensagem("Erro ao processar compra.", "erro");
+            } finally {
+                // Libera tudo no final da operação (dando certo ou errado)
+                document.getElementById('modal-confirmacao').classList.add('hidden');
+                btnSim.disabled = false;
+                btnNao.disabled = false;
+                btnSim.innerText = "SIM";
+                window.pacotePendente = null;
             }
-            window.pacotePendente = null;
         };
     </script>
     <script>

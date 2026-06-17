@@ -128,9 +128,12 @@
                     <!-- NOVO: INJETAR PACOTES -->
                     <div class="bg-gray-800 p-4 rounded-lg border border-[#bc7bd4]/50 shadow-inner">
                         <h4 class="text-xs font-bold text-gray-400 uppercase mb-3 flex items-center gap-2">🎁 Injetar Pacotes na Conta</h4>
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-3 gap-2">
                             <button onclick="injetarPacote('basico')" class="bg-gray-700 hover:bg-gray-600 text-white font-black py-3 rounded-lg shadow border border-gray-500 text-[10px] sm:text-xs uppercase transition-transform active:scale-95">
                                 +1 Básico
+                            </button>
+                            <button onclick="injetarPacote('expansao')" class="bg-[#bc7bd4] hover:bg-[#a855f7] text-white font-black py-3 rounded-lg shadow border border-purple-400 text-[10px] sm:text-xs uppercase transition-transform active:scale-95">
+                                +1 P.O.I.
                             </button>
                             <button onclick="injetarPacote('premium')" class="bg-[#996600] hover:bg-[#805500] text-white font-black py-3 rounded-lg shadow border border-[#ffd700] text-[10px] sm:text-xs uppercase transition-transform active:scale-95">
                                 +1 Premium
@@ -426,16 +429,26 @@
             btn.disabled = true;
 
             try {
-                // Monta o nome exato do campo usando Notação de Ponto
-                const campoInventario = tipo === 'basico' ? "inventario.pacoteBasico" : "inventario.pacotePremium";
+                let campoInventario = "";
+                let nomePacoteAlerta = "";
+
+                if (tipo === 'basico') {
+                    campoInventario = "inventario.pacoteBasico";
+                    nomePacoteAlerta = "Básico";
+                } else if (tipo === 'premium') {
+                    campoInventario = "inventario.pacotePremium";
+                    nomePacoteAlerta = "Premium";
+                } else if (tipo === 'expansao') {
+                    campoInventario = "inventario.pacoteExpansao";
+                    nomePacoteAlerta = "Para Onde Iremos (P.O.I.)";
+                }
                 
                 await updateDoc(doc(db, "users", window.currentUserUid), { 
                     [campoInventario]: increment(1) 
                 });
                 
-                // Atualiza a tela para mostrar que o pacote caiu
                 await window.carregarJogador(window.currentUserUid);
-                alert(`✅ 1 Pacote ${tipo === 'basico' ? 'Básico' : 'Premium'} injetado com sucesso!`);
+                alert(`✅ 1 Pacote ${nomePacoteAlerta} injetado com sucesso!`);
                 
             } catch (error) {
                 console.error(error);

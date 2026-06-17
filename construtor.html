@@ -72,7 +72,14 @@
     <div class="w-full max-w-sm flex flex-col h-full relative">
         
         <header class="flex flex-col items-center w-full mb-4 flex-shrink-0">
-            <h1 id="titulo-deck" class="text-[#dca3e8] font-black text-2xl text-center drop-shadow-md uppercase tracking-wider">CARREGANDO...</h1>
+            <div class="flex items-center justify-center gap-3 w-full px-4">
+                <h1 id="titulo-deck" class="text-[#dca3e8] font-black text-2xl text-center drop-shadow-md uppercase tracking-wider truncate max-w-[220px]">CARREGANDO...</h1>
+                
+                <button onclick="window.abrirModalRenomear()" class="bg-[#dca3e8] hover:bg-[#bc7bd4] text-[#7a32a8] rounded-full w-8 h-8 flex items-center justify-center shadow-md border-2 border-[#bc7bd4] transition-transform hover:scale-105 flex-shrink-0">
+                    <span class="text-sm -mt-0.5">✏️</span>
+                </button>
+            </div>
+            
             <span id="contador-cartas" class="text-white bg-[#7a32a8] px-4 py-1 rounded-full text-xs font-bold mt-2 border border-[#bc7bd4] shadow-md">0 / 20 CARTAS</span>
         </header>
 
@@ -149,6 +156,21 @@
             
             <button onclick="document.getElementById('modal-erro-deck').classList.add('hidden')" class="w-full py-3 mt-2 bg-red-600 hover:bg-red-700 text-white font-black text-sm rounded-full shadow-md uppercase">
                 Corrigir
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL DE RENOMEAR DECK -->
+    <div id="modal-renomear" class="hidden fixed inset-0 bg-black/80 z-[300] flex flex-col items-center justify-center p-4 backdrop-blur-sm pointer-events-auto">
+        <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 w-full max-w-sm shadow-2xl flex flex-col items-center gap-4 relative">
+            <button onclick="window.fecharModalRenomear()" class="absolute top-2 right-4 text-[#7a32a8] font-black text-xl hover:text-purple-600 transition-colors">X</button>
+            
+            <h2 class="text-[#7a32a8] font-black text-lg text-center uppercase tracking-wider mb-2">Renomear Deck</h2>
+            
+            <input type="text" id="input-novo-nome" placeholder="Novo Nome" maxlength="15" class="w-full px-4 py-3 rounded-xl bg-white/80 border-2 border-transparent focus:border-purple-500 focus:outline-none text-purple-900 font-bold placeholder-purple-400 text-center uppercase">
+            
+            <button onclick="window.confirmarRenomear()" class="w-full py-3 mt-2 bg-[#7a32a8] hover:bg-purple-600 text-white font-black text-sm rounded-full shadow-md uppercase">
+                Confirmar
             </button>
         </div>
     </div>
@@ -379,6 +401,26 @@
                 fecharModalColecao();
                 renderizarGrade();
             }
+        };
+
+        // --- SISTEMA DE RENOMEAR DECK ---
+        window.abrirModalRenomear = function() {
+            document.getElementById('input-novo-nome').value = metaDeck.nome;
+            document.getElementById('modal-renomear').classList.remove('hidden');
+        };
+
+        window.fecharModalRenomear = function() {
+            document.getElementById('modal-renomear').classList.add('hidden');
+        };
+
+        window.confirmarRenomear = function() {
+            const novoNome = document.getElementById('input-novo-nome').value.trim();
+            if (!novoNome) return window.mostrarToast("O nome não pode ser vazio!");
+            
+            metaDeck.nome = novoNome.toUpperCase();
+            document.getElementById('titulo-deck').innerText = metaDeck.nome;
+            window.fecharModalRenomear();
+            window.mostrarToast("Nome alterado! Salve o deck para gravar no servidor.");
         };
 
         // --- SISTEMA DE VALIDAÇÃO E SALVAMENTO ---

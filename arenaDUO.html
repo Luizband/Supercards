@@ -60,74 +60,64 @@
     <div id="main-arena" class="w-full h-full flex bg-gradient-to-r from-[#7a32a8]/90 via-gray-800/80 to-[#4ade80]/90 relative backdrop-blur-sm">
 
         <div class="w-[35%] h-full flex flex-col justify-between p-2 md:p-4 bg-black/30 border-r-4 border-black/20 z-10 shadow-2xl">
-            
             <div class="flex flex-col gap-3 md:gap-5 mt-1">
-                
                 <div class="flex items-center gap-2 md:gap-3">
                     <div class="flex flex-col items-center relative">
-                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-[#dca3e8] bg-gray-800 relative">
+                        <div id="glow-parceiro" class="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-[#dca3e8] bg-gray-800 relative transition-all duration-300">
                             <span id="emoji-parceiro" class="hidden absolute top-1/2 left-1/2 text-4xl md:text-5xl drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] z-30" style="transform: translate(-50%, -50%);"></span>
                         </div>
-                        <span class="bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[9px] px-3 py-0.5 rounded-full mt-1 uppercase shadow-md">Parceiro</span>
+                        <span id="nome-parceiro" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[9px] px-3 py-0.5 rounded-full mt-1 uppercase shadow-md truncate max-w-[70px]">Parceiro</span>
                     </div>
-                    <div class="flex -space-x-1 opacity-90">
-                        <img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm"><img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm"><img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm"><img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm"><img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm">
-                    </div>
+                    <div id="mini-mao-parceiro" class="flex -space-x-1 opacity-90"></div>
                 </div>
 
                 <div class="flex items-center gap-2 md:gap-3">
                     <div class="flex flex-col items-center relative">
-                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-[#dca3e8] bg-gray-800 relative">
+                        <div id="glow-opp1" class="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-[#dca3e8] bg-gray-800 relative transition-all duration-300">
                             <span id="emoji-opp1" class="hidden absolute top-1/2 left-1/2 text-4xl md:text-5xl drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] z-30" style="transform: translate(-50%, -50%);"></span>
                         </div>
-                        <span class="bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[9px] px-3 py-0.5 rounded-full mt-1 uppercase shadow-md">Inimigo 1</span>
+                        <span id="nome-opp1" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[9px] px-3 py-0.5 rounded-full mt-1 uppercase shadow-md truncate max-w-[70px]">Inimigo 1</span>
                     </div>
-                    <div class="flex -space-x-1 opacity-90">
-                        <img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm"><img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm"><img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm"><img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm"><img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm">
-                    </div>
+                    <div id="mini-mao-opp1" class="flex -space-x-1 opacity-90"></div>
                 </div>
 
                 <div class="flex items-center gap-2 md:gap-3">
                     <div class="flex flex-col items-center relative">
-                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-[#dca3e8] bg-gray-800 relative">
+                        <div id="glow-opp2" class="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-[#dca3e8] bg-gray-800 relative transition-all duration-300">
                             <span id="emoji-opp2" class="hidden absolute top-1/2 left-1/2 text-4xl md:text-5xl drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] z-30" style="transform: translate(-50%, -50%);"></span>
                         </div>
-                        <span class="bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[9px] px-3 py-0.5 rounded-full mt-1 uppercase shadow-md">Inimigo 2</span>
+                        <span id="nome-opp2" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[9px] px-3 py-0.5 rounded-full mt-1 uppercase shadow-md truncate max-w-[70px]">Inimigo 2</span>
                     </div>
-                    <div class="flex -space-x-1 opacity-90">
-                        <img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm"><img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm"><img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm"><img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm"><img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm">
-                    </div>
+                    <div id="mini-mao-opp2" class="flex -space-x-1 opacity-90"></div>
                 </div>
-
             </div>
 
             <div class="flex items-end justify-between md:justify-start gap-2 md:gap-4 mb-1">
                 <div class="relative">
                     <div id="menu-reacoes" class="hidden absolute bottom-[110%] left-0 w-max bg-[#dca3e8] p-3 rounded-xl grid grid-cols-4 gap-2 shadow-2xl border-2 border-[#bc7bd4] z-50">
-                        <button onclick="enviarReacao('my', '💣')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform hover:bg-[#bc7bd4] rounded-lg">💣</button>
-                        <button onclick="enviarReacao('my', '🖕')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform hover:bg-[#bc7bd4] rounded-lg">🖕</button>
-                        <button onclick="enviarReacao('my', '👀')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform hover:bg-[#bc7bd4] rounded-lg">👀</button>
-                        <button onclick="enviarReacao('my', '💖')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform hover:bg-[#bc7bd4] rounded-lg">💖</button>
-                        
-                        <button onclick="enviarReacao('my', '💀')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform hover:bg-[#bc7bd4] rounded-lg">💀</button>
-                        <button onclick="enviarReacao('my', '🤬')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform hover:bg-[#bc7bd4] rounded-lg">🤬</button>
-                        <button onclick="enviarReacao('my', '🤣')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform hover:bg-[#bc7bd4] rounded-lg">🤣</button>
-                        <button onclick="enviarReacao('my', '😭')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform hover:bg-[#bc7bd4] rounded-lg">😭</button>
+                        <button onclick="enviarReacao('my', '💣')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 hover:bg-[#bc7bd4] rounded-lg">💣</button>
+                        <button onclick="enviarReacao('my', '🖕')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 hover:bg-[#bc7bd4] rounded-lg">🖕</button>
+                        <button onclick="enviarReacao('my', '👀')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 hover:bg-[#bc7bd4] rounded-lg">👀</button>
+                        <button onclick="enviarReacao('my', '💖')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 hover:bg-[#bc7bd4] rounded-lg">💖</button>
+                        <button onclick="enviarReacao('my', '💀')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 hover:bg-[#bc7bd4] rounded-lg">💀</button>
+                        <button onclick="enviarReacao('my', '🤬')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 hover:bg-[#bc7bd4] rounded-lg">🤬</button>
+                        <button onclick="enviarReacao('my', '🤣')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 hover:bg-[#bc7bd4] rounded-lg">🤣</button>
+                        <button onclick="enviarReacao('my', '😭')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 hover:bg-[#bc7bd4] rounded-lg">😭</button>
                     </div>
-                    <button onclick="document.getElementById('menu-reacoes').classList.toggle('hidden')" class="bg-[#dca3e8] hover:bg-[#bc7bd4] text-[#7a32a8] font-black text-[8px] md:text-[10px] px-3 md:px-5 py-3 rounded-2xl border-2 border-[#bc7bd4] text-center leading-tight shadow-lg transition-transform active:scale-95 uppercase">
+                    <button onclick="document.getElementById('menu-reacoes').classList.toggle('hidden')" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[10px] px-3 md:px-5 py-3 rounded-2xl border-2 border-[#bc7bd4] shadow-lg uppercase">
                         Escolher A<br>Reação
                     </button>
                 </div>
 
                 <div class="flex flex-col items-center relative">
-                    <div class="w-12 h-12 md:w-16 md:h-16 rounded-full border-4 border-[#dca3e8] bg-gray-800 relative shadow-[0_0_15px_#dca3e8] vez-ativa">
+                    <div id="glow-my" class="w-12 h-12 md:w-16 md:h-16 rounded-full border-4 border-[#dca3e8] bg-gray-800 relative transition-all duration-300">
                         <span id="emoji-my" class="hidden absolute top-1/2 left-1/2 text-5xl md:text-6xl drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] z-30" style="transform: translate(-50%, -50%);"></span>
                     </div>
-                    <span class="bg-[#dca3e8] text-[#7a32a8] font-black text-[9px] md:text-[10px] px-4 py-0.5 rounded-full mt-1 uppercase shadow-md border border-[#bc7bd4]">Você</span>
+                    <span id="nome-my" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[9px] md:text-[10px] px-4 py-0.5 rounded-full mt-1 uppercase shadow-md border border-[#bc7bd4]">Você</span>
                 </div>
 
                 <div class="flex flex-col items-center justify-center bg-black/60 border border-white/20 rounded p-1 w-10 md:w-12 h-14 md:h-16 relative shadow-lg">
-                    <span id="deck-count" class="text-white font-black text-xl md:text-2xl z-10 drop-shadow-[0_2px_2px_rgba(0,0,0,1)]">15</span>
+                    <span id="deck-count" class="text-white font-black text-xl md:text-2xl z-10 drop-shadow-[0_2px_2px_rgba(0,0,0,1)]">0</span>
                     <img src="fundo_carta.png" class="absolute inset-0 w-full h-full object-cover opacity-40 rounded">
                 </div>
             </div>
@@ -137,32 +127,31 @@
             
             <div class="w-full flex justify-center mt-1 relative">
                 <div class="flex flex-col items-center gap-1.5 z-40">
-                    <div class="bg-[#dca3e8] text-[#7a32a8] font-black text-[10px] md:text-xs px-6 md:px-10 py-1.5 rounded-full shadow-lg border-2 border-[#bc7bd4] uppercase tracking-wide">
-                        Aguardando Jogadores...
+                    <div id="status-turno-top" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[10px] md:text-xs px-6 md:px-10 py-1.5 rounded-full shadow-lg border-2 border-[#bc7bd4] uppercase tracking-wide">
+                        Carregando Sala...
                     </div>
-                    <div class="bg-[#dca3e8] text-[#7a32a8] font-black text-[9px] md:text-[10px] px-6 py-1 rounded-full shadow-md border-2 border-[#bc7bd4] uppercase leading-tight text-center">
-                        Atributo<br>Aura
+                    
+                    <div id="box-atributo" class="hidden bg-[#dca3e8] text-[#7a32a8] font-black text-[9px] md:text-[10px] px-6 py-1 rounded-full shadow-md border-2 border-[#bc7bd4] uppercase leading-tight text-center transition-colors">
+                        Atributo<br><span id="texto-atributo">---</span>
                     </div>
+
+                    <div id="placar-ao-vivo" class="hidden flex items-center gap-3 bg-black/80 px-4 py-1.5 rounded-full border border-white/20 shadow-lg">
+                        <span id="placar-aliado" class="text-[#4ade80] font-black text-sm drop-shadow-[0_0_8px_#4ade80]">0</span>
+                        <span class="text-white/50 font-black text-[10px]">VS</span>
+                        <span id="placar-inimigo" class="text-red-500 font-black text-sm drop-shadow-[0_0_8px_#ef4444]">0</span>
+                    </div>
+
                 </div>
                 <button onclick="document.getElementById('modal-desistir').classList.remove('hidden')" class="absolute top-0 right-0 bg-red-600 hover:bg-red-700 text-white font-black text-[9px] md:text-[10px] px-4 py-1.5 rounded-xl shadow-md border-2 border-red-800 uppercase tracking-widest transition-transform active:scale-95">
                     Desistir
                 </button>
             </div>
 
-            <div class="flex justify-center items-center gap-2 md:gap-4 w-full z-20 mt-2">
-                <div class="w-[14vh] max-w-[90px] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-xl border-2 border-black hover:scale-105 transition-transform"><img src="fundo_carta.png" class="w-full h-full object-cover rounded-[4px]"></div>
-                <div class="w-[14vh] max-w-[90px] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-xl border-2 border-black hover:scale-105 transition-transform"><img src="fundo_carta.png" class="w-full h-full object-cover rounded-[4px]"></div>
-                <div class="w-[14vh] max-w-[90px] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-xl border-2 border-black hover:scale-105 transition-transform"><img src="fundo_carta.png" class="w-full h-full object-cover rounded-[4px]"></div>
-                <div class="w-[14vh] max-w-[90px] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-xl border-2 border-black hover:scale-105 transition-transform"><img src="fundo_carta.png" class="w-full h-full object-cover rounded-[4px]"></div>
-            </div>
+            <div id="mesa-combate" class="flex justify-center items-center gap-2 md:gap-4 w-full z-20 mt-2 min-h-[14vh]">
+                </div>
 
-            <div class="w-full flex justify-center gap-1.5 md:gap-3 mb-1 z-40">
-                <div class="w-[18vh] max-w-[110px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-2xl border-2 border-black hover:border-[#dca3e8] cursor-pointer hover-carta overflow-hidden"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
-                <div class="w-[18vh] max-w-[110px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-2xl border-2 border-black hover:border-[#dca3e8] cursor-pointer hover-carta overflow-hidden"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
-                <div class="w-[18vh] max-w-[110px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-2xl border-2 border-black hover:border-[#dca3e8] cursor-pointer hover-carta overflow-hidden"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
-                <div class="w-[18vh] max-w-[110px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-2xl border-2 border-black hover:border-[#dca3e8] cursor-pointer hover-carta overflow-hidden"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
-                <div class="w-[18vh] max-w-[110px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-2xl border-2 border-black hover:border-[#dca3e8] cursor-pointer hover-carta overflow-hidden"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
-            </div>
+            <div id="mao-jogador" class="w-full flex justify-center gap-1.5 md:gap-3 mb-1 z-40 min-h-[18vh]">
+                </div>
 
         </div>
     </div>
@@ -270,40 +259,157 @@
         </div>
     </div>
 
-    <script>
-        // Sistema de Reações do Jogador
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { INFO_CARTAS } from './cartas.js';
+
+        // Inicialização do Firebase (Use as suas credenciais reais aqui depois se divergir)
+        const app = initializeApp({
+          apiKey: "AIzaSyCU3lFTgfrDMaD9jwR7X7ivYPmGQh4VE1g",
+          authDomain: "supercards-tcg.firebaseapp.com",
+          projectId: "supercards-tcg",
+          storageBucket: "supercards-tcg.firebasestorage.app",
+          messagingSenderId: "862316380615",
+          appId: "1:862316380615:web:b3f28056ebc967673999e2"
+        });
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Variáveis de Controle do DUO
+        let currentUserUid = null;
+        let minhaRole = null; // 'jogador1', 'jogador2', etc
+        let isHost = false;
+        let salaId = null;
+        let dadosSala = null;
+        let cartaFocadaId = null;
+
+        // Utilitários de Interface Simples
+        window.mostrarToast = function(msg) { alert(msg); }; // Temporário até plugar o toast bonitinho
+        window.fecharModalDesistir = () => document.getElementById('modal-desistir').classList.add('hidden');
+        window.confirmarDesistencia = () => { /* Logica Firebase Sair */ window.location.href='batalha.html'; };
+
+        // SISTEMA DE REAÇÕES
         window.timersReacao = {};
-
         window.enviarReacao = function(idAlvo, emoji) {
-            // Fecha o menu depois de clicar
             document.getElementById('menu-reacoes').classList.add('hidden');
+            // Logica para mandar pro firebase o emoji da minhaRole
+        };
 
-            const elemento = document.getElementById(`emoji-${idAlvo}`);
-            if (!elemento) return;
+        // ===============================================
+        // MOTOR DE RENDERIZAÇÃO DA ARENA DUO
+        // ===============================================
+        function renderizarMesa() {
+            if(!dadosSala) return;
 
-            // Define o emoji e ativa a animação
-            elemento.innerText = emoji;
-            elemento.classList.remove('hidden');
-            elemento.classList.remove('emoji-ativo');
-            
-            // Força o navegador a reiniciar a animação
-            void elemento.offsetWidth; 
-            elemento.classList.add('emoji-ativo');
-
-            // Se o jogador já tinha mandado uma reação antes dela sumir, cancela o "sumiço" antigo
-            if (window.timersReacao[idAlvo]) {
-                clearTimeout(window.timersReacao[idAlvo]);
+            // 1. Identificar Quem é Quem (Depende se sou Equipe A ou B)
+            let me, parceiro, opp1, opp2;
+            let timeA = ['jogador1', 'jogador2'];
+            if (timeA.includes(minhaRole)) {
+                me = minhaRole; parceiro = minhaRole === 'jogador1' ? 'jogador2' : 'jogador1';
+                opp1 = 'jogador3'; opp2 = 'jogador4';
+            } else {
+                me = minhaRole; parceiro = minhaRole === 'jogador3' ? 'jogador4' : 'jogador3';
+                opp1 = 'jogador1'; opp2 = 'jogador2';
             }
 
-            // Define para sumir em 3.5 segundos exatos
-            window.timersReacao[idAlvo] = setTimeout(() => {
-                elemento.classList.add('hidden');
-                elemento.classList.remove('emoji-ativo');
-            }, 3500);
-            
-            // Aqui futuramente você vai enviar o updateDoc para o firebase: { [`reacao_${minhaRole}`]: emoji }
-        };
-    </script>
+            // 2. Atualizar Nomes e Bordas de Líder (Glow)
+            document.getElementById('nome-my').innerText = dadosSala[me].nome;
+            document.getElementById('nome-parceiro').innerText = dadosSala[parceiro].nome;
+            document.getElementById('nome-opp1').innerText = dadosSala[opp1].nome;
+            document.getElementById('nome-opp2').innerText = dadosSala[opp2].nome;
 
+            // Limpa todos os Glows
+            ['my','parceiro','opp1','opp2'].forEach(id => {
+                document.getElementById(`glow-${id}`).classList.remove('shadow-[0_0_20px_#fbbf24]', 'border-yellow-400');
+            });
+            // Acende o Líder
+            if(dadosSala.liderRodada) {
+                if(dadosSala.liderRodada === me) document.getElementById('glow-my').classList.add('shadow-[0_0_20px_#fbbf24]', 'border-yellow-400');
+                if(dadosSala.liderRodada === parceiro) document.getElementById('glow-parceiro').classList.add('shadow-[0_0_20px_#fbbf24]', 'border-yellow-400');
+                if(dadosSala.liderRodada === opp1) document.getElementById('glow-opp1').classList.add('shadow-[0_0_20px_#fbbf24]', 'border-yellow-400');
+                if(dadosSala.liderRodada === opp2) document.getElementById('glow-opp2').classList.add('shadow-[0_0_20px_#fbbf24]', 'border-yellow-400');
+            }
+
+            // 3. Atualizar Status do Topo e Placar
+            const statusTop = document.getElementById('status-turno-top');
+            if(dadosSala.vezAtual === me) {
+                statusTop.innerText = "SUA VEZ!";
+                statusTop.className = "bg-green-500 text-black font-black text-[10px] md:text-xs px-6 md:px-10 py-1.5 rounded-full shadow-lg border-2 border-white uppercase tracking-wide animate-pulse";
+            } else {
+                statusTop.innerText = `Aguardando ${dadosSala[dadosSala.vezAtual]?.nome || '...'}`;
+                statusTop.className = "bg-[#dca3e8] text-[#7a32a8] font-black text-[10px] md:text-xs px-6 md:px-10 py-1.5 rounded-full shadow-lg border-2 border-[#bc7bd4] uppercase tracking-wide";
+            }
+
+            // Exibir Atributo
+            if(dadosSala.atributoRodada) {
+                document.getElementById('box-atributo').classList.remove('hidden');
+                document.getElementById('texto-atributo').innerText = dadosSala.atributoRodada;
+                document.getElementById('placar-ao-vivo').classList.remove('hidden');
+            } else {
+                document.getElementById('box-atributo').classList.add('hidden');
+                document.getElementById('placar-ao-vivo').classList.add('hidden');
+            }
+
+            // ===========================================
+            // A MESA (O Centro) & CALCULO DO PLACAR AO VIVO
+            // ===========================================
+            const mesaDiv = document.getElementById('mesa-combate');
+            mesaDiv.innerHTML = '';
+            
+            let somaMinhaEquipe = 0;
+            let somaEquipeInimiga = 0;
+
+            // A mesa renderiza na ordem da Fila: Ex: se J1 é lider: J1 > J3 > J2 > J4
+            if(dadosSala.filaTurno) {
+                dadosSala.filaTurno.forEach(role => {
+                    const cartaIdJogada = dadosSala.mesa[role];
+                    
+                    if (cartaIdJogada) {
+                        const info = INFO_CARTAS[cartaIdJogada] || { miniatura: 'fundo_carta.png' };
+                        
+                        // Atualiza a matemática do placar ao vivo
+                        if(dadosSala.atributoRodada) {
+                            let valor = info[dadosSala.atributoRodada.toLowerCase()] || 0;
+                            if(timeA.includes(minhaRole) && timeA.includes(role)) somaMinhaEquipe += valor;
+                            else if(!timeA.includes(minhaRole) && !timeA.includes(role)) somaMinhaEquipe += valor;
+                            else somaEquipeInimiga += valor;
+                        }
+
+                        mesaDiv.innerHTML += `
+                            <div onclick="verCartaMesa('${cartaIdJogada}')" class="w-[14vh] max-w-[90px] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-[0_0_15px_rgba(255,255,255,0.2)] border-2 border-white cursor-pointer hover:scale-105 transition-transform">
+                                <img src="${info.miniatura || info.imagem}" class="w-full h-full object-cover rounded-[4px]">
+                            </div>`;
+                    } else {
+                        // Slot vazio
+                        mesaDiv.innerHTML += `
+                            <div class="w-[14vh] max-w-[90px] aspect-[2.5/3.5] bg-black/40 rounded-md shadow-inner border-2 border-white/20 border-dashed"></div>`;
+                    }
+                });
+            }
+
+            // Atualiza os números no Placar ao Vivo
+            document.getElementById('placar-aliado').innerText = somaMinhaEquipe;
+            document.getElementById('placar-inimigo').innerText = somaEquipeInimiga;
+
+            // 4. Renderizar A Mão (Você)
+            const maoDiv = document.getElementById('mao-jogador');
+            maoDiv.innerHTML = '';
+            (dadosSala[me].mao || []).forEach(cartaId => {
+                const info = INFO_CARTAS[cartaId] || { miniatura: 'fundo_carta.png' };
+                maoDiv.innerHTML += `
+                    <div onclick="abrirSuaCarta('${cartaId}')" class="w-[18vh] max-w-[110px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-2xl border-2 border-black hover:border-[#dca3e8] cursor-pointer hover-carta overflow-hidden">
+                        <img src="${info.miniatura || info.imagem}" class="w-full h-full object-cover">
+                    </div>`;
+            });
+            document.getElementById('deck-count').innerText = dadosSala[me].deck?.length || 0;
+        }
+
+        // Funções Falsas de Clique (Para testes enquanto o backend não roda)
+        window.verCartaMesa = function(id) { alert("Zoom na carta da mesa: " + id); }
+        window.abrirSuaCarta = function(id) { alert("Abrir minha carta para jogar: " + id); }
+
+    </script>
 </body>
 </html>

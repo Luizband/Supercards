@@ -148,7 +148,7 @@ export const INFO_CARTAS = {
     
     "082": { nome: "Uni-vos", raridade: "Rara", expansao: "poi", pontos: 4, aura: 75, fofura: 13, diversao: 11, aleatoriedade: 12, imagem: "cartas/082.png" }, 
     "083": { nome: "50 tons de lorygo", raridade: "Rara", expansao: "poi", pontos: 4, aura: 12, fofura: 66, diversao: 71, aleatoriedade: 9, imagem: "cartas/083.png" }, 
-    "084": { nome: "O que trazer pra mim n°2", raridade: "Rara", expansao: "poi", pontos: 4, aura: 68, fofura: 67, diversao: 66, aleatoriedade: 78, imagem: "cartas/084.png" }, 
+    "084": { nome: "O que trazes pra mim n°2", raridade: "Rara", expansao: "poi", pontos: 4, aura: 68, fofura: 67, diversao: 66, aleatoriedade: 78, imagem: "cartas/084.png" }, 
     "085": { nome: "Piadas do pastor", raridade: "Rara", expansao: "poi", pontos: 4, aura: 72, fofura: 8, diversao: 74, aleatoriedade: 7, imagem: "cartas/085.png" }, 
 
 

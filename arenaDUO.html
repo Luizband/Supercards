@@ -410,6 +410,34 @@
         window.verCartaMesa = function(id) { alert("Zoom na carta da mesa: " + id); }
         window.abrirSuaCarta = function(id) { alert("Abrir minha carta para jogar: " + id); }
 
+        // ===============================================
+        // DADOS DE TESTE (SIMULAÇÃO DE PARTIDA)
+        // Apagaremos isso quando plugar o Firebase!
+        // ===============================================
+        setTimeout(() => {
+            minhaRole = 'jogador1';
+            dadosSala = {
+                liderRodada: 'jogador1', // Você é o líder!
+                vezAtual: 'jogador1',    // É a sua vez!
+                atributoRodada: 'AURA',  // O atributo já foi escolhido
+                filaTurno: ['jogador1', 'jogador3', 'jogador2', 'jogador4'],
+                mesa: {
+                    jogador1: null, // Você ainda não jogou
+                    jogador3: null, // Inimigo 1 ainda não jogou
+                    jogador2: null, // Parceiro ainda não jogou
+                    jogador4: null  // Inimigo 2 ainda não jogou
+                },
+                jogador1: { nome: 'Douglas', mao: ['c1', 'c2', 'c3', 'c4', 'c5'], deck: new Array(15) },
+                jogador2: { nome: 'Parça', mao: ['c1', 'c2', 'c3', 'c4', 'c5'], deck: new Array(15) },
+                jogador3: { nome: 'Rival 1', mao: ['c1', 'c2', 'c3', 'c4', 'c5'], deck: new Array(15) },
+                jogador4: { nome: 'Rival 2', mao: ['c1', 'c2', 'c3', 'c4', 'c5'], deck: new Array(15) }
+            };
+            
+            // Tira a mensagem de "Carregando Sala..." e desenha a mesa!
+            document.getElementById('status-turno-top').innerText = "Simulação Ativa";
+            renderizarMesa();
+        }, 500);
+
     </script>
 </body>
 </html>

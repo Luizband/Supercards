@@ -352,7 +352,7 @@
             }
         };
 
-        function dispararToastsDeTurno() {
+        function dispararToastsDeTurno(esperarAnimacao = false) {
             if (dadosSala.status === 'finalizada') return;
             let estado = `${dadosSala.turnoAtual}-${dadosSala.statusTurno}`;
             if (ultimoEstadoToast === estado) return; ultimoEstadoToast = estado;
@@ -360,7 +360,17 @@
             const nAtacante = dadosSala.quemAtaca === dadosSala.jogador1.uid ? dadosSala.jogador1.nome : dadosSala.jogador2.nome;
 
             if (dadosSala.statusTurno === 'aguardando_ataque') {
-                window.mostrarToast(`Vez de ${nAtacante} escolher uma carta e atributo`);
+                if (esperarAnimacao) {
+                    // Se estiver passando a animação do embate, espera 4.6 segundos para mostrar o aviso
+                    setTimeout(() => {
+                        if (dadosSala.status !== 'finalizada') {
+                            window.mostrarToast(`Vez de ${nAtacante} escolher uma carta e atributo`);
+                        }
+                    }, 4600); 
+                } else {
+                    // Se for o primeiro turno do jogo, mostra na hora
+                    window.mostrarToast(`Vez de ${nAtacante} escolher uma carta e atributo`);
+                }
             }
         }
         // NOVA FUNÇÃO: Controla o Atributo no centro da tela
@@ -385,6 +395,9 @@
         }
 
         window.abrirZoomCarta = function(id) {
+            // TRAVA FÍSICA: Impede clicar em cartas enquanto a animação do embate estiver na tela
+            if (!document.getElementById('modal-embate').classList.contains('hidden')) return;
+
             if (dadosSala.statusTurno === 'resolvendo' || dadosSala.statusTurno === 'exibindo_resultado' || dadosSala.status === 'finalizada') return;
             if (dadosSala[minhaRole].cartaJogada) return; 
             const isMyTurn = dadosSala.quemAtaca === currentUserUid;
@@ -651,13 +664,18 @@
 
                     if (!dadosSala.jogador1.mao) return; 
 
-                    renderizarArena(); dispararToastsDeTurno(); atualizarAtributoPiscando();
+                    renderizarArena(); atualizarAtributoPiscando();
 
-                    // GATILHO DA ANIMAÇÃO LOCAL: O banco atualizou o turno, o celular dá play no "Replay"
+                    // GATILHO DA ANIMAÇÃO LOCAL
+                    let animandoAgora = false;
                     if (dadosSala.ultimoClash && dadosSala.ultimoClash.turno > window.turnoAnimadoLocal) {
                         window.turnoAnimadoLocal = dadosSala.ultimoClash.turno;
+                        animandoAgora = true;
                         exibirAnimacaoClash(dadosSala.ultimoClash);
                     }
+
+                    // Dispara Toasts avisando se ele deve esperar a animação terminar
+                    dispararToastsDeTurno(animandoAgora);
 
                     // Aguarda a tela de clash fechar para abrir a tela de pontos finais
                     if (dadosSala.status === 'finalizada' && document.getElementById('modal-embate').classList.contains('hidden')) {

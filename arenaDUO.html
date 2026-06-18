@@ -30,6 +30,17 @@
         .hover-carta { transition: transform 0.2s ease, z-index 0s; }
         .hover-carta:hover { transform: translateY(-15px) scale(1.15); z-index: 50 !important; }
 
+        /* Efeito de Pulo do Emoji */
+        @keyframes popEmoji {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            60% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+        .emoji-ativo {
+            animation: popEmoji 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            display: block !important;
+        }
+
         /* MENSAGEM DE BLOQUEIO SE O CELULAR ESTIVER EM PÉ (PORTRAIT) */
         #aviso-retrato { display: none; }
         @media (orientation: portrait) {
@@ -38,7 +49,7 @@
         }
     </style>
 </head>
-<body class="fixed inset-0 overflow-hidden w-screen h-screen text-white select-none">
+<body class="fixed inset-0 overflow-hidden w-full h-[100dvh] text-white select-none">
 
     <!-- TELA DE BLOQUEIO PORTRAIT -->
     <div id="aviso-retrato" class="w-full h-full bg-black/95 flex-col items-center justify-center p-6 text-center z-[9999] absolute inset-0">
@@ -47,84 +58,129 @@
         <p class="text-sm text-gray-300 font-bold">O modo Arena 2x2 só pode ser jogado com a tela na horizontal.</p>
     </div>
 
-    <!-- ARENA DUO (LANDSCAPE) -->
-    <div id="main-arena" class="w-full h-full relative flex items-center justify-center">
+    <!-- ARENA DUO (LANDSCAPE) - NOVO LAYOUT SPLIT-SCREEN -->
+    <div id="main-arena" class="w-full h-full flex bg-gradient-to-r from-[#7a32a8]/90 via-gray-800/80 to-[#4ade80]/90 relative backdrop-blur-sm">
 
         <!-- ========================================== -->
-        <!-- HUD SUPERIOR -->
+        <!-- LADO ESQUERDO: JOGADORES, STATUS E REAÇÕES -->
         <!-- ========================================== -->
-        <div class="absolute top-3 w-full px-6 flex justify-between items-start z-50 pointer-events-none">
-            <!-- Toast de Avisos (Esquerda) -->
-            <div class="bg-[#dca3e8] text-[#7a32a8] font-black text-xs px-5 py-2 rounded-full shadow-lg border-2 border-[#bc7bd4] uppercase pointer-events-auto">
-                Aguardando Jogadores...
-            </div>
-
-            <!-- Botões e Status (Direita) -->
-            <div class="flex items-center gap-4 pointer-events-auto">
-                <div class="bg-black/70 border border-white/20 rounded-lg px-4 py-1.5 flex items-center gap-3 shadow-lg backdrop-blur-sm">
-                    <img src="fundo_carta.png" class="w-5 h-6 object-cover rounded-[2px] opacity-80 border border-black">
-                    <div class="flex flex-col leading-none">
-                        <span class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Montante</span>
-                        <span class="text-base text-white font-black" id="deck-count">15</span>
+        <div class="w-[35%] h-full flex flex-col justify-between p-2 md:p-4 bg-black/30 border-r-4 border-black/20 z-10 shadow-2xl">
+            
+            <!-- LISTA DE JOGADORES (TOPO/MEIO) -->
+            <div class="flex flex-col gap-3 md:gap-5 mt-1">
+                
+                <!-- Parceiro -->
+                <div class="flex items-center gap-2 md:gap-3">
+                    <div class="flex flex-col items-center relative">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-[#dca3e8] bg-gray-800 relative">
+                            <!-- EMOJI OVERLAY -->
+                            <span id="emoji-parceiro" class="hidden absolute top-1/2 left-1/2 text-4xl md:text-5xl drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] z-30" style="transform: translate(-50%, -50%);"></span>
+                        </div>
+                        <span class="bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[9px] px-3 py-0.5 rounded-full mt-1 uppercase shadow-md">Parceiro</span>
+                    </div>
+                    <!-- Mini Mão de Cartas -->
+                    <div class="flex -space-x-1 opacity-90">
+                        <img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm"><img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm"><img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm"><img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm"><img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm">
                     </div>
                 </div>
-                <button onclick="document.getElementById('modal-desistir').classList.remove('hidden')" class="bg-red-600 hover:bg-red-700 text-white font-black text-[11px] px-4 py-2 rounded-full shadow-md border-2 border-red-800 uppercase tracking-widest transition-transform active:scale-95">Desistir</button>
+
+                <!-- Inimigo 1 -->
+                <div class="flex items-center gap-2 md:gap-3">
+                    <div class="flex flex-col items-center relative">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-[#dca3e8] bg-gray-800 relative">
+                            <span id="emoji-opp1" class="hidden absolute top-1/2 left-1/2 text-4xl md:text-5xl drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] z-30" style="transform: translate(-50%, -50%);"></span>
+                        </div>
+                        <span class="bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[9px] px-3 py-0.5 rounded-full mt-1 uppercase shadow-md">Inimigo 1</span>
+                    </div>
+                    <div class="flex -space-x-1 opacity-90">
+                        <img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm"><img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm"><img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm"><img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm"><img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm">
+                    </div>
+                </div>
+
+                <!-- Inimigo 2 -->
+                <div class="flex items-center gap-2 md:gap-3">
+                    <div class="flex flex-col items-center relative">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-[#dca3e8] bg-gray-800 relative">
+                            <span id="emoji-opp2" class="hidden absolute top-1/2 left-1/2 text-4xl md:text-5xl drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] z-30" style="transform: translate(-50%, -50%);"></span>
+                        </div>
+                        <span class="bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[9px] px-3 py-0.5 rounded-full mt-1 uppercase shadow-md">Inimigo 2</span>
+                    </div>
+                    <div class="flex -space-x-1 opacity-90">
+                        <img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm"><img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm"><img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm"><img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm"><img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm">
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- VOCÊ E CONTROLES (BASE ESQUERDA) -->
+            <div class="flex items-end gap-2 md:gap-4 mb-1">
+                <!-- Botão Escolher Reação (com menu popup oculto) -->
+                <div class="relative">
+                    <div id="menu-reacoes" class="hidden absolute bottom-[110%] left-0 bg-[#dca3e8] p-2 rounded-xl flex gap-2 shadow-2xl border-2 border-[#bc7bd4] z-50">
+                        <button onclick="enviarReacao('my', '😂')" class="text-2xl hover:scale-125 transition-transform">😂</button>
+                        <button onclick="enviarReacao('my', '😡')" class="text-2xl hover:scale-125 transition-transform">😡</button>
+                        <button onclick="enviarReacao('my', '😱')" class="text-2xl hover:scale-125 transition-transform">😱</button>
+                        <button onclick="enviarReacao('my', '❤️')" class="text-2xl hover:scale-125 transition-transform">❤️</button>
+                    </div>
+                    <button onclick="document.getElementById('menu-reacoes').classList.toggle('hidden')" class="bg-[#dca3e8] hover:bg-[#bc7bd4] text-[#7a32a8] font-black text-[8px] md:text-[10px] px-3 md:px-5 py-3 rounded-2xl border-2 border-[#bc7bd4] text-center leading-tight shadow-lg transition-transform active:scale-95 uppercase">
+                        Escolher A<br>Reação
+                    </button>
+                </div>
+
+                <!-- O Seu Perfil -->
+                <div class="flex flex-col items-center relative">
+                    <div class="w-12 h-12 md:w-16 md:h-16 rounded-full border-4 border-[#dca3e8] bg-gray-800 relative shadow-[0_0_15px_#dca3e8] vez-ativa">
+                        <span id="emoji-my" class="hidden absolute top-1/2 left-1/2 text-5xl md:text-6xl drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] z-30" style="transform: translate(-50%, -50%);"></span>
+                    </div>
+                    <span class="bg-[#dca3e8] text-[#7a32a8] font-black text-[9px] md:text-[10px] px-4 py-0.5 rounded-full mt-1 uppercase shadow-md border border-[#bc7bd4]">Você</span>
+                </div>
+
+                <!-- Montante do Deck -->
+                <div class="flex flex-col items-center justify-center bg-black/60 border border-white/20 rounded p-1 w-10 md:w-12 h-14 md:h-16 relative shadow-lg">
+                    <span id="deck-count" class="text-white font-black text-xl md:text-2xl z-10 drop-shadow-[0_2px_2px_rgba(0,0,0,1)]">15</span>
+                    <img src="fundo_carta.png" class="absolute inset-0 w-full h-full object-cover opacity-40 rounded">
+                </div>
             </div>
         </div>
 
         <!-- ========================================== -->
-        <!-- JOGADOR PARCEIRO (TOPO) -->
+        <!-- LADO DIREITO: CAMPO DE BATALHA E SUA MÃO -->
         <!-- ========================================== -->
-        <div class="absolute top-4 left-1/2 transform -translate-x-1/2 flex flex-col items-center z-10">
-            <img src="fundo_carta.png" class="w-14 h-14 rounded-full border-2 border-black/50 object-cover shadow-md bg-gray-800">
-            <span class="bg-black/90 px-3 py-1 rounded text-[9px] font-black mt-1 uppercase border border-white/20 shadow-lg">Parceiro</span>
-        </div>
-
-        <!-- ========================================== -->
-        <!-- OPONENTE 1 (ESQUERDA) -->
-        <!-- ========================================== -->
-        <div class="absolute left-6 top-1/2 transform -translate-y-1/2 flex flex-col items-center z-10">
-            <img src="fundo_carta.png" class="w-14 h-14 rounded-full border-2 border-black/50 object-cover shadow-md bg-gray-800">
-            <span class="bg-black/90 px-2 py-1 rounded text-[9px] font-black mt-1 uppercase text-red-400 border border-white/20 shadow-lg">Inimigo 1</span>
-        </div>
-
-        <!-- ========================================== -->
-        <!-- OPONENTE 2 (DIREITA) -->
-        <!-- ========================================== -->
-        <div class="absolute right-6 top-1/2 transform -translate-y-1/2 flex flex-col items-center z-10">
-            <img src="fundo_carta.png" class="w-14 h-14 rounded-full border-2 border-black/50 object-cover shadow-md bg-gray-800">
-            <span class="bg-black/90 px-2 py-1 rounded text-[9px] font-black mt-1 uppercase text-red-400 border border-white/20 shadow-lg">Inimigo 2</span>
-        </div>
-
-        <!-- ========================================== -->
-        <!-- O CAMPO DE BATALHA (Bandeja Reta) -->
-        <!-- ========================================== -->
-        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/30 backdrop-blur-md border border-white/10 px-8 py-5 rounded-[2.5rem] flex justify-center items-center gap-3 z-20 shadow-2xl">
-            <div class="w-[60px] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-lg border-2 border-red-500 cursor-pointer hover:scale-105 transition-transform"><img src="fundo_carta.png" class="w-full h-full object-cover rounded-sm"></div>
-            <div class="w-[60px] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-lg border-2 border-gray-400 cursor-pointer hover:scale-105 transition-transform"><img src="fundo_carta.png" class="w-full h-full object-cover rounded-sm"></div>
-            <div class="w-[60px] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-lg border-2 border-[#4ade80] cursor-pointer hover:scale-105 transition-transform"><img src="fundo_carta.png" class="w-full h-full object-cover rounded-sm"></div>
-            <div class="w-[60px] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-lg border-2 border-red-500 cursor-pointer hover:scale-105 transition-transform"><img src="fundo_carta.png" class="w-full h-full object-cover rounded-sm"></div>
-        </div>
-
-        <!-- ========================================== -->
-        <!-- VOCÊ (BASE DA TELA) -->
-        <!-- ========================================== -->
-        <div class="absolute bottom-1 w-full flex justify-center z-40">
-            <div class="flex -space-x-4 mb-1">
-                <div class="w-[75px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-2xl border-2 border-black hover:border-[#4ade80] cursor-pointer hover-carta relative overflow-hidden"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
-                <div class="w-[75px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-2xl border-2 border-black hover:border-[#4ade80] cursor-pointer hover-carta relative overflow-hidden"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
-                <div class="w-[75px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-2xl border-2 border-black hover:border-[#4ade80] cursor-pointer hover-carta relative overflow-hidden"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
-                <div class="w-[75px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-2xl border-2 border-black hover:border-[#4ade80] cursor-pointer hover-carta relative overflow-hidden"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
-                <div class="w-[75px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-2xl border-2 border-black hover:border-[#4ade80] cursor-pointer hover-carta relative overflow-hidden"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
+        <div class="w-[65%] h-full relative p-2 md:p-4 flex flex-col justify-between items-center z-10">
+            
+            <!-- HUD Superior (Textos e Desistir) -->
+            <div class="w-full flex justify-center mt-1 relative">
+                <div class="flex flex-col items-center gap-1.5 z-40">
+                    <div class="bg-[#dca3e8] text-[#7a32a8] font-black text-[10px] md:text-xs px-6 md:px-10 py-1.5 rounded-full shadow-lg border-2 border-[#bc7bd4] uppercase tracking-wide">
+                        Aguardando Jogadores...
+                    </div>
+                    <div class="bg-[#dca3e8] text-[#7a32a8] font-black text-[9px] md:text-[10px] px-6 py-1 rounded-full shadow-md border-2 border-[#bc7bd4] uppercase leading-tight text-center">
+                        Atributo<br>Aura
+                    </div>
+                </div>
+                <button onclick="document.getElementById('modal-desistir').classList.remove('hidden')" class="absolute top-0 right-0 bg-red-600 hover:bg-red-700 text-white font-black text-[9px] md:text-[10px] px-4 py-1.5 rounded-xl shadow-md border-2 border-red-800 uppercase tracking-widest transition-transform active:scale-95">
+                    Desistir
+                </button>
             </div>
-        </div>
 
-        <!-- Seu Perfil isolado -->
-        <div class="absolute bottom-4 right-8 flex flex-col items-center z-40">
-            <div class="w-16 h-16 rounded-full border-2 border-[#dca3e8] object-cover shadow-[0_0_15px_#dca3e8] bg-gray-800 vez-ativa"></div>
-            <span class="bg-[#dca3e8] text-[#7a32a8] px-4 py-1 rounded-full text-[10px] font-black mt-2 uppercase border-2 border-[#bc7bd4] shadow-lg">Você</span>
-        </div>
+            <!-- O CAMPO DE BATALHA (4 Cartas) -->
+            <div class="flex justify-center items-center gap-2 md:gap-4 w-full z-20 mt-2">
+                <div class="w-[14vh] max-w-[90px] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-xl border-2 border-black hover:scale-105 transition-transform"><img src="fundo_carta.png" class="w-full h-full object-cover rounded-[4px]"></div>
+                <div class="w-[14vh] max-w-[90px] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-xl border-2 border-black hover:scale-105 transition-transform"><img src="fundo_carta.png" class="w-full h-full object-cover rounded-[4px]"></div>
+                <div class="w-[14vh] max-w-[90px] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-xl border-2 border-black hover:scale-105 transition-transform"><img src="fundo_carta.png" class="w-full h-full object-cover rounded-[4px]"></div>
+                <div class="w-[14vh] max-w-[90px] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-xl border-2 border-black hover:scale-105 transition-transform"><img src="fundo_carta.png" class="w-full h-full object-cover rounded-[4px]"></div>
+            </div>
 
+            <!-- SUA MÃO DE CARTAS -->
+            <div class="w-full flex justify-center gap-1.5 md:gap-3 mb-1 z-40">
+                <div class="w-[18vh] max-w-[110px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-2xl border-2 border-black hover:border-[#dca3e8] cursor-pointer hover-carta overflow-hidden"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
+                <div class="w-[18vh] max-w-[110px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-2xl border-2 border-black hover:border-[#dca3e8] cursor-pointer hover-carta overflow-hidden"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
+                <div class="w-[18vh] max-w-[110px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-2xl border-2 border-black hover:border-[#dca3e8] cursor-pointer hover-carta overflow-hidden"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
+                <div class="w-[18vh] max-w-[110px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-2xl border-2 border-black hover:border-[#dca3e8] cursor-pointer hover-carta overflow-hidden"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
+                <div class="w-[18vh] max-w-[110px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-2xl border-2 border-black hover:border-[#dca3e8] cursor-pointer hover-carta overflow-hidden"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
+            </div>
+
+        </div>
     </div>
 
     <!-- ====================================================================== -->
@@ -244,6 +300,41 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Sistema de Reações do Jogador
+        window.timersReacao = {};
+
+        window.enviarReacao = function(idAlvo, emoji) {
+            // Fecha o menu depois de clicar
+            document.getElementById('menu-reacoes').classList.add('hidden');
+
+            const elemento = document.getElementById(`emoji-${idAlvo}`);
+            if (!elemento) return;
+
+            // Define o emoji e ativa a animação
+            elemento.innerText = emoji;
+            elemento.classList.remove('hidden');
+            elemento.classList.remove('emoji-ativo');
+            
+            // Força o navegador a reiniciar a animação
+            void elemento.offsetWidth; 
+            elemento.classList.add('emoji-ativo');
+
+            // Se o jogador já tinha mandado uma reação antes dela sumir, cancela o "sumiço" antigo
+            if (window.timersReacao[idAlvo]) {
+                clearTimeout(window.timersReacao[idAlvo]);
+            }
+
+            // Define para sumir em 3.5 segundos exatos
+            window.timersReacao[idAlvo] = setTimeout(() => {
+                elemento.classList.add('hidden');
+                elemento.classList.remove('emoji-ativo');
+            }, 3500);
+            
+            // Aqui futuramente você vai enviar o updateDoc para o firebase: { [`reacao_${minhaRole}`]: emoji }
+        };
+    </script>
 
 </body>
 </html>

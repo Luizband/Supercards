@@ -49,7 +49,7 @@
         }
     </style>
 </head>
-<body class="fixed inset-0 overflow-hidden w-full h-[100dvh] text-white select-none">
+<body class="fixed inset-0 overflow-hidden w-full h-full text-white select-none bg-black">
 
     <div id="aviso-retrato" class="w-full h-full bg-black/95 flex-col items-center justify-center p-6 text-center z-[9999] absolute inset-0">
         <span class="text-6xl mb-4">🔄</span>
@@ -59,15 +59,16 @@
 
     <div id="main-arena" class="w-full h-full flex bg-gradient-to-r from-[#7a32a8]/90 via-gray-800/80 to-[#4ade80]/90 relative backdrop-blur-sm">
 
-        <!-- LADO ESQUERDO: JOGADORES (ORDEM ALTERNADA) -->
-        <div class="w-[35%] h-full flex flex-col justify-between p-2 md:p-4 bg-black/30 border-r-4 border-black/20 z-10 shadow-2xl">
-            <div class="flex flex-col gap-3 md:gap-5 mt-1">
-                
+        <!-- LADO ESQUERDO: JOGADORES (FLEX-1 PARA NÃO ESPREMER) -->
+        <div class="w-[35%] h-full flex flex-col justify-between p-2 md:p-4 bg-black/30 border-r-4 border-black/20 z-10 shadow-2xl overflow-hidden">
+            
+            <!-- LISTA DE JOGADORES (ADAPTÁVEL) -->
+            <div class="flex flex-col justify-evenly flex-grow min-h-0 pb-2">
                 <!-- Inimigo 1 -->
                 <div class="flex items-center gap-2 md:gap-3">
                     <div class="flex flex-col items-center relative">
                         <div id="glow-opp1" class="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-[#dca3e8] bg-gray-800 relative transition-all duration-300">
-                            <span id="emoji-opp1" class="hidden absolute top-1/2 left-1/2 text-4xl md:text-5xl drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] z-30" style="transform: translate(-50%, -50%);"></span>
+                            <span id="emoji-opp1" class="hidden absolute top-1/2 left-1/2 text-3xl md:text-5xl drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] z-30" style="transform: translate(-50%, -50%);"></span>
                         </div>
                         <span id="nome-opp1" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[9px] px-3 py-0.5 rounded-full mt-1 uppercase shadow-md truncate max-w-[70px]">Inimigo 1</span>
                     </div>
@@ -78,7 +79,7 @@
                 <div class="flex items-center gap-2 md:gap-3">
                     <div class="flex flex-col items-center relative">
                         <div id="glow-parceiro" class="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-[#dca3e8] bg-gray-800 relative transition-all duration-300">
-                            <span id="emoji-parceiro" class="hidden absolute top-1/2 left-1/2 text-4xl md:text-5xl drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] z-30" style="transform: translate(-50%, -50%);"></span>
+                            <span id="emoji-parceiro" class="hidden absolute top-1/2 left-1/2 text-3xl md:text-5xl drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] z-30" style="transform: translate(-50%, -50%);"></span>
                         </div>
                         <span id="nome-parceiro" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[9px] px-3 py-0.5 rounded-full mt-1 uppercase shadow-md truncate max-w-[70px]">Parceiro</span>
                     </div>
@@ -89,7 +90,7 @@
                 <div class="flex items-center gap-2 md:gap-3">
                     <div class="flex flex-col items-center relative">
                         <div id="glow-opp2" class="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-[#dca3e8] bg-gray-800 relative transition-all duration-300">
-                            <span id="emoji-opp2" class="hidden absolute top-1/2 left-1/2 text-4xl md:text-5xl drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] z-30" style="transform: translate(-50%, -50%);"></span>
+                            <span id="emoji-opp2" class="hidden absolute top-1/2 left-1/2 text-3xl md:text-5xl drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] z-30" style="transform: translate(-50%, -50%);"></span>
                         </div>
                         <span id="nome-opp2" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[9px] px-3 py-0.5 rounded-full mt-1 uppercase shadow-md truncate max-w-[70px]">Inimigo 2</span>
                     </div>
@@ -97,8 +98,8 @@
                 </div>
             </div>
 
-            <!-- VOCÊ -->
-            <div class="flex items-end justify-between md:justify-start gap-2 md:gap-4 mb-1">
+            <!-- VOCÊ (FIXO NO RODAPÉ DA COLUNA) -->
+            <div class="flex items-end justify-between md:justify-start gap-1 md:gap-4 flex-shrink-0 pt-2 border-t border-white/10">
                 <div class="relative">
                     <div id="menu-reacoes" class="hidden absolute bottom-[110%] left-0 w-max bg-[#dca3e8] p-3 rounded-xl grid grid-cols-4 gap-2 shadow-2xl border-2 border-[#bc7bd4] z-50">
                         <button onclick="enviarReacao('my', '💣')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 hover:bg-[#bc7bd4] rounded-lg transition-transform">💣</button>
@@ -110,16 +111,16 @@
                         <button onclick="enviarReacao('my', '🤣')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 hover:bg-[#bc7bd4] rounded-lg transition-transform">🤣</button>
                         <button onclick="enviarReacao('my', '😭')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 hover:bg-[#bc7bd4] rounded-lg transition-transform">😭</button>
                     </div>
-                    <button onclick="document.getElementById('menu-reacoes').classList.toggle('hidden')" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[10px] px-3 md:px-5 py-3 rounded-2xl border-2 border-[#bc7bd4] shadow-lg uppercase">
-                        Escolher A<br>Reação
+                    <button onclick="document.getElementById('menu-reacoes').classList.toggle('hidden')" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[10px] px-2 md:px-4 py-2 md:py-3 rounded-xl border-2 border-[#bc7bd4] shadow-lg uppercase">
+                        Escolher<br>Reação
                     </button>
                 </div>
 
-                <div class="flex flex-col items-center relative">
+                <div class="flex flex-col items-center relative mx-1">
                     <div id="glow-my" class="w-12 h-12 md:w-16 md:h-16 rounded-full border-4 border-[#dca3e8] bg-gray-800 relative transition-all duration-300">
-                        <span id="emoji-my" class="hidden absolute top-1/2 left-1/2 text-5xl md:text-6xl drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] z-30" style="transform: translate(-50%, -50%);"></span>
+                        <span id="emoji-my" class="hidden absolute top-1/2 left-1/2 text-4xl md:text-6xl drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] z-30" style="transform: translate(-50%, -50%);"></span>
                     </div>
-                    <span id="nome-my" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[9px] md:text-[10px] px-4 py-0.5 rounded-full mt-1 uppercase shadow-md border border-[#bc7bd4]">Você</span>
+                    <span id="nome-my" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[9px] md:text-[10px] px-3 py-0.5 rounded-full mt-1 uppercase shadow-md border border-[#bc7bd4] truncate max-w-[75px]">Você</span>
                 </div>
 
                 <div class="flex flex-col items-center justify-center bg-black/60 border border-white/20 rounded p-1 w-10 md:w-12 h-14 md:h-16 relative shadow-lg">
@@ -129,46 +130,54 @@
             </div>
         </div>
 
-        <!-- LADO DIREITO: CAMPO E MÃO -->
-        <div class="w-[65%] h-full relative p-2 md:p-4 flex flex-col justify-between items-center z-10">
+        <!-- LADO DIREITO: CAMPO E MÃO (POSICIONAMENTO ABSOLUTO) -->
+        <div class="w-[65%] h-full relative overflow-hidden z-10">
             
-            <!-- MENU DE TOPO (LINHA ÚNICA) -->
-            <div class="w-full flex justify-center mt-1 relative">
-                <div class="flex flex-row flex-wrap items-center justify-center gap-2 md:gap-4 z-40 px-10">
-                    
-                    <div id="status-turno-top" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[9px] md:text-xs px-4 py-1.5 rounded-full shadow-lg border-2 border-[#bc7bd4] uppercase tracking-wide">
-                        Carregando Sala...
-                    </div>
-                    
-                    <div id="box-atributo" class="hidden bg-[#dca3e8] text-[#7a32a8] font-black text-[9px] md:text-xs px-4 py-1.5 rounded-full shadow-md border-2 border-[#bc7bd4] uppercase leading-tight text-center transition-colors">
-                        Atributo: <span id="texto-atributo">---</span>
-                    </div>
-
-                    <div id="placar-ao-vivo" class="hidden flex items-center gap-2 bg-black/80 px-4 py-1.5 rounded-full border border-white/20 shadow-lg">
-                        <span id="placar-aliado" class="text-[#4ade80] font-black text-sm drop-shadow-[0_0_8px_#4ade80]">0</span>
-                        <span class="text-white/50 font-black text-[10px]">VS</span>
-                        <span id="placar-inimigo" class="text-red-500 font-black text-sm drop-shadow-[0_0_8px_#ef4444]">0</span>
-                    </div>
-
+            <!-- TOPO: STATUS, PLACAR E DESISTIR (Pregados no Teto) -->
+            <div class="absolute top-2 md:top-3 left-0 w-full px-2 md:px-4 flex justify-between items-start z-50 pointer-events-none">
+                
+                <!-- Status -->
+                <div id="status-turno-top" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[10px] px-3 py-1.5 rounded-full shadow-lg border-2 border-[#bc7bd4] uppercase tracking-wide truncate max-w-[35%] pointer-events-auto">
+                    Carregando...
                 </div>
-                <button onclick="document.getElementById('modal-desistir').classList.remove('hidden')" class="absolute top-0 right-0 bg-red-600 hover:bg-red-700 text-white font-black text-[9px] md:text-[10px] px-4 py-1.5 rounded-xl shadow-md border-2 border-red-800 uppercase tracking-widest transition-transform active:scale-95">
+                
+                <!-- Placar Centralizado Perfeitamente -->
+                <div id="placar-ao-vivo" class="hidden absolute left-1/2 transform -translate-x-1/2 flex items-center gap-2 md:gap-3 bg-black/80 px-3 md:px-4 py-1.5 rounded-full border border-white/20 shadow-lg pointer-events-auto mt-0 md:mt-1">
+                    <span id="placar-aliado" class="text-[#4ade80] font-black text-sm drop-shadow-[0_0_8px_#4ade80]">0</span>
+                    <span class="text-white/50 font-black text-[9px]">VS</span>
+                    <span id="placar-inimigo" class="text-red-500 font-black text-sm drop-shadow-[0_0_8px_#ef4444]">0</span>
+                </div>
+
+                <!-- Botão Desistir -->
+                <button onclick="document.getElementById('modal-desistir').classList.remove('hidden')" class="bg-red-600 hover:bg-red-700 text-white font-black text-[8px] md:text-[10px] px-3 md:px-4 py-1.5 rounded-xl shadow-md border-2 border-red-800 uppercase tracking-widest transition-transform active:scale-95 pointer-events-auto">
                     Desistir
                 </button>
             </div>
 
-            <!-- A MESA DE CARTAS (AUMENTADA) -->
-            <div id="mesa-combate" class="flex justify-center items-center gap-3 md:gap-5 w-full z-20 mt-4 min-h-[22vh]">
-                <!-- As 4 cartas irão aparecer aqui -->
+            <!-- MESA E ATRIBUTO (Livres e Centralizados no Meio da Tela) -->
+            <div class="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none">
+                
+                <!-- O Nome do Atributo Piscando -->
+                <div id="box-atributo" class="hidden mb-4 md:mb-6 pointer-events-auto">
+                    <span id="texto-atributo" class="text-yellow-400 font-black text-xs md:text-sm uppercase tracking-widest animate-pulse drop-shadow-[0_0_10px_rgba(250,204,21,0.8)] bg-black/60 px-6 py-1.5 rounded-full border border-yellow-500/50">
+                        ---
+                    </span>
+                </div>
+
+                <!-- Cartas da Mesa -->
+                <div id="mesa-combate" class="flex justify-center items-center gap-2 md:gap-4 w-full pointer-events-auto">
+                    <!-- JS Injeta Aqui -->
+                </div>
             </div>
 
-            <!-- A SUA MÃO -->
-            <div id="mao-jogador" class="w-full flex justify-center gap-1.5 md:gap-3 mb-1 z-40 min-h-[18vh]">
-                <!-- Cartas da mão -->
+            <!-- A SUA MÃO (Pregada no Chão) -->
+            <div id="mao-jogador" class="absolute bottom-2 left-0 w-full flex justify-center items-end gap-1.5 md:gap-3 z-40 pointer-events-auto">
+                <!-- JS Injeta Aqui -->
             </div>
 
         </div>
     </div>
-
+    
     <div id="modal-zoom" class="hidden fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 backdrop-blur-md">
         <button onclick="document.getElementById('modal-zoom').classList.add('hidden')" class="absolute top-4 right-8 text-white font-black text-3xl hover:text-gray-300 transition-colors z-50 drop-shadow-md">X</button>
         
@@ -322,7 +331,6 @@
         function renderizarMesa() {
             if(!dadosSala) return;
 
-            // 1. Identificar Quem é Quem
             let me, parceiro, opp1, opp2;
             let timeA = ['jogador1', 'jogador2'];
             if (timeA.includes(minhaRole)) {
@@ -333,7 +341,6 @@
                 opp1 = 'jogador1'; opp2 = 'jogador2';
             }
 
-            // 2. Nomes, Glow do Líder e "Cartas Escondidas" dos Inimigos
             document.getElementById('nome-my').innerText = dadosSala[me].nome;
             document.getElementById('nome-parceiro').innerText = dadosSala[parceiro].nome;
             document.getElementById('nome-opp1').innerText = dadosSala[opp1].nome;
@@ -350,7 +357,6 @@
                 if(dadosSala.liderRodada === opp2) document.getElementById('glow-opp2').classList.add('shadow-[0_0_20px_#fbbf24]', 'border-yellow-400');
             }
 
-            // Desenha as "costas" das cartas na mão do Parceiro e dos 2 Inimigos
             const dicionario = { 'parceiro': parceiro, 'opp1': opp1, 'opp2': opp2 };
             for(let key in dicionario) {
                 const role = dicionario[key];
@@ -363,14 +369,13 @@
                 }
             }
 
-            // 3. Status e Placar
             const statusTop = document.getElementById('status-turno-top');
             if(dadosSala.vezAtual === me) {
                 statusTop.innerText = "SUA VEZ!";
-                statusTop.className = "bg-green-500 text-black font-black text-[9px] md:text-xs px-6 py-1.5 rounded-full shadow-lg border-2 border-white uppercase tracking-wide animate-pulse";
+                statusTop.className = "bg-green-500 text-black font-black text-[8px] md:text-[10px] px-4 py-1.5 rounded-full shadow-lg border-2 border-white uppercase tracking-wide animate-pulse pointer-events-auto z-20";
             } else {
                 statusTop.innerText = `AGUARDANDO ${dadosSala[dadosSala.vezAtual]?.nome || '...'}`;
-                statusTop.className = "bg-[#dca3e8] text-[#7a32a8] font-black text-[9px] md:text-xs px-6 py-1.5 rounded-full shadow-lg border-2 border-[#bc7bd4] uppercase tracking-wide";
+                statusTop.className = "bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[10px] px-3 py-1.5 rounded-full shadow-lg border-2 border-[#bc7bd4] uppercase tracking-wide truncate max-w-[40%] pointer-events-auto z-20";
             }
 
             if(dadosSala.atributoRodada) {
@@ -382,7 +387,6 @@
                 document.getElementById('placar-ao-vivo').classList.add('hidden');
             }
 
-            // 4. A MESA CENTRAL (Cartas Aumentadas)
             const mesaDiv = document.getElementById('mesa-combate');
             mesaDiv.innerHTML = '';
             
@@ -392,10 +396,8 @@
             if(dadosSala.filaTurno) {
                 dadosSala.filaTurno.forEach(role => {
                     const cartaIdJogada = dadosSala.mesa[role];
-                    
                     if (cartaIdJogada) {
                         const info = INFO_CARTAS[cartaIdJogada] || { miniatura: 'fundo_carta.png' };
-                        
                         if(dadosSala.atributoRodada) {
                             let valor = info[dadosSala.atributoRodada.toLowerCase()] || 0;
                             if(timeA.includes(minhaRole) && timeA.includes(role)) somaMinhaEquipe += valor;
@@ -403,15 +405,13 @@
                             else somaEquipeInimiga += valor;
                         }
 
-                        // W-[18vh] (AUMENTADO)
                         mesaDiv.innerHTML += `
-                            <div onclick="verCartaMesa('${cartaIdJogada}')" class="w-[18vh] max-w-[120px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-[0_0_20px_rgba(255,255,255,0.2)] border-2 border-white cursor-pointer hover:scale-105 transition-transform">
+                            <div onclick="verCartaMesa('${cartaIdJogada}')" class="w-[14.5vh] max-w-[85px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-[0_0_20px_rgba(255,255,255,0.2)] border-2 border-white cursor-pointer hover:scale-105 transition-transform">
                                 <img src="${info.miniatura || info.imagem}" class="w-full h-full object-cover rounded-[6px]">
                             </div>`;
                     } else {
-                        // Slot Vazio
                         mesaDiv.innerHTML += `
-                            <div class="w-[18vh] max-w-[120px] aspect-[2.5/3.5] bg-black/40 rounded-lg shadow-inner border-2 border-white/20 border-dashed"></div>`;
+                            <div class="w-[14.5vh] max-w-[85px] aspect-[2.5/3.5] bg-black/40 rounded-lg shadow-inner border-2 border-white/20 border-dashed"></div>`;
                     }
                 });
             }
@@ -419,13 +419,12 @@
             document.getElementById('placar-aliado').innerText = somaMinhaEquipe;
             document.getElementById('placar-inimigo').innerText = somaEquipeInimiga;
 
-            // 5. A SUA MÃO 
             const maoDiv = document.getElementById('mao-jogador');
             maoDiv.innerHTML = '';
             (dadosSala[me].mao || []).forEach(cartaId => {
                 const info = INFO_CARTAS[cartaId] || { miniatura: 'fundo_carta.png' };
                 maoDiv.innerHTML += `
-                    <div onclick="abrirSuaCarta('${cartaId}')" class="w-[18vh] max-w-[110px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-2xl border-2 border-black hover:border-[#dca3e8] cursor-pointer hover-carta overflow-hidden">
+                    <div onclick="abrirSuaCarta('${cartaId}')" class="w-[16vh] max-w-[95px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-2xl border-2 border-black hover:border-[#dca3e8] cursor-pointer hover-carta overflow-hidden">
                         <img src="${info.miniatura || info.imagem}" class="w-full h-full object-cover">
                     </div>`;
             });

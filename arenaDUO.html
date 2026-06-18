@@ -51,40 +51,30 @@
 </head>
 <body class="fixed inset-0 overflow-hidden w-full h-[100dvh] text-white select-none">
 
-    <!-- TELA DE BLOQUEIO PORTRAIT -->
     <div id="aviso-retrato" class="w-full h-full bg-black/95 flex-col items-center justify-center p-6 text-center z-[9999] absolute inset-0">
         <span class="text-6xl mb-4">🔄</span>
         <h1 class="text-2xl font-black text-[#dca3e8] uppercase tracking-widest mb-2">Vire o Celular</h1>
         <p class="text-sm text-gray-300 font-bold">O modo Arena 2x2 só pode ser jogado com a tela na horizontal.</p>
     </div>
 
-    <!-- ARENA DUO (LANDSCAPE) - NOVO LAYOUT SPLIT-SCREEN -->
     <div id="main-arena" class="w-full h-full flex bg-gradient-to-r from-[#7a32a8]/90 via-gray-800/80 to-[#4ade80]/90 relative backdrop-blur-sm">
 
-        <!-- ========================================== -->
-        <!-- LADO ESQUERDO: JOGADORES, STATUS E REAÇÕES -->
-        <!-- ========================================== -->
         <div class="w-[35%] h-full flex flex-col justify-between p-2 md:p-4 bg-black/30 border-r-4 border-black/20 z-10 shadow-2xl">
             
-            <!-- LISTA DE JOGADORES (TOPO/MEIO) -->
             <div class="flex flex-col gap-3 md:gap-5 mt-1">
                 
-                <!-- Parceiro -->
                 <div class="flex items-center gap-2 md:gap-3">
                     <div class="flex flex-col items-center relative">
                         <div class="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-[#dca3e8] bg-gray-800 relative">
-                            <!-- EMOJI OVERLAY -->
                             <span id="emoji-parceiro" class="hidden absolute top-1/2 left-1/2 text-4xl md:text-5xl drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] z-30" style="transform: translate(-50%, -50%);"></span>
                         </div>
                         <span class="bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[9px] px-3 py-0.5 rounded-full mt-1 uppercase shadow-md">Parceiro</span>
                     </div>
-                    <!-- Mini Mão de Cartas -->
                     <div class="flex -space-x-1 opacity-90">
                         <img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm"><img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm"><img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm"><img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm"><img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm">
                     </div>
                 </div>
 
-                <!-- Inimigo 1 -->
                 <div class="flex items-center gap-2 md:gap-3">
                     <div class="flex flex-col items-center relative">
                         <div class="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-[#dca3e8] bg-gray-800 relative">
@@ -97,7 +87,6 @@
                     </div>
                 </div>
 
-                <!-- Inimigo 2 -->
                 <div class="flex items-center gap-2 md:gap-3">
                     <div class="flex flex-col items-center relative">
                         <div class="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-[#dca3e8] bg-gray-800 relative">
@@ -112,9 +101,7 @@
 
             </div>
 
-            <!-- VOCÊ E CONTROLES (BASE ESQUERDA) -->
-            <div class="flex items-end gap-2 md:gap-4 mb-1">
-                <!-- Botão Escolher Reação (com menu popup oculto) -->
+            <div class="flex items-end justify-between md:justify-start gap-2 md:gap-4 mb-1">
                 <div class="relative">
                     <div id="menu-reacoes" class="hidden absolute bottom-[110%] left-0 w-max bg-[#dca3e8] p-3 rounded-xl grid grid-cols-4 gap-2 shadow-2xl border-2 border-[#bc7bd4] z-50">
                         <button onclick="enviarReacao('my', '💣')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform hover:bg-[#bc7bd4] rounded-lg">💣</button>
@@ -131,12 +118,7 @@
                         Escolher A<br>Reação
                     </button>
                 </div>
-                    <button onclick="document.getElementById('menu-reacoes').classList.toggle('hidden')" class="bg-[#dca3e8] hover:bg-[#bc7bd4] text-[#7a32a8] font-black text-[8px] md:text-[10px] px-3 md:px-5 py-3 rounded-2xl border-2 border-[#bc7bd4] text-center leading-tight shadow-lg transition-transform active:scale-95 uppercase">
-                        Escolher A<br>Reação
-                    </button>
-                </div>
 
-                <!-- O Seu Perfil -->
                 <div class="flex flex-col items-center relative">
                     <div class="w-12 h-12 md:w-16 md:h-16 rounded-full border-4 border-[#dca3e8] bg-gray-800 relative shadow-[0_0_15px_#dca3e8] vez-ativa">
                         <span id="emoji-my" class="hidden absolute top-1/2 left-1/2 text-5xl md:text-6xl drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] z-30" style="transform: translate(-50%, -50%);"></span>
@@ -144,7 +126,6 @@
                     <span class="bg-[#dca3e8] text-[#7a32a8] font-black text-[9px] md:text-[10px] px-4 py-0.5 rounded-full mt-1 uppercase shadow-md border border-[#bc7bd4]">Você</span>
                 </div>
 
-                <!-- Montante do Deck -->
                 <div class="flex flex-col items-center justify-center bg-black/60 border border-white/20 rounded p-1 w-10 md:w-12 h-14 md:h-16 relative shadow-lg">
                     <span id="deck-count" class="text-white font-black text-xl md:text-2xl z-10 drop-shadow-[0_2px_2px_rgba(0,0,0,1)]">15</span>
                     <img src="fundo_carta.png" class="absolute inset-0 w-full h-full object-cover opacity-40 rounded">
@@ -152,12 +133,8 @@
             </div>
         </div>
 
-        <!-- ========================================== -->
-        <!-- LADO DIREITO: CAMPO DE BATALHA E SUA MÃO -->
-        <!-- ========================================== -->
         <div class="w-[65%] h-full relative p-2 md:p-4 flex flex-col justify-between items-center z-10">
             
-            <!-- HUD Superior (Textos e Desistir) -->
             <div class="w-full flex justify-center mt-1 relative">
                 <div class="flex flex-col items-center gap-1.5 z-40">
                     <div class="bg-[#dca3e8] text-[#7a32a8] font-black text-[10px] md:text-xs px-6 md:px-10 py-1.5 rounded-full shadow-lg border-2 border-[#bc7bd4] uppercase tracking-wide">
@@ -172,7 +149,6 @@
                 </button>
             </div>
 
-            <!-- O CAMPO DE BATALHA (4 Cartas) -->
             <div class="flex justify-center items-center gap-2 md:gap-4 w-full z-20 mt-2">
                 <div class="w-[14vh] max-w-[90px] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-xl border-2 border-black hover:scale-105 transition-transform"><img src="fundo_carta.png" class="w-full h-full object-cover rounded-[4px]"></div>
                 <div class="w-[14vh] max-w-[90px] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-xl border-2 border-black hover:scale-105 transition-transform"><img src="fundo_carta.png" class="w-full h-full object-cover rounded-[4px]"></div>
@@ -180,7 +156,6 @@
                 <div class="w-[14vh] max-w-[90px] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-xl border-2 border-black hover:scale-105 transition-transform"><img src="fundo_carta.png" class="w-full h-full object-cover rounded-[4px]"></div>
             </div>
 
-            <!-- SUA MÃO DE CARTAS -->
             <div class="w-full flex justify-center gap-1.5 md:gap-3 mb-1 z-40">
                 <div class="w-[18vh] max-w-[110px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-2xl border-2 border-black hover:border-[#dca3e8] cursor-pointer hover-carta overflow-hidden"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
                 <div class="w-[18vh] max-w-[110px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-2xl border-2 border-black hover:border-[#dca3e8] cursor-pointer hover-carta overflow-hidden"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
@@ -192,24 +167,16 @@
         </div>
     </div>
 
-    <!-- ====================================================================== -->
-    <!-- ÁREA DE MODAIS (Iniciam ocultos pela classe "hidden")                  -->
-    <!-- ====================================================================== -->
-
-    <!-- MODAL 1: ZOOM / ESCOLHER AÇÃO -->
     <div id="modal-zoom" class="hidden fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 backdrop-blur-md">
         <button onclick="document.getElementById('modal-zoom').classList.add('hidden')" class="absolute top-4 right-8 text-white font-black text-3xl hover:text-gray-300 transition-colors z-50 drop-shadow-md">X</button>
         
         <div class="flex gap-8 items-center w-full max-w-3xl justify-center">
-            <!-- Imagem da Carta Gigante -->
             <div class="flex flex-col items-center">
                 <h2 id="titulo-acao" class="text-white font-black text-xl uppercase tracking-wider mb-2 drop-shadow-md">SUA CARTA</h2>
                 <img id="zoom-img" src="fundo_carta.png" class="w-[200px] aspect-[2.5/3.5] object-cover drop-shadow-[0_0_20px_rgba(220,163,232,0.4)] rounded-xl border-4 border-[#bc7bd4]">
             </div>
 
-            <!-- Painéis de Ação (Direita) -->
             <div class="w-full max-w-[200px] flex flex-col justify-center">
-                <!-- PAINEL DE ATACANTE (Escolher Atributo) -->
                 <div id="painel-atributos" class="grid grid-cols-1 gap-3 w-full">
                     <button class="bg-blue-600 hover:bg-blue-500 text-white font-black text-sm py-3 rounded-xl shadow-lg border-2 border-blue-400 uppercase tracking-widest transition-transform active:scale-95">AURA</button>
                     <button class="bg-pink-500 hover:bg-pink-400 text-white font-black text-sm py-3 rounded-xl shadow-lg border-2 border-pink-300 uppercase tracking-widest transition-transform active:scale-95">FOFURA</button>
@@ -217,7 +184,6 @@
                     <button class="bg-purple-600 hover:bg-purple-500 text-white font-black text-sm py-3 rounded-xl shadow-lg border-2 border-purple-400 uppercase tracking-widest transition-transform active:scale-95">ALEATÓRIO</button>
                 </div>
 
-                <!-- PAINEL DE DEFENSOR -->
                 <div id="painel-defesa" class="w-full hidden mt-8">
                     <span class="text-[#dca3e8] font-black text-[10px] uppercase text-center block mb-2">Atributo da Rodada</span>
                     <button id="btn-defender" class="w-full bg-red-600 hover:bg-red-500 text-white font-black text-sm py-4 rounded-xl shadow-lg border-2 border-red-400 uppercase tracking-widest transition-transform active:scale-95 animate-pulse">DEFENDER</button>
@@ -226,12 +192,10 @@
         </div>
     </div>
 
-    <!-- MODAL 2: O EMBATE (CLASH DE 4 CARTAS) -->
     <div id="modal-embate" class="hidden fixed inset-0 bg-black/95 z-[150] flex flex-col items-center justify-center p-4 backdrop-blur-md">
         <h2 id="embate-atributo-titulo" class="text-[#dca3e8] font-black text-2xl uppercase tracking-widest mb-6 drop-shadow-lg absolute top-4">ATRIBUTO: AURA</h2>
         
         <div class="flex items-center gap-6 mt-6 w-full justify-center">
-            <!-- DUPLA ALIADA -->
             <div class="flex gap-4 p-4 rounded-xl border-2 border-[#4ade80] bg-[#4ade80]/10 relative shadow-[0_0_30px_rgba(74,222,128,0.2)]">
                 <span class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#4ade80] text-black font-black text-[10px] px-3 py-0.5 rounded-full uppercase tracking-widest">Sua Dupla</span>
                 
@@ -250,7 +214,6 @@
 
             <span class="text-white font-black text-4xl mx-2 drop-shadow-[0_0_10px_#fff] italic opacity-80">VS</span>
 
-            <!-- DUPLA INIMIGA -->
             <div class="flex gap-4 p-4 rounded-xl border-2 border-red-500 bg-red-500/10 relative shadow-[0_0_30px_rgba(239,68,68,0.2)]">
                 <span class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-red-500 text-white font-black text-[10px] px-3 py-0.5 rounded-full uppercase tracking-widest">Inimigos</span>
                 
@@ -267,11 +230,9 @@
                 </div>
             </div>
         </div>
-        <!-- Aviso de desempate -->
         <span class="text-yellow-400 font-black text-[10px] uppercase mt-4 tracking-widest hidden" id="aviso-desempate">Desempate Matemático Aplicado!</span>
     </div>
 
-    <!-- MODAL 3: RESULTADO FINAL DA PARTIDA -->
     <div id="modal-resultado-final" class="hidden fixed inset-0 bg-black/95 z-[300] flex flex-col items-center justify-center p-4 backdrop-blur-md">
         <h1 id="texto-vitoria" class="text-5xl font-black text-[#4ade80] uppercase tracking-widest mb-2 drop-shadow-[0_0_20px_#4ade80] text-center">VITÓRIA!</h1>
         
@@ -298,7 +259,6 @@
         <button onclick="window.location.href='batalha.html'" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-4 px-16 rounded-full shadow-lg border-2 border-white tracking-widest text-lg transition-transform active:scale-95">FINALIZAR</button>
     </div>
 
-    <!-- MODAL 4: CONFIRMAR DESISTÊNCIA -->
     <div id="modal-desistir" class="hidden fixed inset-0 bg-black/80 z-[400] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl relative">
             <h2 class="text-red-600 font-black text-xl mb-2 uppercase drop-shadow-sm">Abandonar a Dupla?</h2>

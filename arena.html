@@ -366,7 +366,7 @@
                         if (dadosSala.status !== 'finalizada') {
                             window.mostrarToast(`Vez de ${nAtacante} escolher uma carta e atributo`);
                         }
-                    }, 4600); 
+                    }, 3200); 
                 } else {
                     // Se for o primeiro turno do jogo, mostra na hora
                     window.mostrarToast(`Vez de ${nAtacante} escolher uma carta e atributo`);
@@ -455,7 +455,7 @@
             setTimeout(() => {
                 document.getElementById('modal-embate').classList.add('hidden');
                 if (dadosSala.status === 'finalizada') iniciarCascataFinal();
-            }, 4500);
+            }, 3000);
         }
 
         async function resolverCombateHost() {

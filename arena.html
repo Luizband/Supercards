@@ -483,14 +483,17 @@
                 'jogador1.deck': j1D, 'jogador1.mao': j1M, 'jogador2.deck': j2D, 'jogador2.mao': j2M, 
                 'jogador1.cartaJogada': null, 'jogador2.cartaJogada': null, 'atributoTurno': null, 
                 'statusTurno': proxStatus, 'status': proxStatus === 'finalizada' ? 'finalizada' : dadosSala.status,
-                'turnoAtual': dadosSala.turnoAtual + 1, 'quemAtaca': proxAtacante,
-                'ultimoClash': { id1, val1, id2, val2, vencedorTurno: tipo, nomeVencedorTurno: nomeV, chaveVencedor: vencK, valorDesempate: valD, turno: dadosSala.turnoAtual, attr_nome: dadosSala.atributoTurno }
+                'turnoAtual': (dadosSala.turnoAtual || 1) + 1, 'quemAtaca': proxAtacante,
+                'ultimoClash': { id1, val1, id2, val2, vencedorTurno: tipo, nomeVencedorTurno: nomeV, chaveVencedor: vencK, valorDesempate: valD, turno: (dadosSala.turnoAtual || 1), attr_nome: dadosSala.atributoTurno }
             };
 
-            await updateDoc(doc(db, "partidas", salaId), ups); 
-            window.resolvendoHost = false;
+            try {
+                await updateDoc(doc(db, "partidas", salaId), ups); 
+            } finally {
+                window.resolvendoHost = false;
+            }
         }
-
+        
         function montarGridFinal(k) {
             const grid = document.getElementById('fim-grid-cartas'); grid.innerHTML = '';
             let t = 0;
@@ -633,7 +636,17 @@
 
                     if (isHost && !dadosSala.jogador1.mao) {
                         let j1 = [...dadosSala.jogador1.deck], j2 = [...dadosSala.jogador2.deck]; shuffle(j1); shuffle(j2);
-                        updateDoc(doc(db, "partidas", salaId), { 'jogador1.mao': j1.splice(0,5), 'jogador1.deck': j1, 'jogador1.pilhaVitorias': [], 'jogador2.mao': j2.splice(0,5), 'jogador2.deck': j2, 'jogador2.pilhaVitorias': [], 'statusTurno': 'aguardando_ataque', 'quemAtaca': Math.random() < 0.5 ? dadosSala.jogador1.uid : dadosSala.jogador2.uid }); return; 
+                        updateDoc(doc(db, "partidas", salaId), { 
+                            'jogador1.mao': j1.splice(0,5), 
+                            'jogador1.deck': j1, 
+                            'jogador1.pilhaVitorias': [], 
+                            'jogador2.mao': j2.splice(0,5), 
+                            'jogador2.deck': j2, 
+                            'jogador2.pilhaVitorias': [], 
+                            'statusTurno': 'aguardando_ataque', 
+                            'turnoAtual': 1, 
+                            'quemAtaca': Math.random() < 0.5 ? dadosSala.jogador1.uid : dadosSala.jogador2.uid 
+                        }); return; 
                     }
 
                     if (!dadosSala.jogador1.mao) return; 

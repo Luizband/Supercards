@@ -158,15 +158,29 @@
         </main>
 
         <footer class="absolute bottom-16 left-0 w-full flex justify-center z-[50] pointer-events-none" style="padding-bottom: env(safe-area-inset-bottom);">
-            <div class="bg-[#dca3e8] rounded-full flex p-1.5 gap-2 shadow-2xl w-[90%] max-w-[280px] pointer-events-auto border-2 border-[#bc7bd4]">
-                <button onclick="window.location.href='notificacoes.html'" class="relative flex-1 bg-[#7a32a8] text-white text-xs font-bold py-2.5 rounded-full hover:bg-purple-600 transition-colors shadow-inner">
-                    Notificações
-                    <span id="indicador-notif" class="hidden absolute -top-1 -right-1 flex h-3 w-3">
+            <div class="bg-[#dca3e8] rounded-full flex items-center justify-center p-2 px-3 gap-3 shadow-2xl pointer-events-auto border-2 border-[#bc7bd4]">
+                
+                <button onclick="window.location.href='notificacoes.html'" class="relative bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-12 h-10 shadow-inner" title="Notificações">
+                    <img src="notificacoes.png" alt="Notificações" class="w-5 h-5 object-contain">
+                    
+                    <span id="indicador-notif" class="hidden absolute -top-1 -right-1 flex h-3.5 w-3.5">
                       <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-3 w-3 bg-red-600 border border-white"></span>
+                      <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-red-600 border border-white"></span>
                     </span>
                 </button>
-                <button onclick="window.location.href='amigos.html'" class="flex-1 bg-[#7a32a8] text-white text-xs font-bold py-2.5 rounded-full hover:bg-purple-600 transition-colors shadow-inner">Amigos</button>
+
+                <button onclick="window.location.href='amigos.html'" class="relative bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-12 h-10 shadow-inner" title="Amigos">
+                    <img src="amigos.png" alt="Amigos" class="w-5 h-5 object-contain">
+                </button>
+
+                <button onclick="window.open('https://chat.whatsapp.com/L1lQ8fAVNzGBxkwnn9DlTm', '_blank')" class="relative bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-12 h-10 shadow-inner" title="Grupo WhatsApp">
+                    <img src="whats.png" alt="WhatsApp" class="w-5 h-5 object-contain">
+                </button>
+
+                <button onclick="window.mostrarToast('Wiki em desenvolvimento! 🚧')" class="relative bg-[#7a32a8] hover:bg-purple-600 transition-colors rounded-full flex items-center justify-center w-12 h-10 shadow-inner" title="Wiki do Jogo">
+                    <img src="wiki.png" alt="Wiki" class="w-5 h-5 object-contain">
+                </button>
+
             </div>
         </footer>
 

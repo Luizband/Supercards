@@ -119,6 +119,13 @@
                         <span class="text-[#dca3e8] font-black text-sm mt-3 drop-shadow-md uppercase tracking-wide text-center leading-tight">Torneios<br>&nbsp;</span>
                     </div>
 
+                    <div onclick="abrirModalDuo()" class="flex flex-col items-center group cursor-pointer snap-start flex-shrink-0" style="width: calc(50% - 8px);">
+                        <div class="bg-[#dca3e8] w-full aspect-square rounded-[24px] flex items-center justify-center p-4 shadow-xl hover:scale-105 transition-transform border-4 border-transparent hover:border-[#8b3dff]/50 relative">
+                            <img src="duo.png" class="w-[80%] h-[80%] object-contain drop-shadow-lg opacity-90">
+                        </div>
+                        <span class="text-[#dca3e8] font-black text-sm mt-3 drop-shadow-md uppercase tracking-wide text-center leading-tight">Arena<br>DUO</span>
+                    </div>
+
                 </div>
 
                 <div class="bg-black/20 border border-[#bc7bd4]/30 rounded-full px-4 py-1.5 flex items-center gap-5 shadow-inner">
@@ -126,6 +133,7 @@
                     <div class="flex gap-1.5 pointer-events-none">
                         <div id="ponto-1" class="w-1.5 h-1.5 bg-[#dca3e8] rounded-full shadow-md transition-colors duration-300"></div>
                         <div id="ponto-2" class="w-1.5 h-1.5 bg-[#dca3e8]/30 rounded-full shadow-md transition-colors duration-300"></div>
+                        <div id="ponto-3" class="w-1.5 h-1.5 bg-[#dca3e8]/30 rounded-full shadow-md transition-colors duration-300"></div>
                     </div>
                     <button onclick="document.getElementById('carrossel-modos').scrollBy({left: 150, behavior: 'smooth'})" class="text-[#dca3e8] hover:text-white active:scale-90 transition-transform text-[10px]">▶</button>
                 </div>
@@ -179,6 +187,74 @@
             </div>
             
             <button onclick="fecharModalRegras()" class="mt-4 w-full bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-3 rounded-full shadow-md uppercase tracking-wider transition-colors flex-shrink-0">Entendi</button>
+        </div>
+    </div>
+
+    <div id="modal-duo" class="hidden fixed inset-0 bg-black/90 z-[250] flex flex-col items-center justify-center p-4 backdrop-blur-md pointer-events-auto">
+        <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-5 w-full max-w-sm shadow-2xl flex flex-col h-[85%] max-h-[600px] relative">
+            <button onclick="fecharModalDuo()" class="absolute top-2 right-4 text-[#7a32a8] font-black text-xl hover:text-purple-600 transition-colors z-50">X</button>
+
+            <div id="view-menu-duo" class="flex flex-col h-full w-full">
+                <h2 class="text-[#7a32a8] font-black text-xl text-center uppercase tracking-wider mb-6 mt-2">Arena DUO</h2>
+                
+                <button onclick="criarSalaDuo()" class="w-full bg-[#4ade80] hover:bg-[#22c55e] text-[#7a32a8] font-black text-sm py-3.5 rounded-full shadow-md border-2 border-[#22c55e] uppercase tracking-widest transition-transform hover:scale-105 mb-3">Criar Sala DUO</button>
+                
+                <div class="flex gap-2 mb-4">
+                    <input type="text" id="input-codigo-duo" placeholder="Código da Sala" class="w-2/3 bg-[#bc7bd4] text-[#7a32a8] placeholder-[#7a32a8]/70 font-black text-xs rounded-full px-4 py-2.5 outline-none border-2 border-[#7a32a8]/30 focus:border-[#7a32a8] transition-colors shadow-inner text-center uppercase">
+                    <button onclick="entrarSalaCodigo()" class="w-1/3 bg-[#7a32a8] hover:bg-purple-600 text-white font-black text-[10px] rounded-full shadow-sm uppercase tracking-wider">Entrar</button>
+                </div>
+
+                <div class="w-full h-px bg-[#7a32a8]/30 mb-3 flex-shrink-0"></div>
+                <h2 class="text-[#7a32a8] font-black text-sm text-center uppercase tracking-wider mb-2 flex-shrink-0">Convites DUO</h2>
+
+                <div id="lista-convites-duo" class="flex flex-col gap-2 overflow-y-auto no-scrollbar flex-grow bg-white/30 rounded-xl p-2 border border-[#7a32a8]/20 mb-2">
+                    <span class="text-[#7a32a8] text-[10px] font-bold text-center mt-2">Nenhum convite pendente.</span>
+                </div>
+            </div>
+
+            <div id="view-lobby-duo" class="hidden flex flex-col h-full w-full items-center">
+                <h2 class="text-[#7a32a8] font-black text-lg text-center uppercase tracking-widest mb-1 mt-2">Lobby DUO</h2>
+                <span id="codigo-sala-display" class="text-[#7a32a8] font-bold text-[10px] mb-4 bg-white/40 px-3 py-1 rounded-full border border-[#7a32a8]/20">CÓDIGO: ----</span>
+
+                <div class="flex flex-col w-full gap-4 mb-4 flex-grow justify-center">
+                    <div class="bg-[#4ade80]/20 border-2 border-[#4ade80] rounded-xl p-3 flex justify-around items-center relative">
+                        <span class="absolute -top-2.5 bg-[#4ade80] text-black font-black text-[8px] px-2 py-0.5 rounded-full uppercase">Sua Equipe</span>
+                        <div class="flex flex-col items-center gap-1 w-1/2">
+                            <div class="w-10 h-10 rounded-full bg-gray-800 border-2 border-white shadow-inner flex items-center justify-center overflow-hidden"><img id="duo-slot-1-img" src="fundo_carta.png" class="w-full h-full object-cover"></div>
+                            <span id="duo-slot-1-nome" class="text-[#7a32a8] font-black text-[9px] uppercase truncate w-full text-center">Você</span>
+                            <span id="duo-slot-1-status" class="text-green-600 font-bold text-[8px] uppercase">Host</span>
+                        </div>
+                        <div onclick="abrirConviteDuo('parceiro')" class="flex flex-col items-center gap-1 w-1/2 cursor-pointer hover:scale-105 transition-transform">
+                            <div class="w-10 h-10 rounded-full bg-[#bc7bd4] border-2 border-dashed border-[#7a32a8] shadow-inner flex items-center justify-center"><span class="text-[#7a32a8] font-black text-xl">+</span></div>
+                            <span id="duo-slot-2-nome" class="text-[#7a32a8] font-black text-[9px] uppercase truncate w-full text-center">Convidar</span>
+                            <span id="duo-slot-2-status" class="text-transparent font-bold text-[8px] uppercase">-</span>
+                        </div>
+                    </div>
+
+                    <span class="text-[#7a32a8] font-black text-xl text-center opacity-50 italic">VS</span>
+
+                    <div class="bg-red-500/10 border-2 border-red-500 rounded-xl p-3 flex justify-around items-center relative">
+                        <span class="absolute -top-2.5 bg-red-500 text-white font-black text-[8px] px-2 py-0.5 rounded-full uppercase">Inimigos</span>
+                        <div onclick="abrirConviteDuo('inimigo1')" class="flex flex-col items-center gap-1 w-1/2 cursor-pointer hover:scale-105 transition-transform">
+                            <div class="w-10 h-10 rounded-full bg-[#bc7bd4] border-2 border-dashed border-[#7a32a8] shadow-inner flex items-center justify-center"><span class="text-[#7a32a8] font-black text-xl">+</span></div>
+                            <span id="duo-slot-3-nome" class="text-[#7a32a8] font-black text-[9px] uppercase truncate w-full text-center">Convidar</span>
+                            <span id="duo-slot-3-status" class="text-transparent font-bold text-[8px] uppercase">-</span>
+                        </div>
+                        <div onclick="abrirConviteDuo('inimigo2')" class="flex flex-col items-center gap-1 w-1/2 cursor-pointer hover:scale-105 transition-transform">
+                            <div class="w-10 h-10 rounded-full bg-[#bc7bd4] border-2 border-dashed border-[#7a32a8] shadow-inner flex items-center justify-center"><span class="text-[#7a32a8] font-black text-xl">+</span></div>
+                            <span id="duo-slot-4-nome" class="text-[#7a32a8] font-black text-[9px] uppercase truncate w-full text-center">Convidar</span>
+                            <span id="duo-slot-4-status" class="text-transparent font-bold text-[8px] uppercase">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="btn-buscar-inimigos-duo" onclick="buscarInimigosDuo()" class="w-full bg-[#7a32a8] hover:bg-purple-600 text-white font-black text-xs py-3 rounded-full shadow-md uppercase tracking-wider transition-colors mb-2 border border-[#bc7bd4]">Buscar Dupla Oponente</button>
+                
+                <button id="btn-pronto-duo" onclick="marcarProntoDuo()" class="hidden w-full bg-[#4ade80] hover:bg-[#22c55e] text-[#7a32a8] font-black text-sm py-3.5 rounded-full shadow-md border-2 border-[#22c55e] uppercase tracking-widest transition-transform hover:scale-105 mb-2">ESTOU PRONTO</button>
+                
+                <button onclick="sairLobbyDuo()" class="w-full bg-red-500 hover:bg-red-600 text-white font-black text-[10px] py-2 rounded-full shadow-sm uppercase tracking-wider transition-colors border border-red-700">Sair da Sala</button>
+            </div>
+
         </div>
     </div>
 
@@ -269,14 +345,20 @@
         window.atualizarPontinhos = function(carrossel) {
             const p1 = document.getElementById('ponto-1');
             const p2 = document.getElementById('ponto-2');
+            const p3 = document.getElementById('ponto-3');
             
-            // Se a tela rolou mais de 50 pixels pra direita, acende a bolinha 2
-            if (carrossel.scrollLeft > 50) {
-                p1.className = "w-1.5 h-1.5 bg-[#dca3e8]/30 rounded-full shadow-md transition-colors duration-300"; // Apaga a 1
-                p2.className = "w-1.5 h-1.5 bg-[#dca3e8] rounded-full shadow-md transition-colors duration-300";    // Acende a 2
+            const scroll = carrossel.scrollLeft;
+
+            p1.className = "w-1.5 h-1.5 bg-[#dca3e8]/30 rounded-full shadow-md transition-colors duration-300";
+            p2.className = "w-1.5 h-1.5 bg-[#dca3e8]/30 rounded-full shadow-md transition-colors duration-300";
+            p3.className = "w-1.5 h-1.5 bg-[#dca3e8]/30 rounded-full shadow-md transition-colors duration-300";
+
+            if (scroll > 200) {
+                p3.className = "w-1.5 h-1.5 bg-[#dca3e8] rounded-full shadow-md transition-colors duration-300";
+            } else if (scroll > 50) {
+                p2.className = "w-1.5 h-1.5 bg-[#dca3e8] rounded-full shadow-md transition-colors duration-300";
             } else {
-                p1.className = "w-1.5 h-1.5 bg-[#dca3e8] rounded-full shadow-md transition-colors duration-300";    // Acende a 1
-                p2.className = "w-1.5 h-1.5 bg-[#dca3e8]/30 rounded-full shadow-md transition-colors duration-300"; // Apaga a 2
+                p1.className = "w-1.5 h-1.5 bg-[#dca3e8] rounded-full shadow-md transition-colors duration-300";
             }
         };
 
@@ -552,6 +634,53 @@
             const ehJ1 = lobbyAtivo.jogador1.uid === currentUserUid;
             const campo = ehJ1 ? "jogador1.pronto" : "jogador2.pronto";
             try { await updateDoc(doc(db, "partidas", lobbyAtivo.id), { [campo]: true }); } catch(e) {}
+        };
+
+        // ===============================================
+        // FRONT-END: LOBBY ARENA DUO
+        // ===============================================
+        window.abrirModalDuo = function() {
+            if (!currentUserDoc || !currentUserDoc.deckPadrao || !currentUserDoc.decks || !currentUserDoc.decks[currentUserDoc.deckPadrao]) {
+                return window.mostrarToast("Você precisa selecionar um Deck Padrão completo primeiro!");
+            }
+            document.getElementById('modal-duo').classList.remove('hidden');
+            document.getElementById('view-menu-duo').classList.remove('hidden');
+            document.getElementById('view-lobby-duo').classList.add('hidden');
+        };
+
+        window.fecharModalDuo = function() {
+            document.getElementById('modal-duo').classList.add('hidden');
+        };
+
+        window.criarSalaDuo = function() {
+            document.getElementById('view-menu-duo').classList.add('hidden');
+            document.getElementById('view-lobby-duo').classList.remove('hidden');
+            document.getElementById('codigo-sala-display').innerText = "CÓDIGO: DUO-" + Math.floor(1000 + Math.random() * 9000);
+            document.getElementById('duo-slot-1-img').src = currentUserDoc.fotoPerfil || 'fundo_carta.png';
+            document.getElementById('duo-slot-1-nome').innerText = currentUserDoc.nomeDisplay || "Você";
+        };
+
+        window.entrarSalaCodigo = function() {
+            const cod = document.getElementById('input-codigo-duo').value.trim();
+            if(!cod) return window.mostrarToast("Digite um código válido.");
+            window.mostrarToast("Buscando sala " + cod + "...");
+        };
+
+        window.abrirConviteDuo = function(slot) {
+            window.mostrarToast("Sistema de convite para: " + slot + " (Em breve)");
+        };
+
+        window.buscarInimigosDuo = function() {
+            window.mostrarToast("Buscando outra dupla pronta...");
+        };
+
+        window.marcarProntoDuo = function() {
+            window.mostrarToast("Você está pronto! Aguardando os demais.");
+        };
+
+        window.sairLobbyDuo = function() {
+            document.getElementById('view-lobby-duo').classList.add('hidden');
+            document.getElementById('view-menu-duo').classList.remove('hidden');
         };
 
         // ===============================================

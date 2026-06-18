@@ -173,6 +173,11 @@
         let cartaFocadaId = null;
         let ultimoEstadoToast = null; 
         let etapaFim = 0, pointsJ1 = 0, pointsJ2 = 0;
+        
+        // --- NOVAS VARIÁVEIS DE OTIMIZAÇÃO E ANIMAÇÃO ---
+        window.turnoAnimadoLocal = -1;
+        window.ultimaMaoOpp = "";
+        window.ultimaMaoMy = "";
 
         // Variaveis de Integração Segura do Torneio
         window.isTorneio = false;
@@ -201,14 +206,25 @@
             if (opp.foto) { document.getElementById('opp-foto').src = opp.foto; document.getElementById('opp-foto').classList.remove('hidden'); document.getElementById('opp-foto-placeholder').classList.add('hidden'); }
             document.getElementById('opp-deck-count').innerText = opp.deck.length; document.getElementById('player-deck-count').innerText = my.deck.length;
 
-            const oppMao = document.getElementById('mao-adversario'); oppMao.innerHTML = '';
-            opp.mao.forEach((_, i) => oppMao.innerHTML += `<img src="fundo_carta.png" class="w-[18%] max-w-[65px] object-contain shadow-md border border-black/20 rounded-md" style="z-index: ${i};">`);
+            // OTIMIZAÇÃO: Só recria o HTML se a quantidade/ordem das cartas mudou (Salva o FPS do iPhone)
+            const maoOppStr = JSON.stringify(opp.mao);
+            const maoMyStr = JSON.stringify(my.mao);
 
-            const myMao = document.getElementById('mao-jogador'); myMao.innerHTML = '';
-            my.mao.forEach((id, i) => {
-                const info = INFO_CARTAS[id] || { miniatura: 'fundo_carta.png', imagem: 'fundo_carta.png' };
-                myMao.innerHTML += `<div onclick="abrirZoomCarta('${id}')" class="w-[26%] max-w-[100px] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-2xl border-2 border-black hover:border-[#4ade80] cursor-pointer hover-carta relative overflow-hidden" style="z-index: ${i};"><img src="${info.miniatura || info.imagem}" class="w-full h-full object-cover"></div>`;
-            });
+            if (window.ultimaMaoOpp !== maoOppStr) {
+                window.ultimaMaoOpp = maoOppStr;
+                const oppMao = document.getElementById('mao-adversario'); oppMao.innerHTML = '';
+                opp.mao.forEach((_, i) => oppMao.innerHTML += `<img src="fundo_carta.png" class="w-[18%] max-w-[65px] object-contain shadow-md border border-black/20 rounded-md" style="z-index: ${i};">`);
+            }
+
+            if (window.ultimaMaoMy !== maoMyStr) {
+                window.ultimaMaoMy = maoMyStr;
+                const myMao = document.getElementById('mao-jogador'); myMao.innerHTML = '';
+                my.mao.forEach((id, i) => {
+                    const info = INFO_CARTAS[id] || { miniatura: 'fundo_carta.png', imagem: 'fundo_carta.png' };
+                    myMao.innerHTML += `<div onclick="abrirZoomCarta('${id}')" class="w-[26%] max-w-[100px] aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-2xl border-2 border-black hover:border-[#4ade80] cursor-pointer hover-carta relative overflow-hidden" style="z-index: ${i};"><img src="${info.miniatura || info.imagem}" class="w-full h-full object-cover"></div>`;
+                });
+            }
+            
             document.getElementById('arena-combate').classList.add('hidden');
 
             // === INJEÇÃO DO BOTÃO DE FORÇAR VITÓRIA PARA BOTS NO TORNEIO ===
@@ -346,13 +362,7 @@
             if (dadosSala.statusTurno === 'aguardando_ataque') {
                 window.mostrarToast(`Vez de ${nAtacante} escolher uma carta e atributo`);
             }
-            else if (dadosSala.statusTurno === 'exibindo_resultado') {
-                if (dadosSala.vencedorTurno === 'anuladas') window.mostrarToast(`Empate absoluto! As cartas se ANULARAM.`);
-                else if (dadosSala.vencedorTurno === 'desempate') window.mostrarToast(`EMPATE!<br><span class="text-xs font-normal">${dadosSala.nomeVencedorTurno} venceu no atributo extra (${dadosSala.valorDesempate}).</span>`);
-                else window.mostrarToast(`${dadosSala.nomeVencedorTurno} ganhou o turno!`);
-            }
         }
-
         // NOVA FUNÇÃO: Controla o Atributo no centro da tela
         function atualizarAtributoPiscando() {
             const avisoDiv = document.getElementById('aviso-atributo');
@@ -400,9 +410,8 @@
 
         window.confirmarDefesa = function() { window.confirmarAcao(null); };
 
-        function exibirAnimacaoClash() {
-            const data = dadosSala.clashData; if (!data) return;
-            document.getElementById('embate-atributo-titulo').innerText = `ATRIBUTO: ${dadosSala.atributoTurno.toUpperCase()}`;
+        function exibirAnimacaoClash(data) {
+            document.getElementById('embate-atributo-titulo').innerText = `ATRIBUTO: ${data.attr_nome.toUpperCase()}`;
             document.getElementById('clash-p1-name').innerText = dadosSala.jogador1.nome;
             document.getElementById('clash-p1-card').style.backgroundImage = `url('${(INFO_CARTAS[data.id1]||{}).imagem||'fundo_carta.png'}')`;
             document.getElementById('clash-p1-valor').innerText = data.val1;
@@ -419,14 +428,28 @@
             vs.style.animation = 'fadeIn 1s 0.5s forwards'; vs.style.opacity = 0;
 
             setTimeout(() => {
-                if (dadosSala.chaveVencedor === 'jogador1') { p1.classList.add('is-winner'); p2.classList.add('is-loser'); }
-                else if (dadosSala.chaveVencedor === 'jogador2') { p2.classList.add('is-winner'); p1.classList.add('is-loser'); }
+                if (data.chaveVencedor === 'jogador1') { p1.classList.add('is-winner'); p2.classList.add('is-loser'); }
+                else if (data.chaveVencedor === 'jogador2') { p2.classList.add('is-winner'); p1.classList.add('is-loser'); }
                 else { p1.classList.add('is-loser'); p2.classList.add('is-loser'); }
+                
+                // Dispara o toast do resultado EXATAMENTE na hora do impacto!
+                if (data.vencedorTurno === 'anuladas') window.mostrarToast(`Empate absoluto! As cartas se ANULARAM.`);
+                else if (data.vencedorTurno === 'desempate') window.mostrarToast(`EMPATE!<br><span class="text-xs font-normal">${data.nomeVencedorTurno} venceu no atributo extra (${data.valorDesempate}).</span>`);
+                else window.mostrarToast(`${data.nomeVencedorTurno} ganhou o turno!`);
             }, 1500);
+
+            // O celular do jogador gerencia o fechamento, o servidor já está livre!
+            setTimeout(() => {
+                document.getElementById('modal-embate').classList.add('hidden');
+                if (dadosSala.status === 'finalizada') iniciarCascataFinal();
+            }, 4500);
         }
 
         async function resolverCombateHost() {
-            if (window.resolvendoHost) return; window.resolvendoHost = true;
+            // TRAVA ANTI-CLONE: Ignora se duas abas tentarem processar juntas ou se não for a hora
+            if (window.resolvendoHost || dadosSala.statusTurno !== 'resolvendo') return; 
+            window.resolvendoHost = true;
+
             const id1 = dadosSala.jogador1.cartaJogada, id2 = dadosSala.jogador2.cartaJogada;
             if (!id1 || !id2) return window.resolvendoHost = false;
 
@@ -446,24 +469,26 @@
                 else { vencK = 'nenhum'; nomeV = 'Ninguém'; tipo = 'anuladas'; }
             }
 
-            await updateDoc(doc(db, "partidas", salaId), {
-                statusTurno: 'exibindo_resultado', vencedorTurno: tipo, nomeVencedorTurno: nomeV, chaveVencedor: vencK,
-                valorDesempate: valD, clashData: { id1, val1, id2, val2 }
-            });
+            // TURNO ATÔMICO: Calcula e avança tudo em 1 único segundo, sem esperar a animação.
+            let j1P = [...(dadosSala.jogador1.pilhaVitorias || [])], j2P = [...(dadosSala.jogador2.pilhaVitorias || [])];
+            if (vencK === 'jogador1') j1P.push(id1, id2); else if (vencK === 'jogador2') j2P.push(id1, id2);
+            let j1D = [...dadosSala.jogador1.deck], j1M = [...dadosSala.jogador1.mao]; if(j1D.length) j1M.push(j1D.shift());
+            let j2D = [...dadosSala.jogador2.deck], j2M = [...dadosSala.jogador2.mao]; if(j2D.length) j2M.push(j2D.shift());
+            
+            let proxStatus = (!j1M.length && !j2M.length) ? 'finalizada' : 'aguardando_ataque';
+            let proxAtacante = dadosSala.quemAtaca === dadosSala.jogador1.uid ? dadosSala.jogador2.uid : dadosSala.jogador1.uid;
+            
+            let ups = { 
+                'jogador1.pilhaVitorias': j1P, 'jogador2.pilhaVitorias': j2P, 
+                'jogador1.deck': j1D, 'jogador1.mao': j1M, 'jogador2.deck': j2D, 'jogador2.mao': j2M, 
+                'jogador1.cartaJogada': null, 'jogador2.cartaJogada': null, 'atributoTurno': null, 
+                'statusTurno': proxStatus, 'status': proxStatus === 'finalizada' ? 'finalizada' : dadosSala.status,
+                'turnoAtual': dadosSala.turnoAtual + 1, 'quemAtaca': proxAtacante,
+                'ultimoClash': { id1, val1, id2, val2, vencedorTurno: tipo, nomeVencedorTurno: nomeV, chaveVencedor: vencK, valorDesempate: valD, turno: dadosSala.turnoAtual, attr_nome: dadosSala.atributoTurno }
+            };
 
-            setTimeout(async () => {
-                let j1P = [...(dadosSala.jogador1.pilhaVitorias || [])], j2P = [...(dadosSala.jogador2.pilhaVitorias || [])];
-                if (vencK === 'jogador1') j1P.push(id1, id2); else if (vencK === 'jogador2') j2P.push(id1, id2);
-                let j1D = [...dadosSala.jogador1.deck], j1M = [...dadosSala.jogador1.mao]; if(j1D.length) j1M.push(j1D.shift());
-                let j2D = [...dadosSala.jogador2.deck], j2M = [...dadosSala.jogador2.mao]; if(j2D.length) j2M.push(j2D.shift());
-                
-                let ups = { 'jogador1.pilhaVitorias': j1P, 'jogador2.pilhaVitorias': j2P, 'jogador1.deck': j1D, 'jogador1.mao': j1M, 'jogador2.deck': j2D, 'jogador2.mao': j2M, 'jogador1.cartaJogada': null, 'jogador2.cartaJogada': null, 'atributoTurno': null, 'vencedorTurno': null, 'nomeVencedorTurno': null, 'chaveVencedor': null, 'clashData': null, 'valorDesempate': null };
-                
-                if (!j1M.length && !j2M.length) { ups['status'] = 'finalizada'; ups['statusTurno'] = 'finalizada'; }
-                else { ups['turnoAtual'] = dadosSala.turnoAtual + 1; ups['statusTurno'] = 'aguardando_ataque'; ups['quemAtaca'] = dadosSala.quemAtaca === dadosSala.jogador1.uid ? dadosSala.jogador2.uid : dadosSala.jogador1.uid; }
-                
-                await updateDoc(doc(db, "partidas", salaId), ups); window.resolvendoHost = false;
-            }, 5000);
+            await updateDoc(doc(db, "partidas", salaId), ups); 
+            window.resolvendoHost = false;
         }
 
         function montarGridFinal(k) {
@@ -615,11 +640,19 @@
 
                     renderizarArena(); dispararToastsDeTurno(); atualizarAtributoPiscando();
 
-                    if (dadosSala.statusTurno === 'exibindo_resultado') { if (!window.clashAtivo) { window.clashAtivo = true; exibirAnimacaoClash(); } }
-                    else { window.clashAtivo = false; document.getElementById('modal-embate').classList.add('hidden'); }
+                    // GATILHO DA ANIMAÇÃO LOCAL: O banco atualizou o turno, o celular dá play no "Replay"
+                    if (dadosSala.ultimoClash && dadosSala.ultimoClash.turno > window.turnoAnimadoLocal) {
+                        window.turnoAnimadoLocal = dadosSala.ultimoClash.turno;
+                        exibirAnimacaoClash(dadosSala.ultimoClash);
+                    }
 
+                    // Aguarda a tela de clash fechar para abrir a tela de pontos finais
+                    if (dadosSala.status === 'finalizada' && document.getElementById('modal-embate').classList.contains('hidden')) {
+                        iniciarCascataFinal();
+                    }
+
+                    // Se for a hora do combate, o Host calcula tudo num instante só
                     if (dadosSala.statusTurno === 'resolvendo' && isHost) resolverCombateHost();
-                    else if (dadosSala.status === 'finalizada') iniciarCascataFinal();
                 });
             } else window.location.href = "index.html";
         });

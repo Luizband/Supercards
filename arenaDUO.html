@@ -43,9 +43,15 @@
             #main-arena { display: none !important; }
             #aviso-retrato { display: flex; }
         }
+        
+        #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; width: 90%; max-width: 350px; pointer-events: none; display: flex; flex-direction: column; gap: 10px; }
+        .toast-msg { background: #dca3e8; color: #7a32a8; border: 3px solid #7a32a8; padding: 12px 20px; border-radius: 9999px; box-shadow: 0 10px 15px rgba(0,0,0,0.3); text-align: center; font-weight: 900; font-size: 0.85rem; animation: slideDown 0.3s ease-out forwards; pointer-events: auto; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="fixed inset-0 overflow-hidden w-full h-full text-white select-none bg-black">
+
+    <div id="toast-container"></div>
 
     <div id="aviso-retrato" class="w-full h-full bg-black/95 flex-col items-center justify-center p-6 text-center z-[9999] absolute inset-0">
         <span class="text-6xl mb-4">🔄</span>
@@ -55,9 +61,10 @@
 
     <div id="main-arena" class="w-full h-full flex bg-gradient-to-r from-[#7a32a8]/90 via-gray-800/80 to-[#4ade80]/90 relative backdrop-blur-sm">
 
+        <!-- LADO ESQUERDO: JOGADORES (Pílulas Alternadas) -->
         <div class="w-[22%] md:w-[20%] h-full flex flex-col justify-center p-2 md:p-3 bg-black/50 border-r-2 border-white/10 z-10 shadow-2xl">
-            
             <div class="flex flex-col gap-4 w-full">
+                <!-- Você (Verde) -->
                 <div id="glow-my" class="flex items-center gap-2 bg-[#4ade80]/20 border-2 border-[#4ade80]/50 rounded-full p-1 transition-all duration-300">
                     <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-800 border border-[#4ade80] overflow-hidden relative flex-shrink-0 shadow-inner">
                         <span id="emoji-my" class="hidden absolute top-1/2 left-1/2 text-2xl md:text-3xl z-30 drop-shadow-md" style="transform: translate(-50%, -50%);"></span>
@@ -66,6 +73,7 @@
                     <span id="nome-my" class="text-[#4ade80] font-black text-[9px] md:text-[10px] uppercase truncate w-full pr-2">Você</span>
                 </div>
 
+                <!-- Inimigo 1 (Vermelho) -->
                 <div id="glow-opp1" class="flex items-center gap-2 bg-red-900/40 border-2 border-red-500/50 rounded-full p-1 transition-all duration-300">
                     <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-800 border border-red-400 overflow-hidden relative flex-shrink-0 shadow-inner">
                         <span id="emoji-opp1" class="hidden absolute top-1/2 left-1/2 text-2xl md:text-3xl z-30 drop-shadow-md" style="transform: translate(-50%, -50%);"></span>
@@ -74,6 +82,7 @@
                     <span id="nome-opp1" class="text-red-200 font-black text-[9px] md:text-[10px] uppercase truncate w-full pr-2">Rival 1</span>
                 </div>
 
+                <!-- Parceiro (Verde) -->
                 <div id="glow-parceiro" class="flex items-center gap-2 bg-[#4ade80]/20 border-2 border-[#4ade80]/50 rounded-full p-1 transition-all duration-300">
                     <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-800 border border-[#4ade80] overflow-hidden relative flex-shrink-0 shadow-inner">
                         <span id="emoji-parceiro" class="hidden absolute top-1/2 left-1/2 text-2xl md:text-3xl z-30 drop-shadow-md" style="transform: translate(-50%, -50%);"></span>
@@ -82,6 +91,7 @@
                     <span id="nome-parceiro" class="text-[#4ade80] font-black text-[9px] md:text-[10px] uppercase truncate w-full pr-2">Parceiro</span>
                 </div>
 
+                <!-- Inimigo 2 (Vermelho) -->
                 <div id="glow-opp2" class="flex items-center gap-2 bg-red-900/40 border-2 border-red-500/50 rounded-full p-1 transition-all duration-300">
                     <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-800 border border-red-400 overflow-hidden relative flex-shrink-0 shadow-inner">
                         <span id="emoji-opp2" class="hidden absolute top-1/2 left-1/2 text-2xl md:text-3xl z-30 drop-shadow-md" style="transform: translate(-50%, -50%);"></span>
@@ -92,12 +102,11 @@
             </div>
         </div>
 
-        <!-- LADO DIREITO: CAMPO GIGANTE E GAVETA (78%) -->
+        <!-- LADO DIREITO: CAMPO GIGANTE E GAVETA -->
         <div class="w-[78%] md:w-[80%] h-full relative overflow-hidden z-10 flex flex-col">
             
             <!-- PAINEL DE CONTROLE DO TOPO -->
             <div class="w-full px-3 md:px-6 py-3 flex justify-between items-start z-40 relative">
-                
                 <!-- Atributo Flutuante -->
                 <div id="box-atributo" class="hidden bg-black/80 text-yellow-400 font-black text-[10px] md:text-[12px] px-6 py-2 rounded-full shadow-lg border border-yellow-500/50 uppercase tracking-widest animate-pulse flex-shrink-0">
                     <span id="texto-atributo">---</span>
@@ -110,64 +119,54 @@
                     <span id="placar-inimigo" class="text-red-500 font-black text-base md:text-lg drop-shadow-[0_0_8px_#ef4444]">0</span>
                 </div>
 
-                <!-- Botões da Direita (Reação e Desistir) -->
+                <!-- Botões da Direita -->
                 <div class="flex gap-2 relative">
-                    <!-- Menu Reações Oculto -->
                     <div id="menu-reacoes" class="hidden absolute top-[110%] right-0 w-max bg-[#dca3e8] p-3 rounded-xl grid grid-cols-4 gap-2 shadow-2xl border-2 border-[#bc7bd4] z-50">
-                        <button onclick="enviarReacao('my', '💣')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">💣</button>
-                        <button onclick="enviarReacao('my', '🖕')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">🖕</button>
-                        <button onclick="enviarReacao('my', '👀')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">👀</button>
-                        <button onclick="enviarReacao('my', '💖')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">💖</button>
-                        <button onclick="enviarReacao('my', '💀')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">💀</button>
-                        <button onclick="enviarReacao('my', '🤬')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">🤬</button>
-                        <button onclick="enviarReacao('my', '🤣')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">🤣</button>
-                        <button onclick="enviarReacao('my', '😭')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">😭</button>
+                        <button onclick="dispararReacaoLocal('💣')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">💣</button>
+                        <button onclick="dispararReacaoLocal('🖕')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">🖕</button>
+                        <button onclick="dispararReacaoLocal('👀')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">👀</button>
+                        <button onclick="dispararReacaoLocal('💖')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">💖</button>
+                        <button onclick="dispararReacaoLocal('💀')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">💀</button>
+                        <button onclick="dispararReacaoLocal('🤬')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">🤬</button>
+                        <button onclick="dispararReacaoLocal('🤣')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">🤣</button>
+                        <button onclick="dispararReacaoLocal('😭')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">😭</button>
                     </div>
                     
                     <button onclick="document.getElementById('menu-reacoes').classList.toggle('hidden')" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[9px] md:text-[10px] px-3 py-1.5 rounded-lg shadow-md border-2 border-[#bc7bd4] uppercase tracking-wider hover:bg-white transition-colors">
                         Reação
                     </button>
-
                     <button onclick="document.getElementById('modal-desistir').classList.remove('hidden')" class="bg-red-600 hover:bg-red-700 text-white font-black text-[9px] md:text-[10px] px-4 py-1.5 rounded-lg shadow-md border-2 border-red-800 uppercase tracking-widest transition-transform active:scale-95">
                         Desistir
                     </button>
                 </div>
             </div>
 
-            <!-- O CENTRO DA MESA (Cartas um pouco mais para cima) -->
+            <!-- O CENTRO DA MESA -->
             <div class="flex-grow flex items-center justify-center relative w-full pb-16 md:pb-24">
-                
-                <!-- Deck Count (Movido para dentro da mesa, canto inferior esquerdo) -->
                 <div class="absolute bottom-2 md:bottom-4 left-4 flex flex-col items-center justify-center bg-black/60 border border-white/20 rounded-md p-1 w-12 h-16 shadow-lg z-20">
                     <span id="deck-count" class="text-white font-black text-2xl z-10 drop-shadow-[0_2px_2px_rgba(0,0,0,1)]">0</span>
                     <img src="fundo_carta.png" class="absolute inset-0 w-full h-full object-cover opacity-40 rounded-md">
                 </div>
-
-                <!-- CARTAS DA MESA GIGANTES -->
                 <div id="mesa-combate" class="flex justify-center items-center gap-3 md:gap-5 w-full px-10">
                     <!-- JS Injeta Aqui -->
                 </div>
             </div>
 
-            <!-- GATILHO DA GAVETA (Botão movido para baixo das cartas) -->
+            <!-- GATILHO DA GAVETA -->
             <div onclick="toggleGaveta()" class="absolute right-0 bottom-4 md:bottom-6 bg-[#dca3e8] text-[#7a32a8] font-black py-3 px-4 rounded-l-xl cursor-pointer shadow-[-5px_0_20px_rgba(0,0,0,0.4)] z-40 border-y-4 border-l-4 border-[#bc7bd4] flex items-center gap-2 hover:bg-white transition-colors">
                 <span class="text-lg leading-none mt-0.5">◀</span>
                 <span class="text-[10px] md:text-xs uppercase tracking-widest whitespace-nowrap">Minhas Cartas</span>
             </div>
 
-            <!-- FUNDO INVISÍVEL (Cobre a tela inteira, inclusive a coluna de jogadores) -->
+            <!-- FUNDO INVISÍVEL -->
             <div id="overlay-gaveta" onclick="toggleGaveta()" class="fixed inset-0 bg-black/40 z-[50] hidden backdrop-blur-sm transition-opacity"></div>
 
-            <!-- A GAVETA ENXUTA (Mantém a altura no centro, mas envelopa apenas as cartas) -->
+            <!-- A GAVETA -->
             <div id="gaveta-mao" class="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-[110%] transition-transform duration-300 z-[60] bg-black/95 border-l-4 border-y-4 border-[#dca3e8] rounded-l-3xl p-4 md:p-6 shadow-[-10px_0_30px_rgba(0,0,0,0.8)] max-w-[95%] md:max-w-[85%] flex flex-col items-center">
-                
-                <!-- TÍTULO E BOTÃO "X" -->
                 <div class="flex justify-between items-center w-full mb-3 px-2">
                     <h2 class="text-[#dca3e8] font-black text-sm md:text-base tracking-widest uppercase drop-shadow-md">Sua Mão</h2>
                     <button onclick="toggleGaveta()" class="text-[#dca3e8] hover:text-white font-black text-3xl transition-colors leading-none active:scale-90">&times;</button>
                 </div>
-                
-                <!-- Cartas lado a lado sem sobrepor -->
                 <div id="cartas-da-gaveta" class="flex items-center gap-3 w-full overflow-x-auto no-scrollbar py-2 px-2">
                     <!-- JS Injeta Aqui -->
                 </div>
@@ -176,11 +175,7 @@
         </div>
     </div>
 
-    <!-- ============================================== -->
-    <!-- MODAIS RESTAURADOS (NÃO FALTARÁ NENHUM AGORA)  -->
-    <!-- ============================================== -->
-    
-    <!-- MODAL DE ZOOM DA CARTA -->
+    <!-- MODAIS RESTAURADOS -->
     <div id="modal-zoom" class="hidden fixed inset-0 bg-black/95 z-[100] flex items-center justify-center p-4 backdrop-blur-md">
         <button onclick="fecharZoomCarta()" class="absolute top-4 right-8 text-white font-black text-3xl hover:text-gray-300 transition-colors z-50 drop-shadow-md">X</button>
         <div class="flex gap-8 items-center w-full max-w-3xl justify-center">
@@ -190,168 +185,167 @@
             </div>
             <div class="w-full max-w-[200px] flex flex-col justify-center">
                 <div id="painel-atributos" class="grid grid-cols-1 gap-3 w-full">
-                    <button class="bg-blue-600 hover:bg-blue-500 text-white font-black text-sm py-3 rounded-xl shadow-lg border-2 border-blue-400 uppercase tracking-widest transition-transform active:scale-95">AURA</button>
-                    <button class="bg-pink-500 hover:bg-pink-400 text-white font-black text-sm py-3 rounded-xl shadow-lg border-2 border-pink-300 uppercase tracking-widest transition-transform active:scale-95">FOFURA</button>
-                    <button class="bg-yellow-500 hover:bg-yellow-400 text-black font-black text-sm py-3 rounded-xl shadow-lg border-2 border-yellow-300 uppercase tracking-widest transition-transform active:scale-95">DIVERSÃO</button>
-                    <button class="bg-purple-600 hover:bg-purple-500 text-white font-black text-sm py-3 rounded-xl shadow-lg border-2 border-purple-400 uppercase tracking-widest transition-transform active:scale-95">ALEATÓRIO</button>
+                    <button onclick="confirmarJogada('aura')" class="bg-blue-600 hover:bg-blue-500 text-white font-black text-sm py-3 rounded-xl shadow-lg border-2 border-blue-400 uppercase tracking-widest transition-transform active:scale-95">AURA</button>
+                    <button onclick="confirmarJogada('fofura')" class="bg-pink-500 hover:bg-pink-400 text-white font-black text-sm py-3 rounded-xl shadow-lg border-2 border-pink-300 uppercase tracking-widest transition-transform active:scale-95">FOFURA</button>
+                    <button onclick="confirmarJogada('diversao')" class="bg-yellow-500 hover:bg-yellow-400 text-black font-black text-sm py-3 rounded-xl shadow-lg border-2 border-yellow-300 uppercase tracking-widest transition-transform active:scale-95">DIVERSÃO</button>
+                    <button onclick="confirmarJogada('aleatoriedade')" class="bg-purple-600 hover:bg-purple-500 text-white font-black text-sm py-3 rounded-xl shadow-lg border-2 border-purple-400 uppercase tracking-widest transition-transform active:scale-95">ALEATÓRIO</button>
                 </div>
                 <div id="painel-defesa" class="w-full hidden mt-8">
                     <span class="text-[#dca3e8] font-black text-[10px] uppercase text-center block mb-2">Atributo da Rodada</span>
-                    <button id="btn-defender" class="w-full bg-red-600 hover:bg-red-500 text-white font-black text-sm py-4 rounded-xl shadow-lg border-2 border-red-400 uppercase tracking-widest transition-transform active:scale-95 animate-pulse">DEFENDER</button>
+                    <button id="btn-defender" onclick="confirmarJogada(null)" class="w-full bg-red-600 hover:bg-red-500 text-white font-black text-sm py-4 rounded-xl shadow-lg border-2 border-red-400 uppercase tracking-widest transition-transform active:scale-95 animate-pulse">JOGAR CARTA</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL DE EMBATE (CHOQUE) -->
-    <div id="modal-embate" class="hidden fixed inset-0 bg-black/95 z-[150] flex flex-col items-center justify-center p-4 backdrop-blur-md">
-        <h2 id="embate-atributo-titulo" class="text-[#dca3e8] font-black text-2xl uppercase tracking-widest mb-6 drop-shadow-lg absolute top-4">ATRIBUTO: AURA</h2>
-        
-        <div class="flex items-center gap-6 mt-6 w-full justify-center">
-            <div class="flex gap-4 p-4 rounded-xl border-2 border-[#4ade80] bg-[#4ade80]/10 relative shadow-[0_0_30px_rgba(74,222,128,0.2)]">
-                <span class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#4ade80] text-black font-black text-[10px] px-3 py-0.5 rounded-full uppercase tracking-widest">Sua Dupla</span>
-                
-                <div class="flex flex-col items-center gap-2">
-                    <span class="text-white font-black text-[9px] uppercase truncate w-20 text-center">Você</span>
-                    <div class="w-20 aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-2xl border-2 border-white"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
-                    <div class="bg-black/80 px-4 py-1 rounded border border-white/20"><span class="text-white font-black text-xl">57</span></div>
-                </div>
+    <!-- O MODAL DE EMBATE SERÁ REFEITO POSTERIORMENTE PARA 2X2. POR ENQUANTO ESCONDIDO -->
+    <div id="modal-embate" class="hidden fixed inset-0 bg-black/95 z-[150] flex flex-col items-center justify-center p-4 backdrop-blur-md"></div>
 
-                <div class="flex flex-col items-center gap-2">
-                    <span class="text-gray-300 font-black text-[9px] uppercase truncate w-20 text-center">Parceiro</span>
-                    <div class="w-20 aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-2xl border-2 border-gray-400"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
-                    <div class="bg-black/80 px-4 py-1 rounded border border-white/20"><span class="text-gray-300 font-black text-xl">42</span></div>
-                </div>
-            </div>
-
-            <span class="text-white font-black text-4xl mx-2 drop-shadow-[0_0_10px_#fff] italic opacity-80">VS</span>
-
-            <div class="flex gap-4 p-4 rounded-xl border-2 border-red-500 bg-red-500/10 relative shadow-[0_0_30px_rgba(239,68,68,0.2)]">
-                <span class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-red-500 text-white font-black text-[10px] px-3 py-0.5 rounded-full uppercase tracking-widest">Inimigos</span>
-                
-                <div class="flex flex-col items-center gap-2">
-                    <span class="text-red-300 font-black text-[9px] uppercase truncate w-20 text-center">Inimigo 1</span>
-                    <div class="w-20 aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-2xl border-2 border-red-400"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
-                    <div class="bg-black/80 px-4 py-1 rounded border border-white/20"><span class="text-red-300 font-black text-xl">60</span></div>
-                </div>
-
-                <div class="flex flex-col items-center gap-2">
-                    <span class="text-red-300 font-black text-[9px] uppercase truncate w-20 text-center">Inimigo 2</span>
-                    <div class="w-20 aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-2xl border-2 border-red-400"><img src="fundo_carta.png" class="w-full h-full object-cover"></div>
-                    <div class="bg-black/80 px-4 py-1 rounded border border-white/20"><span class="text-red-300 font-black text-xl">15</span></div>
-                </div>
-            </div>
-        </div>
-        <span class="text-yellow-400 font-black text-[10px] uppercase mt-4 tracking-widest hidden" id="aviso-desempate">Desempate Matemático Aplicado!</span>
-    </div>
-
-    <!-- MODAL DE VITÓRIA / RESULTADO FINAL -->
     <div id="modal-resultado-final" class="hidden fixed inset-0 bg-black/95 z-[300] flex flex-col items-center justify-center p-4 backdrop-blur-md">
         <h1 id="texto-vitoria" class="text-5xl font-black text-[#4ade80] uppercase tracking-widest mb-2 drop-shadow-[0_0_20px_#4ade80] text-center">VITÓRIA!</h1>
-        
         <div class="flex items-center gap-6 my-6 bg-black/50 px-8 py-3 rounded-2xl border border-white/10">
             <div class="flex flex-col items-center">
                 <span class="text-[#4ade80] font-black text-xs uppercase">Sua Dupla</span>
-                <span class="text-white font-black text-4xl">45 <span class="text-sm">Pts</span></span>
+                <span id="pontos-final-aliado" class="text-white font-black text-4xl">0 <span class="text-sm">Pts</span></span>
             </div>
             <span class="text-gray-500 font-black text-xl">X</span>
             <div class="flex flex-col items-center">
                 <span class="text-red-500 font-black text-xs uppercase">Inimigos</span>
-                <span class="text-white font-black text-4xl opacity-50">32 <span class="text-sm">Pts</span></span>
+                <span id="pontos-final-inimigo" class="text-white font-black text-4xl opacity-50">0 <span class="text-sm">Pts</span></span>
             </div>
         </div>
-        
-        <div id="recompensas-final" class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-4 w-full max-w-sm flex flex-col items-center gap-2 mb-6 shadow-2xl">
+        <div id="recompensas-final" class="hidden bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-4 w-full max-w-sm flex flex-col items-center gap-2 mb-6 shadow-2xl">
             <span class="text-[#7a32a8] font-black text-sm tracking-widest uppercase">Recompensas 2x2</span>
             <div class="flex w-full justify-around mt-1">
-                <span class="text-black font-black text-base">+40 XP</span>
-                <span class="text-black font-black text-base flex items-center gap-1">+30 <img src="moedas.png" class="w-5 h-5 object-contain"></span>
+                <span class="text-black font-black text-base">+20 XP</span>
+                <span class="text-black font-black text-base flex items-center gap-1">+20 <img src="moedas.png" class="w-5 h-5 object-contain"></span>
             </div>
         </div>
-
         <button onclick="window.location.href='batalha.html'" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-4 px-16 rounded-full shadow-lg border-2 border-white tracking-widest text-lg transition-transform active:scale-95">FINALIZAR</button>
     </div>
 
-    <!-- MODAL DESISTIR -->
     <div id="modal-desistir" class="hidden fixed inset-0 bg-black/80 z-[400] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl relative">
             <h2 class="text-red-600 font-black text-xl mb-2 uppercase drop-shadow-sm">Abandonar a Dupla?</h2>
             <p class="text-[#7a32a8] font-bold text-xs mb-6">Se você sair agora, seu parceiro jogará sozinho e a derrota será garantida.</p>
             <div class="flex justify-center gap-4">
                 <button onclick="document.getElementById('modal-desistir').classList.add('hidden')" class="flex-1 bg-gray-500 text-white font-black py-3 rounded-full shadow-md uppercase text-sm border-2 border-gray-600">Ficar</button>
-                <button onclick="confirmarDesistencia()" class="flex-1 bg-red-600 text-white font-black py-3 rounded-full shadow-md uppercase text-sm border-2 border-red-800">Desistir</button>
+                <button onclick="window.location.href='batalha.html'" class="flex-1 bg-red-600 text-white font-black py-3 rounded-full shadow-md uppercase text-sm border-2 border-red-800">Desistir</button>
             </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         import { INFO_CARTAS } from './cartas.js';
+
+        const app = initializeApp({
+          apiKey: "AIzaSyCU3lFTgfrDMaD9jwR7X7ivYPmGQh4VE1g",
+          authDomain: "supercards-tcg.firebaseapp.com",
+          projectId: "supercards-tcg",
+          storageBucket: "supercards-tcg.firebasestorage.app",
+          messagingSenderId: "862316380615",
+          appId: "1:862316380615:web:b3f28056ebc967673999e2"
+        });
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
         let currentUserUid = null;
         let minhaRole = null; 
+        let isHost = false;
+        let salaId = null;
         let dadosSala = null;
         let cartaFocadaId = null;
 
-        window.mostrarToast = function(msg) { alert(msg); };
-        window.fecharZoomCarta = () => document.getElementById('modal-zoom').classList.add('hidden');
-        window.confirmarDesistencia = () => { window.location.href='batalha.html'; };
+        let roleParceiro = null, roleOpp1 = null, roleOpp2 = null;
 
-        // GAVETA LOGIC
+        // Utilitários UI
+        window.mostrarToast = function(msg) {
+            const c = document.getElementById('toast-container');
+            const t = document.createElement('div'); t.className = 'toast-msg'; t.innerHTML = msg;
+            c.appendChild(t); setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 500); }, 4000); 
+        };
         window.toggleGaveta = function() {
-            const gaveta = document.getElementById('gaveta-mao');
-            const overlay = document.getElementById('overlay-gaveta');
-            
-            // Faz a gaveta entrar ou sair da tela
-            gaveta.classList.toggle('translate-x-[110%]');
-            // Acende ou apaga o fundo invisível (que permite fechar clicando fora)
-            overlay.classList.toggle('hidden');
+            document.getElementById('gaveta-mao').classList.toggle('translate-x-[110%]');
+            document.getElementById('overlay-gaveta').classList.toggle('hidden');
         };
+        window.fecharZoomCarta = () => document.getElementById('modal-zoom').classList.add('hidden');
+        
+        function shuffle(array) {
+            let c = array.length, r;
+            while (c > 0) { r = Math.floor(Math.random() * c); c--; [array[c], array[r]] = [array[r], array[c]]; }
+            return array;
+        }
 
-        // REAÇÕES
+        // ==========================================
+        // LÓGICA DE REAÇÃO GLOBAL
+        // ==========================================
         window.timersReacao = {};
-        window.enviarReacao = function(idAlvo, emoji) {
+        window.dispararReacaoLocal = function(emoji) {
             document.getElementById('menu-reacoes').classList.add('hidden');
-            const el = document.getElementById(`emoji-${idAlvo}`);
-            if(!el) return;
-            el.innerText = emoji;
-            el.classList.remove('hidden', 'emoji-ativo');
-            void el.offsetWidth;
-            el.classList.add('emoji-ativo');
-            if(window.timersReacao[idAlvo]) clearTimeout(window.timersReacao[idAlvo]);
-            window.timersReacao[idAlvo] = setTimeout(() => {
-                el.classList.add('hidden');
-                el.classList.remove('emoji-ativo');
-            }, 3500);
+            if(!salaId) return;
+            // Salva a reação no Firebase para todos verem
+            updateDoc(doc(db, "partidas", salaId), { ultimaReacao: { uid: currentUserUid, emoji: emoji, ts: Date.now() } });
         };
-
-        // MOTOR DUO - RENDERIZAÇÃO
-        function renderizarMesa() {
-            if(!dadosSala) return;
-
-            let me = minhaRole, parceiro = 'jogador2', opp1 = 'jogador3', opp2 = 'jogador4';
+        
+        function processarReacao(reacao) {
+            if(!reacao || !reacao.uid) return;
+            // Descobre em qual pílula pular o emoji
+            let idAlvo = null;
+            if(dadosSala[minhaRole].uid === reacao.uid) idAlvo = 'my';
+            else if(dadosSala[roleParceiro].uid === reacao.uid) idAlvo = 'parceiro';
+            else if(dadosSala[roleOpp1].uid === reacao.uid) idAlvo = 'opp1';
+            else if(dadosSala[roleOpp2].uid === reacao.uid) idAlvo = 'opp2';
             
-            // Textos das Pílulas
-            document.getElementById('nome-my').innerText = dadosSala[me].nome;
-            document.getElementById('nome-parceiro').innerText = dadosSala[parceiro].nome;
-            document.getElementById('nome-opp1').innerText = dadosSala[opp1].nome;
-            document.getElementById('nome-opp2').innerText = dadosSala[opp2].nome;
+            if(idAlvo) {
+                const el = document.getElementById(`emoji-${idAlvo}`);
+                if(el) {
+                    el.innerText = reacao.emoji; el.classList.remove('hidden', 'emoji-ativo');
+                    void el.offsetWidth; el.classList.add('emoji-ativo');
+                    if(window.timersReacao[idAlvo]) clearTimeout(window.timersReacao[idAlvo]);
+                    window.timersReacao[idAlvo] = setTimeout(() => { el.classList.add('hidden', 'emoji-ativo'); }, 3500);
+                }
+            }
+        }
+
+        // ==========================================
+        // MOTOR PRINCIPAL
+        // ==========================================
+        function definirRoles() {
+            if(minhaRole === 'jogador1') { roleParceiro = 'jogador2'; roleOpp1 = 'jogador3'; roleOpp2 = 'jogador4'; }
+            if(minhaRole === 'jogador2') { roleParceiro = 'jogador1'; roleOpp1 = 'jogador4'; roleOpp2 = 'jogador3'; }
+            if(minhaRole === 'jogador3') { roleParceiro = 'jogador4'; roleOpp1 = 'jogador1'; roleOpp2 = 'jogador2'; }
+            if(minhaRole === 'jogador4') { roleParceiro = 'jogador3'; roleOpp1 = 'jogador2'; roleOpp2 = 'jogador1'; }
+        }
+
+        function renderizarMesa() {
+            if(!dadosSala || !minhaRole) return;
+
+            // 1. Pílulas
+            document.getElementById('nome-my').innerText = dadosSala[minhaRole].nome;
+            document.getElementById('nome-parceiro').innerText = dadosSala[roleParceiro].nome;
+            document.getElementById('nome-opp1').innerText = dadosSala[roleOpp1].nome;
+            document.getElementById('nome-opp2').innerText = dadosSala[roleOpp2].nome;
+
+            if(dadosSala[minhaRole].foto) document.getElementById('foto-my').src = dadosSala[minhaRole].foto;
+            if(dadosSala[roleParceiro].foto) document.getElementById('foto-parceiro').src = dadosSala[roleParceiro].foto;
+            if(dadosSala[roleOpp1].foto) document.getElementById('foto-opp1').src = dadosSala[roleOpp1].foto;
+            if(dadosSala[roleOpp2].foto) document.getElementById('foto-opp2').src = dadosSala[roleOpp2].foto;
 
             // Limpa Glow
-            ['my','parceiro','opp1','opp2'].forEach(id => {
-                document.getElementById(`glow-${id}`).classList.remove('glow-lider');
-            });
-            // Acende Glow
+            ['my','parceiro','opp1','opp2'].forEach(id => document.getElementById(`glow-${id}`).classList.remove('glow-lider'));
+            
+            // Acende o Líder e diz de quem é a vez
             if(dadosSala.liderRodada) {
-                if(dadosSala.liderRodada === me) document.getElementById('glow-my').classList.add('glow-lider');
-                if(dadosSala.liderRodada === parceiro) document.getElementById('glow-parceiro').classList.add('glow-lider');
-                if(dadosSala.liderRodada === opp1) document.getElementById('glow-opp1').classList.add('glow-lider');
-                if(dadosSala.liderRodada === opp2) document.getElementById('glow-opp2').classList.add('glow-lider');
+                if(dadosSala.liderRodada === minhaRole) document.getElementById('glow-my').classList.add('glow-lider');
+                if(dadosSala.liderRodada === roleParceiro) document.getElementById('glow-parceiro').classList.add('glow-lider');
+                if(dadosSala.liderRodada === roleOpp1) document.getElementById('glow-opp1').classList.add('glow-lider');
+                if(dadosSala.liderRodada === roleOpp2) document.getElementById('glow-opp2').classList.add('glow-lider');
             }
 
-            // Atributo Topo
+            // 2. Placar e Atributo
             if(dadosSala.atributoRodada) {
                 document.getElementById('box-atributo').classList.remove('hidden');
                 document.getElementById('texto-atributo').innerText = dadosSala.atributoRodada;
@@ -361,7 +355,7 @@
                 document.getElementById('placar-ao-vivo').classList.add('hidden');
             }
 
-            // CARTAS DA MESA (GIGANTES)
+            // 3. Cartas da Mesa (Centro)
             const mesaDiv = document.getElementById('mesa-combate');
             mesaDiv.innerHTML = '';
             let somaAliado = 0, somaInimigo = 0;
@@ -371,57 +365,283 @@
                     const cartaId = dadosSala.mesa[role];
                     if (cartaId) {
                         const info = INFO_CARTAS[cartaId] || { miniatura: 'fundo_carta.png' };
+                        // Calcula Somas ao Vivo
                         if(dadosSala.atributoRodada) {
                             let valor = info[dadosSala.atributoRodada.toLowerCase()] || 0;
-                            if(['jogador1','jogador2'].includes(role)) somaAliado += valor;
+                            if([minhaRole, roleParceiro].includes(role)) somaAliado += valor;
                             else somaInimigo += valor;
                         }
-                        
                         mesaDiv.innerHTML += `
-                            <div onclick="window.mostrarToast('Carta na Mesa: ${cartaId}')" class="w-[28vh] max-w-[170px] aspect-[2.5/3.5] bg-gray-800 rounded-xl shadow-[0_0_30px_rgba(255,255,255,0.2)] border-2 border-white cursor-pointer hover:scale-105 transition-transform flex-shrink-0">
+                            <div class="w-[28vh] max-w-[170px] aspect-[2.5/3.5] bg-gray-800 rounded-xl shadow-[0_0_30px_rgba(255,255,255,0.2)] border-2 border-white flex-shrink-0">
                                 <img src="${info.miniatura || info.imagem}" class="w-full h-full object-cover rounded-[10px]">
                             </div>`;
                     } else {
-                        mesaDiv.innerHTML += `
-                            <div class="w-[28vh] max-w-[170px] aspect-[2.5/3.5] bg-black/50 rounded-xl shadow-inner border-2 border-white/20 border-dashed flex-shrink-0"></div>`;
+                        mesaDiv.innerHTML += `<div class="w-[28vh] max-w-[170px] aspect-[2.5/3.5] bg-black/50 rounded-xl shadow-inner border-2 border-white/20 border-dashed flex-shrink-0"></div>`;
                     }
                 });
             }
 
             document.getElementById('placar-aliado').innerText = somaAliado;
             document.getElementById('placar-inimigo').innerText = somaInimigo;
-            document.getElementById('deck-count').innerText = dadosSala[me].deck?.length || 0;
+            document.getElementById('deck-count').innerText = dadosSala[minhaRole].deck?.length || 0;
 
-            // CARTAS DA GAVETA (Mão Lado a Lado)
+            // 4. Gaveta (Sua Mão)
             const gavetaDiv = document.getElementById('cartas-da-gaveta');
             gavetaDiv.innerHTML = '';
-            (dadosSala[me].mao || []).forEach(cartaId => {
+            (dadosSala[minhaRole].mao || []).forEach(cartaId => {
                 const info = INFO_CARTAS[cartaId] || { miniatura: 'fundo_carta.png' };
+                // Se a carta já foi jogada na mesa, ela não renderiza na gaveta
+                if (dadosSala.mesa && dadosSala.mesa[minhaRole] === cartaId) return;
+                
                 gavetaDiv.innerHTML += `
-                    <div onclick="window.mostrarToast('Sua carta da gaveta clicada!')" class="w-[24vh] max-w-[150px] aspect-[2.5/3.5] bg-gray-800 rounded-xl shadow-2xl border-4 border-black hover:border-[#dca3e8] cursor-pointer hover:scale-105 transition-transform flex-shrink-0">
+                    <div onclick="abrirAcaoCarta('${cartaId}')" class="w-[24vh] max-w-[150px] aspect-[2.5/3.5] bg-gray-800 rounded-xl shadow-2xl border-4 border-black hover:border-[#dca3e8] cursor-pointer hover-carta transition-transform flex-shrink-0">
                         <img src="${info.miniatura || info.imagem}" class="w-full h-full object-cover rounded-lg">
                     </div>`;
             });
         }
 
-        // ===============================================
-        // SIMULAÇÃO DE TESTE (MOCK DATA)
-        // ===============================================
-        setTimeout(() => {
-            minhaRole = 'jogador1';
-            dadosSala = {
-                liderRodada: 'jogador1', 
-                atributoRodada: 'AURA',  
-                filaTurno: ['jogador1', 'jogador3', 'jogador2', 'jogador4'],
-                mesa: { jogador1: null, jogador3: null, jogador2: null, jogador4: null },
-                jogador1: { nome: 'Douglas', mao: ['c1', 'c2', 'c3', 'c4', 'c5'], deck: new Array(15) },
-                jogador2: { nome: 'Parça', mao: [], deck: new Array(15) },
-                jogador3: { nome: 'Rival 1', mao: [], deck: new Array(15) },
-                jogador4: { nome: 'Rival 2', mao: [], deck: new Array(15) }
-            };
-            renderizarMesa();
-        }, 500);
+        // ==========================================
+        // FLUXO DE JOGADA
+        // ==========================================
+        window.abrirAcaoCarta = function(id) {
+            if (dadosSala.status !== 'jogando') return;
+            const quemJoga = dadosSala.filaTurno[dadosSala.vezAtual];
+            if (quemJoga !== minhaRole) {
+                window.mostrarToast(`Aguarde a vez de ${dadosSala[quemJoga].nome}.`);
+                return;
+            }
 
+            cartaFocadaId = id;
+            document.getElementById('zoom-img').src = INFO_CARTAS[id]?.imagem || 'fundo_carta.png';
+            
+            // Se eu sou o Líder (primeiro da roda), escolho o atributo. Senão, só jogo a carta.
+            if (minhaRole === dadosSala.liderRodada) {
+                document.getElementById('painel-atributos').classList.remove('hidden');
+                document.getElementById('painel-defesa').classList.add('hidden');
+            } else {
+                document.getElementById('painel-atributos').classList.add('hidden');
+                document.getElementById('painel-defesa').classList.remove('hidden');
+                document.getElementById('btn-defender').innerText = `JOGAR CARTA (${dadosSala.atributoRodada.toUpperCase()})`;
+            }
+            
+            toggleGaveta(); // Recolhe gaveta
+            document.getElementById('modal-zoom').classList.remove('hidden'); // Abre Modal
+        };
+
+        window.confirmarJogada = async function(attrEscolhido) {
+            fecharZoomCarta();
+            if (!cartaFocadaId) return;
+
+            let updates = {};
+            // Registra a carta na mesa
+            updates[`mesa.${minhaRole}`] = cartaFocadaId;
+
+            // Se for o Líder jogando a primeira carta, trava o atributo da rodada
+            if (minhaRole === dadosSala.liderRodada && attrEscolhido) {
+                updates['atributoRodada'] = attrEscolhido;
+            }
+
+            // Move a roda
+            let novaVez = (dadosSala.vezAtual || 0) + 1;
+            
+            if (novaVez >= 4) {
+                // Os 4 jogaram! Aciona o Host para resolver a porradaria.
+                updates['statusTurno'] = 'resolvendo';
+            } else {
+                // Passa a vez para o próximo
+                updates['vezAtual'] = novaVez;
+                updates['quemJoga'] = dadosSala.filaTurno[novaVez];
+            }
+
+            cartaFocadaId = null;
+            await updateDoc(doc(db, "partidas", salaId), updates);
+        };
+
+        // ==========================================
+        // RESOLUÇÃO MATEMÁTICA (SOMENTE O HOST)
+        // ==========================================
+        async function resolverCombateHost() {
+            if (window.resolvendo) return; window.resolvendo = true;
+            
+            let cJ1 = dadosSala.mesa.jogador1; let cJ2 = dadosSala.mesa.jogador2;
+            let cJ3 = dadosSala.mesa.jogador3; let cJ4 = dadosSala.mesa.jogador4;
+            let attr = dadosSala.atributoRodada.toLowerCase();
+            
+            let info1 = INFO_CARTAS[cJ1]||{}; let info2 = INFO_CARTAS[cJ2]||{};
+            let info3 = INFO_CARTAS[cJ3]||{}; let info4 = INFO_CARTAS[cJ4]||{};
+
+            // SOMAS PRINCIPAIS
+            let somaEquipe1 = (info1[attr]||0) + (info2[attr]||0); // Host + Parceiro
+            let somaEquipe2 = (info3[attr]||0) + (info4[attr]||0); // Inimigo 1 + Inimigo 2
+
+            let vencedorTurno = null;
+            let msgToast = "";
+
+            if (somaEquipe1 > somaEquipe2) {
+                vencedorTurno = 'equipe1'; msgToast = "Sua dupla ganhou o turno!";
+            } else if (somaEquipe2 > somaEquipe1) {
+                vencedorTurno = 'equipe2'; msgToast = "Os rivais ganharam o turno!";
+            } else {
+                // EMPATE: A Carta "Pico de Força" salva!
+                const getPico = (card) => {
+                    const atrs = ['aura', 'fofura', 'diversao', 'aleatoriedade'].filter(a => a !== attr);
+                    return Math.max(...atrs.map(a => card[a] || 0));
+                };
+                let picoE1 = Math.max(getPico(info1), getPico(info2));
+                let picoE2 = Math.max(getPico(info3), getPico(info4));
+
+                if (picoE1 > picoE2) {
+                    vencedorTurno = 'equipe1'; msgToast = "Desempate! Sua dupla ganhou no atributo extra!";
+                } else if (picoE2 > picoE1) {
+                    vencedorTurno = 'equipe2'; msgToast = "Desempate! Os rivais ganharam no atributo extra!";
+                } else {
+                    vencedorTurno = 'empate_absoluto'; msgToast = "Empate Absoluto! Cada dupla ficou com suas cartas.";
+                }
+            }
+
+            // Distribuição de Cartas Ganhas (Pilha de Vitórias)
+            let e1Pilha = [...(dadosSala.jogador1.pilhaVitorias || [])];
+            let e2Pilha = [...(dadosSala.jogador3.pilhaVitorias || [])]; // J3 guarda as vitórias da Equipe 2
+            
+            if (vencedorTurno === 'equipe1') {
+                e1Pilha.push(cJ1, cJ2, cJ3, cJ4);
+            } else if (vencedorTurno === 'equipe2') {
+                e2Pilha.push(cJ1, cJ2, cJ3, cJ4);
+            } else if (vencedorTurno === 'empate_absoluto') {
+                e1Pilha.push(cJ1, cJ2); e2Pilha.push(cJ3, cJ4);
+            }
+
+            // Tira a carta jogada da mão e puxa 1 nova do deck para cada
+            const reabastecer = (role) => {
+                let mao = [...dadosSala[role].mao]; let deck = [...dadosSala[role].deck];
+                mao.splice(mao.indexOf(dadosSala.mesa[role]), 1);
+                if(deck.length > 0) mao.push(deck.shift());
+                return { mao, deck };
+            };
+            let j1N = reabastecer('jogador1'); let j2N = reabastecer('jogador2');
+            let j3N = reabastecer('jogador3'); let j4N = reabastecer('jogador4');
+
+            // Prepara a Próxima Roda
+            const ORDEM = ['jogador1', 'jogador3', 'jogador2', 'jogador4'];
+            let nextIndex = (ORDEM.indexOf(dadosSala.liderRodada) + 1) % 4;
+            let novoLider = ORDEM[nextIndex];
+            
+            let novaFila = [];
+            for(let i=0; i<4; i++) novaFila.push(ORDEM[(nextIndex + i) % 4]);
+
+            let proxStatus = (!j1N.mao.length) ? 'finalizada' : 'jogando';
+
+            let updates = {
+                'mesa': { jogador1: null, jogador2: null, jogador3: null, jogador4: null },
+                'jogador1.mao': j1N.mao, 'jogador1.deck': j1N.deck, 'jogador1.pilhaVitorias': e1Pilha,
+                'jogador2.mao': j2N.mao, 'jogador2.deck': j2N.deck,
+                'jogador3.mao': j3N.mao, 'jogador3.deck': j3N.deck, 'jogador3.pilhaVitorias': e2Pilha,
+                'jogador4.mao': j4N.mao, 'jogador4.deck': j4N.deck,
+                'liderRodada': novoLider, 'quemJoga': novoLider, 'vezAtual': 0, 'atributoRodada': null,
+                'statusTurno': 'aguardando_carta', 'status': proxStatus,
+                'avisoToastGlobal': msgToast, 'timestampAviso': Date.now()
+            };
+
+            await updateDoc(doc(db, "partidas", salaId), updates);
+            window.resolvendo = false;
+        }
+
+        // ==========================================
+        // CONEXÃO FIREBASE
+        // ==========================================
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUserUid = user.uid;
+                salaId = new URLSearchParams(window.location.search).get('sala');
+                if (!salaId) return window.location.href = 'batalha.html';
+
+                onSnapshot(doc(db, "partidas", salaId), (docSnap) => {
+                    if (!docSnap.exists()) return window.location.href = 'batalha.html';
+                    dadosSala = docSnap.data();
+
+                    if (dadosSala.jogador1?.uid === currentUserUid) { minhaRole = 'jogador1'; isHost = true; }
+                    else if (dadosSala.jogador2?.uid === currentUserUid) { minhaRole = 'jogador2'; isHost = false; }
+                    else if (dadosSala.jogador3?.uid === currentUserUid) { minhaRole = 'jogador3'; isHost = false; }
+                    else if (dadosSala.jogador4?.uid === currentUserUid) { minhaRole = 'jogador4'; isHost = false; }
+                    else return window.location.href = 'batalha.html';
+
+                    definirRoles();
+
+                    // Host: Preparar a Mesa (Distribuição inicial)
+                    if (isHost && dadosSala.status === 'aguardando' && dadosSala.jogador1 && dadosSala.jogador2 && dadosSala.jogador3 && dadosSala.jogador4 && !dadosSala.mesa) {
+                        const j1D = [...dadosSala.jogador1.deck]; shuffle(j1D);
+                        const j2D = [...dadosSala.jogador2.deck]; shuffle(j2D);
+                        const j3D = [...dadosSala.jogador3.deck]; shuffle(j3D);
+                        const j4D = [...dadosSala.jogador4.deck]; shuffle(j4D);
+
+                        const ORDEM = ['jogador1', 'jogador3', 'jogador2', 'jogador4'];
+                        let lider = ORDEM[Math.floor(Math.random() * 4)];
+                        let iLider = ORDEM.indexOf(lider);
+                        let fila = []; for(let i=0; i<4; i++) fila.push(ORDEM[(iLider + i) % 4]);
+
+                        updateDoc(doc(db, "partidas", salaId), {
+                            status: 'jogando', statusTurno: 'aguardando_carta',
+                            liderRodada: lider, quemJoga: lider, vezAtual: 0, filaTurno: fila, atributoRodada: null,
+                            mesa: { jogador1: null, jogador2: null, jogador3: null, jogador4: null },
+                            'jogador1.mao': j1D.splice(0,5), 'jogador1.deck': j1D, 'jogador1.pilhaVitorias': [],
+                            'jogador2.mao': j2D.splice(0,5), 'jogador2.deck': j2D, 
+                            'jogador3.mao': j3D.splice(0,5), 'jogador3.deck': j3D, 'jogador3.pilhaVitorias': [],
+                            'jogador4.mao': j4D.splice(0,5), 'jogador4.deck': j4D
+                        });
+                        return;
+                    }
+
+                    // Se já estamos jogando, processa a tela
+                    if (dadosSala.status === 'jogando') {
+                        renderizarMesa();
+
+                        // Verifica Reações
+                        if (window.ultimoTsReacao !== dadosSala.ultimaReacao?.ts) {
+                            window.ultimoTsReacao = dadosSala.ultimaReacao?.ts;
+                            processarReacao(dadosSala.ultimaReacao);
+                        }
+                        
+                        // Verifica Toasts de Avisos (Ex: Quem ganhou o turno)
+                        if (window.ultimoTsAviso !== dadosSala.timestampAviso) {
+                            window.ultimoTsAviso = dadosSala.timestampAviso;
+                            if(dadosSala.avisoToastGlobal) window.mostrarToast(dadosSala.avisoToastGlobal);
+                        }
+
+                        // Host resolve a matemática
+                        if (isHost && dadosSala.statusTurno === 'resolvendo') {
+                            resolverCombateHost();
+                        }
+                    }
+
+                    // Verifica se Finalizou
+                    if (dadosSala.status === 'finalizada' && document.getElementById('modal-resultado-final').classList.contains('hidden')) {
+                        // Calcula pontos e mostra modal de vitória
+                        let ptsAliado = 0, ptsInimigo = 0;
+                        let aliPilha = (minhaRole === 'jogador1' || minhaRole === 'jogador2') ? dadosSala.jogador1.pilhaVitorias : dadosSala.jogador3.pilhaVitorias;
+                        let iniPilha = (minhaRole === 'jogador1' || minhaRole === 'jogador2') ? dadosSala.jogador3.pilhaVitorias : dadosSala.jogador1.pilhaVitorias;
+                        
+                        (aliPilha || []).forEach(id => ptsAliado += (INFO_CARTAS[id]?.pontos || 0));
+                        (iniPilha || []).forEach(id => ptsInimigo += (INFO_CARTAS[id]?.pontos || 0));
+
+                        document.getElementById('pontos-final-aliado').innerHTML = `${ptsAliado} <span class="text-sm">Pts</span>`;
+                        document.getElementById('pontos-final-inimigo').innerHTML = `${ptsInimigo} <span class="text-sm">Pts</span>`;
+
+                        if(ptsAliado > ptsInimigo) {
+                            document.getElementById('texto-vitoria').innerText = "VITÓRIA!";
+                            document.getElementById('recompensas-final').classList.remove('hidden');
+                        } else if(ptsInimigo > ptsAliado) {
+                            document.getElementById('texto-vitoria').innerText = "DERROTA";
+                            document.getElementById('texto-vitoria').classList.replace('text-[#4ade80]', 'text-red-500');
+                        } else {
+                            document.getElementById('texto-vitoria').innerText = "EMPATE";
+                            document.getElementById('texto-vitoria').classList.replace('text-[#4ade80]', 'text-yellow-400');
+                        }
+                        
+                        document.getElementById('modal-resultado-final').classList.remove('hidden');
+                    }
+                });
+            } else { window.location.href = "index.html"; }
+        });
     </script>
 </body>
 </html>

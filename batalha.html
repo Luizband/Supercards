@@ -255,6 +255,17 @@
                 <button onclick="sairLobbyDuo()" class="w-full bg-red-500 hover:bg-red-600 text-white font-black text-[10px] py-2 rounded-full shadow-sm uppercase tracking-wider transition-colors border border-red-700">Sair da Sala</button>
             </div>
 
+            <!-- NOVA TELA DE BUSCAR AMIGO PARA DUO -->
+            <div id="view-busca-duo" class="hidden flex flex-col h-full w-full">
+                <button onclick="voltarLobbyDuo()" class="absolute top-2 left-4 text-[#7a32a8] font-black text-xl hover:text-purple-600 transition-colors z-50">←</button>
+                <h2 class="text-[#7a32a8] font-black text-lg text-center uppercase tracking-wider mb-4 mt-2">Convidar para DUO</h2>
+                <input type="text" id="input-busca-duo" placeholder="Buscar jogador..." class="mb-3 w-full bg-[#bc7bd4] text-[#7a32a8] placeholder-[#7a32a8]/70 font-black text-xs rounded-full px-4 py-2.5 outline-none border-2 border-[#7a32a8]/30 focus:border-[#7a32a8] transition-colors shadow-inner flex-shrink-0 text-center uppercase">
+
+                <div id="lista-jogadores-duo" class="flex flex-col gap-2 overflow-y-auto no-scrollbar flex-grow mb-3 bg-white/30 rounded-xl p-2 border border-[#7a32a8]/20 min-h-[120px]">
+                    <span class="text-[#7a32a8] text-[10px] font-bold text-center mt-2">Pesquise o nome do jogador.</span>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -305,7 +316,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, collection, query, orderBy, limit, getDocs, where, addDoc, updateDoc, onSnapshot, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, collection, query, orderBy, limit, getDocs, where, addDoc, updateDoc, onSnapshot, serverTimestamp, deleteDoc, arrayUnion, arrayRemove} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const app = initializeApp({
           apiKey: "AIzaSyCU3lFTgfrDMaD9jwR7X7ivYPmGQh4VE1g",
@@ -668,7 +679,7 @@
             document.getElementById('modal-duo').classList.add('hidden');
         };
 
-        // 1. O HOST CRIA A SALA
+        // ATUALIZAÇÃO DA CRIAÇÃO PARA SUPORTAR O SISTEMA DE CONVITES
         window.criarSalaDuo = async function() {
             const deck = validarDeckDuo();
             if (!deck) return window.mostrarToast("Seu Deck é inválido ou possui cartas recicladas!");
@@ -676,7 +687,6 @@
             document.getElementById('view-menu-duo').classList.add('hidden');
             document.getElementById('view-lobby-duo').classList.remove('hidden');
             
-            // Gera código único
             const codigo = Math.floor(1000 + Math.random() * 9000).toString();
             document.getElementById('codigo-sala-display').innerText = "CÓDIGO: " + codigo;
             window.mostrarToast("Criando Sala DUO...");
@@ -684,6 +694,8 @@
             try {
                 const docRef = await addDoc(collection(db, "partidas"), {
                     tipo: "duo", status: "lobby_duo", codigo: codigo, criadoEm: serverTimestamp(),
+                    participantes: [currentUserUid], // <- ISSO É OBRIGATÓRIO PRO CONVITE FUNCIONAR
+                    convitesPendentes: [],           // <- LISTA DE QUEM VOCÊ CONVIDOU
                     jogador1: { uid: currentUserUid, nome: currentUserDoc.nomeDisplay || "JOGADOR 1", foto: currentUserDoc.fotoPerfil || "fundo_carta.png", deck: deck },
                     jogador2: null, jogador3: null, jogador4: null
                 });
@@ -692,202 +704,174 @@
             } catch(e) { console.error(e); window.mostrarToast("Erro ao criar sala."); }
         };
 
-        // 2. OS AMIGOS ENTRAM PELO CÓDIGO
-        window.entrarSalaCodigo = async function() {
-            const cod = document.getElementById('input-codigo-duo').value.trim();
-            if(!cod) return window.mostrarToast("Digite um código válido.");
-            
-            const deck = validarDeckDuo();
-            if (!deck) return window.mostrarToast("Seu Deck é inválido ou possui cartas recicladas!");
+        // ABRE A TELA DE BUSCAR AMIGOS
+        window.abrirConviteDuo = function(slot) {
+            document.getElementById('view-lobby-duo').classList.add('hidden');
+            document.getElementById('view-busca-duo').classList.remove('hidden');
+            document.getElementById('input-busca-duo').value = "";
+            document.getElementById('lista-jogadores-duo').innerHTML = '<span class="text-[#7a32a8] text-[10px] font-bold text-center mt-2">Pesquise o nome do jogador.</span>';
+        };
 
-            window.mostrarToast("Buscando sala " + cod + "...");
+        window.voltarLobbyDuo = function() {
+            document.getElementById('view-busca-duo').classList.add('hidden');
+            document.getElementById('view-lobby-duo').classList.remove('hidden');
+        };
+
+        // PESQUISA DE JOGADORES PRO DUO
+        document.getElementById('input-busca-duo').addEventListener('input', async (event) => {
+            const termoBusca = event.target.value.toLowerCase().trim();
+            const container = document.getElementById('lista-jogadores-duo');
+            if (termoBusca === "") return container.innerHTML = '<span class="text-[#7a32a8] text-[10px] font-bold text-center mt-2">Pesquise o nome do jogador.</span>';
+            container.innerHTML = '<span class="text-[#7a32a8] text-[10px] font-bold text-center mt-2 animate-pulse">Buscando...</span>';
             
             try {
-                const q = query(collection(db, "partidas"), where("codigo", "==", cod), where("status", "==", "lobby_duo"));
+                const q = query(collection(db, "users"), limit(50));
                 const snap = await getDocs(q);
-                
-                if (snap.empty) return window.mostrarToast("Sala não encontrada ou já iniciada!");
-                
-                const sala = snap.docs[0];
-                const dados = sala.data();
+                container.innerHTML = '';
+                let temResultado = false;
+                snap.forEach(docSnap => {
+                    if (docSnap.id !== currentUserUid) {
+                        const dados = docSnap.data();
+                        const nomeDb = dados.nome || dados.nomeDisplay || "JOGADOR";
+                        if (nomeDb.toLowerCase().includes(termoBusca)) {
+                            temResultado = true;
+                            const nomeFormatado = nomeDb.toUpperCase();
+                            container.innerHTML += `
+                                <div class="flex items-center justify-between bg-white border border-[#7a32a8]/20 rounded-lg p-2 shadow-sm mb-1">
+                                    <span class="text-[#7a32a8] font-black text-xs uppercase">${nomeFormatado}</span>
+                                    <button onclick="enviarConviteDuoInterno('${docSnap.id}')" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black text-[9px] py-2 px-4 rounded-full shadow-sm uppercase tracking-wider transition-transform hover:scale-105">CONVIDAR</button>
+                                </div>`;
+                        }
+                    }
+                });
+                if (!temResultado) container.innerHTML = '<span class="text-[#7a32a8] text-[10px] font-bold text-center mt-2">Nenhum jogador encontrado.</span>';
+            } catch (e) { console.error(e); }
+        });
+
+        // ENVIA O CONVITE PARA O BANCO DE DADOS
+        window.enviarConviteDuoInterno = async function(uidAlvo) {
+            if (!partidaIdAtual) return;
+            window.mostrarToast("Convite enviado!");
+            try {
+                await updateDoc(doc(db, "partidas", partidaIdAtual), {
+                    participantes: arrayUnion(uidAlvo),
+                    convitesPendentes: arrayUnion(uidAlvo)
+                });
+            } catch(e) { console.error(e); }
+        };
+
+        // EXIBE OS CONVITES DUO NA TELA PRINCIPAL (NO PAINEL DO DUO)
+        function renderizarConvitesDuo(convites) {
+            const lc = document.getElementById('lista-convites-duo');
+            if (!lc) return;
+            lc.innerHTML = '';
+            if (convites.length === 0) {
+                lc.innerHTML = '<span class="text-[#7a32a8] text-[10px] font-bold text-center mt-2">Nenhum convite pendente.</span>';
+            } else {
+                convites.forEach(c => {
+                    lc.innerHTML += `
+                        <div class="flex items-center justify-between bg-[#4ade80] border-2 border-[#22c55e] rounded-lg p-2 shadow-sm gap-2 mb-1">
+                            <span class="text-[#7a32a8] font-black text-[10px] uppercase truncate">Convite de: ${c.jogador1.nome}</span>
+                            <div class="flex gap-1 flex-shrink-0">
+                                <button onclick="recusarConviteDuo('${c.id}')" class="bg-red-500 hover:bg-red-600 text-white font-black text-[9px] py-1 px-2 rounded-md shadow-sm">X</button>
+                                <button onclick="aceitarConviteDuo('${c.id}')" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black text-[9px] py-1 px-2 rounded-md shadow-sm">ACEITAR</button>
+                            </div>
+                        </div>`;
+                });
+            }
+        }
+
+        window.recusarConviteDuo = async function(idSala) {
+            try {
+                await updateDoc(doc(db, "partidas", idSala), {
+                    participantes: arrayRemove(currentUserUid),
+                    convitesPendentes: arrayRemove(currentUserUid)
+                });
+                window.mostrarToast("Convite recusado.");
+            } catch(e) {}
+        };
+
+        window.aceitarConviteDuo = async function(idSala) {
+            const deck = validarDeckDuo();
+            if (!deck) return window.mostrarToast("Seu Deck é inválido!");
+            try {
+                const snap = await getDoc(doc(db, "partidas", idSala));
+                if (!snap.exists()) return window.mostrarToast("Sala não existe mais.");
+                const dados = snap.data();
+                if (dados.status !== "lobby_duo") return window.mostrarToast("A partida já começou.");
                 
                 let vaga = null;
                 if (!dados.jogador2) vaga = 'jogador2';
                 else if (!dados.jogador3) vaga = 'jogador3';
                 else if (!dados.jogador4) vaga = 'jogador4';
                 
-                if (!vaga) return window.mostrarToast("A sala já está cheia (4/4)!");
+                if (!vaga) {
+                    await updateDoc(doc(db, "partidas", idSala), { convitesPendentes: arrayRemove(currentUserUid) });
+                    return window.mostrarToast("A sala já está cheia!");
+                }
                 
-                await updateDoc(doc(db, "partidas", sala.id), {
-                    [vaga]: { uid: currentUserUid, nome: currentUserDoc.nomeDisplay || "JOGADOR", foto: currentUserDoc.fotoPerfil || "fundo_carta.png", deck: deck }
+                // Ocupa a vaga e tira o convite pendente
+                await updateDoc(doc(db, "partidas", idSala), {
+                    [vaga]: { uid: currentUserUid, nome: currentUserDoc.nomeDisplay || "JOGADOR", foto: currentUserDoc.fotoPerfil || "fundo_carta.png", deck: deck },
+                    convitesPendentes: arrayRemove(currentUserUid)
                 });
                 
-                partidaIdAtual = sala.id;
+                partidaIdAtual = idSala;
+                document.getElementById('modal-duo').classList.remove('hidden');
                 document.getElementById('view-menu-duo').classList.add('hidden');
                 document.getElementById('view-lobby-duo').classList.remove('hidden');
-                document.getElementById('codigo-sala-display').innerText = "CÓDIGO: " + cod;
+                document.getElementById('codigo-sala-display').innerText = "CÓDIGO: " + dados.codigo;
                 iniciarEscutaDuo(partidaIdAtual);
                 
             } catch(e) { console.error(e); window.mostrarToast("Erro ao entrar na sala."); }
         };
 
-        // 3. ATUALIZA FOTOS E NOMES NA TELA
-        function atualizarSlot(slotNum, jogadorData) {
-            const nome = document.getElementById(`duo-slot-${slotNum}-nome`);
-            const status = document.getElementById(`duo-slot-${slotNum}-status`);
-            const container = nome.previousElementSibling; 
-            
-            let img = document.getElementById(`duo-slot-${slotNum}-img`);
-            if (!img) {
-                img = document.createElement('img');
-                img.id = `duo-slot-${slotNum}-img`;
-                img.className = "hidden w-full h-full object-cover";
-                container.appendChild(img);
-                container.classList.add('overflow-hidden');
-            }
-            
-            if (jogadorData) {
-                if(jogadorData.foto) { img.src = jogadorData.foto; img.classList.remove('hidden'); }
-                nome.innerText = jogadorData.nome;
-                container.classList.replace('bg-[#bc7bd4]', 'bg-gray-800');
-                container.classList.replace('border-dashed', 'border-solid');
-                if(container.querySelector('span')) container.querySelector('span').classList.add('hidden');
-                status.innerText = "PRONTO"; status.classList.replace('text-transparent', 'text-white');
-            } else {
-                img.classList.add('hidden');
-                nome.innerText = "Convidar";
-                container.classList.replace('bg-gray-800', 'bg-[#bc7bd4]');
-                container.classList.replace('border-solid', 'border-dashed');
-                if(container.querySelector('span')) container.querySelector('span').classList.remove('hidden');
-                status.innerText = "-"; status.classList.replace('text-white', 'text-transparent');
-            }
-        }
-
-        // 4. O OLHO DA SALA DE ESPERA E MESCLAGEM
-        function iniciarEscutaDuo(id) {
-            if (unsubscribeDuo) unsubscribeDuo();
-            unsubscribeDuo = onSnapshot(doc(db, "partidas", id), (docSnap) => {
-                if (!docSnap.exists()) {
-                    window.mostrarToast("A sala foi encerrada.");
-                    window.sairLobbyDuo(true);
-                    return;
-                }
-                const dados = docSnap.data();
+        // ESSA FUNÇÃO ATUALIZA OS CONVITES ASSIM QUE O FIREBASE AVISAR QUE TEM UM NOVO
+        const escutarDesafiosAntigo = escutarDesafios; // Vamos engatar no seu observador que já existe
+        escutarDesafios = function() {
+            const q = query(collection(db, "partidas"), where("participantes", "array-contains", currentUserUid));
+            onSnapshot(q, (snap) => {
+                let convites = [];
+                let meuLobby = null;
+                let convitesDuo = []; // NOVA LISTA
                 
-                // GATILHO 1: O Host clicou em iniciar
-                if (dados.status === "aguardando" || dados.status === "jogando") {
-                    window.location.href = `arenaDUO.html?sala=${id}`;
-                    return;
-                }
+                snap.forEach(d => {
+                    const data = d.data();
+                    if (data.status === "finalizada") return;
 
-                // GATILHO 2: Fomos engolidos por outra sala via matchmaking
-                if (dados.status === "mesclada" && dados.novaSalaId) {
-                    window.location.href = `arenaDUO.html?sala=${dados.novaSalaId}`;
-                    return;
-                }
-
-                atualizarSlot(1, dados.jogador1);
-                atualizarSlot(2, dados.jogador2);
-                atualizarSlot(3, dados.jogador3);
-                atualizarSlot(4, dados.jogador4);
-
-                const btnPronto = document.getElementById('btn-pronto-duo');
-                const btnBuscarInimigos = document.getElementById('btn-buscar-inimigos-duo');
-
-                if (dados.jogador1 && dados.jogador1.uid === currentUserUid) {
-                    if (dados.jogador1 && dados.jogador2 && dados.jogador3 && dados.jogador4) {
-                        btnPronto.innerText = "INICIAR PARTIDA";
-                        btnPronto.classList.remove('hidden');
-                        btnBuscarInimigos.classList.add('hidden');
-                    } else if (dados.jogador1 && dados.jogador2 && !dados.jogador3 && !dados.jogador4) {
-                        btnPronto.classList.add('hidden');
-                        btnBuscarInimigos.innerText = dados.status === "buscando_dupla" ? "BUSCANDO..." : "Buscar Dupla Oponente";
-                        btnBuscarInimigos.classList.remove('hidden');
-                    } else {
-                        btnPronto.classList.add('hidden');
-                        btnBuscarInimigos.classList.add('hidden');
-                    }
-                } else {
-                    btnPronto.classList.add('hidden');
-                    btnBuscarInimigos.classList.add('hidden');
-                }
-            });
-        }
-
-        // 5. O HOST APERTA O BOTÃO E O JOGO COMEÇA
-        window.marcarProntoDuo = async function() {
-            if (!partidaIdAtual) return;
-            window.mostrarToast("Lançando Arena DUO...");
-            try { await updateDoc(doc(db, "partidas", partidaIdAtual), { status: "aguardando" }); } catch(e) {}
-        };
-
-        // 6. COMPARTILHAR CÓDIGO
-        window.abrirConviteDuo = function(slot) {
-            const codigoTexto = document.getElementById('codigo-sala-display').innerText.replace("CÓDIGO: ", "");
-            const mensagem = `Bora jogar um 2x2 no Supercards? Meu código de sala é: ${codigoTexto}`;
-            if (navigator.share) {
-                navigator.share({ title: 'Supercards DUO', text: mensagem }).catch(err => {
-                    navigator.clipboard.writeText(mensagem);
-                    window.mostrarToast("Código copiado! Mande para seus amigos.");
-                });
-            } else {
-                navigator.clipboard.writeText(mensagem);
-                window.mostrarToast("Código copiado para a área de transferência!");
-            }
-        };
-
-        // 7. MATCHMAKING DE DUPLAS (Gritar pro servidor que quer jogar)
-        window.buscarInimigosDuo = async function() {
-            if (!partidaIdAtual) return;
-            window.mostrarToast("Buscando outra dupla pronta...");
-            try {
-                await updateDoc(doc(db, "partidas", partidaIdAtual), { status: "buscando_dupla" });
-                const q = query(collection(db, "partidas"), where("status", "==", "buscando_dupla"), where("tipo", "==", "duo"));
-                const snap = await getDocs(q);
-
-                let salaEncontrada = null;
-                snap.forEach(d => { if (d.id !== partidaIdAtual && !salaEncontrada) salaEncontrada = { id: d.id, ...d.data() }; });
-
-                if (salaEncontrada) {
-                    window.mostrarToast("Oponentes encontrados! Unindo as salas...");
-                    await updateDoc(doc(db, "partidas", partidaIdAtual), {
-                        jogador3: salaEncontrada.jogador1 || null,
-                        jogador4: salaEncontrada.jogador2 || null,
-                        status: "aguardando" // Inicia a partida!
-                    });
-                    await updateDoc(doc(db, "partidas", salaEncontrada.id), {
-                        status: "mesclada", novaSalaId: partidaIdAtual
-                    });
-                }
-            } catch(e) { window.mostrarToast("Erro ao buscar oponentes."); }
-        };
-
-        // 8. SAIR OU DESFAZER SALA
-        window.sairLobbyDuo = async function(forcarVisual = false) {
-            if (partidaIdAtual) {
-                if (unsubscribeDuo) unsubscribeDuo();
-                try {
-                    const snap = await getDoc(doc(db, "partidas", partidaIdAtual));
-                    if(snap.exists()) {
-                        const dados = snap.data();
-                        if(dados.jogador1?.uid === currentUserUid) {
-                            await deleteDoc(doc(db, "partidas", partidaIdAtual));
-                        } else {
-                            let updates = {};
-                            if(dados.jogador2?.uid === currentUserUid) updates.jogador2 = null;
-                            if(dados.jogador3?.uid === currentUserUid) updates.jogador3 = null;
-                            if(dados.jogador4?.uid === currentUserUid) updates.jogador4 = null;
-                            await updateDoc(doc(db, "partidas", partidaIdAtual), updates);
+                    // LOBBY 1v1 Normal
+                    if (data.tipo === "desafio") {
+                        if (data.status === "convite" && data.convidadoUid === currentUserUid) convites.push({ id: d.id, ...data });
+                        if (data.status === "lobby" || (data.status === "convite" && data.jogador1.uid === currentUserUid)) meuLobby = { id: d.id, ...data };
+                        if (data.status === "andamento" && (data.jogador1.uid === currentUserUid || data.jogador2?.uid === currentUserUid)) {
+                            if (partidaSendoIniciada || (lobbyAtivo && lobbyAtivo.id === d.id)) window.location.href = `arena.html?sala=${d.id}`;
                         }
                     }
-                } catch(e) {}
-                partidaIdAtual = null;
-            }
-            if(!forcarVisual) {
-                document.getElementById('view-lobby-duo').classList.add('hidden');
-                document.getElementById('view-menu-duo').classList.remove('hidden');
-                document.getElementById('input-codigo-duo').value = "";
-            }
+
+                    // LOBBY DUO 2x2
+                    if (data.tipo === "duo" && data.status === "lobby_duo") {
+                        // Se você foi convidado e ainda não entrou:
+                        if (data.convitesPendentes?.includes(currentUserUid)) convitesDuo.push({ id: d.id, ...data });
+                    }
+                });
+
+                lobbyAtivo = meuLobby;
+
+                // Pisca a bolinha vermelha no menu principal se tiver convite
+                const ping = document.getElementById('ping-desafio');
+                if (convites.length > 0 || convitesDuo.length > 0) ping.classList.remove('hidden');
+                else ping.classList.add('hidden');
+
+                renderizarModalLobby(convites, meuLobby);
+                renderizarConvitesDuo(convitesDuo); // INJETA NA TELA DO DUO
+                
+                if (meuLobby && meuLobby.status === "lobby" && meuLobby.jogador1.uid === currentUserUid) {
+                    if (meuLobby.jogador1.pronto && meuLobby.jogador2?.pronto) {
+                        partidaSendoIniciada = true;
+                        updateDoc(doc(db, "partidas", meuLobby.id), { status: "andamento" });
+                    }
+                }
+            });
         };
         
         // ===============================================

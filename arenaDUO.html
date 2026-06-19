@@ -64,40 +64,52 @@
         <!-- LADO ESQUERDO: JOGADORES (Pílulas Alternadas) -->
         <div class="w-[22%] md:w-[20%] h-full flex flex-col justify-center p-2 md:p-3 bg-black/50 border-r-2 border-white/10 z-10 shadow-2xl">
             <div class="flex flex-col gap-4 w-full">
-                <!-- Você (Verde) -->
-                <div id="glow-my" class="flex items-center gap-2 bg-[#4ade80]/20 border-2 border-[#4ade80]/50 rounded-full p-1 transition-all duration-300">
+                <!-- SLOT 1: JOGADOR 1 (Host / Equipe 1) -->
+                <div id="glow-jogador1" class="flex items-center gap-2 bg-[#4ade80]/20 border-2 border-[#4ade80]/50 rounded-full p-1 transition-all duration-300 relative">
                     <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-800 border border-[#4ade80] overflow-hidden relative flex-shrink-0 shadow-inner">
-                        <span id="emoji-my" class="hidden absolute top-1/2 left-1/2 text-2xl md:text-3xl z-30 drop-shadow-md" style="transform: translate(-50%, -50%);"></span>
-                        <img id="foto-my" src="fundo_carta.png" class="w-full h-full object-cover">
+                        <span id="emoji-jogador1" class="hidden absolute top-1/2 left-1/2 text-2xl md:text-3xl z-30 drop-shadow-md" style="transform: translate(-50%, -50%);"></span>
+                        <img id="foto-jogador1" src="fundo_carta.png" class="w-full h-full object-cover">
                     </div>
-                    <span id="nome-my" class="text-[#4ade80] font-black text-[9px] md:text-[10px] uppercase truncate w-full pr-2">Você</span>
+                    <div class="flex flex-col overflow-hidden w-full pr-2">
+                        <span id="nome-jogador1" class="text-[#4ade80] font-black text-[9px] md:text-[10px] uppercase truncate w-full">Jogador 1</span>
+                        <span id="tag-jogador1" class="text-white/70 font-bold text-[7px] uppercase hidden">VOCÊ</span>
+                    </div>
                 </div>
 
-                <!-- Inimigo 1 (Vermelho) -->
-                <div id="glow-opp1" class="flex items-center gap-2 bg-red-900/40 border-2 border-red-500/50 rounded-full p-1 transition-all duration-300">
+                <!-- SLOT 2: JOGADOR 3 (Rival 1 / Equipe 2) -->
+                <div id="glow-jogador3" class="flex items-center gap-2 bg-red-900/40 border-2 border-red-500/50 rounded-full p-1 transition-all duration-300 relative">
                     <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-800 border border-red-400 overflow-hidden relative flex-shrink-0 shadow-inner">
-                        <span id="emoji-opp1" class="hidden absolute top-1/2 left-1/2 text-2xl md:text-3xl z-30 drop-shadow-md" style="transform: translate(-50%, -50%);"></span>
-                        <img id="foto-opp1" src="fundo_carta.png" class="w-full h-full object-cover">
+                        <span id="emoji-jogador3" class="hidden absolute top-1/2 left-1/2 text-2xl md:text-3xl z-30 drop-shadow-md" style="transform: translate(-50%, -50%);"></span>
+                        <img id="foto-jogador3" src="fundo_carta.png" class="w-full h-full object-cover">
                     </div>
-                    <span id="nome-opp1" class="text-red-200 font-black text-[9px] md:text-[10px] uppercase truncate w-full pr-2">Rival 1</span>
+                    <div class="flex flex-col overflow-hidden w-full pr-2">
+                        <span id="nome-jogador3" class="text-red-200 font-black text-[9px] md:text-[10px] uppercase truncate w-full">Jogador 3</span>
+                        <span id="tag-jogador3" class="text-white/70 font-bold text-[7px] uppercase hidden">VOCÊ</span>
+                    </div>
                 </div>
 
-                <!-- Parceiro (Verde) -->
-                <div id="glow-parceiro" class="flex items-center gap-2 bg-[#4ade80]/20 border-2 border-[#4ade80]/50 rounded-full p-1 transition-all duration-300">
+                <!-- SLOT 3: JOGADOR 2 (Parceiro / Equipe 1) -->
+                <div id="glow-jogador2" class="flex items-center gap-2 bg-[#4ade80]/20 border-2 border-[#4ade80]/50 rounded-full p-1 transition-all duration-300 relative">
                     <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-800 border border-[#4ade80] overflow-hidden relative flex-shrink-0 shadow-inner">
-                        <span id="emoji-parceiro" class="hidden absolute top-1/2 left-1/2 text-2xl md:text-3xl z-30 drop-shadow-md" style="transform: translate(-50%, -50%);"></span>
-                        <img id="foto-parceiro" src="fundo_carta.png" class="w-full h-full object-cover">
+                        <span id="emoji-jogador2" class="hidden absolute top-1/2 left-1/2 text-2xl md:text-3xl z-30 drop-shadow-md" style="transform: translate(-50%, -50%);"></span>
+                        <img id="foto-jogador2" src="fundo_carta.png" class="w-full h-full object-cover">
                     </div>
-                    <span id="nome-parceiro" class="text-[#4ade80] font-black text-[9px] md:text-[10px] uppercase truncate w-full pr-2">Parceiro</span>
+                    <div class="flex flex-col overflow-hidden w-full pr-2">
+                        <span id="nome-jogador2" class="text-[#4ade80] font-black text-[9px] md:text-[10px] uppercase truncate w-full">Jogador 2</span>
+                        <span id="tag-jogador2" class="text-white/70 font-bold text-[7px] uppercase hidden">VOCÊ</span>
+                    </div>
                 </div>
 
-                <!-- Inimigo 2 (Vermelho) -->
-                <div id="glow-opp2" class="flex items-center gap-2 bg-red-900/40 border-2 border-red-500/50 rounded-full p-1 transition-all duration-300">
+                <!-- SLOT 4: JOGADOR 4 (Rival 2 / Equipe 2) -->
+                <div id="glow-jogador4" class="flex items-center gap-2 bg-red-900/40 border-2 border-red-500/50 rounded-full p-1 transition-all duration-300 relative">
                     <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-800 border border-red-400 overflow-hidden relative flex-shrink-0 shadow-inner">
-                        <span id="emoji-opp2" class="hidden absolute top-1/2 left-1/2 text-2xl md:text-3xl z-30 drop-shadow-md" style="transform: translate(-50%, -50%);"></span>
-                        <img id="foto-opp2" src="fundo_carta.png" class="w-full h-full object-cover">
+                        <span id="emoji-jogador4" class="hidden absolute top-1/2 left-1/2 text-2xl md:text-3xl z-30 drop-shadow-md" style="transform: translate(-50%, -50%);"></span>
+                        <img id="foto-jogador4" src="fundo_carta.png" class="w-full h-full object-cover">
                     </div>
-                    <span id="nome-opp2" class="text-red-200 font-black text-[9px] md:text-[10px] uppercase truncate w-full pr-2">Rival 2</span>
+                    <div class="flex flex-col overflow-hidden w-full pr-2">
+                        <span id="nome-jogador4" class="text-red-200 font-black text-[9px] md:text-[10px] uppercase truncate w-full">Jogador 4</span>
+                        <span id="tag-jogador4" class="text-white/70 font-bold text-[7px] uppercase hidden">VOCÊ</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -294,12 +306,12 @@
         
         function processarReacao(reacao) {
             if(!reacao || !reacao.uid) return;
-            // Descobre em qual pílula pular o emoji
             let idAlvo = null;
-            if(dadosSala[minhaRole].uid === reacao.uid) idAlvo = 'my';
-            else if(dadosSala[roleParceiro].uid === reacao.uid) idAlvo = 'parceiro';
-            else if(dadosSala[roleOpp1].uid === reacao.uid) idAlvo = 'opp1';
-            else if(dadosSala[roleOpp2].uid === reacao.uid) idAlvo = 'opp2';
+            
+            // Procura quem mandou a reação pelas 4 cadeiras fixas
+            ['jogador1', 'jogador2', 'jogador3', 'jogador4'].forEach(role => {
+                if(dadosSala[role] && dadosSala[role].uid === reacao.uid) idAlvo = role;
+            });
             
             if(idAlvo) {
                 const el = document.getElementById(`emoji-${idAlvo}`);
@@ -312,39 +324,29 @@
             }
         }
 
-        // ==========================================
-        // MOTOR PRINCIPAL
-        // ==========================================
-        function definirRoles() {
-            if(minhaRole === 'jogador1') { roleParceiro = 'jogador2'; roleOpp1 = 'jogador3'; roleOpp2 = 'jogador4'; }
-            if(minhaRole === 'jogador2') { roleParceiro = 'jogador1'; roleOpp1 = 'jogador4'; roleOpp2 = 'jogador3'; }
-            if(minhaRole === 'jogador3') { roleParceiro = 'jogador4'; roleOpp1 = 'jogador1'; roleOpp2 = 'jogador2'; }
-            if(minhaRole === 'jogador4') { roleParceiro = 'jogador3'; roleOpp1 = 'jogador2'; roleOpp2 = 'jogador1'; }
-        }
-
         function renderizarMesa() {
             if(!dadosSala || !minhaRole) return;
 
-            // 1. Pílulas
-            document.getElementById('nome-my').innerText = dadosSala[minhaRole].nome;
-            document.getElementById('nome-parceiro').innerText = dadosSala[roleParceiro].nome;
-            document.getElementById('nome-opp1').innerText = dadosSala[roleOpp1].nome;
-            document.getElementById('nome-opp2').innerText = dadosSala[roleOpp2].nome;
+            // 1. Pílulas (Ordem Física Fixa)
+            ['jogador1', 'jogador2', 'jogador3', 'jogador4'].forEach(role => {
+                const jog = dadosSala[role];
+                if (jog) {
+                    document.getElementById(`nome-${role}`).innerText = jog.nome;
+                    if(jog.foto) document.getElementById(`foto-${role}`).src = jog.foto;
+                }
+                
+                // Limpa o brilho anterior
+                document.getElementById(`glow-${role}`).classList.remove('glow-lider');
+                
+                // Se esse slot for o celular atual, exibe a tag "VOCÊ" para o player se achar na tela
+                const tag = document.getElementById(`tag-${role}`);
+                if (role === minhaRole) tag.classList.remove('hidden');
+                else tag.classList.add('hidden');
+            });
 
-            if(dadosSala[minhaRole].foto) document.getElementById('foto-my').src = dadosSala[minhaRole].foto;
-            if(dadosSala[roleParceiro].foto) document.getElementById('foto-parceiro').src = dadosSala[roleParceiro].foto;
-            if(dadosSala[roleOpp1].foto) document.getElementById('foto-opp1').src = dadosSala[roleOpp1].foto;
-            if(dadosSala[roleOpp2].foto) document.getElementById('foto-opp2').src = dadosSala[roleOpp2].foto;
-
-            // Limpa Glow
-            ['my','parceiro','opp1','opp2'].forEach(id => document.getElementById(`glow-${id}`).classList.remove('glow-lider'));
-            
-            // Acende o Líder e diz de quem é a vez
+            // Acende o Líder atual
             if(dadosSala.liderRodada) {
-                if(dadosSala.liderRodada === minhaRole) document.getElementById('glow-my').classList.add('glow-lider');
-                if(dadosSala.liderRodada === roleParceiro) document.getElementById('glow-parceiro').classList.add('glow-lider');
-                if(dadosSala.liderRodada === roleOpp1) document.getElementById('glow-opp1').classList.add('glow-lider');
-                if(dadosSala.liderRodada === roleOpp2) document.getElementById('glow-opp2').classList.add('glow-lider');
+                document.getElementById(`glow-${dadosSala.liderRodada}`).classList.add('glow-lider');
             }
 
             // 2. Placar e Atributo
@@ -600,7 +602,7 @@
                         // Verifica Reações
                         if (window.ultimoTsReacao !== dadosSala.ultimaReacao?.ts) {
                             window.ultimoTsReacao = dadosSala.ultimaReacao?.ts;
-                            processarReacao(dadosSala.ultimaReacao);
+                            (dadosSala.ultimaReacao);
                         }
                         
                         // Verifica Toasts de Avisos (Ex: Quem ganhou o turno)

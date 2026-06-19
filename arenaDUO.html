@@ -258,6 +258,8 @@
         let salaId = null;
         let dadosSala = null;
         let cartaFocadaId = null;
+        // Tenta forçar a tela a deitar no celular automaticamente
+        try { screen.orientation.lock("landscape").catch(e => console.log("Rotação tratada pelo Manifest.")); } catch(e) {}
 
         let roleParceiro = null, roleOpp1 = null, roleOpp2 = null;
 

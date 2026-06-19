@@ -155,8 +155,8 @@
                 <span class="text-[10px] md:text-xs uppercase tracking-widest whitespace-nowrap">Minhas Cartas</span>
             </div>
 
-            <!-- FUNDO INVISÍVEL (Clica fora para fechar a gaveta) -->
-            <div id="overlay-gaveta" onclick="toggleGaveta()" class="absolute inset-0 bg-black/40 z-[50] hidden backdrop-blur-sm transition-opacity"></div>
+            <!-- FUNDO INVISÍVEL (Cobre a tela inteira, inclusive a coluna de jogadores) -->
+            <div id="overlay-gaveta" onclick="toggleGaveta()" class="fixed inset-0 bg-black/40 z-[50] hidden backdrop-blur-sm transition-opacity"></div>
 
             <!-- A GAVETA ENXUTA (Mantém a altura no centro, mas envelopa apenas as cartas) -->
             <div id="gaveta-mao" class="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-[110%] transition-transform duration-300 z-[60] bg-black/95 border-l-4 border-y-4 border-[#dca3e8] rounded-l-3xl p-4 md:p-6 shadow-[-10px_0_30px_rgba(0,0,0,0.8)] max-w-[95%] md:max-w-[85%] flex flex-col items-center">

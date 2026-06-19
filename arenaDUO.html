@@ -19,8 +19,8 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Brilho do Líder */
-        .glow-lider { box-shadow: 0 0 15px 2px #fbbf24; border-color: #fbbf24 !important; }
+        /* Brilho do Líder (Apenas Sombra, Mantém a Borda da Dupla) */
+        .glow-lider { box-shadow: 0 0 15px 4px #fbbf24 !important; transition: box-shadow 0.3s ease; }
 
         /* Efeito Hover na Gaveta */
         .hover-carta { transition: transform 0.2s ease, z-index 0s; }

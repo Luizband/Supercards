@@ -637,52 +637,259 @@
         };
 
         // ===============================================
-        // FRONT-END: LOBBY ARENA DUO
         // ===============================================
+        // FRONT-END E MOTOR DO LOBBY ARENA DUO (2X2)
+        // ===============================================
+        let unsubscribeDuo = null;
+
+        // Função de segurança: Garante que os jogadores não entrem com deck quebrado
+        function validarDeckDuo() {
+            if (!currentUserDoc || !currentUserDoc.deckPadrao || !currentUserDoc.decks || !currentUserDoc.decks[currentUserDoc.deckPadrao]) return null;
+            const deck = currentUserDoc.decks[currentUserDoc.deckPadrao].cartas || [];
+            let contagemDeck = {}; let deckEValido = true;
+            const colecaoPlayer = currentUserDoc.colecao || {};
+            
+            deck.forEach(id => { contagemDeck[id] = (contagemDeck[id] || 0) + 1; });
+            for (let id in contagemDeck) { if ((colecaoPlayer[id] || 0) < contagemDeck[id]) deckEValido = false; }
+            
+            if (deck.length < 20 || !deckEValido) return null;
+            return deck;
+        }
+
         window.abrirModalDuo = function() {
-            if (!currentUserDoc || !currentUserDoc.deckPadrao || !currentUserDoc.decks || !currentUserDoc.decks[currentUserDoc.deckPadrao]) {
-                return window.mostrarToast("Você precisa selecionar um Deck Padrão completo primeiro!");
-            }
+            if (!validarDeckDuo()) return window.mostrarToast("Você precisa selecionar um Deck Padrão completo primeiro!");
             document.getElementById('modal-duo').classList.remove('hidden');
             document.getElementById('view-menu-duo').classList.remove('hidden');
             document.getElementById('view-lobby-duo').classList.add('hidden');
         };
 
         window.fecharModalDuo = function() {
+            if (partidaIdAtual && unsubscribeDuo) window.sairLobbyDuo(true);
             document.getElementById('modal-duo').classList.add('hidden');
         };
 
-        window.criarSalaDuo = function() {
+        // 1. O HOST CRIA A SALA
+        window.criarSalaDuo = async function() {
+            const deck = validarDeckDuo();
+            if (!deck) return window.mostrarToast("Seu Deck é inválido ou possui cartas recicladas!");
+            
             document.getElementById('view-menu-duo').classList.add('hidden');
             document.getElementById('view-lobby-duo').classList.remove('hidden');
-            document.getElementById('codigo-sala-display').innerText = "CÓDIGO: DUO-" + Math.floor(1000 + Math.random() * 9000);
-            document.getElementById('duo-slot-1-img').src = currentUserDoc.fotoPerfil || 'fundo_carta.png';
-            document.getElementById('duo-slot-1-nome').innerText = currentUserDoc.nomeDisplay || "Você";
+            
+            // Gera código único
+            const codigo = Math.floor(1000 + Math.random() * 9000).toString();
+            document.getElementById('codigo-sala-display').innerText = "CÓDIGO: " + codigo;
+            window.mostrarToast("Criando Sala DUO...");
+            
+            try {
+                const docRef = await addDoc(collection(db, "partidas"), {
+                    tipo: "duo", status: "lobby_duo", codigo: codigo, criadoEm: serverTimestamp(),
+                    jogador1: { uid: currentUserUid, nome: currentUserDoc.nomeDisplay || "JOGADOR 1", foto: currentUserDoc.fotoPerfil || "fundo_carta.png", deck: deck },
+                    jogador2: null, jogador3: null, jogador4: null
+                });
+                partidaIdAtual = docRef.id;
+                iniciarEscutaDuo(partidaIdAtual);
+            } catch(e) { console.error(e); window.mostrarToast("Erro ao criar sala."); }
         };
 
-        window.entrarSalaCodigo = function() {
+        // 2. OS AMIGOS ENTRAM PELO CÓDIGO
+        window.entrarSalaCodigo = async function() {
             const cod = document.getElementById('input-codigo-duo').value.trim();
             if(!cod) return window.mostrarToast("Digite um código válido.");
+            
+            const deck = validarDeckDuo();
+            if (!deck) return window.mostrarToast("Seu Deck é inválido ou possui cartas recicladas!");
+
             window.mostrarToast("Buscando sala " + cod + "...");
+            
+            try {
+                const q = query(collection(db, "partidas"), where("codigo", "==", cod), where("status", "==", "lobby_duo"));
+                const snap = await getDocs(q);
+                
+                if (snap.empty) return window.mostrarToast("Sala não encontrada ou já iniciada!");
+                
+                const sala = snap.docs[0];
+                const dados = sala.data();
+                
+                let vaga = null;
+                if (!dados.jogador2) vaga = 'jogador2';
+                else if (!dados.jogador3) vaga = 'jogador3';
+                else if (!dados.jogador4) vaga = 'jogador4';
+                
+                if (!vaga) return window.mostrarToast("A sala já está cheia (4/4)!");
+                
+                await updateDoc(doc(db, "partidas", sala.id), {
+                    [vaga]: { uid: currentUserUid, nome: currentUserDoc.nomeDisplay || "JOGADOR", foto: currentUserDoc.fotoPerfil || "fundo_carta.png", deck: deck }
+                });
+                
+                partidaIdAtual = sala.id;
+                document.getElementById('view-menu-duo').classList.add('hidden');
+                document.getElementById('view-lobby-duo').classList.remove('hidden');
+                document.getElementById('codigo-sala-display').innerText = "CÓDIGO: " + cod;
+                iniciarEscutaDuo(partidaIdAtual);
+                
+            } catch(e) { console.error(e); window.mostrarToast("Erro ao entrar na sala."); }
         };
 
+        // 3. ATUALIZA FOTOS E NOMES NA TELA
+        function atualizarSlot(slotNum, jogadorData) {
+            const nome = document.getElementById(`duo-slot-${slotNum}-nome`);
+            const status = document.getElementById(`duo-slot-${slotNum}-status`);
+            const container = nome.previousElementSibling; 
+            
+            let img = document.getElementById(`duo-slot-${slotNum}-img`);
+            if (!img) {
+                img = document.createElement('img');
+                img.id = `duo-slot-${slotNum}-img`;
+                img.className = "hidden w-full h-full object-cover";
+                container.appendChild(img);
+                container.classList.add('overflow-hidden');
+            }
+            
+            if (jogadorData) {
+                if(jogadorData.foto) { img.src = jogadorData.foto; img.classList.remove('hidden'); }
+                nome.innerText = jogadorData.nome;
+                container.classList.replace('bg-[#bc7bd4]', 'bg-gray-800');
+                container.classList.replace('border-dashed', 'border-solid');
+                if(container.querySelector('span')) container.querySelector('span').classList.add('hidden');
+                status.innerText = "PRONTO"; status.classList.replace('text-transparent', 'text-white');
+            } else {
+                img.classList.add('hidden');
+                nome.innerText = "Convidar";
+                container.classList.replace('bg-gray-800', 'bg-[#bc7bd4]');
+                container.classList.replace('border-solid', 'border-dashed');
+                if(container.querySelector('span')) container.querySelector('span').classList.remove('hidden');
+                status.innerText = "-"; status.classList.replace('text-white', 'text-transparent');
+            }
+        }
+
+        // 4. O OLHO DA SALA DE ESPERA E MESCLAGEM
+        function iniciarEscutaDuo(id) {
+            if (unsubscribeDuo) unsubscribeDuo();
+            unsubscribeDuo = onSnapshot(doc(db, "partidas", id), (docSnap) => {
+                if (!docSnap.exists()) {
+                    window.mostrarToast("A sala foi encerrada.");
+                    window.sairLobbyDuo(true);
+                    return;
+                }
+                const dados = docSnap.data();
+                
+                // GATILHO 1: O Host clicou em iniciar
+                if (dados.status === "aguardando" || dados.status === "jogando") {
+                    window.location.href = `arenaDUO.html?sala=${id}`;
+                    return;
+                }
+
+                // GATILHO 2: Fomos engolidos por outra sala via matchmaking
+                if (dados.status === "mesclada" && dados.novaSalaId) {
+                    window.location.href = `arenaDUO.html?sala=${dados.novaSalaId}`;
+                    return;
+                }
+
+                atualizarSlot(1, dados.jogador1);
+                atualizarSlot(2, dados.jogador2);
+                atualizarSlot(3, dados.jogador3);
+                atualizarSlot(4, dados.jogador4);
+
+                const btnPronto = document.getElementById('btn-pronto-duo');
+                const btnBuscarInimigos = document.getElementById('btn-buscar-inimigos-duo');
+
+                if (dados.jogador1 && dados.jogador1.uid === currentUserUid) {
+                    if (dados.jogador1 && dados.jogador2 && dados.jogador3 && dados.jogador4) {
+                        btnPronto.innerText = "INICIAR PARTIDA";
+                        btnPronto.classList.remove('hidden');
+                        btnBuscarInimigos.classList.add('hidden');
+                    } else if (dados.jogador1 && dados.jogador2 && !dados.jogador3 && !dados.jogador4) {
+                        btnPronto.classList.add('hidden');
+                        btnBuscarInimigos.innerText = dados.status === "buscando_dupla" ? "BUSCANDO..." : "Buscar Dupla Oponente";
+                        btnBuscarInimigos.classList.remove('hidden');
+                    } else {
+                        btnPronto.classList.add('hidden');
+                        btnBuscarInimigos.classList.add('hidden');
+                    }
+                } else {
+                    btnPronto.classList.add('hidden');
+                    btnBuscarInimigos.classList.add('hidden');
+                }
+            });
+        }
+
+        // 5. O HOST APERTA O BOTÃO E O JOGO COMEÇA
+        window.marcarProntoDuo = async function() {
+            if (!partidaIdAtual) return;
+            window.mostrarToast("Lançando Arena DUO...");
+            try { await updateDoc(doc(db, "partidas", partidaIdAtual), { status: "aguardando" }); } catch(e) {}
+        };
+
+        // 6. COMPARTILHAR CÓDIGO
         window.abrirConviteDuo = function(slot) {
-            window.mostrarToast("Sistema de convite para: " + slot + " (Em breve)");
+            const codigoTexto = document.getElementById('codigo-sala-display').innerText.replace("CÓDIGO: ", "");
+            const mensagem = `Bora jogar um 2x2 no Supercards? Meu código de sala é: ${codigoTexto}`;
+            if (navigator.share) {
+                navigator.share({ title: 'Supercards DUO', text: mensagem }).catch(err => {
+                    navigator.clipboard.writeText(mensagem);
+                    window.mostrarToast("Código copiado! Mande para seus amigos.");
+                });
+            } else {
+                navigator.clipboard.writeText(mensagem);
+                window.mostrarToast("Código copiado para a área de transferência!");
+            }
         };
 
-        window.buscarInimigosDuo = function() {
+        // 7. MATCHMAKING DE DUPLAS (Gritar pro servidor que quer jogar)
+        window.buscarInimigosDuo = async function() {
+            if (!partidaIdAtual) return;
             window.mostrarToast("Buscando outra dupla pronta...");
+            try {
+                await updateDoc(doc(db, "partidas", partidaIdAtual), { status: "buscando_dupla" });
+                const q = query(collection(db, "partidas"), where("status", "==", "buscando_dupla"), where("tipo", "==", "duo"));
+                const snap = await getDocs(q);
+
+                let salaEncontrada = null;
+                snap.forEach(d => { if (d.id !== partidaIdAtual && !salaEncontrada) salaEncontrada = { id: d.id, ...d.data() }; });
+
+                if (salaEncontrada) {
+                    window.mostrarToast("Oponentes encontrados! Unindo as salas...");
+                    await updateDoc(doc(db, "partidas", partidaIdAtual), {
+                        jogador3: salaEncontrada.jogador1 || null,
+                        jogador4: salaEncontrada.jogador2 || null,
+                        status: "aguardando" // Inicia a partida!
+                    });
+                    await updateDoc(doc(db, "partidas", salaEncontrada.id), {
+                        status: "mesclada", novaSalaId: partidaIdAtual
+                    });
+                }
+            } catch(e) { window.mostrarToast("Erro ao buscar oponentes."); }
         };
 
-        window.marcarProntoDuo = function() {
-            window.mostrarToast("Você está pronto! Aguardando os demais.");
+        // 8. SAIR OU DESFAZER SALA
+        window.sairLobbyDuo = async function(forcarVisual = false) {
+            if (partidaIdAtual) {
+                if (unsubscribeDuo) unsubscribeDuo();
+                try {
+                    const snap = await getDoc(doc(db, "partidas", partidaIdAtual));
+                    if(snap.exists()) {
+                        const dados = snap.data();
+                        if(dados.jogador1?.uid === currentUserUid) {
+                            await deleteDoc(doc(db, "partidas", partidaIdAtual));
+                        } else {
+                            let updates = {};
+                            if(dados.jogador2?.uid === currentUserUid) updates.jogador2 = null;
+                            if(dados.jogador3?.uid === currentUserUid) updates.jogador3 = null;
+                            if(dados.jogador4?.uid === currentUserUid) updates.jogador4 = null;
+                            await updateDoc(doc(db, "partidas", partidaIdAtual), updates);
+                        }
+                    }
+                } catch(e) {}
+                partidaIdAtual = null;
+            }
+            if(!forcarVisual) {
+                document.getElementById('view-lobby-duo').classList.add('hidden');
+                document.getElementById('view-menu-duo').classList.remove('hidden');
+                document.getElementById('input-codigo-duo').value = "";
+            }
         };
-
-        window.sairLobbyDuo = function() {
-            document.getElementById('view-lobby-duo').classList.add('hidden');
-            document.getElementById('view-menu-duo').classList.remove('hidden');
-        };
-
+        
         // ===============================================
         // BUSCA ALEATÓRIA (MANTIDA INTACTA)
         // ===============================================

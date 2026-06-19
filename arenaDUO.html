@@ -55,46 +55,40 @@
 
     <div id="main-arena" class="w-full h-full flex bg-gradient-to-r from-[#7a32a8]/90 via-gray-800/80 to-[#4ade80]/90 relative backdrop-blur-sm">
 
-        <!-- LADO ESQUERDO: JOGADORES (Pílulas Estreitas - 20%) -->
-        <div class="w-[22%] md:w-[20%] h-full flex flex-col justify-between p-2 md:p-3 bg-black/50 border-r-2 border-white/10 z-10 shadow-2xl">
+        <div class="w-[22%] md:w-[20%] h-full flex flex-col justify-center p-2 md:p-3 bg-black/50 border-r-2 border-white/10 z-10 shadow-2xl">
             
-            <!-- Inimigos e Parceiro (Ordem Alternada) -->
-            <div class="flex flex-col gap-4 mt-2">
-                <!-- Inimigo 1 (Vermelho) -->
+            <div class="flex flex-col gap-4 w-full">
+                <div id="glow-my" class="flex items-center gap-2 bg-[#4ade80]/20 border-2 border-[#4ade80]/50 rounded-full p-1 transition-all duration-300">
+                    <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-800 border border-[#4ade80] overflow-hidden relative flex-shrink-0 shadow-inner">
+                        <span id="emoji-my" class="hidden absolute top-1/2 left-1/2 text-2xl md:text-3xl z-30 drop-shadow-md" style="transform: translate(-50%, -50%);"></span>
+                        <img id="foto-my" src="fundo_carta.png" class="w-full h-full object-cover">
+                    </div>
+                    <span id="nome-my" class="text-[#4ade80] font-black text-[9px] md:text-[10px] uppercase truncate w-full pr-2">Você</span>
+                </div>
+
                 <div id="glow-opp1" class="flex items-center gap-2 bg-red-900/40 border-2 border-red-500/50 rounded-full p-1 transition-all duration-300">
-                    <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-800 border border-red-400 overflow-hidden relative flex-shrink-0">
+                    <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-800 border border-red-400 overflow-hidden relative flex-shrink-0 shadow-inner">
                         <span id="emoji-opp1" class="hidden absolute top-1/2 left-1/2 text-2xl md:text-3xl z-30 drop-shadow-md" style="transform: translate(-50%, -50%);"></span>
                         <img id="foto-opp1" src="fundo_carta.png" class="w-full h-full object-cover">
                     </div>
                     <span id="nome-opp1" class="text-red-200 font-black text-[9px] md:text-[10px] uppercase truncate w-full pr-2">Rival 1</span>
                 </div>
 
-                <!-- Parceiro (Verde) -->
                 <div id="glow-parceiro" class="flex items-center gap-2 bg-[#4ade80]/20 border-2 border-[#4ade80]/50 rounded-full p-1 transition-all duration-300">
-                    <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-800 border border-[#4ade80] overflow-hidden relative flex-shrink-0">
+                    <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-800 border border-[#4ade80] overflow-hidden relative flex-shrink-0 shadow-inner">
                         <span id="emoji-parceiro" class="hidden absolute top-1/2 left-1/2 text-2xl md:text-3xl z-30 drop-shadow-md" style="transform: translate(-50%, -50%);"></span>
                         <img id="foto-parceiro" src="fundo_carta.png" class="w-full h-full object-cover">
                     </div>
                     <span id="nome-parceiro" class="text-[#4ade80] font-black text-[9px] md:text-[10px] uppercase truncate w-full pr-2">Parceiro</span>
                 </div>
 
-                <!-- Inimigo 2 (Vermelho) -->
                 <div id="glow-opp2" class="flex items-center gap-2 bg-red-900/40 border-2 border-red-500/50 rounded-full p-1 transition-all duration-300">
-                    <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-800 border border-red-400 overflow-hidden relative flex-shrink-0">
+                    <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-800 border border-red-400 overflow-hidden relative flex-shrink-0 shadow-inner">
                         <span id="emoji-opp2" class="hidden absolute top-1/2 left-1/2 text-2xl md:text-3xl z-30 drop-shadow-md" style="transform: translate(-50%, -50%);"></span>
                         <img id="foto-opp2" src="fundo_carta.png" class="w-full h-full object-cover">
                     </div>
                     <span id="nome-opp2" class="text-red-200 font-black text-[9px] md:text-[10px] uppercase truncate w-full pr-2">Rival 2</span>
                 </div>
-            </div>
-
-            <!-- VOCÊ (Rodapé da Coluna Esquerda) -->
-            <div class="flex flex-col items-center justify-end pb-2">
-                <div id="glow-my" class="w-14 h-14 md:w-16 md:h-16 rounded-full border-4 border-[#dca3e8] bg-gray-800 relative transition-all duration-300 shadow-lg">
-                    <span id="emoji-my" class="hidden absolute top-1/2 left-1/2 text-4xl md:text-5xl drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] z-30" style="transform: translate(-50%, -50%);"></span>
-                    <img id="foto-my" src="fundo_carta.png" class="w-full h-full object-cover rounded-full">
-                </div>
-                <span id="nome-my" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[10px] px-4 py-1 rounded-full mt-2 uppercase shadow-md border border-[#bc7bd4] truncate max-w-full">Você</span>
             </div>
         </div>
 
@@ -155,23 +149,18 @@
                 </div>
             </div>
 
-            <!-- GATILHO DA GAVETA (Aba Puxadora) -->
-            <div onclick="toggleGaveta()" class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-[#dca3e8] text-[#7a32a8] font-black py-4 px-2 rounded-l-xl cursor-pointer shadow-[-5px_0_20px_rgba(0,0,0,0.4)] z-30 border-y-4 border-l-4 border-[#bc7bd4] flex flex-col items-center hover:bg-white transition-colors">
-                <span class="text-lg">◀</span>
-                <span class="text-xs mt-1">M</span>
-                <span class="text-xs">Ã</span>
-                <span class="text-xs">O</span>
+            <div onclick="toggleGaveta()" class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-[#dca3e8] text-[#7a32a8] font-black py-3 px-4 rounded-l-xl cursor-pointer shadow-[-5px_0_20px_rgba(0,0,0,0.4)] z-30 border-y-4 border-l-4 border-[#bc7bd4] flex items-center gap-2 hover:bg-white transition-colors">
+                <span class="text-lg leading-none mt-0.5">◀</span>
+                <span class="text-[10px] md:text-xs uppercase tracking-widest whitespace-nowrap">Minhas Cartas</span>
             </div>
 
-            <!-- OVERLAY DA GAVETA (A Mão de Cartas Oculta) -->
-            <div id="gaveta-mao" class="absolute inset-0 bg-black/95 z-[60] transform translate-x-full transition-transform duration-300 flex flex-col items-center justify-center backdrop-blur-md">
-                <button onclick="toggleGaveta()" class="absolute top-4 right-6 text-[#dca3e8] hover:text-white font-black text-4xl transition-colors">X</button>
-                <h2 class="text-[#dca3e8] font-black text-2xl mb-8 tracking-widest uppercase drop-shadow-md">Escolha sua Carta</h2>
+            <div id="overlay-gaveta" onclick="toggleGaveta()" class="absolute inset-0 bg-black/40 z-[50] hidden backdrop-blur-sm transition-opacity"></div>
+
+            <div id="gaveta-mao" class="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-[110%] transition-transform duration-300 z-[60] bg-black/90 border-l-4 border-y-4 border-[#dca3e8] rounded-l-3xl p-4 md:p-6 shadow-[-10px_0_30px_rgba(0,0,0,0.8)] max-w-[95%] md:max-w-[85%] flex flex-col items-center">
+                <h2 class="text-[#dca3e8] font-black text-sm mb-3 tracking-widest uppercase drop-shadow-md">Sua Mão</h2>
                 
-                <!-- Cartas lado a lado sem sobrepor -->
-                <div id="cartas-da-gaveta" class="flex justify-center items-center gap-4 w-full px-6 overflow-x-auto no-scrollbar">
-                    <!-- JS Injeta Aqui -->
-                </div>
+                <div id="cartas-da-gaveta" class="flex items-center gap-3 w-full overflow-x-auto no-scrollbar py-2 px-2">
+                    </div>
             </div>
 
         </div>
@@ -303,7 +292,12 @@
         // GAVETA LOGIC
         window.toggleGaveta = function() {
             const gaveta = document.getElementById('gaveta-mao');
-            gaveta.classList.toggle('translate-x-full');
+            const overlay = document.getElementById('overlay-gaveta');
+            
+            // Alterna a gaveta entrando/saindo da tela
+            gaveta.classList.toggle('translate-x-[110%]');
+            // Mostra/esconde o fundo que permite clicar fora
+            overlay.classList.toggle('hidden');
         };
 
         // REAÇÕES

@@ -13,22 +13,18 @@
             background-position: center;
             background-repeat: no-repeat;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overscroll-behavior: none; /* Evita que a tela puxe no mobile */
+            overscroll-behavior: none;
         }
         
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Animação para a vez do jogador */
-        @keyframes pulse-ring {
-            0% { box-shadow: 0 0 0 0px rgba(220, 163, 232, 0.7); }
-            100% { box-shadow: 0 0 0 12px rgba(220, 163, 232, 0); }
-        }
-        .vez-ativa { animation: pulse-ring 1.5s infinite; border-color: #dca3e8 !important; }
+        /* Brilho do Líder */
+        .glow-lider { box-shadow: 0 0 15px 2px #fbbf24; border-color: #fbbf24 !important; }
 
-        /* Efeito Hover nas Cartas da Mão */
+        /* Efeito Hover na Gaveta */
         .hover-carta { transition: transform 0.2s ease, z-index 0s; }
-        .hover-carta:hover { transform: translateY(-15px) scale(1.15); z-index: 50 !important; }
+        .hover-carta:hover { transform: translateY(-15px) scale(1.10); z-index: 50 !important; }
 
         /* Efeito de Pulo do Emoji */
         @keyframes popEmoji {
@@ -41,7 +37,7 @@
             display: block !important;
         }
 
-        /* MENSAGEM DE BLOQUEIO SE O CELULAR ESTIVER EM PÉ (PORTRAIT) */
+        /* Trava de Rotação */
         #aviso-retrato { display: none; }
         @media (orientation: portrait) {
             #main-arena { display: none !important; }
@@ -54,46 +50,76 @@
     <div id="aviso-retrato" class="w-full h-full bg-black/95 flex-col items-center justify-center p-6 text-center z-[9999] absolute inset-0">
         <span class="text-6xl mb-4">🔄</span>
         <h1 class="text-2xl font-black text-[#dca3e8] uppercase tracking-widest mb-2">Vire o Celular</h1>
-        <p class="text-sm text-gray-300 font-bold">O modo Arena 2x2 só pode ser jogado com a tela na horizontal.</p>
+        <p class="text-sm text-gray-300 font-bold">O modo Arena 2x2 só pode ser jogado na horizontal.</p>
     </div>
 
     <div id="main-arena" class="w-full h-full flex bg-gradient-to-r from-[#7a32a8]/90 via-gray-800/80 to-[#4ade80]/90 relative backdrop-blur-sm">
 
-        <div class="w-[26%] h-full flex flex-col justify-between p-1 md:p-3 bg-black/30 border-r-4 border-black/20 z-10 shadow-2xl overflow-hidden">
+        <!-- LADO ESQUERDO: JOGADORES (Pílulas Estreitas - 20%) -->
+        <div class="w-[22%] md:w-[20%] h-full flex flex-col justify-between p-2 md:p-3 bg-black/50 border-r-2 border-white/10 z-10 shadow-2xl">
             
-            <div class="flex flex-col justify-evenly flex-grow min-h-0 pb-1">
-                <div class="flex items-center gap-1.5 md:gap-3">
-                    <div class="flex flex-col items-center relative">
-                        <div id="glow-opp1" class="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-[#dca3e8] bg-gray-800 relative transition-all duration-300">
-                            <span id="emoji-opp1" class="hidden absolute top-1/2 left-1/2 text-3xl md:text-5xl drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] z-30" style="transform: translate(-50%, -50%);"></span>
-                        </div>
-                        <span id="nome-opp1" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[9px] px-2 py-0.5 rounded-full mt-1 uppercase shadow-md truncate max-w-[65px] text-center">Inimigo 1</span>
+            <!-- Inimigos e Parceiro (Ordem Alternada) -->
+            <div class="flex flex-col gap-4 mt-2">
+                <!-- Inimigo 1 (Vermelho) -->
+                <div id="glow-opp1" class="flex items-center gap-2 bg-red-900/40 border-2 border-red-500/50 rounded-full p-1 transition-all duration-300">
+                    <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-800 border border-red-400 overflow-hidden relative flex-shrink-0">
+                        <span id="emoji-opp1" class="hidden absolute top-1/2 left-1/2 text-2xl md:text-3xl z-30 drop-shadow-md" style="transform: translate(-50%, -50%);"></span>
+                        <img id="foto-opp1" src="fundo_carta.png" class="w-full h-full object-cover">
                     </div>
-                    <div id="mini-mao-opp1" class="flex -space-x-1 opacity-90 hidden sm:flex"></div>
+                    <span id="nome-opp1" class="text-red-200 font-black text-[9px] md:text-[10px] uppercase truncate w-full pr-2">Rival 1</span>
                 </div>
 
-                <div class="flex items-center gap-1.5 md:gap-3">
-                    <div class="flex flex-col items-center relative">
-                        <div id="glow-parceiro" class="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-[#dca3e8] bg-gray-800 relative transition-all duration-300">
-                            <span id="emoji-parceiro" class="hidden absolute top-1/2 left-1/2 text-3xl md:text-5xl drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] z-30" style="transform: translate(-50%, -50%);"></span>
-                        </div>
-                        <span id="nome-parceiro" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[9px] px-2 py-0.5 rounded-full mt-1 uppercase shadow-md truncate max-w-[65px] text-center">Parceiro</span>
+                <!-- Parceiro (Verde) -->
+                <div id="glow-parceiro" class="flex items-center gap-2 bg-[#4ade80]/20 border-2 border-[#4ade80]/50 rounded-full p-1 transition-all duration-300">
+                    <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-800 border border-[#4ade80] overflow-hidden relative flex-shrink-0">
+                        <span id="emoji-parceiro" class="hidden absolute top-1/2 left-1/2 text-2xl md:text-3xl z-30 drop-shadow-md" style="transform: translate(-50%, -50%);"></span>
+                        <img id="foto-parceiro" src="fundo_carta.png" class="w-full h-full object-cover">
                     </div>
-                    <div id="mini-mao-parceiro" class="flex -space-x-1 opacity-90 hidden sm:flex"></div>
+                    <span id="nome-parceiro" class="text-[#4ade80] font-black text-[9px] md:text-[10px] uppercase truncate w-full pr-2">Parceiro</span>
                 </div>
 
-                <div class="flex items-center gap-1.5 md:gap-3">
-                    <div class="flex flex-col items-center relative">
-                        <div id="glow-opp2" class="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-[#dca3e8] bg-gray-800 relative transition-all duration-300">
-                            <span id="emoji-opp2" class="hidden absolute top-1/2 left-1/2 text-3xl md:text-5xl drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] z-30" style="transform: translate(-50%, -50%);"></span>
-                        </div>
-                        <span id="nome-opp2" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[9px] px-2 py-0.5 rounded-full mt-1 uppercase shadow-md truncate max-w-[65px] text-center">Inimigo 2</span>
+                <!-- Inimigo 2 (Vermelho) -->
+                <div id="glow-opp2" class="flex items-center gap-2 bg-red-900/40 border-2 border-red-500/50 rounded-full p-1 transition-all duration-300">
+                    <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-800 border border-red-400 overflow-hidden relative flex-shrink-0">
+                        <span id="emoji-opp2" class="hidden absolute top-1/2 left-1/2 text-2xl md:text-3xl z-30 drop-shadow-md" style="transform: translate(-50%, -50%);"></span>
+                        <img id="foto-opp2" src="fundo_carta.png" class="w-full h-full object-cover">
                     </div>
-                    <div id="mini-mao-opp2" class="flex -space-x-1 opacity-90 hidden sm:flex"></div>
+                    <span id="nome-opp2" class="text-red-200 font-black text-[9px] md:text-[10px] uppercase truncate w-full pr-2">Rival 2</span>
+                </div>
+            </div>
+
+            <!-- VOCÊ (Rodapé da Coluna Esquerda) -->
+            <div class="flex flex-col items-center justify-end pb-2">
+                <div id="glow-my" class="w-14 h-14 md:w-16 md:h-16 rounded-full border-4 border-[#dca3e8] bg-gray-800 relative transition-all duration-300 shadow-lg">
+                    <span id="emoji-my" class="hidden absolute top-1/2 left-1/2 text-4xl md:text-5xl drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] z-30" style="transform: translate(-50%, -50%);"></span>
+                    <img id="foto-my" src="fundo_carta.png" class="w-full h-full object-cover rounded-full">
+                </div>
+                <span id="nome-my" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[10px] px-4 py-1 rounded-full mt-2 uppercase shadow-md border border-[#bc7bd4] truncate max-w-full">Você</span>
+            </div>
+        </div>
+
+        <!-- LADO DIREITO: CAMPO GIGANTE E GAVETA (78%) -->
+        <div class="w-[78%] md:w-[80%] h-full relative overflow-hidden z-10 flex flex-col">
+            
+            <!-- PAINEL DE CONTROLE DO TOPO -->
+            <div class="w-full px-3 md:px-6 py-3 flex justify-between items-start z-40 relative">
+                
+                <!-- Atributo Flutuante -->
+                <div id="box-atributo" class="hidden bg-black/80 text-yellow-400 font-black text-[10px] md:text-[12px] px-6 py-2 rounded-full shadow-lg border border-yellow-500/50 uppercase tracking-widest animate-pulse flex-shrink-0">
+                    <span id="texto-atributo">---</span>
+                </div>
+                
+                <!-- Placar Centralizado -->
+                <div id="placar-ao-vivo" class="hidden absolute left-1/2 transform -translate-x-1/2 flex items-center gap-3 md:gap-4 bg-black/80 px-5 py-2 rounded-full border border-white/20 shadow-xl">
+                    <span id="placar-aliado" class="text-[#4ade80] font-black text-base md:text-lg drop-shadow-[0_0_8px_#4ade80]">0</span>
+                    <span class="text-white/50 font-black text-[10px]">VS</span>
+                    <span id="placar-inimigo" class="text-red-500 font-black text-base md:text-lg drop-shadow-[0_0_8px_#ef4444]">0</span>
                 </div>
 
-                <div class="relative w-full flex justify-center mt-3">
-                    <div id="menu-reacoes" class="hidden absolute bottom-[110%] left-1/2 transform -translate-x-1/2 w-max bg-[#dca3e8] p-3 rounded-xl grid grid-cols-4 gap-2 shadow-2xl border-2 border-[#bc7bd4] z-50">
+                <!-- Botões da Direita (Reação e Desistir) -->
+                <div class="flex gap-2 relative">
+                    <!-- Menu Reações Oculto -->
+                    <div id="menu-reacoes" class="hidden absolute top-[110%] right-0 w-max bg-[#dca3e8] p-3 rounded-xl grid grid-cols-4 gap-2 shadow-2xl border-2 border-[#bc7bd4] z-50">
                         <button onclick="enviarReacao('my', '💣')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">💣</button>
                         <button onclick="enviarReacao('my', '🖕')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">🖕</button>
                         <button onclick="enviarReacao('my', '👀')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">👀</button>
@@ -103,65 +129,66 @@
                         <button onclick="enviarReacao('my', '🤣')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">🤣</button>
                         <button onclick="enviarReacao('my', '😭')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">😭</button>
                     </div>
-                    <button onclick="document.getElementById('menu-reacoes').classList.toggle('hidden')" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[10px] px-2 py-2 rounded-xl border-2 border-[#bc7bd4] shadow-lg uppercase w-[90%] max-w-[100px] truncate text-center">
+                    
+                    <button onclick="document.getElementById('menu-reacoes').classList.toggle('hidden')" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[9px] md:text-[10px] px-3 py-1.5 rounded-lg shadow-md border-2 border-[#bc7bd4] uppercase tracking-wider hover:bg-white transition-colors">
                         Reação
+                    </button>
+
+                    <button onclick="document.getElementById('modal-desistir').classList.remove('hidden')" class="bg-red-600 hover:bg-red-700 text-white font-black text-[9px] md:text-[10px] px-4 py-1.5 rounded-lg shadow-md border-2 border-red-800 uppercase tracking-widest transition-transform active:scale-95">
+                        Desistir
                     </button>
                 </div>
             </div>
 
-            <div class="flex items-end justify-center gap-3 flex-shrink-0 pt-2 border-t border-white/10 w-full">
-                <div class="flex flex-col items-center relative">
-                    <div id="glow-my" class="w-12 h-12 md:w-16 md:h-16 rounded-full border-4 border-[#dca3e8] bg-gray-800 relative transition-all duration-300">
-                        <span id="emoji-my" class="hidden absolute top-1/2 left-1/2 text-4xl md:text-6xl drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] z-30" style="transform: translate(-50%, -50%);"></span>
-                    </div>
-                    <span id="nome-my" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[9px] md:text-[10px] px-3 py-0.5 rounded-full mt-1 uppercase shadow-md border border-[#bc7bd4] truncate max-w-[70px]">Você</span>
-                </div>
-                <div class="flex flex-col items-center justify-center bg-black/60 border border-white/20 rounded p-1 w-10 md:w-12 h-14 md:h-16 relative shadow-lg">
-                    <span id="deck-count" class="text-white font-black text-xl md:text-2xl z-10 drop-shadow-[0_2px_2px_rgba(0,0,0,1)]">0</span>
-                    <img src="fundo_carta.png" class="absolute inset-0 w-full h-full object-cover opacity-40 rounded">
-                </div>
-            </div>
-        </div>
-
-        <div class="w-[74%] h-full relative overflow-hidden z-10">
-            
-            <div class="absolute top-2 md:top-3 left-0 w-full px-2 md:px-4 flex justify-between items-start z-50 pointer-events-none">
+            <!-- O CENTRO DA MESA -->
+            <div class="flex-grow flex items-center justify-center relative w-full pb-4">
                 
-                <div id="box-atributo" class="hidden bg-black/80 text-yellow-400 font-black text-[10px] md:text-[12px] px-4 py-1.5 rounded-full shadow-lg border border-yellow-500/50 uppercase tracking-widest animate-pulse pointer-events-auto mt-0.5 md:mt-1">
-                    <span id="texto-atributo">---</span>
+                <!-- Deck Count (Movido para dentro da mesa, canto inferior esquerdo) -->
+                <div class="absolute bottom-4 left-4 flex flex-col items-center justify-center bg-black/60 border border-white/20 rounded-md p-1 w-12 h-16 shadow-lg z-20">
+                    <span id="deck-count" class="text-white font-black text-2xl z-10 drop-shadow-[0_2px_2px_rgba(0,0,0,1)]">0</span>
+                    <img src="fundo_carta.png" class="absolute inset-0 w-full h-full object-cover opacity-40 rounded-md">
                 </div>
+
+                <!-- CARTAS DA MESA GIGANTES -->
+                <div id="mesa-combate" class="flex justify-center items-center gap-3 md:gap-5 w-full px-10">
+                    <!-- JS Injeta Aqui -->
+                </div>
+            </div>
+
+            <!-- GATILHO DA GAVETA (Aba Puxadora) -->
+            <div onclick="toggleGaveta()" class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-[#dca3e8] text-[#7a32a8] font-black py-4 px-2 rounded-l-xl cursor-pointer shadow-[-5px_0_20px_rgba(0,0,0,0.4)] z-30 border-y-4 border-l-4 border-[#bc7bd4] flex flex-col items-center hover:bg-white transition-colors">
+                <span class="text-lg">◀</span>
+                <span class="text-xs mt-1">M</span>
+                <span class="text-xs">Ã</span>
+                <span class="text-xs">O</span>
+            </div>
+
+            <!-- OVERLAY DA GAVETA (A Mão de Cartas Oculta) -->
+            <div id="gaveta-mao" class="absolute inset-0 bg-black/95 z-[60] transform translate-x-full transition-transform duration-300 flex flex-col items-center justify-center backdrop-blur-md">
+                <button onclick="toggleGaveta()" class="absolute top-4 right-6 text-[#dca3e8] hover:text-white font-black text-4xl transition-colors">X</button>
+                <h2 class="text-[#dca3e8] font-black text-2xl mb-8 tracking-widest uppercase drop-shadow-md">Escolha sua Carta</h2>
                 
-                <div id="placar-ao-vivo" class="hidden absolute left-1/2 transform -translate-x-1/2 flex items-center gap-2 md:gap-3 bg-black/80 px-3 md:px-4 py-1.5 rounded-full border border-white/20 shadow-lg pointer-events-auto mt-0 md:mt-1">
-                    <span id="placar-aliado" class="text-[#4ade80] font-black text-sm drop-shadow-[0_0_8px_#4ade80]">0</span>
-                    <span class="text-white/50 font-black text-[9px]">VS</span>
-                    <span id="placar-inimigo" class="text-red-500 font-black text-sm drop-shadow-[0_0_8px_#ef4444]">0</span>
+                <!-- Cartas lado a lado sem sobrepor -->
+                <div id="cartas-da-gaveta" class="flex justify-center items-center gap-4 w-full px-6 overflow-x-auto no-scrollbar">
+                    <!-- JS Injeta Aqui -->
                 </div>
-
-                <button onclick="document.getElementById('modal-desistir').classList.remove('hidden')" class="bg-red-600 hover:bg-red-700 text-white font-black text-[8px] md:text-[10px] px-3 md:px-4 py-1.5 rounded-xl shadow-md border-2 border-red-800 uppercase tracking-widest transition-transform active:scale-95 pointer-events-auto mt-0.5 md:mt-1">
-                    Desistir
-                </button>
             </div>
-
-            <div class="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none pb-[12vh]">
-                <div id="mesa-combate" class="flex justify-center items-center gap-2 md:gap-4 w-full pointer-events-auto">
-                    </div>
-            </div>
-
-            <div id="mao-jogador" class="absolute bottom-[-10px] md:bottom-[-20px] left-0 w-full flex justify-center items-end -space-x-6 md:-space-x-8 z-40 pointer-events-auto px-4">
-                </div>
 
         </div>
     </div>
+
+    <!-- ============================================== -->
+    <!-- MODAIS RESTAURADOS (NÃO FALTARÁ NENHUM AGORA)  -->
+    <!-- ============================================== -->
     
-    <div id="modal-zoom" class="hidden fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 backdrop-blur-md">
-        <button onclick="document.getElementById('modal-zoom').classList.add('hidden')" class="absolute top-4 right-8 text-white font-black text-3xl hover:text-gray-300 transition-colors z-50 drop-shadow-md">X</button>
-        
+    <!-- MODAL DE ZOOM DA CARTA -->
+    <div id="modal-zoom" class="hidden fixed inset-0 bg-black/95 z-[100] flex items-center justify-center p-4 backdrop-blur-md">
+        <button onclick="fecharZoomCarta()" class="absolute top-4 right-8 text-white font-black text-3xl hover:text-gray-300 transition-colors z-50 drop-shadow-md">X</button>
         <div class="flex gap-8 items-center w-full max-w-3xl justify-center">
             <div class="flex flex-col items-center">
                 <h2 id="titulo-acao" class="text-white font-black text-xl uppercase tracking-wider mb-2 drop-shadow-md">SUA CARTA</h2>
-                <img id="zoom-img" src="fundo_carta.png" class="w-[200px] aspect-[2.5/3.5] object-cover drop-shadow-[0_0_20px_rgba(220,163,232,0.4)] rounded-xl border-4 border-[#bc7bd4]">
+                <img id="zoom-img" src="fundo_carta.png" class="w-[200px] md:w-[240px] aspect-[2.5/3.5] object-cover drop-shadow-[0_0_30px_rgba(220,163,232,0.4)] rounded-xl border-4 border-[#bc7bd4]">
             </div>
-
             <div class="w-full max-w-[200px] flex flex-col justify-center">
                 <div id="painel-atributos" class="grid grid-cols-1 gap-3 w-full">
                     <button class="bg-blue-600 hover:bg-blue-500 text-white font-black text-sm py-3 rounded-xl shadow-lg border-2 border-blue-400 uppercase tracking-widest transition-transform active:scale-95">AURA</button>
@@ -169,7 +196,6 @@
                     <button class="bg-yellow-500 hover:bg-yellow-400 text-black font-black text-sm py-3 rounded-xl shadow-lg border-2 border-yellow-300 uppercase tracking-widest transition-transform active:scale-95">DIVERSÃO</button>
                     <button class="bg-purple-600 hover:bg-purple-500 text-white font-black text-sm py-3 rounded-xl shadow-lg border-2 border-purple-400 uppercase tracking-widest transition-transform active:scale-95">ALEATÓRIO</button>
                 </div>
-
                 <div id="painel-defesa" class="w-full hidden mt-8">
                     <span class="text-[#dca3e8] font-black text-[10px] uppercase text-center block mb-2">Atributo da Rodada</span>
                     <button id="btn-defender" class="w-full bg-red-600 hover:bg-red-500 text-white font-black text-sm py-4 rounded-xl shadow-lg border-2 border-red-400 uppercase tracking-widest transition-transform active:scale-95 animate-pulse">DEFENDER</button>
@@ -178,6 +204,7 @@
         </div>
     </div>
 
+    <!-- MODAL DE EMBATE (CHOQUE) -->
     <div id="modal-embate" class="hidden fixed inset-0 bg-black/95 z-[150] flex flex-col items-center justify-center p-4 backdrop-blur-md">
         <h2 id="embate-atributo-titulo" class="text-[#dca3e8] font-black text-2xl uppercase tracking-widest mb-6 drop-shadow-lg absolute top-4">ATRIBUTO: AURA</h2>
         
@@ -219,6 +246,7 @@
         <span class="text-yellow-400 font-black text-[10px] uppercase mt-4 tracking-widest hidden" id="aviso-desempate">Desempate Matemático Aplicado!</span>
     </div>
 
+    <!-- MODAL DE VITÓRIA / RESULTADO FINAL -->
     <div id="modal-resultado-final" class="hidden fixed inset-0 bg-black/95 z-[300] flex flex-col items-center justify-center p-4 backdrop-blur-md">
         <h1 id="texto-vitoria" class="text-5xl font-black text-[#4ade80] uppercase tracking-widest mb-2 drop-shadow-[0_0_20px_#4ade80] text-center">VITÓRIA!</h1>
         
@@ -245,94 +273,81 @@
         <button onclick="window.location.href='batalha.html'" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-4 px-16 rounded-full shadow-lg border-2 border-white tracking-widest text-lg transition-transform active:scale-95">FINALIZAR</button>
     </div>
 
+    <!-- MODAL DESISTIR -->
     <div id="modal-desistir" class="hidden fixed inset-0 bg-black/80 z-[400] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl relative">
             <h2 class="text-red-600 font-black text-xl mb-2 uppercase drop-shadow-sm">Abandonar a Dupla?</h2>
             <p class="text-[#7a32a8] font-bold text-xs mb-6">Se você sair agora, seu parceiro jogará sozinho e a derrota será garantida.</p>
             <div class="flex justify-center gap-4">
                 <button onclick="document.getElementById('modal-desistir').classList.add('hidden')" class="flex-1 bg-gray-500 text-white font-black py-3 rounded-full shadow-md uppercase text-sm border-2 border-gray-600">Ficar</button>
-                <button class="flex-1 bg-red-600 text-white font-black py-3 rounded-full shadow-md uppercase text-sm border-2 border-red-800">Desistir</button>
+                <button onclick="confirmarDesistencia()" class="flex-1 bg-red-600 text-white font-black py-3 rounded-full shadow-md uppercase text-sm border-2 border-red-800">Desistir</button>
             </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         import { INFO_CARTAS } from './cartas.js';
 
-        // Variáveis de Controle do DUO
         let currentUserUid = null;
         let minhaRole = null; 
-        let isHost = false;
-        let salaId = null;
         let dadosSala = null;
         let cartaFocadaId = null;
 
         window.mostrarToast = function(msg) { alert(msg); };
-        window.fecharModalDesistir = () => document.getElementById('modal-desistir').classList.add('hidden');
+        window.fecharZoomCarta = () => document.getElementById('modal-zoom').classList.add('hidden');
         window.confirmarDesistencia = () => { window.location.href='batalha.html'; };
 
-        // ===============================================
-        // SISTEMA DE REAÇÕES (CONSERTADO PARA ANIMAÇÃO)
-        // ===============================================
+        // GAVETA LOGIC
+        window.toggleGaveta = function() {
+            const gaveta = document.getElementById('gaveta-mao');
+            gaveta.classList.toggle('translate-x-full');
+        };
+
+        // REAÇÕES
         window.timersReacao = {};
         window.enviarReacao = function(idAlvo, emoji) {
             document.getElementById('menu-reacoes').classList.add('hidden');
-            
-            // Simulação Local na tela:
             const el = document.getElementById(`emoji-${idAlvo}`);
             if(!el) return;
-            
             el.innerText = emoji;
             el.classList.remove('hidden', 'emoji-ativo');
-            void el.offsetWidth; // Força o navegador a reiniciar a animação
+            void el.offsetWidth;
             el.classList.add('emoji-ativo');
-            
             if(window.timersReacao[idAlvo]) clearTimeout(window.timersReacao[idAlvo]);
-            
             window.timersReacao[idAlvo] = setTimeout(() => {
                 el.classList.add('hidden');
                 el.classList.remove('emoji-ativo');
             }, 3500);
-
-            // Futuro: Manda o update pro Firebase avisando os outros
         };
 
-        // ===============================================
-        // MOTOR DE RENDERIZAÇÃO DA ARENA DUO
-        // ===============================================
+        // MOTOR DUO - RENDERIZAÇÃO
         function renderizarMesa() {
             if(!dadosSala) return;
 
-            let me, parceiro, opp1, opp2;
-            let timeA = ['jogador1', 'jogador2'];
-            if (timeA.includes(minhaRole)) {
-                me = minhaRole; parceiro = minhaRole === 'jogador1' ? 'jogador2' : 'jogador1';
-                opp1 = 'jogador3'; opp2 = 'jogador4';
-            } else {
-                me = minhaRole; parceiro = minhaRole === 'jogador3' ? 'jogador4' : 'jogador3';
-                opp1 = 'jogador1'; opp2 = 'jogador2';
-            }
-
+            let me = minhaRole, parceiro = 'jogador2', opp1 = 'jogador3', opp2 = 'jogador4';
+            
+            // Textos das Pílulas
             document.getElementById('nome-my').innerText = dadosSala[me].nome;
             document.getElementById('nome-parceiro').innerText = dadosSala[parceiro].nome;
             document.getElementById('nome-opp1').innerText = dadosSala[opp1].nome;
             document.getElementById('nome-opp2').innerText = dadosSala[opp2].nome;
 
-            // Controle do Glow de Turno
+            // Limpa Glow
             ['my','parceiro','opp1','opp2'].forEach(id => {
-                document.getElementById(`glow-${id}`).classList.remove('shadow-[0_0_20px_#fbbf24]', 'border-yellow-400');
+                document.getElementById(`glow-${id}`).classList.remove('glow-lider');
             });
+            // Acende Glow
             if(dadosSala.liderRodada) {
-                if(dadosSala.liderRodada === me) document.getElementById('glow-my').classList.add('shadow-[0_0_20px_#fbbf24]', 'border-yellow-400');
-                if(dadosSala.liderRodada === parceiro) document.getElementById('glow-parceiro').classList.add('shadow-[0_0_20px_#fbbf24]', 'border-yellow-400');
-                if(dadosSala.liderRodada === opp1) document.getElementById('glow-opp1').classList.add('shadow-[0_0_20px_#fbbf24]', 'border-yellow-400');
-                if(dadosSala.liderRodada === opp2) document.getElementById('glow-opp2').classList.add('shadow-[0_0_20px_#fbbf24]', 'border-yellow-400');
+                if(dadosSala.liderRodada === me) document.getElementById('glow-my').classList.add('glow-lider');
+                if(dadosSala.liderRodada === parceiro) document.getElementById('glow-parceiro').classList.add('glow-lider');
+                if(dadosSala.liderRodada === opp1) document.getElementById('glow-opp1').classList.add('glow-lider');
+                if(dadosSala.liderRodada === opp2) document.getElementById('glow-opp2').classList.add('glow-lider');
             }
 
-            // Exibir Atributo no Topo
+            // Atributo Topo
             if(dadosSala.atributoRodada) {
                 document.getElementById('box-atributo').classList.remove('hidden');
                 document.getElementById('texto-atributo').innerText = dadosSala.atributoRodada;
@@ -342,79 +357,64 @@
                 document.getElementById('placar-ao-vivo').classList.add('hidden');
             }
 
-            // CARTAS DA MESA CENTRAL (Aumentadas 40%!)
+            // CARTAS DA MESA (GIGANTES)
             const mesaDiv = document.getElementById('mesa-combate');
             mesaDiv.innerHTML = '';
-            
-            let somaMinhaEquipe = 0;
-            let somaEquipeInimiga = 0;
+            let somaAliado = 0, somaInimigo = 0;
 
             if(dadosSala.filaTurno) {
                 dadosSala.filaTurno.forEach(role => {
-                    const cartaIdJogada = dadosSala.mesa[role];
-                    if (cartaIdJogada) {
-                        const info = INFO_CARTAS[cartaIdJogada] || { miniatura: 'fundo_carta.png' };
+                    const cartaId = dadosSala.mesa[role];
+                    if (cartaId) {
+                        const info = INFO_CARTAS[cartaId] || { miniatura: 'fundo_carta.png' };
                         if(dadosSala.atributoRodada) {
                             let valor = info[dadosSala.atributoRodada.toLowerCase()] || 0;
-                            if(timeA.includes(minhaRole) && timeA.includes(role)) somaMinhaEquipe += valor;
-                            else if(!timeA.includes(minhaRole) && !timeA.includes(role)) somaMinhaEquipe += valor;
-                            else somaEquipeInimiga += valor;
+                            if(['jogador1','jogador2'].includes(role)) somaAliado += valor;
+                            else somaInimigo += valor;
                         }
-
-                        // w-[20vh] max-w-[125px] -> Gigantes no centro
+                        
                         mesaDiv.innerHTML += `
-                            <div onclick="verCartaMesa('${cartaIdJogada}')" class="w-[20vh] max-w-[125px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-[0_0_25px_rgba(255,255,255,0.2)] border-2 border-white cursor-pointer hover:scale-105 transition-transform">
-                                <img src="${info.miniatura || info.imagem}" class="w-full h-full object-cover rounded-[6px]">
+                            <div onclick="window.mostrarToast('Carta na Mesa: ${cartaId}')" class="w-[28vh] max-w-[170px] aspect-[2.5/3.5] bg-gray-800 rounded-xl shadow-[0_0_30px_rgba(255,255,255,0.2)] border-2 border-white cursor-pointer hover:scale-105 transition-transform flex-shrink-0">
+                                <img src="${info.miniatura || info.imagem}" class="w-full h-full object-cover rounded-[10px]">
                             </div>`;
                     } else {
                         mesaDiv.innerHTML += `
-                            <div class="w-[20vh] max-w-[125px] aspect-[2.5/3.5] bg-black/50 rounded-lg shadow-inner border-2 border-white/30 border-dashed"></div>`;
+                            <div class="w-[28vh] max-w-[170px] aspect-[2.5/3.5] bg-black/50 rounded-xl shadow-inner border-2 border-white/20 border-dashed flex-shrink-0"></div>`;
                     }
                 });
             }
 
-            document.getElementById('placar-aliado').innerText = somaMinhaEquipe;
-            document.getElementById('placar-inimigo').innerText = somaEquipeInimiga;
+            document.getElementById('placar-aliado').innerText = somaAliado;
+            document.getElementById('placar-inimigo').innerText = somaInimigo;
+            document.getElementById('deck-count').innerText = dadosSala[me].deck?.length || 0;
 
-            // CARTAS DA SUA MÃO (Aumentadas 60% e em formato de leque sobreposto)
-            const maoDiv = document.getElementById('mao-jogador');
-            maoDiv.innerHTML = '';
-            (dadosSala[me].mao || []).forEach((cartaId, index) => {
+            // CARTAS DA GAVETA (Mão Lado a Lado)
+            const gavetaDiv = document.getElementById('cartas-da-gaveta');
+            gavetaDiv.innerHTML = '';
+            (dadosSala[me].mao || []).forEach(cartaId => {
                 const info = INFO_CARTAS[cartaId] || { miniatura: 'fundo_carta.png' };
-                // w-[26vh] max-w-[145px] -> Ocupam toda a base e sobrepõem bonito
-                maoDiv.innerHTML += `
-                    <div onclick="abrirSuaCarta('${cartaId}')" class="w-[26vh] max-w-[145px] aspect-[2.5/3.5] bg-gray-800 rounded-xl shadow-2xl border-[3px] border-black hover:border-[#dca3e8] cursor-pointer hover-carta overflow-hidden" style="z-index: ${index};">
-                        <img src="${info.miniatura || info.imagem}" class="w-full h-full object-cover">
+                gavetaDiv.innerHTML += `
+                    <div onclick="window.mostrarToast('Sua carta da gaveta clicada!')" class="w-[24vh] max-w-[150px] aspect-[2.5/3.5] bg-gray-800 rounded-xl shadow-2xl border-4 border-black hover:border-[#dca3e8] cursor-pointer hover:scale-105 transition-transform flex-shrink-0">
+                        <img src="${info.miniatura || info.imagem}" class="w-full h-full object-cover rounded-lg">
                     </div>`;
             });
-            document.getElementById('deck-count').innerText = dadosSala[me].deck?.length || 0;
         }
 
-        window.verCartaMesa = function(id) { alert("Zoom na carta da mesa: " + id); }
-        window.abrirSuaCarta = function(id) { alert("Abrir minha carta para jogar: " + id); }
-
         // ===============================================
-        // DADOS DE TESTE (MOCK PARA VOCÊ VER A TELA PRONTA)
+        // SIMULAÇÃO DE TESTE (MOCK DATA)
         // ===============================================
         setTimeout(() => {
             minhaRole = 'jogador1';
             dadosSala = {
                 liderRodada: 'jogador1', 
-                vezAtual: 'jogador1',    
                 atributoRodada: 'AURA',  
                 filaTurno: ['jogador1', 'jogador3', 'jogador2', 'jogador4'],
-                mesa: {
-                    jogador1: null, 
-                    jogador3: null, 
-                    jogador2: null, 
-                    jogador4: null  
-                },
+                mesa: { jogador1: null, jogador3: null, jogador2: null, jogador4: null },
                 jogador1: { nome: 'Douglas', mao: ['c1', 'c2', 'c3', 'c4', 'c5'], deck: new Array(15) },
-                jogador2: { nome: 'Parça', mao: ['c1', 'c2', 'c3', 'c4', 'c5'], deck: new Array(15) },
-                jogador3: { nome: 'Rival 1', mao: ['c1', 'c2', 'c3', 'c4', 'c5'], deck: new Array(15) },
-                jogador4: { nome: 'Rival 2', mao: ['c1', 'c2', 'c3', 'c4', 'c5'], deck: new Array(15) }
+                jogador2: { nome: 'Parça', mao: [], deck: new Array(15) },
+                jogador3: { nome: 'Rival 1', mao: [], deck: new Array(15) },
+                jogador4: { nome: 'Rival 2', mao: [], deck: new Array(15) }
             };
-            
             renderizarMesa();
         }, 500);
 

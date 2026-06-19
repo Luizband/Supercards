@@ -92,7 +92,7 @@ export const INFO_CARTAS = {
 
     "045": { nome: "João de 4 em SP", raridade: "Rara", expansao: "base", pontos: 3, aura: 30, fofura: 26, diversao: 75, aleatoriedade: 42, imagem: "cartas/045.png" },
 
-    "046": { nome: "Mikaoinese", raridade: "Lendária", expansao: "base", pontos: 5, aura: 55, fofura: 68, diversao: 86, aleatoriedade: 31, imagem: "cartas/046.png" },
+    "046": { nome: "Mikaionese", raridade: "Lendária", expansao: "base", pontos: 5, aura: 55, fofura: 68, diversao: 86, aleatoriedade: 31, imagem: "cartas/046.png" },
 
     "047": { nome: "Garoto de Ipanema", raridade: "Lendária", expansao: "base", pontos: 5, aura: 66, fofura: 81, diversao: 40, aleatoriedade: 19, imagem: "cartas/047.png" },
 

@@ -247,8 +247,7 @@
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { getFirestore, doc, onSnapshot, updateDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         import { INFO_CARTAS } from './cartas.js';
@@ -270,12 +269,11 @@
         let salaId = null;
         let dadosSala = null;
         let cartaFocadaId = null;
-        // Tenta forçar a tela a deitar no celular automaticamente
+        
         try { screen.orientation.lock("landscape").catch(e => console.log("Rotação tratada pelo Manifest.")); } catch(e) {}
 
         let roleParceiro = null, roleOpp1 = null, roleOpp2 = null;
 
-        // Utilitários UI
         window.mostrarToast = function(msg) {
             const c = document.getElementById('toast-container');
             const t = document.createElement('div'); t.className = 'toast-msg'; t.innerHTML = msg;
@@ -293,22 +291,16 @@
             return array;
         }
 
-        // ==========================================
-        // LÓGICA DE REAÇÃO GLOBAL
-        // ==========================================
         window.timersReacao = {};
         window.dispararReacaoLocal = function(emoji) {
             document.getElementById('menu-reacoes').classList.add('hidden');
             if(!salaId) return;
-            // Salva a reação no Firebase para todos verem
             updateDoc(doc(db, "partidas", salaId), { ultimaReacao: { uid: currentUserUid, emoji: emoji, ts: Date.now() } });
         };
         
         function processarReacao(reacao) {
             if(!reacao || !reacao.uid) return;
             let idAlvo = null;
-            
-            // Procura quem mandou a reação pelas 4 cadeiras fixas
             ['jogador1', 'jogador2', 'jogador3', 'jogador4'].forEach(role => {
                 if(dadosSala[role] && dadosSala[role].uid === reacao.uid) idAlvo = role;
             });
@@ -324,32 +316,33 @@
             }
         }
 
+        function definirRoles() {
+            if(minhaRole === 'jogador1') { roleParceiro = 'jogador2'; roleOpp1 = 'jogador3'; roleOpp2 = 'jogador4'; }
+            if(minhaRole === 'jogador2') { roleParceiro = 'jogador1'; roleOpp1 = 'jogador4'; roleOpp2 = 'jogador3'; }
+            if(minhaRole === 'jogador3') { roleParceiro = 'jogador4'; roleOpp1 = 'jogador1'; roleOpp2 = 'jogador2'; }
+            if(minhaRole === 'jogador4') { roleParceiro = 'jogador3'; roleOpp1 = 'jogador2'; roleOpp2 = 'jogador1'; }
+        }
+
         function renderizarMesa() {
             if(!dadosSala || !minhaRole) return;
 
-            // 1. Pílulas (Ordem Física Fixa)
-            ['jogador1', 'jogador2', 'jogador3', 'jogador4'].forEach(role => {
+            // 1. PÍLULAS DA ESQUERDA (Ordem Visual Fixa)
+            ['jogador1', 'jogador3', 'jogador2', 'jogador4'].forEach(role => {
                 const jog = dadosSala[role];
                 if (jog) {
                     document.getElementById(`nome-${role}`).innerText = jog.nome;
                     if(jog.foto) document.getElementById(`foto-${role}`).src = jog.foto;
                 }
                 
-                // Limpa o brilho anterior
                 document.getElementById(`glow-${role}`).classList.remove('glow-lider');
-                
-                // Se esse slot for o celular atual, exibe a tag "VOCÊ" para o player se achar na tela
                 const tag = document.getElementById(`tag-${role}`);
                 if (role === minhaRole) tag.classList.remove('hidden');
                 else tag.classList.add('hidden');
             });
 
-            // Acende o Líder atual
-            if(dadosSala.liderRodada) {
-                document.getElementById(`glow-${dadosSala.liderRodada}`).classList.add('glow-lider');
-            }
+            if(dadosSala.liderRodada) document.getElementById(`glow-${dadosSala.liderRodada}`).classList.add('glow-lider');
 
-            // 2. Placar e Atributo
+            // 2. PLACAR E ATRIBUTO
             if(dadosSala.atributoRodada) {
                 document.getElementById('box-atributo').classList.remove('hidden');
                 document.getElementById('texto-atributo').innerText = dadosSala.atributoRodada;
@@ -359,28 +352,37 @@
                 document.getElementById('placar-ao-vivo').classList.add('hidden');
             }
 
-            // 3. Cartas da Mesa (Centro)
+            // 3. CENTRO DA MESA (Acompanha a filaTurno = Esquerda para a Direita)
             const mesaDiv = document.getElementById('mesa-combate');
             mesaDiv.innerHTML = '';
             let somaAliado = 0, somaInimigo = 0;
 
             if(dadosSala.filaTurno) {
                 dadosSala.filaTurno.forEach(role => {
-                    const cartaId = dadosSala.mesa[role];
+                    const cartaId = dadosSala.mesa ? dadosSala.mesa[role] : null;
+                    let isAliado = [minhaRole, roleParceiro].includes(role);
+                    
                     if (cartaId) {
                         const info = INFO_CARTAS[cartaId] || { miniatura: 'fundo_carta.png' };
-                        // Calcula Somas ao Vivo
                         if(dadosSala.atributoRodada) {
                             let valor = info[dadosSala.atributoRodada.toLowerCase()] || 0;
-                            if([minhaRole, roleParceiro].includes(role)) somaAliado += valor;
+                            if(isAliado) somaAliado += valor;
                             else somaInimigo += valor;
                         }
+                        
+                        let borderColor = isAliado ? 'border-[#4ade80]' : 'border-red-500';
                         mesaDiv.innerHTML += `
-                            <div class="w-[28vh] max-w-[170px] aspect-[2.5/3.5] bg-gray-800 rounded-xl shadow-[0_0_30px_rgba(255,255,255,0.2)] border-2 border-white flex-shrink-0">
+                            <div class="w-[28vh] max-w-[170px] aspect-[2.5/3.5] bg-gray-800 rounded-xl shadow-[0_0_30px_rgba(255,255,255,0.2)] border-2 ${borderColor} flex-shrink-0 relative">
+                                <span class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-black/80 px-2 py-0.5 rounded text-[8px] font-black ${isAliado ? 'text-[#4ade80]' : 'text-red-500'} border border-white/20 whitespace-nowrap">${dadosSala[role]?.nome || ''}</span>
                                 <img src="${info.miniatura || info.imagem}" class="w-full h-full object-cover rounded-[10px]">
                             </div>`;
                     } else {
-                        mesaDiv.innerHTML += `<div class="w-[28vh] max-w-[170px] aspect-[2.5/3.5] bg-black/50 rounded-xl shadow-inner border-2 border-white/20 border-dashed flex-shrink-0"></div>`;
+                        let borderColor = isAliado ? 'border-[#4ade80]/50' : 'border-red-500/50';
+                        let bgIcon = isAliado ? 'bg-[#4ade80]/10' : 'bg-red-500/10';
+                        mesaDiv.innerHTML += `
+                            <div class="w-[28vh] max-w-[170px] aspect-[2.5/3.5] ${bgIcon} rounded-xl shadow-inner border-2 ${borderColor} border-dashed flex-shrink-0 flex items-center justify-center relative">
+                                <span class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-black/80 px-2 py-0.5 rounded text-[8px] font-black ${isAliado ? 'text-[#4ade80]' : 'text-red-500'} border border-white/20 whitespace-nowrap">${dadosSala[role]?.nome || ''}</span>
+                            </div>`;
                     }
                 });
             }
@@ -389,12 +391,11 @@
             document.getElementById('placar-inimigo').innerText = somaInimigo;
             document.getElementById('deck-count').innerText = dadosSala[minhaRole].deck?.length || 0;
 
-            // 4. Gaveta (Sua Mão)
+            // 4. GAVETA
             const gavetaDiv = document.getElementById('cartas-da-gaveta');
             gavetaDiv.innerHTML = '';
             (dadosSala[minhaRole].mao || []).forEach(cartaId => {
                 const info = INFO_CARTAS[cartaId] || { miniatura: 'fundo_carta.png' };
-                // Se a carta já foi jogada na mesa, ela não renderiza na gaveta
                 if (dadosSala.mesa && dadosSala.mesa[minhaRole] === cartaId) return;
                 
                 gavetaDiv.innerHTML += `
@@ -404,9 +405,6 @@
             });
         }
 
-        // ==========================================
-        // FLUXO DE JOGADA
-        // ==========================================
         window.abrirAcaoCarta = function(id) {
             if (dadosSala.status !== 'jogando') return;
             const quemJoga = dadosSala.filaTurno[dadosSala.vezAtual];
@@ -418,7 +416,6 @@
             cartaFocadaId = id;
             document.getElementById('zoom-img').src = INFO_CARTAS[id]?.imagem || 'fundo_carta.png';
             
-            // Se eu sou o Líder (primeiro da roda), escolho o atributo. Senão, só jogo a carta.
             if (minhaRole === dadosSala.liderRodada) {
                 document.getElementById('painel-atributos').classList.remove('hidden');
                 document.getElementById('painel-defesa').classList.add('hidden');
@@ -428,8 +425,8 @@
                 document.getElementById('btn-defender').innerText = `JOGAR CARTA (${dadosSala.atributoRodada.toUpperCase()})`;
             }
             
-            toggleGaveta(); // Recolhe gaveta
-            document.getElementById('modal-zoom').classList.remove('hidden'); // Abre Modal
+            toggleGaveta(); 
+            document.getElementById('modal-zoom').classList.remove('hidden'); 
         };
 
         window.confirmarJogada = async function(attrEscolhido) {
@@ -437,22 +434,17 @@
             if (!cartaFocadaId) return;
 
             let updates = {};
-            // Registra a carta na mesa
             updates[`mesa.${minhaRole}`] = cartaFocadaId;
 
-            // Se for o Líder jogando a primeira carta, trava o atributo da rodada
             if (minhaRole === dadosSala.liderRodada && attrEscolhido) {
                 updates['atributoRodada'] = attrEscolhido;
             }
 
-            // Move a roda
             let novaVez = (dadosSala.vezAtual || 0) + 1;
             
             if (novaVez >= 4) {
-                // Os 4 jogaram! Aciona o Host para resolver a porradaria.
                 updates['statusTurno'] = 'resolvendo';
             } else {
-                // Passa a vez para o próximo
                 updates['vezAtual'] = novaVez;
                 updates['quemJoga'] = dadosSala.filaTurno[novaVez];
             }
@@ -461,9 +453,6 @@
             await updateDoc(doc(db, "partidas", salaId), updates);
         };
 
-        // ==========================================
-        // RESOLUÇÃO MATEMÁTICA (SOMENTE O HOST)
-        // ==========================================
         async function resolverCombateHost() {
             if (window.resolvendo) return; window.resolvendo = true;
             
@@ -474,9 +463,8 @@
             let info1 = INFO_CARTAS[cJ1]||{}; let info2 = INFO_CARTAS[cJ2]||{};
             let info3 = INFO_CARTAS[cJ3]||{}; let info4 = INFO_CARTAS[cJ4]||{};
 
-            // SOMAS PRINCIPAIS
-            let somaEquipe1 = (info1[attr]||0) + (info2[attr]||0); // Host + Parceiro
-            let somaEquipe2 = (info3[attr]||0) + (info4[attr]||0); // Inimigo 1 + Inimigo 2
+            let somaEquipe1 = (info1[attr]||0) + (info2[attr]||0); 
+            let somaEquipe2 = (info3[attr]||0) + (info4[attr]||0); 
 
             let vencedorTurno = null;
             let msgToast = "";
@@ -486,46 +474,31 @@
             } else if (somaEquipe2 > somaEquipe1) {
                 vencedorTurno = 'equipe2'; msgToast = "Os rivais ganharam o turno!";
             } else {
-                // EMPATE: A Carta "Pico de Força" salva!
-                const getPico = (card) => {
-                    const atrs = ['aura', 'fofura', 'diversao', 'aleatoriedade'].filter(a => a !== attr);
-                    return Math.max(...atrs.map(a => card[a] || 0));
-                };
+                const getPico = (card) => Math.max(...['aura', 'fofura', 'diversao', 'aleatoriedade'].filter(a => a !== attr).map(a => card[a] || 0));
                 let picoE1 = Math.max(getPico(info1), getPico(info2));
                 let picoE2 = Math.max(getPico(info3), getPico(info4));
 
-                if (picoE1 > picoE2) {
-                    vencedorTurno = 'equipe1'; msgToast = "Desempate! Sua dupla ganhou no atributo extra!";
-                } else if (picoE2 > picoE1) {
-                    vencedorTurno = 'equipe2'; msgToast = "Desempate! Os rivais ganharam no atributo extra!";
-                } else {
-                    vencedorTurno = 'empate_absoluto'; msgToast = "Empate Absoluto! Cada dupla ficou com suas cartas.";
-                }
+                if (picoE1 > picoE2) { vencedorTurno = 'equipe1'; msgToast = "Desempate! Sua dupla ganhou no atributo extra!"; } 
+                else if (picoE2 > picoE1) { vencedorTurno = 'equipe2'; msgToast = "Desempate! Os rivais ganharam no atributo extra!"; } 
+                else { vencedorTurno = 'empate_absoluto'; msgToast = "Empate Absoluto! Cada dupla ficou com suas cartas."; }
             }
 
-            // Distribuição de Cartas Ganhas (Pilha de Vitórias)
             let e1Pilha = [...(dadosSala.jogador1.pilhaVitorias || [])];
-            let e2Pilha = [...(dadosSala.jogador3.pilhaVitorias || [])]; // J3 guarda as vitórias da Equipe 2
+            let e2Pilha = [...(dadosSala.jogador3.pilhaVitorias || [])]; 
             
-            if (vencedorTurno === 'equipe1') {
-                e1Pilha.push(cJ1, cJ2, cJ3, cJ4);
-            } else if (vencedorTurno === 'equipe2') {
-                e2Pilha.push(cJ1, cJ2, cJ3, cJ4);
-            } else if (vencedorTurno === 'empate_absoluto') {
-                e1Pilha.push(cJ1, cJ2); e2Pilha.push(cJ3, cJ4);
-            }
+            if (vencedorTurno === 'equipe1') { e1Pilha.push(cJ1, cJ2, cJ3, cJ4); } 
+            else if (vencedorTurno === 'equipe2') { e2Pilha.push(cJ1, cJ2, cJ3, cJ4); } 
+            else if (vencedorTurno === 'empate_absoluto') { e1Pilha.push(cJ1, cJ2); e2Pilha.push(cJ3, cJ4); }
 
-            // Tira a carta jogada da mão e puxa 1 nova do deck para cada
             const reabastecer = (role) => {
-                let mao = [...dadosSala[role].mao]; let deck = [...dadosSala[role].deck];
-                mao.splice(mao.indexOf(dadosSala.mesa[role]), 1);
+                let mao = [...(dadosSala[role].mao || [])]; let deck = [...(dadosSala[role].deck || [])];
+                if(dadosSala.mesa[role]) mao.splice(mao.indexOf(dadosSala.mesa[role]), 1);
                 if(deck.length > 0) mao.push(deck.shift());
                 return { mao, deck };
             };
             let j1N = reabastecer('jogador1'); let j2N = reabastecer('jogador2');
             let j3N = reabastecer('jogador3'); let j4N = reabastecer('jogador4');
 
-            // Prepara a Próxima Roda
             const ORDEM = ['jogador1', 'jogador3', 'jogador2', 'jogador4'];
             let nextIndex = (ORDEM.indexOf(dadosSala.liderRodada) + 1) % 4;
             let novoLider = ORDEM[nextIndex];
@@ -550,9 +523,6 @@
             window.resolvendo = false;
         }
 
-        // ==========================================
-        // CONEXÃO FIREBASE
-        // ==========================================
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUserUid = user.uid;
@@ -571,12 +541,12 @@
 
                     definirRoles();
 
-                    // Host: Preparar a Mesa (Distribuição inicial)
+                    // Host: PREPARAÇÃO BLINDADA COM '|| []'
                     if (isHost && dadosSala.status === 'aguardando' && dadosSala.jogador1 && dadosSala.jogador2 && dadosSala.jogador3 && dadosSala.jogador4 && !dadosSala.mesa) {
-                        const j1D = [...dadosSala.jogador1.deck]; shuffle(j1D);
-                        const j2D = [...dadosSala.jogador2.deck]; shuffle(j2D);
-                        const j3D = [...dadosSala.jogador3.deck]; shuffle(j3D);
-                        const j4D = [...dadosSala.jogador4.deck]; shuffle(j4D);
+                        const j1D = [...(dadosSala.jogador1.deck || [])]; shuffle(j1D);
+                        const j2D = [...(dadosSala.jogador2.deck || [])]; shuffle(j2D);
+                        const j3D = [...(dadosSala.jogador3.deck || [])]; shuffle(j3D);
+                        const j4D = [...(dadosSala.jogador4.deck || [])]; shuffle(j4D);
 
                         const ORDEM = ['jogador1', 'jogador3', 'jogador2', 'jogador4'];
                         let lider = ORDEM[Math.floor(Math.random() * 4)];
@@ -591,35 +561,29 @@
                             'jogador2.mao': j2D.splice(0,5), 'jogador2.deck': j2D, 
                             'jogador3.mao': j3D.splice(0,5), 'jogador3.deck': j3D, 'jogador3.pilhaVitorias': [],
                             'jogador4.mao': j4D.splice(0,5), 'jogador4.deck': j4D
-                        });
+                        }).catch(e => console.error("Erro na distribuição de cartas: ", e));
                         return;
                     }
 
-                    // Se já estamos jogando, processa a tela
                     if (dadosSala.status === 'jogando') {
                         renderizarMesa();
 
-                        // Verifica Reações
                         if (window.ultimoTsReacao !== dadosSala.ultimaReacao?.ts) {
                             window.ultimoTsReacao = dadosSala.ultimaReacao?.ts;
-                            (dadosSala.ultimaReacao);
+                            processarReacao(dadosSala.ultimaReacao); 
                         }
                         
-                        // Verifica Toasts de Avisos (Ex: Quem ganhou o turno)
                         if (window.ultimoTsAviso !== dadosSala.timestampAviso) {
                             window.ultimoTsAviso = dadosSala.timestampAviso;
                             if(dadosSala.avisoToastGlobal) window.mostrarToast(dadosSala.avisoToastGlobal);
                         }
 
-                        // Host resolve a matemática
                         if (isHost && dadosSala.statusTurno === 'resolvendo') {
                             resolverCombateHost();
                         }
                     }
 
-                    // Verifica se Finalizou
                     if (dadosSala.status === 'finalizada' && document.getElementById('modal-resultado-final').classList.contains('hidden')) {
-                        // Calcula pontos e mostra modal de vitória
                         let ptsAliado = 0, ptsInimigo = 0;
                         let aliPilha = (minhaRole === 'jogador1' || minhaRole === 'jogador2') ? dadosSala.jogador1.pilhaVitorias : dadosSala.jogador3.pilhaVitorias;
                         let iniPilha = (minhaRole === 'jogador1' || minhaRole === 'jogador2') ? dadosSala.jogador3.pilhaVitorias : dadosSala.jogador1.pilhaVitorias;

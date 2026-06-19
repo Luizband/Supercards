@@ -134,11 +134,11 @@
                 </div>
             </div>
 
-            <!-- O CENTRO DA MESA -->
-            <div class="flex-grow flex items-center justify-center relative w-full pb-4">
+            <!-- O CENTRO DA MESA (Cartas um pouco mais para cima) -->
+            <div class="flex-grow flex items-center justify-center relative w-full pb-16 md:pb-24">
                 
                 <!-- Deck Count (Movido para dentro da mesa, canto inferior esquerdo) -->
-                <div class="absolute bottom-4 left-4 flex flex-col items-center justify-center bg-black/60 border border-white/20 rounded-md p-1 w-12 h-16 shadow-lg z-20">
+                <div class="absolute bottom-2 md:bottom-4 left-4 flex flex-col items-center justify-center bg-black/60 border border-white/20 rounded-md p-1 w-12 h-16 shadow-lg z-20">
                     <span id="deck-count" class="text-white font-black text-2xl z-10 drop-shadow-[0_2px_2px_rgba(0,0,0,1)]">0</span>
                     <img src="fundo_carta.png" class="absolute inset-0 w-full h-full object-cover opacity-40 rounded-md">
                 </div>
@@ -149,18 +149,28 @@
                 </div>
             </div>
 
-            <div onclick="toggleGaveta()" class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-[#dca3e8] text-[#7a32a8] font-black py-3 px-4 rounded-l-xl cursor-pointer shadow-[-5px_0_20px_rgba(0,0,0,0.4)] z-30 border-y-4 border-l-4 border-[#bc7bd4] flex items-center gap-2 hover:bg-white transition-colors">
+            <!-- GATILHO DA GAVETA (Botão movido para baixo das cartas) -->
+            <div onclick="toggleGaveta()" class="absolute right-0 bottom-4 md:bottom-6 bg-[#dca3e8] text-[#7a32a8] font-black py-3 px-4 rounded-l-xl cursor-pointer shadow-[-5px_0_20px_rgba(0,0,0,0.4)] z-40 border-y-4 border-l-4 border-[#bc7bd4] flex items-center gap-2 hover:bg-white transition-colors">
                 <span class="text-lg leading-none mt-0.5">◀</span>
                 <span class="text-[10px] md:text-xs uppercase tracking-widest whitespace-nowrap">Minhas Cartas</span>
             </div>
 
+            <!-- FUNDO INVISÍVEL (Clica fora para fechar a gaveta) -->
             <div id="overlay-gaveta" onclick="toggleGaveta()" class="absolute inset-0 bg-black/40 z-[50] hidden backdrop-blur-sm transition-opacity"></div>
 
-            <div id="gaveta-mao" class="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-[110%] transition-transform duration-300 z-[60] bg-black/90 border-l-4 border-y-4 border-[#dca3e8] rounded-l-3xl p-4 md:p-6 shadow-[-10px_0_30px_rgba(0,0,0,0.8)] max-w-[95%] md:max-w-[85%] flex flex-col items-center">
-                <h2 class="text-[#dca3e8] font-black text-sm mb-3 tracking-widest uppercase drop-shadow-md">Sua Mão</h2>
+            <!-- A GAVETA ENXUTA (Mantém a altura no centro, mas envelopa apenas as cartas) -->
+            <div id="gaveta-mao" class="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-[110%] transition-transform duration-300 z-[60] bg-black/95 border-l-4 border-y-4 border-[#dca3e8] rounded-l-3xl p-4 md:p-6 shadow-[-10px_0_30px_rgba(0,0,0,0.8)] max-w-[95%] md:max-w-[85%] flex flex-col items-center">
                 
+                <!-- TÍTULO E BOTÃO "X" -->
+                <div class="flex justify-between items-center w-full mb-3 px-2">
+                    <h2 class="text-[#dca3e8] font-black text-sm md:text-base tracking-widest uppercase drop-shadow-md">Sua Mão</h2>
+                    <button onclick="toggleGaveta()" class="text-[#dca3e8] hover:text-white font-black text-3xl transition-colors leading-none active:scale-90">&times;</button>
+                </div>
+                
+                <!-- Cartas lado a lado sem sobrepor -->
                 <div id="cartas-da-gaveta" class="flex items-center gap-3 w-full overflow-x-auto no-scrollbar py-2 px-2">
-                    </div>
+                    <!-- JS Injeta Aqui -->
+                </div>
             </div>
 
         </div>
@@ -294,9 +304,9 @@
             const gaveta = document.getElementById('gaveta-mao');
             const overlay = document.getElementById('overlay-gaveta');
             
-            // Alterna a gaveta entrando/saindo da tela
+            // Faz a gaveta entrar ou sair da tela
             gaveta.classList.toggle('translate-x-[110%]');
-            // Mostra/esconde o fundo que permite clicar fora
+            // Acende ou apaga o fundo invisível (que permite fechar clicando fora)
             overlay.classList.toggle('hidden');
         };
 

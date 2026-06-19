@@ -238,11 +238,11 @@
 
     <div id="modal-desistir" class="hidden fixed inset-0 bg-black/80 z-[400] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl relative">
-            <h2 class="text-red-600 font-black text-xl mb-2 uppercase drop-shadow-sm">Abandonar a Dupla?</h2>
-            <p class="text-[#7a32a8] font-bold text-xs mb-6">Se você sair agora, seu parceiro jogará sozinho e a derrota será garantida.</p>
+            <h2 class="text-red-600 font-black text-xl mb-2 uppercase drop-shadow-sm">Abandonar a Partida?</h2>
+            <p class="text-[#7a32a8] font-bold text-xs mb-6">Se você sair agora, a partida será CANCELADA para todos e ninguém ganhará pontos.</p>
             <div class="flex justify-center gap-4">
                 <button onclick="document.getElementById('modal-desistir').classList.add('hidden')" class="flex-1 bg-gray-500 text-white font-black py-3 rounded-full shadow-md uppercase text-sm border-2 border-gray-600">Ficar</button>
-                <button onclick="window.location.href='batalha.html'" class="flex-1 bg-red-600 text-white font-black py-3 rounded-full shadow-md uppercase text-sm border-2 border-red-800">Desistir</button>
+                <button onclick="confirmarDesistencia()" class="flex-1 bg-red-600 text-white font-black py-3 rounded-full shadow-md uppercase text-sm border-2 border-red-800">Desistir</button>
             </div>
         </div>
     </div>
@@ -418,6 +418,19 @@
             });
         }
 
+        window.confirmarDesistencia = async function() {
+            if(!salaId) return window.location.href = 'batalha.html';
+            document.getElementById('modal-desistir').classList.add('hidden');
+            
+            // Grita pro Firebase que a partida foi abortada e diz quem foi o fujão
+            try {
+                await updateDoc(doc(db, "partidas", salaId), {
+                    status: 'abandonada',
+                    quemAbandonou: dadosSala[minhaRole].nome
+                });
+            } catch(e) { console.error(e); }
+        };
+
         window.abrirAcaoCarta = function(id) {
             // Trava o clique se estiver rolando a animação de resolução do turno!
             if (dadosSala.status !== 'jogando' || dadosSala.statusTurno === 'resolvendo') return;
@@ -573,6 +586,13 @@
                 onSnapshot(doc(db, "partidas", salaId), (docSnap) => {
                     if (!docSnap.exists()) return window.location.href = 'batalha.html';
                     dadosSala = docSnap.data();
+
+                    // TRAVA DE ABANDONO: Expulsa todo mundo na mesma hora se alguém desistir
+                    if (dadosSala.status === 'abandonada') {
+                        alert(`🛑 PARTIDA ENCERRADA!\n\n${dadosSala.quemAbandonou || 'Um jogador'} abandonou o jogo.`);
+                        window.location.href = 'batalha.html';
+                        return;
+                    }
 
                     if (dadosSala.jogador1?.uid === currentUserUid) { minhaRole = 'jogador1'; isHost = true; }
                     else if (dadosSala.jogador2?.uid === currentUserUid) { minhaRole = 'jogador2'; isHost = false; }

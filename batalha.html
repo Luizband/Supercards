@@ -675,7 +675,10 @@
         };
 
         window.fecharModalDuo = function() {
-            if (partidaIdAtual && unsubscribeDuo) window.sairLobbyDuo(true);
+            if (partidaIdAtual && unsubscribeDuo) {
+                // Ao fechar pelo 'X', manda o comando para sair/destruir a sala E forçar a volta pro menu
+                window.sairLobbyDuo(false); 
+            }
             document.getElementById('modal-duo').classList.add('hidden');
         };
 

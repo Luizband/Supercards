@@ -254,10 +254,19 @@
         </div>
     </div>
 
+    <div id="modal-fim-etapa" class="hidden fixed inset-0 bg-black/95 z-[250] flex flex-col items-center justify-start pt-10 p-4 backdrop-blur-md">
+        <h1 id="fim-titulo-jogador" class="text-[#dca3e8] font-black text-xl uppercase tracking-widest mb-1 text-center">CARTAS GANHAS POR</h1>
+        <h2 id="fim-pontos-jogador" class="text-[#4ade80] font-black text-4xl mb-6 drop-shadow-md">0 PTS</h2>
+        <div id="fim-grid-cartas" class="grid grid-cols-4 gap-2 w-full max-w-sm overflow-y-auto no-scrollbar content-start flex-grow pb-10"></div>
+        <div class="w-full max-w-sm pb-8 flex-shrink-0 flex justify-center mt-4">
+            <button onclick="avancarEtapaFim()" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-3 px-12 rounded-full shadow-lg border-2 border-[#bc7bd4] tracking-widest uppercase">AVANÇAR</button>
+        </div>
+    </div>
+
     </div> <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, setDoc, getDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         import { INFO_CARTAS } from './cartas.js';
 
         const app = initializeApp({
@@ -278,6 +287,10 @@
         let dadosSala = null;
         let cartaFocadaId = null;
         
+        // VARIÁVEIS DA CASCATA FINAL
+        let etapaFim = 0, pointsEquipe1 = 0, pointsEquipe2 = 0;
+        window.etapaIniciada = false;
+
         try { screen.orientation.lock("landscape").catch(e => console.log("Rotação tratada pelo Manifest.")); } catch(e) {}
 
         let roleParceiro = null, roleOpp1 = null, roleOpp2 = null;
@@ -295,13 +308,11 @@
 
         window.fecharZoomCarta = () => {
             document.getElementById('modal-zoom').classList.add('hidden');
-            // Reabre a gaveta SÓ se você cancelou a ação (clicou no X ou fora)
             if (document.getElementById('gaveta-mao').classList.contains('translate-x-[110%]')) {
                 toggleGaveta();
             }
         };
 
-        // Permite fechar clicando fora da carta
         document.getElementById('modal-zoom').addEventListener('click', function(e) {
             if (e.target === this) window.fecharZoomCarta();
         });
@@ -347,7 +358,6 @@
         function renderizarMesa() {
             if(!dadosSala || !minhaRole) return;
 
-            // Pílulas e Liderança Fixas Visuais
             ['jogador1', 'jogador3', 'jogador2', 'jogador4'].forEach(role => {
                 const jog = dadosSala[role];
                 if (jog) {
@@ -464,7 +474,6 @@
         };
 
         window.confirmarJogada = async function(attrEscolhido) {
-            // Fecha a carta visualmente SEM reabrir a gaveta
             document.getElementById('modal-zoom').classList.add('hidden');
 
             if (!cartaFocadaId) return;
@@ -518,16 +527,13 @@
                 else { vencedorTurno = 'empate_absoluto'; }
             }
 
-            // 1. Exibe a tela congelada com Banner para todo mundo ver o placar final
             await updateDoc(doc(db, "partidas", salaId), {
                 statusTurno: 'exibindo_resultado',
                 vencedorTurnoGlobal: vencedorTurno
             });
 
-            // 2. Aguarda 3.5 segundos!
             await new Promise(resolve => setTimeout(resolve, 3500));
 
-            // 3. Recolhe as cartas e reabastece até 5!
             let e1Pilha = [...(dadosSala.jogador1.pilhaVitorias || [])];
             let e2Pilha = [...(dadosSala.jogador3.pilhaVitorias || [])]; 
             
@@ -545,7 +551,6 @@
                     if(idx > -1) mao.splice(idx, 1);
                 }
                 
-                // MÁGICA DE SEGURANÇA: Garante a compra até ter 5 na mão!
                 while (mao.length < 5 && deck.length > 0) {
                     mao.push(deck.shift());
                 }
@@ -579,6 +584,112 @@
             });
             window.resolvendo = false;
         }
+
+        // ==========================================
+        // FLUXO DE FIM DE JOGO (CASCATA & RECOMPENSAS)
+        // ==========================================
+
+        window.concederRecompensasArena = async function(vitoria) {
+            if (!window.dadosSalvos) {
+                window.dadosSalvos = true;
+                try {
+                    const s = await getDoc(doc(db, "users", currentUserUid));
+                    if(s.exists()) {
+                        let d = s.data(); let ups = {};
+                        let ms = d.missoesDiarias || {}; let aM = false;
+                        
+                        (ms.lista || []).forEach(m => { 
+                            if(["batalhar","jogar_batalha","jogar"].includes(m.id) && m.progresso < m.meta) { m.progresso++; aM = true; } 
+                            if(vitoria && ["ganhar_partida","vencer_batalha","vencer"].includes(m.id) && m.progresso < m.meta) { m.progresso++; aM = true; } 
+                        });
+                        if(aM) ups.missoesDiarias = ms;
+
+                        if (vitoria) {
+                            ups['estatisticas.batalhasVencidas'] = increment(1); 
+                            let va = (d.estatisticas?.batalhasVencidas || 0) + 1;
+                            let xpB = 20; let moB = 20;
+                            
+                            if (va >= 30 && (!d.badges || !d.badges['badge-005'])) { 
+                                ups['badges.badge-005'] = true; xpB += 50; moB += 50; localStorage.setItem('novaBadge', 'Guerreiro'); 
+                            }
+                            
+                            let nA = d.nivel || 1; let nx = (d.xp || 0) + xpB; let sub = false; let pb = 0; let pp = 0;
+                            let mx = (nA <= 5) ? 200 : (nA <= 15 ? 750 : (nA <= 25 ? 1600 : 3000));
+                            while (nx >= mx && nA < 30) {
+                                nx -= mx; nA++; sub = true; moB += 30; pb++;
+                                if ([10, 20, 30].includes(nA)) pp++;
+                                mx = (nA <= 5) ? 200 : (nA <= 15 ? 750 : (nA <= 25 ? 1600 : 3000));
+                            }
+                            
+                            ups.xp = nx; ups.nivel = nA; ups.moedas = increment(moB);
+                            if(pb > 0) ups['inventario.pacoteBasico'] = increment(pb); 
+                            if(pp > 0) ups['inventario.pacotePremium'] = increment(pp);
+                            if(sub) localStorage.setItem('novoLevel', nA);
+                        }
+                        if(Object.keys(ups).length > 0) await updateDoc(doc(db, "users", currentUserUid), ups);
+                    }
+                } catch(e) { console.error("Erro ao salvar recompensas:", e); }
+            }
+        };
+
+        function montarGridFinal(k, titulo) {
+            const grid = document.getElementById('fim-grid-cartas'); grid.innerHTML = '';
+            let t = 0;
+            (dadosSala[k].pilhaVitorias || []).forEach(id => {
+                const i = INFO_CARTAS[id] || { pontos: 0 }; t += i.pontos;
+                grid.innerHTML += `<div class="relative aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-lg border border-black"><img src="${i.miniatura || i.imagem || 'fundo_carta.png'}" class="w-full h-full object-cover"></div>`;
+            });
+            document.getElementById('fim-titulo-jogador').innerText = titulo;
+            document.getElementById('fim-pontos-jogador').innerText = `${t} PTS`; return t;
+        }
+
+        window.iniciarCascataFinal = function() { 
+            if (window.etapaIniciada) return; 
+            window.etapaIniciada = true; 
+            etapaFim = 1; 
+            let isEquipe1 = (minhaRole === 'jogador1' || minhaRole === 'jogador2');
+            let roleMinhaEquipe = isEquipe1 ? 'jogador1' : 'jogador3';
+            pointsEquipe1 = montarGridFinal(roleMinhaEquipe, "CARTAS DA SUA DUPLA"); 
+            document.getElementById('modal-fim-etapa').classList.remove('hidden'); 
+        };
+
+        window.avancarEtapaFim = async function() {
+            etapaFim++;
+            let isEquipe1 = (minhaRole === 'jogador1' || minhaRole === 'jogador2');
+            
+            if (etapaFim === 2) {
+                let roleEquipeInimiga = isEquipe1 ? 'jogador3' : 'jogador1';
+                pointsEquipe2 = montarGridFinal(roleEquipeInimiga, "CARTAS DA DUPLA RIVAL");
+            } else if (etapaFim === 3) {
+                document.getElementById('modal-fim-etapa').classList.add('hidden');
+                
+                const myP = pointsEquipe1; 
+                const oppP = pointsEquipe2; 
+                const vitoria = myP > oppP;
+                
+                document.getElementById('pontos-final-aliado').innerHTML = `${myP} <span class="text-sm">Pts</span>`;
+                document.getElementById('pontos-final-inimigo').innerHTML = `${oppP} <span class="text-sm">Pts</span>`;
+                
+                if (vitoria) {
+                    document.getElementById('texto-vitoria').innerText = "VITÓRIA!";
+                    document.getElementById('texto-vitoria').className = "text-5xl font-black text-[#4ade80] uppercase tracking-widest mb-2 drop-shadow-[0_0_20px_#4ade80] text-center";
+                    document.getElementById('recompensas-final').classList.remove('hidden');
+                } else if (oppP > myP) {
+                    document.getElementById('texto-vitoria').innerText = "DERROTA";
+                    document.getElementById('texto-vitoria').className = "text-5xl font-black text-red-500 uppercase tracking-widest mb-2 drop-shadow-[0_0_20px_#ef4444] text-center";
+                    document.getElementById('recompensas-final').classList.add('hidden');
+                } else {
+                    document.getElementById('texto-vitoria').innerText = "EMPATE";
+                    document.getElementById('texto-vitoria').className = "text-5xl font-black text-yellow-400 uppercase tracking-widest mb-2 drop-shadow-[0_0_20px_#facc15] text-center";
+                    document.getElementById('recompensas-final').classList.add('hidden');
+                }
+                
+                document.getElementById('modal-resultado-final').classList.remove('hidden');
+
+                // INJETA AS RECOMPENSAS NO BANCO DE DADOS
+                await window.concederRecompensasArena(vitoria);
+            }
+        };
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -630,7 +741,6 @@
                     if (dadosSala.status === 'jogando') {
                         renderizarMesa();
 
-                        // PROCESSA O BANNER CENTRAL
                         const banner = document.getElementById('banner-turno');
                         const txtBanner = document.getElementById('texto-banner-turno');
                         
@@ -664,29 +774,9 @@
                         }
                     }
 
-                    if (dadosSala.status === 'finalizada' && document.getElementById('modal-resultado-final').classList.contains('hidden')) {
-                        let ptsAliado = 0, ptsInimigo = 0;
-                        let aliPilha = (minhaRole === 'jogador1' || minhaRole === 'jogador2') ? dadosSala.jogador1.pilhaVitorias : dadosSala.jogador3.pilhaVitorias;
-                        let iniPilha = (minhaRole === 'jogador1' || minhaRole === 'jogador2') ? dadosSala.jogador3.pilhaVitorias : dadosSala.jogador1.pilhaVitorias;
-                        
-                        (aliPilha || []).forEach(id => ptsAliado += (INFO_CARTAS[id]?.pontos || 0));
-                        (iniPilha || []).forEach(id => ptsInimigo += (INFO_CARTAS[id]?.pontos || 0));
-
-                        document.getElementById('pontos-final-aliado').innerHTML = `${ptsAliado} <span class="text-sm">Pts</span>`;
-                        document.getElementById('pontos-final-inimigo').innerHTML = `${ptsInimigo} <span class="text-sm">Pts</span>`;
-
-                        if(ptsAliado > ptsInimigo) {
-                            document.getElementById('texto-vitoria').innerText = "VITÓRIA!";
-                            document.getElementById('recompensas-final').classList.remove('hidden');
-                        } else if(ptsInimigo > ptsAliado) {
-                            document.getElementById('texto-vitoria').innerText = "DERROTA";
-                            document.getElementById('texto-vitoria').classList.replace('text-[#4ade80]', 'text-red-500');
-                        } else {
-                            document.getElementById('texto-vitoria').innerText = "EMPATE";
-                            document.getElementById('texto-vitoria').classList.replace('text-[#4ade80]', 'text-yellow-400');
-                        }
-                        
-                        document.getElementById('modal-resultado-final').classList.remove('hidden');
+                    // GATILHO DA CASCATA FINAL
+                    if (dadosSala.status === 'finalizada' && document.getElementById('modal-resultado-final').classList.contains('hidden') && document.getElementById('modal-fim-etapa').classList.contains('hidden')) {
+                        window.iniciarCascataFinal();
                     }
                 });
             } else { window.location.href = "index.html"; }

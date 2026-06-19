@@ -59,70 +59,63 @@
 
     <div id="main-arena" class="w-full h-full flex bg-gradient-to-r from-[#7a32a8]/90 via-gray-800/80 to-[#4ade80]/90 relative backdrop-blur-sm">
 
-        <!-- LADO ESQUERDO: JOGADORES (FLEX-1 PARA NÃO ESPREMER) -->
-        <div class="w-[35%] h-full flex flex-col justify-between p-2 md:p-4 bg-black/30 border-r-4 border-black/20 z-10 shadow-2xl overflow-hidden">
+        <div class="w-[26%] h-full flex flex-col justify-between p-1 md:p-3 bg-black/30 border-r-4 border-black/20 z-10 shadow-2xl overflow-hidden">
             
-            <!-- LISTA DE JOGADORES (ADAPTÁVEL) -->
-            <div class="flex flex-col justify-evenly flex-grow min-h-0 pb-2">
-                <!-- Inimigo 1 -->
-                <div class="flex items-center gap-2 md:gap-3">
+            <div class="flex flex-col justify-evenly flex-grow min-h-0 pb-1">
+                <div class="flex items-center gap-1.5 md:gap-3">
                     <div class="flex flex-col items-center relative">
                         <div id="glow-opp1" class="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-[#dca3e8] bg-gray-800 relative transition-all duration-300">
                             <span id="emoji-opp1" class="hidden absolute top-1/2 left-1/2 text-3xl md:text-5xl drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] z-30" style="transform: translate(-50%, -50%);"></span>
                         </div>
-                        <span id="nome-opp1" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[9px] px-3 py-0.5 rounded-full mt-1 uppercase shadow-md truncate max-w-[70px]">Inimigo 1</span>
+                        <span id="nome-opp1" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[9px] px-2 py-0.5 rounded-full mt-1 uppercase shadow-md truncate max-w-[65px] text-center">Inimigo 1</span>
                     </div>
-                    <div id="mini-mao-opp1" class="flex -space-x-1 opacity-90"></div>
+                    <div id="mini-mao-opp1" class="flex -space-x-1 opacity-90 hidden sm:flex"></div>
                 </div>
 
-                <!-- Parceiro -->
-                <div class="flex items-center gap-2 md:gap-3">
+                <div class="flex items-center gap-1.5 md:gap-3">
                     <div class="flex flex-col items-center relative">
                         <div id="glow-parceiro" class="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-[#dca3e8] bg-gray-800 relative transition-all duration-300">
                             <span id="emoji-parceiro" class="hidden absolute top-1/2 left-1/2 text-3xl md:text-5xl drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] z-30" style="transform: translate(-50%, -50%);"></span>
                         </div>
-                        <span id="nome-parceiro" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[9px] px-3 py-0.5 rounded-full mt-1 uppercase shadow-md truncate max-w-[70px]">Parceiro</span>
+                        <span id="nome-parceiro" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[9px] px-2 py-0.5 rounded-full mt-1 uppercase shadow-md truncate max-w-[65px] text-center">Parceiro</span>
                     </div>
-                    <div id="mini-mao-parceiro" class="flex -space-x-1 opacity-90"></div>
+                    <div id="mini-mao-parceiro" class="flex -space-x-1 opacity-90 hidden sm:flex"></div>
                 </div>
 
-                <!-- Inimigo 2 -->
-                <div class="flex items-center gap-2 md:gap-3">
+                <div class="flex items-center gap-1.5 md:gap-3">
                     <div class="flex flex-col items-center relative">
                         <div id="glow-opp2" class="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-[#dca3e8] bg-gray-800 relative transition-all duration-300">
                             <span id="emoji-opp2" class="hidden absolute top-1/2 left-1/2 text-3xl md:text-5xl drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] z-30" style="transform: translate(-50%, -50%);"></span>
                         </div>
-                        <span id="nome-opp2" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[9px] px-3 py-0.5 rounded-full mt-1 uppercase shadow-md truncate max-w-[70px]">Inimigo 2</span>
+                        <span id="nome-opp2" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[9px] px-2 py-0.5 rounded-full mt-1 uppercase shadow-md truncate max-w-[65px] text-center">Inimigo 2</span>
                     </div>
-                    <div id="mini-mao-opp2" class="flex -space-x-1 opacity-90"></div>
+                    <div id="mini-mao-opp2" class="flex -space-x-1 opacity-90 hidden sm:flex"></div>
+                </div>
+
+                <div class="relative w-full flex justify-center mt-3">
+                    <div id="menu-reacoes" class="hidden absolute bottom-[110%] left-1/2 transform -translate-x-1/2 w-max bg-[#dca3e8] p-3 rounded-xl grid grid-cols-4 gap-2 shadow-2xl border-2 border-[#bc7bd4] z-50">
+                        <button onclick="enviarReacao('my', '💣')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">💣</button>
+                        <button onclick="enviarReacao('my', '🖕')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">🖕</button>
+                        <button onclick="enviarReacao('my', '👀')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">👀</button>
+                        <button onclick="enviarReacao('my', '💖')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">💖</button>
+                        <button onclick="enviarReacao('my', '💀')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">💀</button>
+                        <button onclick="enviarReacao('my', '🤬')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">🤬</button>
+                        <button onclick="enviarReacao('my', '🤣')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">🤣</button>
+                        <button onclick="enviarReacao('my', '😭')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">😭</button>
+                    </div>
+                    <button onclick="document.getElementById('menu-reacoes').classList.toggle('hidden')" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[10px] px-2 py-2 rounded-xl border-2 border-[#bc7bd4] shadow-lg uppercase w-[90%] max-w-[100px] truncate text-center">
+                        Reação
+                    </button>
                 </div>
             </div>
 
-            <!-- VOCÊ (FIXO NO RODAPÉ DA COLUNA) -->
-            <div class="flex items-end justify-between md:justify-start gap-1 md:gap-4 flex-shrink-0 pt-2 border-t border-white/10">
-                <div class="relative">
-                    <div id="menu-reacoes" class="hidden absolute bottom-[110%] left-0 w-max bg-[#dca3e8] p-3 rounded-xl grid grid-cols-4 gap-2 shadow-2xl border-2 border-[#bc7bd4] z-50">
-                        <button onclick="enviarReacao('my', '💣')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 hover:bg-[#bc7bd4] rounded-lg transition-transform">💣</button>
-                        <button onclick="enviarReacao('my', '🖕')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 hover:bg-[#bc7bd4] rounded-lg transition-transform">🖕</button>
-                        <button onclick="enviarReacao('my', '👀')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 hover:bg-[#bc7bd4] rounded-lg transition-transform">👀</button>
-                        <button onclick="enviarReacao('my', '💖')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 hover:bg-[#bc7bd4] rounded-lg transition-transform">💖</button>
-                        <button onclick="enviarReacao('my', '💀')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 hover:bg-[#bc7bd4] rounded-lg transition-transform">💀</button>
-                        <button onclick="enviarReacao('my', '🤬')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 hover:bg-[#bc7bd4] rounded-lg transition-transform">🤬</button>
-                        <button onclick="enviarReacao('my', '🤣')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 hover:bg-[#bc7bd4] rounded-lg transition-transform">🤣</button>
-                        <button onclick="enviarReacao('my', '😭')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 hover:bg-[#bc7bd4] rounded-lg transition-transform">😭</button>
-                    </div>
-                    <button onclick="document.getElementById('menu-reacoes').classList.toggle('hidden')" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[10px] px-2 md:px-4 py-2 md:py-3 rounded-xl border-2 border-[#bc7bd4] shadow-lg uppercase">
-                        Escolher<br>Reação
-                    </button>
-                </div>
-
-                <div class="flex flex-col items-center relative mx-1">
+            <div class="flex items-end justify-center gap-3 flex-shrink-0 pt-2 border-t border-white/10 w-full">
+                <div class="flex flex-col items-center relative">
                     <div id="glow-my" class="w-12 h-12 md:w-16 md:h-16 rounded-full border-4 border-[#dca3e8] bg-gray-800 relative transition-all duration-300">
                         <span id="emoji-my" class="hidden absolute top-1/2 left-1/2 text-4xl md:text-6xl drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] z-30" style="transform: translate(-50%, -50%);"></span>
                     </div>
-                    <span id="nome-my" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[9px] md:text-[10px] px-3 py-0.5 rounded-full mt-1 uppercase shadow-md border border-[#bc7bd4] truncate max-w-[75px]">Você</span>
+                    <span id="nome-my" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[9px] md:text-[10px] px-3 py-0.5 rounded-full mt-1 uppercase shadow-md border border-[#bc7bd4] truncate max-w-[70px]">Você</span>
                 </div>
-
                 <div class="flex flex-col items-center justify-center bg-black/60 border border-white/20 rounded p-1 w-10 md:w-12 h-14 md:h-16 relative shadow-lg">
                     <span id="deck-count" class="text-white font-black text-xl md:text-2xl z-10 drop-shadow-[0_2px_2px_rgba(0,0,0,1)]">0</span>
                     <img src="fundo_carta.png" class="absolute inset-0 w-full h-full object-cover opacity-40 rounded">
@@ -130,50 +123,32 @@
             </div>
         </div>
 
-        <!-- LADO DIREITO: CAMPO E MÃO (POSICIONAMENTO ABSOLUTO) -->
-        <div class="w-[65%] h-full relative overflow-hidden z-10">
+        <div class="w-[74%] h-full relative overflow-hidden z-10">
             
-            <!-- TOPO: STATUS, PLACAR E DESISTIR (Pregados no Teto) -->
             <div class="absolute top-2 md:top-3 left-0 w-full px-2 md:px-4 flex justify-between items-start z-50 pointer-events-none">
                 
-                <!-- Status -->
-                <div id="status-turno-top" class="bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[10px] px-3 py-1.5 rounded-full shadow-lg border-2 border-[#bc7bd4] uppercase tracking-wide truncate max-w-[35%] pointer-events-auto">
-                    Carregando...
+                <div id="box-atributo" class="hidden bg-black/80 text-yellow-400 font-black text-[10px] md:text-[12px] px-4 py-1.5 rounded-full shadow-lg border border-yellow-500/50 uppercase tracking-widest animate-pulse pointer-events-auto mt-0.5 md:mt-1">
+                    <span id="texto-atributo">---</span>
                 </div>
                 
-                <!-- Placar Centralizado Perfeitamente -->
                 <div id="placar-ao-vivo" class="hidden absolute left-1/2 transform -translate-x-1/2 flex items-center gap-2 md:gap-3 bg-black/80 px-3 md:px-4 py-1.5 rounded-full border border-white/20 shadow-lg pointer-events-auto mt-0 md:mt-1">
                     <span id="placar-aliado" class="text-[#4ade80] font-black text-sm drop-shadow-[0_0_8px_#4ade80]">0</span>
                     <span class="text-white/50 font-black text-[9px]">VS</span>
                     <span id="placar-inimigo" class="text-red-500 font-black text-sm drop-shadow-[0_0_8px_#ef4444]">0</span>
                 </div>
 
-                <!-- Botão Desistir -->
-                <button onclick="document.getElementById('modal-desistir').classList.remove('hidden')" class="bg-red-600 hover:bg-red-700 text-white font-black text-[8px] md:text-[10px] px-3 md:px-4 py-1.5 rounded-xl shadow-md border-2 border-red-800 uppercase tracking-widest transition-transform active:scale-95 pointer-events-auto">
+                <button onclick="document.getElementById('modal-desistir').classList.remove('hidden')" class="bg-red-600 hover:bg-red-700 text-white font-black text-[8px] md:text-[10px] px-3 md:px-4 py-1.5 rounded-xl shadow-md border-2 border-red-800 uppercase tracking-widest transition-transform active:scale-95 pointer-events-auto mt-0.5 md:mt-1">
                     Desistir
                 </button>
             </div>
 
-            <!-- MESA E ATRIBUTO (Livres e Centralizados no Meio da Tela) -->
-            <div class="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none">
-                
-                <!-- O Nome do Atributo Piscando -->
-                <div id="box-atributo" class="hidden mb-4 md:mb-6 pointer-events-auto">
-                    <span id="texto-atributo" class="text-yellow-400 font-black text-xs md:text-sm uppercase tracking-widest animate-pulse drop-shadow-[0_0_10px_rgba(250,204,21,0.8)] bg-black/60 px-6 py-1.5 rounded-full border border-yellow-500/50">
-                        ---
-                    </span>
-                </div>
-
-                <!-- Cartas da Mesa -->
+            <div class="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none pb-[12vh]">
                 <div id="mesa-combate" class="flex justify-center items-center gap-2 md:gap-4 w-full pointer-events-auto">
-                    <!-- JS Injeta Aqui -->
-                </div>
+                    </div>
             </div>
 
-            <!-- A SUA MÃO (Pregada no Chão) -->
-            <div id="mao-jogador" class="absolute bottom-2 left-0 w-full flex justify-center items-end gap-1.5 md:gap-3 z-40 pointer-events-auto">
-                <!-- JS Injeta Aqui -->
-            </div>
+            <div id="mao-jogador" class="absolute bottom-[-10px] md:bottom-[-20px] left-0 w-full flex justify-center items-end -space-x-6 md:-space-x-8 z-40 pointer-events-auto px-4">
+                </div>
 
         </div>
     </div>
@@ -346,10 +321,10 @@
             document.getElementById('nome-opp1').innerText = dadosSala[opp1].nome;
             document.getElementById('nome-opp2').innerText = dadosSala[opp2].nome;
 
+            // Controle do Glow de Turno
             ['my','parceiro','opp1','opp2'].forEach(id => {
                 document.getElementById(`glow-${id}`).classList.remove('shadow-[0_0_20px_#fbbf24]', 'border-yellow-400');
             });
-            
             if(dadosSala.liderRodada) {
                 if(dadosSala.liderRodada === me) document.getElementById('glow-my').classList.add('shadow-[0_0_20px_#fbbf24]', 'border-yellow-400');
                 if(dadosSala.liderRodada === parceiro) document.getElementById('glow-parceiro').classList.add('shadow-[0_0_20px_#fbbf24]', 'border-yellow-400');
@@ -357,27 +332,7 @@
                 if(dadosSala.liderRodada === opp2) document.getElementById('glow-opp2').classList.add('shadow-[0_0_20px_#fbbf24]', 'border-yellow-400');
             }
 
-            const dicionario = { 'parceiro': parceiro, 'opp1': opp1, 'opp2': opp2 };
-            for(let key in dicionario) {
-                const role = dicionario[key];
-                const divMao = document.getElementById(`mini-mao-${key}`);
-                divMao.innerHTML = '';
-                if(dadosSala[role] && dadosSala[role].mao) {
-                    dadosSala[role].mao.forEach(() => {
-                        divMao.innerHTML += `<img src="fundo_carta.png" class="w-6 md:w-8 aspect-[2.5/3.5] border border-black shadow-md rounded-sm">`;
-                    });
-                }
-            }
-
-            const statusTop = document.getElementById('status-turno-top');
-            if(dadosSala.vezAtual === me) {
-                statusTop.innerText = "SUA VEZ!";
-                statusTop.className = "bg-green-500 text-black font-black text-[8px] md:text-[10px] px-4 py-1.5 rounded-full shadow-lg border-2 border-white uppercase tracking-wide animate-pulse pointer-events-auto z-20";
-            } else {
-                statusTop.innerText = `AGUARDANDO ${dadosSala[dadosSala.vezAtual]?.nome || '...'}`;
-                statusTop.className = "bg-[#dca3e8] text-[#7a32a8] font-black text-[8px] md:text-[10px] px-3 py-1.5 rounded-full shadow-lg border-2 border-[#bc7bd4] uppercase tracking-wide truncate max-w-[40%] pointer-events-auto z-20";
-            }
-
+            // Exibir Atributo no Topo
             if(dadosSala.atributoRodada) {
                 document.getElementById('box-atributo').classList.remove('hidden');
                 document.getElementById('texto-atributo').innerText = dadosSala.atributoRodada;
@@ -387,6 +342,7 @@
                 document.getElementById('placar-ao-vivo').classList.add('hidden');
             }
 
+            // CARTAS DA MESA CENTRAL (Aumentadas 40%!)
             const mesaDiv = document.getElementById('mesa-combate');
             mesaDiv.innerHTML = '';
             
@@ -405,13 +361,14 @@
                             else somaEquipeInimiga += valor;
                         }
 
+                        // w-[20vh] max-w-[125px] -> Gigantes no centro
                         mesaDiv.innerHTML += `
-                            <div onclick="verCartaMesa('${cartaIdJogada}')" class="w-[14.5vh] max-w-[85px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-[0_0_20px_rgba(255,255,255,0.2)] border-2 border-white cursor-pointer hover:scale-105 transition-transform">
+                            <div onclick="verCartaMesa('${cartaIdJogada}')" class="w-[20vh] max-w-[125px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-[0_0_25px_rgba(255,255,255,0.2)] border-2 border-white cursor-pointer hover:scale-105 transition-transform">
                                 <img src="${info.miniatura || info.imagem}" class="w-full h-full object-cover rounded-[6px]">
                             </div>`;
                     } else {
                         mesaDiv.innerHTML += `
-                            <div class="w-[14.5vh] max-w-[85px] aspect-[2.5/3.5] bg-black/40 rounded-lg shadow-inner border-2 border-white/20 border-dashed"></div>`;
+                            <div class="w-[20vh] max-w-[125px] aspect-[2.5/3.5] bg-black/50 rounded-lg shadow-inner border-2 border-white/30 border-dashed"></div>`;
                     }
                 });
             }
@@ -419,12 +376,14 @@
             document.getElementById('placar-aliado').innerText = somaMinhaEquipe;
             document.getElementById('placar-inimigo').innerText = somaEquipeInimiga;
 
+            // CARTAS DA SUA MÃO (Aumentadas 60% e em formato de leque sobreposto)
             const maoDiv = document.getElementById('mao-jogador');
             maoDiv.innerHTML = '';
-            (dadosSala[me].mao || []).forEach(cartaId => {
+            (dadosSala[me].mao || []).forEach((cartaId, index) => {
                 const info = INFO_CARTAS[cartaId] || { miniatura: 'fundo_carta.png' };
+                // w-[26vh] max-w-[145px] -> Ocupam toda a base e sobrepõem bonito
                 maoDiv.innerHTML += `
-                    <div onclick="abrirSuaCarta('${cartaId}')" class="w-[16vh] max-w-[95px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-2xl border-2 border-black hover:border-[#dca3e8] cursor-pointer hover-carta overflow-hidden">
+                    <div onclick="abrirSuaCarta('${cartaId}')" class="w-[26vh] max-w-[145px] aspect-[2.5/3.5] bg-gray-800 rounded-xl shadow-2xl border-[3px] border-black hover:border-[#dca3e8] cursor-pointer hover-carta overflow-hidden" style="z-index: ${index};">
                         <img src="${info.miniatura || info.imagem}" class="w-full h-full object-cover">
                     </div>`;
             });

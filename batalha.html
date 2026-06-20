@@ -192,7 +192,7 @@
 
     <div id="modal-duo" class="hidden fixed inset-0 bg-black/90 z-[250] flex flex-col items-center justify-center p-4 backdrop-blur-md pointer-events-auto">
         <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-5 w-full max-w-sm shadow-2xl flex flex-col h-[85%] max-h-[600px] relative">
-            <button onclick="fecharModalDuo()" class="absolute top-2 right-4 text-[#7a32a8] font-black text-xl hover:text-purple-600 transition-colors z-50">X</button>
+            <button id="btn-fechar-duo" onclick="fecharModalDuo()" class="absolute top-2 right-3 text-[#dca3e8] font-black text-xl hover:text-white transition-colors z-50">X</button>
 
             <div id="view-menu-duo" class="flex flex-col h-full w-full">
                 <h2 class="text-[#7a32a8] font-black text-xl text-center uppercase tracking-wider mb-6 mt-2">Arena DUO</h2>
@@ -671,6 +671,9 @@
             document.getElementById('view-menu-duo').classList.remove('hidden');
             document.getElementById('view-lobby-duo').classList.add('hidden');
             document.getElementById('view-busca-duo').classList.add('hidden');
+            
+            // Garante que o X esteja visível ao abrir o modal pela primeira vez
+            document.getElementById('btn-fechar-duo').classList.remove('hidden');
         };
 
         window.fecharModalDuo = function() {
@@ -747,11 +750,17 @@
             document.getElementById('view-busca-duo').classList.remove('hidden');
             document.getElementById('input-busca-duo').value = "";
             document.getElementById('lista-jogadores-duo').innerHTML = '<span class="text-[#7a32a8] text-[10px] font-bold text-center mt-2">Pesquise o nome do jogador.</span>';
+            
+            // ESCONDE O X PARA EVITAR ACIDENTES
+            document.getElementById('btn-fechar-duo').classList.add('hidden');
         };
 
         window.voltarLobbyDuo = function() {
             document.getElementById('view-busca-duo').classList.add('hidden');
             document.getElementById('view-lobby-duo').classList.remove('hidden');
+            
+            // MOSTRA O X NOVAMENTE NO LOBBY
+            document.getElementById('btn-fechar-duo').classList.remove('hidden');
         };
 
         document.getElementById('input-busca-duo').addEventListener('input', async (event) => {

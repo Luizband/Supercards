@@ -59,7 +59,7 @@
         <p class="text-sm text-gray-300 font-bold">O modo Arena 2x2 só pode ser jogado na horizontal.</p>
     </div>
 
-    <div id="main-arena" class="w-full h-full flex bg-gradient-to-r from-[#7a32a8]/90 via-gray-800/80 to-[#4ade80]/90 relative backdrop-blur-sm">
+    <div id="main-arena" class="w-full h-full flex relative bg-black/30 backdrop-blur-sm">
 
         <!-- LADO ESQUERDO: JOGADORES (Pílulas Alternadas) -->
         <div class="w-[22%] md:w-[20%] h-full flex flex-col justify-center p-2 md:p-3 bg-black/50 border-r-2 border-white/10 z-10 shadow-2xl">
@@ -350,15 +350,13 @@
                 const el = document.getElementById(`emoji-${idAlvo}`);
                 if(el) {
                     el.innerText = reacao.emoji;
-                    el.classList.remove('hidden');
-                    el.classList.add('animate-bounce');
+                    // Mágica do centro exato ativada, mantendo o tamanho original 5xl/6xl
+                    el.className = "absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-5xl md:text-6xl z-[100] drop-shadow-2xl pointer-events-none animate-bounce";
                     
                     if(window.timersReacao[idAlvo]) clearTimeout(window.timersReacao[idAlvo]);
                     
-                    // Some automaticamente após 4 segundos
                     window.timersReacao[idAlvo] = setTimeout(() => { 
-                        el.classList.add('hidden'); 
-                        el.classList.remove('animate-bounce');
+                        el.className = "hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-5xl md:text-6xl z-[100] drop-shadow-2xl pointer-events-none"; 
                     }, 4000);
                 }
             }

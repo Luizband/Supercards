@@ -117,8 +117,8 @@
         <!-- LADO DIREITO: CAMPO GIGANTE E GAVETA -->
         <div class="w-[78%] md:w-[80%] h-full relative overflow-hidden z-10 flex flex-col">
             
-            <!-- PAINEL DE CONTROLE DO TOPO -->
-            <div class="w-full px-3 md:px-6 py-3 flex justify-between items-start z-40 relative">
+            <!-- PAINEL DE CONTROLE DO TOPO COM DEGRADE SUAVE -->
+            <div class="w-full px-3 md:px-6 py-3 flex justify-between items-start z-40 relative bg-gradient-to-b from-black/80 to-transparent pb-8">
                 <!-- Atributo Flutuante -->
                 <div id="box-atributo" class="hidden bg-black/80 text-yellow-400 font-black text-[10px] md:text-[12px] px-6 py-2 rounded-full shadow-lg border border-yellow-500/50 uppercase tracking-widest animate-pulse flex-shrink-0">
                     <span id="texto-atributo">---</span>
@@ -254,19 +254,21 @@
         </div>
     </div>
 
-    <div id="modal-fim-etapa" class="hidden fixed inset-0 bg-black/95 z-[250] flex flex-col items-center justify-start pt-10 p-4 backdrop-blur-md">
-        <h1 id="fim-titulo-jogador" class="text-[#dca3e8] font-black text-xl uppercase tracking-widest mb-1 text-center">CARTAS GANHAS POR</h1>
-        <h2 id="fim-pontos-jogador" class="text-[#4ade80] font-black text-4xl mb-6 drop-shadow-md">0 PTS</h2>
-        <div id="fim-grid-cartas" class="grid grid-cols-4 gap-2 w-full max-w-sm overflow-y-auto no-scrollbar content-start flex-grow pb-10"></div>
-        <div class="w-full max-w-sm pb-8 flex-shrink-0 flex justify-center mt-4">
-            <button onclick="avancarEtapaFim()" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-3 px-12 rounded-full shadow-lg border-2 border-[#bc7bd4] tracking-widest uppercase">AVANÇAR</button>
+    <div id="modal-fim-etapa" class="hidden fixed inset-0 bg-black/95 z-[250] flex flex-col items-center justify-center p-4 backdrop-blur-md">
+        <h1 id="fim-titulo-jogador" class="text-[#4ade80] font-black text-2xl md:text-3xl uppercase tracking-widest mb-6 text-center drop-shadow-md">SUA DUPLA: 0 PTS</h1>
+        
+        <div id="fim-grid-cartas" class="flex gap-3 w-full max-w-lg overflow-x-auto no-scrollbar content-center justify-start md:justify-center pb-6 px-4 snap-x">
+            </div>
+        
+        <div class="w-full flex justify-center mt-4">
+            <button onclick="avancarEtapaFim()" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-2.5 px-10 rounded-full shadow-lg border-2 border-[#bc7bd4] tracking-widest uppercase text-sm">AVANÇAR</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, setDoc, getDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, increment, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         import { INFO_CARTAS } from './cartas.js';
 
         const app = initializeApp({
@@ -287,7 +289,6 @@
         let dadosSala = null;
         let cartaFocadaId = null;
         
-        // VARIÁVEIS DA CASCATA FINAL
         let etapaFim = 0, pointsEquipe1 = 0, pointsEquipe2 = 0;
         window.etapaIniciada = false;
 
@@ -340,10 +341,13 @@
             if(idAlvo) {
                 const el = document.getElementById(`emoji-${idAlvo}`);
                 if(el) {
-                    el.innerText = reacao.emoji; el.classList.remove('hidden', 'emoji-ativo');
-                    void el.offsetWidth; el.classList.add('emoji-ativo');
+                    // EMOJIS GIGANTES QUE SOMEM EM 4 SEGUNDOS
+                    el.className = "absolute top-1/2 left-1/2 text-5xl md:text-6xl z-50 drop-shadow-2xl transition-transform animate-bounce";
+                    el.innerText = reacao.emoji;
                     if(window.timersReacao[idAlvo]) clearTimeout(window.timersReacao[idAlvo]);
-                    window.timersReacao[idAlvo] = setTimeout(() => { el.classList.add('hidden', 'emoji-ativo'); }, 3500);
+                    window.timersReacao[idAlvo] = setTimeout(() => { 
+                        el.className = "hidden absolute top-1/2 left-1/2"; 
+                    }, 4000);
                 }
             }
         }
@@ -370,7 +374,10 @@
                 else tag.classList.add('hidden');
             });
 
-            if(dadosSala.liderRodada) document.getElementById(`glow-${dadosSala.liderRodada}`).classList.add('glow-lider');
+            // BRILHO AGORA PERSEGUE QUEM ESTÁ JOGANDO
+            if(dadosSala.quemJoga) {
+                document.getElementById(`glow-${dadosSala.quemJoga}`).classList.add('glow-lider');
+            }
 
             if(dadosSala.atributoRodada) {
                 document.getElementById('box-atributo').classList.remove('hidden');
@@ -475,7 +482,6 @@
 
         window.confirmarJogada = async function(attrEscolhido) {
             document.getElementById('modal-zoom').classList.add('hidden');
-
             if (!cartaFocadaId) return;
 
             let updates = {};
@@ -544,8 +550,8 @@
             const reabastecer = (role) => {
                 let mao = [...(dadosSala[role].mao || [])]; 
                 let deck = [...(dadosSala[role].deck || [])];
-                
                 let cartaJogada = dadosSala.mesa[role];
+                
                 if(cartaJogada) {
                     let idx = mao.indexOf(cartaJogada);
                     if(idx > -1) mao.splice(idx, 1);
@@ -584,10 +590,6 @@
             });
             window.resolvendo = false;
         }
-
-        // ==========================================
-        // FLUXO DE FIM DE JOGO (CASCATA & RECOMPENSAS)
-        // ==========================================
 
         window.concederRecompensasArena = async function(vitoria) {
             if (!window.dadosSalvos) {
@@ -632,15 +634,19 @@
             }
         };
 
-        function montarGridFinal(k, titulo) {
+        // MONTAGEM DO CARROSSEL FINAL EM LINHA ÚNICA
+        function montarGridFinal(k, prefixoTitulo) {
             const grid = document.getElementById('fim-grid-cartas'); grid.innerHTML = '';
             let t = 0;
             (dadosSala[k].pilhaVitorias || []).forEach(id => {
                 const i = INFO_CARTAS[id] || { pontos: 0 }; t += i.pontos;
-                grid.innerHTML += `<div class="relative aspect-[2.5/3.5] bg-gray-800 rounded-md shadow-lg border border-black"><img src="${i.miniatura || i.imagem || 'fundo_carta.png'}" class="w-full h-full object-cover"></div>`;
+                grid.innerHTML += `<div class="relative w-[20vh] max-w-[100px] aspect-[2.5/3.5] bg-gray-800 rounded-lg shadow-lg border-2 border-black flex-shrink-0 snap-center overflow-hidden"><img src="${i.miniatura || i.imagem || 'fundo_carta.png'}" class="w-full h-full object-cover"></div>`;
             });
-            document.getElementById('fim-titulo-jogador').innerText = titulo;
-            document.getElementById('fim-pontos-jogador').innerText = `${t} PTS`; return t;
+            
+            let cor = prefixoTitulo === "SUA DUPLA" ? "text-[#4ade80]" : "text-red-500";
+            document.getElementById('fim-titulo-jogador').className = `${cor} font-black text-xl md:text-2xl uppercase tracking-widest mb-6 text-center drop-shadow-md`;
+            document.getElementById('fim-titulo-jogador').innerText = `${prefixoTitulo}: ${t} PTS`;
+            return t;
         }
 
         window.iniciarCascataFinal = function() { 
@@ -649,7 +655,7 @@
             etapaFim = 1; 
             let isEquipe1 = (minhaRole === 'jogador1' || minhaRole === 'jogador2');
             let roleMinhaEquipe = isEquipe1 ? 'jogador1' : 'jogador3';
-            pointsEquipe1 = montarGridFinal(roleMinhaEquipe, "CARTAS DA SUA DUPLA"); 
+            pointsEquipe1 = montarGridFinal(roleMinhaEquipe, "SUA DUPLA"); 
             document.getElementById('modal-fim-etapa').classList.remove('hidden'); 
         };
 
@@ -659,7 +665,7 @@
             
             if (etapaFim === 2) {
                 let roleEquipeInimiga = isEquipe1 ? 'jogador3' : 'jogador1';
-                pointsEquipe2 = montarGridFinal(roleEquipeInimiga, "CARTAS DA DUPLA RIVAL");
+                pointsEquipe2 = montarGridFinal(roleEquipeInimiga, "DUPLA ADVERSÁRIA");
             } else if (etapaFim === 3) {
                 document.getElementById('modal-fim-etapa').classList.add('hidden');
                 
@@ -685,8 +691,6 @@
                 }
                 
                 document.getElementById('modal-resultado-final').classList.remove('hidden');
-
-                // INJETA AS RECOMPENSAS NO BANCO DE DADOS
                 await window.concederRecompensasArena(vitoria);
             }
         };
@@ -774,7 +778,6 @@
                         }
                     }
 
-                    // GATILHO DA CASCATA FINAL
                     if (dadosSala.status === 'finalizada' && document.getElementById('modal-resultado-final').classList.contains('hidden') && document.getElementById('modal-fim-etapa').classList.contains('hidden')) {
                         window.iniciarCascataFinal();
                     }

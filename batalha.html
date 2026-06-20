@@ -190,12 +190,47 @@
         </div>
     </div>
 
+    <!-- MODAL DE REGRAS DUO -->
+    <div id="modal-regras-duo" class="hidden fixed inset-0 bg-black/90 z-[300] flex flex-col items-center justify-center p-4 backdrop-blur-md pointer-events-auto">
+        <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 w-full max-w-sm shadow-2xl relative flex flex-col max-h-[85vh]">
+            <button onclick="fecharModalRegrasDuo()" class="absolute top-2 right-4 text-[#7a32a8] font-black text-xl hover:text-purple-600 transition-colors z-50">X</button>
+            
+            <h2 class="text-[#7a32a8] font-black text-xl text-center uppercase tracking-wider mb-4 border-b-2 border-[#7a32a8]/30 pb-2 flex-shrink-0">Guia Arena DUO</h2>
+            
+            <div class="text-[#7a32a8] font-bold text-[11px] leading-relaxed overflow-y-auto no-scrollbar flex-grow pr-1 flex flex-col gap-3">
+                
+                <p><b>O Objetivo:</b> Derrotar a dupla adversária capturando cartas com o maior valor de pontos total ao final da partida. Cada jogador utiliza o seu Deck Padrão (20 cartas).</p>
+
+                <p><b>Dinâmica do Turno:</b> Um jogador é sorteado como Líder da rodada e joga a primeira carta. O Líder define qual será o Atributo da disputa. Os outros três jogadores devem jogar suas cartas, viradas para cima, com base no atributo escolhido, tentando superar a soma feita pela dupla adversária.</p>
+
+                <p><b>O Vencedor do Turno:</b> O jogo soma os valores dos dois jogadores da sua dupla e compara com a soma da dupla rival. A dupla com a maior soma captura as 4 cartas da mesa para a sua Pilha de Vitórias.</p>
+
+                <p><b>Regras de Desempate:</b> Se a soma das duplas for igual, o sistema analisa as 4 cartas da mesa individualmente. Cada carta é avaliada pelo seu maior valor absoluto entre os 4 atributos (Aura, Fofura, Diversão ou Aleatoriedade).</p>
+                
+                <p>A dupla que possuir a carta com o maior número individual entre as quatro vence o desempate.</p>
+                
+                <p>Caso todos os números individuais sejam iguais, ocorre um <i>Empate Absoluto</i>: a rodada é anulada e cada dupla coloca suas cartas na sua pilha de vitórias.</p>
+
+                <p><b>Vitória Final:</b> O jogo continua até que as mãos dos jogadores se esgotem. A dupla que acumulou a maior pontuação somando todas as cartas da sua Pilha de Vitórias é declarada vencedora.</p>
+
+            </div>
+            
+            <button onclick="fecharModalRegrasDuo()" class="mt-4 w-full bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-3 rounded-full shadow-md uppercase tracking-wider transition-colors flex-shrink-0">Entendi</button>
+        </div>
+    </div>
+
     <div id="modal-duo" class="hidden fixed inset-0 bg-black/90 z-[250] flex flex-col items-center justify-center p-4 backdrop-blur-md pointer-events-auto">
         <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-5 w-full max-w-sm shadow-2xl flex flex-col h-[85%] max-h-[600px] relative">
-            <button id="btn-fechar-duo" onclick="fecharModalDuo()" class="absolute top-2 right-3 text-[#dca3e8] font-black text-xl hover:text-white transition-colors z-50">X</button>
+            <!-- O X agora está roxo escuro para aparecer no fundo claro -->
+            <button id="btn-fechar-duo" onclick="fecharModalDuo()" class="absolute top-2 right-4 text-[#7a32a8] font-black text-xl hover:text-purple-600 transition-colors z-50">X</button>
 
             <div id="view-menu-duo" class="flex flex-col h-full w-full">
-                <h2 class="text-[#7a32a8] font-black text-xl text-center uppercase tracking-wider mb-6 mt-2">Arena DUO</h2>
+                
+                <!-- Título + Botão de Ajuda -->
+                <div class="flex justify-center items-center gap-2 mb-6 mt-2">
+                    <h2 class="text-[#7a32a8] font-black text-xl text-center uppercase tracking-wider">Arena DUO</h2>
+                    <button onclick="abrirModalRegrasDuo()" class="bg-[#7a32a8] text-white font-black rounded-full w-6 h-6 flex items-center justify-center shadow-md border-2 border-[#bc7bd4] hover:scale-105 transition-transform pb-0.5 text-xs">?</button>
+                </div>
                 
                 <button onclick="criarSalaDuo()" class="w-full bg-[#4ade80] hover:bg-[#22c55e] text-[#7a32a8] font-black text-sm py-3.5 rounded-full shadow-md border-2 border-[#22c55e] uppercase tracking-widest transition-transform hover:scale-105 mb-3">Criar Sala DUO</button>
                 
@@ -348,6 +383,15 @@
         
         window.fecharModalRegras = function() {
             document.getElementById('modal-regras').classList.add('hidden');
+        };
+
+        // COLE AQUI EMBAIXO:
+        window.abrirModalRegrasDuo = function() {
+            document.getElementById('modal-regras-duo').classList.remove('hidden');
+        };
+        
+        window.fecharModalRegrasDuo = function() {
+            document.getElementById('modal-regras-duo').classList.add('hidden');
         };
 
        // ===============================================

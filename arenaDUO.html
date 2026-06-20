@@ -534,7 +534,9 @@
             } else if (somaEquipe2 > somaEquipe1) {
                 vencedorTurno = 'equipe2'; 
             } else {
-                const getPico = (card) => Math.max(...['aura', 'fofura', 'diversao', 'aleatoriedade'].filter(a => a !== attr).map(a => card[a] || 0));
+                
+                const getPico = (card) => Math.max(card.aura || 0, card.fofura || 0, card.diversao || 0, card.aleatoriedade || 0);
+                
                 let picoE1 = Math.max(getPico(info1), getPico(info2));
                 let picoE2 = Math.max(getPico(info3), getPico(info4));
 

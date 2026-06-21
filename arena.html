@@ -460,7 +460,10 @@
             if (data.chaveVencedor === 'jogador1') cartaVencedora = data.id1;
             else if (data.chaveVencedor === 'jogador2') cartaVencedora = data.id2;
 
-            // 2. Dá prioridade para o som da carta vencedora. 
+            // 2. Toca o som EXCLUSIVAMENTE se a carta vencedora tiver áudio
+            if (cartaVencedora && audiosEspeciais[cartaVencedora]) {
+                new Audio(audiosEspeciais[cartaVencedora]).play().catch(e => console.log(e));
+            }
             // Se der empate ou a vencedora não tiver som, ele procura se a outra tem.
             let cartaParaTocar = (cartaVencedora && audiosEspeciais[cartaVencedora]) 
                 ? cartaVencedora 

@@ -229,6 +229,11 @@
                 <!-- A IMAGEM AGORA FICA GIGANTE (ATÉ 60% DA TELA) E SEM BORDA -->
                 <img id="msg-global-img" src="" class="hidden w-full max-h-[60vh] object-contain rounded-xl drop-shadow-xl">
                 
+                <video id="msg-global-video" controls class="hidden w-full max-h-[60vh] object-contain rounded-xl drop-shadow-xl bg-black">
+                    <source id="msg-global-video-src" src="" type="video/mp4">
+                    O seu navegador não suporta vídeos.
+                </video>
+                
                 <div id="msg-global-texto" class="text-[#7a32a8] font-bold text-sm text-center w-full overflow-y-auto no-scrollbar whitespace-pre-wrap"></div>
                 
                 <button onclick="window.fecharMensagemGlobal()" class="w-full mt-1 bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-3 rounded-full shadow-md uppercase tracking-wider transition-transform hover:scale-105">Entendi</button>
@@ -279,6 +284,11 @@
 
         window.fecharMensagemGlobal = async function() {
             document.getElementById('modal-mensagem-global').classList.add('hidden');
+            
+            // Pausa o vídeo para não ficar a dar som no fundo!
+            const videoEl = document.getElementById('msg-global-video');
+            if (videoEl) videoEl.pause();
+
             // Se houver uma mensagem ativa na tela e um jogador logado, salva o carimbo no banco dele!
             if (window.msgGlobalIdAtual && auth.currentUser) {
                 try {
@@ -431,11 +441,24 @@
                                     document.getElementById('msg-global-texto').innerText = msg.texto;
                                     
                                     const imgEl = document.getElementById('msg-global-img');
+                                    const videoEl = document.getElementById('msg-global-video');
+                                    const videoSrc = document.getElementById('msg-global-video-src');
+                                    
+                                    // Esconde ambos primeiro
+                                    imgEl.classList.add('hidden');
+                                    videoEl.classList.add('hidden');
+
                                     if (msg.imagem && msg.imagem.trim() !== "") {
-                                        imgEl.src = msg.imagem;
-                                        imgEl.classList.remove('hidden');
-                                    } else {
-                                        imgEl.classList.add('hidden');
+                                        // Se terminar em .mp4, carrega o vídeo!
+                                        if (msg.imagem.toLowerCase().endsWith('.mp4')) {
+                                            videoSrc.src = msg.imagem;
+                                            videoEl.load();
+                                            videoEl.classList.remove('hidden');
+                                        } else {
+                                            // Se não for vídeo, carrega a foto normal!
+                                            imgEl.src = msg.imagem;
+                                            imgEl.classList.remove('hidden');
+                                        }
                                     }
                                     
                                     // Guarda o ID numa variável da janela para salvar quando ele fechar

@@ -452,7 +452,7 @@
                 "079": "audios/079.mp3",
                 "085": "audios/085.mp3",
                 "087": "audios/087.mp3",
-                "092": "audios/092.mp3",
+                "092": "audios/092.mp3"
             };
 
             // 1. Descobre qual carta ganhou o turno
@@ -463,14 +463,6 @@
             // 2. Toca o som EXCLUSIVAMENTE se a carta vencedora tiver áudio
             if (cartaVencedora && audiosEspeciais[cartaVencedora]) {
                 new Audio(audiosEspeciais[cartaVencedora]).play().catch(e => console.log(e));
-            }
-            // Se der empate ou a vencedora não tiver som, ele procura se a outra tem.
-            let cartaParaTocar = (cartaVencedora && audiosEspeciais[cartaVencedora]) 
-                ? cartaVencedora 
-                : [data.id1, data.id2].find(id => audiosEspeciais[id]);
-
-            if (cartaParaTocar) {
-                new Audio(audiosEspeciais[cartaParaTocar]).play().catch(e => console.log(e));
             }
 
             p1.style.animation = 'slideInFromLeft 0.5s forwards'; p2.style.animation = 'slideInFromRight 0.5s forwards';

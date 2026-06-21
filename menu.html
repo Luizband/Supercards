@@ -226,13 +226,8 @@
                 
                 <h2 id="msg-global-titulo" class="text-[#7a32a8] font-black text-xl text-center uppercase tracking-wider mt-4 leading-tight"></h2>
                 
-                <!-- A IMAGEM AGORA FICA GIGANTE (ATÉ 60% DA TELA) E SEM BORDA -->
                 <img id="msg-global-img" src="" class="hidden w-full max-h-[60vh] object-contain rounded-xl drop-shadow-xl">
-                
-                <video id="msg-global-video" controls class="hidden w-full max-h-[60vh] object-contain rounded-xl drop-shadow-xl bg-black">
-                    <source id="msg-global-video-src" src="" type="video/mp4">
-                    O seu navegador não suporta vídeos.
-                </video>
+                <video id="msg-global-video" controls playsinline webkit-playsinline class="hidden w-full max-h-[60vh] object-contain rounded-xl drop-shadow-xl bg-black"></video>
                 
                 <div id="msg-global-texto" class="text-[#7a32a8] font-bold text-sm text-center w-full overflow-y-auto no-scrollbar whitespace-pre-wrap"></div>
                 
@@ -442,16 +437,15 @@
                                     
                                     const imgEl = document.getElementById('msg-global-img');
                                     const videoEl = document.getElementById('msg-global-video');
-                                    const videoSrc = document.getElementById('msg-global-video-src');
                                     
-                                    // Esconde ambos primeiro
+                                    // Esconde ambos primeiro para limpar a tela
                                     imgEl.classList.add('hidden');
                                     videoEl.classList.add('hidden');
 
                                     if (msg.imagem && msg.imagem.trim() !== "") {
-                                        // Se terminar em .mp4, carrega o vídeo!
+                                        // Se terminar em .mp4, aplica a regra ultra compatível de vídeo
                                         if (msg.imagem.toLowerCase().endsWith('.mp4')) {
-                                            videoSrc.src = msg.imagem;
+                                            videoEl.src = msg.imagem; // <-- Injeta DIRETO no vídeo, sem usar o videoSrc
                                             videoEl.load();
                                             videoEl.classList.remove('hidden');
                                         } else {

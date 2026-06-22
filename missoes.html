@@ -364,7 +364,7 @@
                 atualizacao = { moedas: increment(premioAtual.valor) };
                 dadosJogador.moedas += premioAtual.valor;
                 document.getElementById('player-coins').innerText = dadosJogador.moedas;
-                msgToast = `Dia ${dSeguidos + 1} Resgatado!<br><span class="text-xs">+${premioAtual.valor} <img src="moedas2.png" class="inline w-4 h-4 align-text-bottom"></span>`;
+                msgToast = `Dia ${dSeguidos + 1} Resgatado!<br><span class="text-xs">+${premioAtual.valor} <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`;
             
             } else if (premioAtual.tipo === 'carta_promo') {
                 // Injeta a carta configurada direto na coleção do jogador

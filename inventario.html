@@ -263,13 +263,11 @@
                     }
                 }
 
-                // Linha adicionada para atualizar o nome no topo da tela do inventário!
                 document.getElementById('player-name').innerText = (dadosJogador.nomeDisplay || dadosJogador.nome || "JOGADOR").toUpperCase();
-
                 document.getElementById('player-coins').innerText = dadosJogador.moedas || 0;
                 atualizarVisualBarraXP(dadosJogador.xp || 0, dadosJogador.nivel || 1);
                 
-               const inventario = dadosJogador.inventario || {};
+                const inventario = dadosJogador.inventario || {};
                 const qtdBasico = inventario.pacoteBasico || 0;
                 const qtdPremium = inventario.pacotePremium || 0;
                 const qtdGratis = inventario.pacoteGratis || 0; 
@@ -290,7 +288,6 @@
                     lista.innerHTML += criarHTMLPacote('basico', 'Pacote Básico', '5 Cartas Aleatórias', qtdBasico, 'pacote1.png');
                 }
                 if (qtdExpansao > 0) {
-                    // COLOQUE O NOME DA IMAGEM DO PACOTE NOVO AQUI:
                     lista.innerHTML += criarHTMLPacote('expansao', 'Para Onde Iremos', 'Apenas cartas dessa expansão', qtdExpansao, 'pacote-exp1.png');
                 }
                 if (qtdPremium > 0) {
@@ -347,18 +344,6 @@
         // --- FASE 1: INICIA A REVELAÇÃO CARTA POR CARTA ---
         window.abrirPacote = async function(tipo) {
             if (abrindoPacote) return;
-            abrindoPacote = true;
-
-            // 🧹 LIMPEZA DO "FANTASMA" DO PACOTE ANTERIOR
-            const imgRevelacao = document.getElementById('img-revelacao');
-            const containerRevelacao = document.getElementById('container-revelacao');
-            imgRevelacao.src = ""; // Apaga a imagem velha
-            containerRevelacao.classList.remove('anim-pop'); // Remove qualquer animação travada
-            containerRevelacao.style.opacity = '0'; // Esconde o container até a nova carta estar pronta
-
-        // --- FASE 1: INICIA A REVELAÇÃO CARTA POR CARTA ---
-        window.abrirPacote = async function(tipo) {
-            if (abrindoPacote) return;
             
             const campo = tipo === 'basico' ? 'pacoteBasico' : (tipo === 'premium' ? 'pacotePremium' : (tipo === 'expansao' ? 'pacoteExpansao' : 'pacoteGratis'));
             let qtd = (dadosJogador.inventario && dadosJogador.inventario[campo]) || 0;
@@ -368,21 +353,21 @@
                 return;
             }
 
-            // Tranca o cadeado IMEDIATAMENTE
+            // TRANCA O CADEADO IMEDIATAMENTE
             abrindoPacote = true;
 
-            // NOVA TRAVA DE SEGURANÇA: Desconta o pacote no banco ANTES de mostrar as cartas
+            // SEGURANÇA: Desconta o pacote no banco ANTES de mostrar as cartas
             try {
                 await updateDoc(dbUserRef, {
                     [`inventario.${campo}`]: increment(-1)
                 });
-                dadosJogador.inventario[campo] -= 1; // Atualiza a variável local
-                carregarInventario(); // Recarrega a tela de trás pra atualizar o número
+                dadosJogador.inventario[campo] -= 1; // Atualiza local para a tela
+                carregarInventario(); // Recarrega a tela de fundo na hora
             } catch (error) {
                 console.error("Erro ao descontar pacote:", error);
                 window.mostrarToast("Erro de conexão ao abrir pacote.");
                 abrindoPacote = false;
-                return; // Se estiver sem internet, o pacote nem abre e ele não perde.
+                return; // Impede abrir se não houver internet para descontar
             }
 
             // 🧹 LIMPEZA DO "FANTASMA" DO PACOTE ANTERIOR
@@ -400,7 +385,6 @@
                 const idSorteado = sortearCarta(tipo, i === 0);
                 cartasSorteadaTemp.push(idSorteado);
                 
-                // Pré-carrega a imagem secretamente para não ter delay na animação
                 const imgPreload = new Image();
                 imgPreload.src = INFO_CARTAS[idSorteado].imagem;
             }
@@ -413,19 +397,17 @@
             containerRevelacao.dataset.bloqueado = "false";
             document.getElementById('modal-abrir-pacote').classList.remove('hidden');
 
-            // Chama a primeira carta imediatamente (sem delay)
             window.mostrarProximaCarta(true);
         };
+
         // --- INTERAÇÃO DE CLIQUE: MOSTRA A PRÓXIMA CARTA OU A TELA FINAL ---
         window.mostrarProximaCarta = function(primeira = false) {
             const container = document.getElementById('container-revelacao');
             const imgElement = document.getElementById('img-revelacao');
 
-            // Proteção contra múltiplos cliques frenéticos
             if (container.dataset.bloqueado === "true") return;
             container.dataset.bloqueado = "true";
 
-            // Se for do clique 2 ao 5, faz a carta sumir rápido primeiro
             if (!primeira) {
                 container.classList.remove('anim-pop');
                 container.style.opacity = '0';
@@ -444,21 +426,15 @@
                     container.style.borderColor = corRaridade;
                     container.style.boxShadow = `0 0 35px ${corRaridade}`;
 
-                    // Restaura os estilos para a animação do CSS fazer efeito
                     container.style.opacity = '';
                     container.style.transform = '';
-
-                    // Força o reset da animação
                     void container.offsetWidth; 
                     container.classList.add('anim-pop');
 
                     indiceRevelacao++;
-                    
-                    // Libera para clicar de novo após 300ms
                     setTimeout(() => { container.dataset.bloqueado = "false"; }, 300);
 
                 } else {
-                    // Fim das cartas, fecha display e vai pro resumo
                     container.classList.add('hidden');
                     container.dataset.bloqueado = "false";
                     document.getElementById('titulo-abrir-pacote').innerText = "Novas Cartas!";
@@ -489,8 +465,6 @@
             window.mostrarToast("Guardando na coleção... ⏳");
 
             try {
-                const campo = tipoPacoteTemp === 'basico' ? 'pacoteBasico' : (tipoPacoteTemp === 'premium' ? 'pacotePremium' : (tipoPacoteTemp === 'expansao' ? 'pacoteExpansao' : 'pacoteGratis'));
-                
                 let pacotesAbertosAtuais = (dadosJogador.estatisticas?.pacotesAbertos || 0) + 1;
                 let badgesJogador = dadosJogador.badges || {};
                 let ganhouBadge = false;
@@ -560,7 +534,8 @@
                     xpMaximo = calcularXPMaximo(nivelAtual);
                 }
 
-                // O -1 foi removido, agora só somamos se ele ganhar pacotes bônus por subir de nível!
+                // Removemos o -1 daqui! O pacote já foi pago na hora que abriu.
+                // Agora só soma se ele ganhou pacote bônus de level up.
                 let deltaBasico = pacotesBasicosGanhos;
                 let deltaPremium = pacotesPremiumGanhos;
 
@@ -575,28 +550,12 @@
 
                 if (deltaBasico !== 0) updates["inventario.pacoteBasico"] = increment(deltaBasico);
                 if (deltaPremium !== 0) updates["inventario.pacotePremium"] = increment(deltaPremium);
-                
-                // Removidas as linhas de deltaGratis e deltaExpansao daqui, pois não recebem bônus de level up.
-                    "estatisticas.pacotesAbertos": increment(1),
-                    "estatisticas.totalCartas": increment(5),
-                    "badges": badgesJogador,
-                    "xp": novoXp,
-                    "nivel": nivelAtual,
-                    "moedas": increment(bonusMoedas)
-                };
 
-                if (deltaBasico !== 0) updates["inventario.pacoteBasico"] = increment(deltaBasico);
-                if (deltaPremium !== 0) updates["inventario.pacotePremium"] = increment(deltaPremium);
-                if (deltaGratis !== 0) updates["inventario.pacoteGratis"] = increment(deltaGratis);
-                if (deltaExpansao !== 0) updates["inventario.pacoteExpansao"] = increment(deltaExpansao);
-
-                // Agrupa e conta as cartas repetidas do mesmo pacote
                 let contagemCartas = {};
                 cartasSorteadaTemp.forEach(id => {
                     contagemCartas[id] = (contagemCartas[id] || 0) + 1;
                 });
 
-                // Envia a instrução para o banco com o incremento exato (1, 2, 3...)
                 for (let id in contagemCartas) {
                     updates[`colecao.${id}`] = increment(contagemCartas[id]);
                 }
@@ -621,6 +580,7 @@
                     setTimeout(() => window.mostrarToast(msgLevelUp), delay);
                 }
 
+                // TUDO CERTO, DESTRANCA O CADEADO!
                 abrindoPacote = false;
 
             } catch (e) {
@@ -644,16 +604,13 @@
     <script>
         let tempoInativo = 0;
         
-        // Se o jogador mexer o rato, tocar no ecrã ou carregar numa tecla, o tempo zera
         const resetarTempo = () => tempoInativo = 0;
         window.addEventListener('mousemove', resetarTempo);
         window.addEventListener('touchstart', resetarTempo);
         window.addEventListener('keydown', resetarTempo);
 
-        // A cada 1 minuto (60000 milissegundos), o contador soma
         setInterval(() => {
             tempoInativo += 60000;
-            // Se atingir 30 minutos (1.800.000 ms), redireciona para o menu
             if (tempoInativo >= 1800000) {
                 window.location.href = 'menu.html';
             }

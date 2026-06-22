@@ -47,46 +47,159 @@
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* ESTILOS DA ROLETA */
+        .roleta-container {
+            width: 250px;
+            height: 250px;
+            position: relative;
+            border-radius: 50%;
+            border: 6px solid #fff;
+            box-shadow: 0 0 30px rgba(0,0,0,0.6);
+            overflow: hidden;
+            background-color: #a855f7;
+        }
+        .roleta {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(
+                #a855f7 0deg 72deg,
+                #7e22ce 72deg 144deg,
+                #eab308 144deg 216deg,
+                #a855f7 216deg 288deg,
+                #7e22ce 288deg 360deg
+            );
+            transition: transform 4s cubic-bezier(0.1, 0.7, 0.1, 1);
+            position: relative;
+        }
+        .ponteiro {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 40px solid #ef4444; 
+            z-index: 10;
+            filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.5));
+        }
+        .roleta-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 70px;
+            margin-left: -35px;
+            margin-top: -10px;
+            text-align: center;
+            font-weight: 900;
+            color: white;
+            font-size: 12px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+            line-height: 1.1;
+        }
+        .slice-1 { transform: rotate(36deg) translateY(-85px); }
+        .slice-2 { transform: rotate(108deg) translateY(-85px); }
+        .slice-3 { transform: rotate(180deg) translateY(-85px) rotate(180deg); }
+        .slice-4 { transform: rotate(252deg) translateY(-85px); }
+        .slice-5 { transform: rotate(324deg) translateY(-85px); }
     </style>
 </head>
 <body class="h-[100dvh] p-4 flex justify-center overflow-hidden">
 
     <div id="toast-container"></div>
 
-    <div class="w-full max-w-sm flex flex-col h-full relative gap-4">
+    <div class="w-full max-w-sm flex flex-col h-full relative gap-3">
         
         <!-- CABEÇALHO -->
-        <header class="relative flex items-center justify-between mt-4 mb-2 min-h-[40px]">
+        <header class="relative flex items-center justify-between mt-2 mb-1 min-h-[40px]">
             <button onclick="window.location.href='menu.html'" class="bg-[#dca3e8] hover:bg-[#bc7bd4] transition-colors rounded-full flex items-center justify-center w-10 h-10 shadow-md text-[#7a32a8] font-black text-xl z-50">
                 ←
             </button>
-            <h1 class="text-white font-black text-xl drop-shadow-md text-center absolute left-1/2 transform -translate-x-1/2 w-full pointer-events-none">MISSÕES</h1>
+            
+            <!-- TÍTULO COM O BOTÃO DE DÚVIDA (?) -->
+            <h1 class="text-white font-black text-xl drop-shadow-md text-center absolute left-1/2 transform -translate-x-1/2 flex items-center gap-2 pointer-events-auto z-40">
+                MISSÕES
+                <button onclick="window.mostrarToast('⏳ Novas missões e a trilha diária resetam todos os dias às 06:00 da manhã.')" class="bg-[#bc7bd4] text-[#7a32a8] rounded-full w-5 h-5 flex items-center justify-center text-[12px] shadow-sm border border-[#7a32a8] hover:scale-110 transition-transform active:scale-95 cursor-pointer font-bold">
+                    ?
+                </button>
+            </h1>
+
             <div class="bg-[#dca3e8] rounded-full px-3 py-1.5 flex items-center justify-center gap-1 shadow-md z-50">
                 <span id="player-coins" class="text-black font-black text-sm">...</span>
                 <img src="moedas.png" alt="Moedas" class="w-4 h-4 object-contain drop-shadow-sm">
             </div>
         </header>
 
-        <!-- AVISO DE RESET -->
-        <div class="bg-[#7a32a8] text-white text-center text-xs font-bold py-2 rounded-full shadow-md border-2 border-[#bc7bd4]">
-            ⏳ Novas missões todos os dias às 06:00
+        <!-- TRILHA DE 7 DIAS -->
+        <div class="bg-[#ebdcf2] rounded-[2rem] px-3 py-2.5 flex items-center justify-between shadow-xl border-2 border-white mb-1 w-full relative z-10 shrink-0">
+            <div id="trilha-container" class="flex w-full justify-between items-end gap-1">
+                <!-- Gerado via JS -->
+            </div>
         </div>
 
         <!-- LISTA DE MISSÕES -->
-        <main class="flex flex-col flex-grow bg-[#dca3e8]/90 backdrop-blur-sm rounded-[2rem] p-4 shadow-xl overflow-hidden mb-4 border-2 border-[#bc7bd4]">
-            
+        <main class="flex flex-col flex-grow bg-[#dca3e8]/90 backdrop-blur-sm rounded-[2rem] p-4 shadow-xl overflow-hidden mb-2 border-2 border-[#bc7bd4]">
             <div id="lista-missoes" class="flex flex-col gap-3 overflow-y-auto no-scrollbar h-full pb-2">
                 <!-- Injetado via JS -->
             </div>
-
         </main>
     </div>
 
-    <!-- SCRIPT DO FIREBASE -->
+    <!-- MODAL DA ROLETA -->
+    <div id="modal-roleta" class="hidden fixed inset-0 bg-black/90 z-[100] flex flex-col items-center justify-center p-4 backdrop-blur-md">
+        <h2 class="text-white font-black text-3xl mb-8 text-center drop-shadow-lg uppercase tracking-widest">A Roleta da Sorte</h2>
+
+        <div class="roleta-container mb-10">
+            <div class="ponteiro"></div>
+            <div id="roleta-wheel" class="roleta">
+                <div class="roleta-text slice-1">50<br><img src="moedas1.png" class="inline w-3 h-3"></div>
+                <div class="roleta-text slice-2">100<br>Frag</div>
+                <div class="roleta-text slice-3">Pacote<br>Premium</div>
+                <div class="roleta-text slice-4">50<br><img src="moedas1.png" class="inline w-3 h-3"></div>
+                <div class="roleta-text slice-5">100<br>Frag</div>
+            </div>
+        </div>
+
+        <button id="btn-girar-roleta" onclick="window.acionarRoleta()" class="bg-[#22c55e] hover:bg-[#16a34a] text-white font-black text-2xl py-4 px-12 rounded-full shadow-[0_0_20px_#4ade80] transition-transform hover:scale-105 active:scale-95 uppercase tracking-widest border-4 border-white">
+            GIRAR!
+        </button>
+    </div>
+
+    <!-- MODAL DA CARTA PROMO (DIA 7) -->
+    <div id="modal-promo" class="hidden fixed inset-0 bg-black/95 z-[110] flex flex-col items-center justify-center p-4 backdrop-blur-xl transition-opacity">
+        <div class="absolute inset-0 bg-[radial-gradient(circle,rgba(250,204,21,0.2)_0%,rgba(0,0,0,0)_70%)] animate-pulse"></div>
+        
+        <h2 class="text-yellow-400 font-black text-3xl mb-2 text-center drop-shadow-[0_0_15px_rgba(250,204,21,0.8)] uppercase tracking-widest z-10 animate-bounce mt-10">Recompensa Épica!</h2>
+        <p class="text-white font-bold text-sm mb-8 z-10 text-center">Você completou 7 dias e ganhou a Carta Promo!</p>
+        
+        <!-- A imagem da carta com efeito de brilho -->
+        <div class="relative z-10 transform transition-transform hover:scale-105 duration-500 mb-8">
+            <div class="absolute inset-0 bg-yellow-400 blur-2xl opacity-50 rounded-lg animate-pulse"></div>
+            <img id="img-carta-promo" src="fundo_carta.png" alt="Carta Promo" class="w-[70%] max-w-[250px] mx-auto object-contain drop-shadow-[0_0_30px_rgba(250,204,21,0.8)] rounded-xl border-4 border-yellow-400 shadow-2xl relative z-20">
+        </div>
+
+        <button onclick="document.getElementById('modal-promo').classList.add('hidden')" class="z-10 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-black font-black text-sm py-4 px-8 rounded-full shadow-[0_0_20px_rgba(250,204,21,0.6)] transition-transform hover:scale-105 active:scale-95 uppercase tracking-widest border-2 border-yellow-200">
+            COLOCAR NA COLEÇÃO
+        </button>
+    </div>
+
+    <!-- SCRIPT DO FIREBASE E LÓGICAS -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        
+        // IMPORTAMOS AS CARTAS PARA PUXAR A IMAGEM DE ALTA RESOLUÇÃO PARA O MODAL
+        import { INFO_CARTAS } from './cartas.js';
+
+        // =========================================================
+        // 🚨 CONFIGURAÇÃO DA CARTA PROMOCIONAL (ALTERE A CADA 15 DIAS)
+        // =========================================================
+        const CARTA_PROMO_ATUAL = "094"; 
+        // =========================================================
 
         const firebaseConfig = {
           apiKey: "AIzaSyCU3lFTgfrDMaD9jwR7X7ivYPmGQh4VE1g",
@@ -103,8 +216,8 @@
 
         let dbUserRef = null;
         let dadosJogador = null;
+        let roletaGirando = false;
 
-        // O POOL OFICIAL DE MISSÕES
         const POOL_MISSOES = [
             { id: "login", desc: "Fazer login no jogo", meta: 1 },
             { id: "troca", desc: "Realizar uma troca", meta: 1 },
@@ -113,7 +226,18 @@
             { id: "abrir_colecao", desc: "Abrir a coleção", meta: 1 },
             { id: "batalhar", desc: "Batalhar uma vez", meta: 1 },
             { id: "ganhar_partida", desc: "Ganhar uma partida", meta: 1 },
-            { id: "abrir_pacote", desc: "Abrir um pacote de cartas", meta: 1 } // <-- ESSA É A NOVA
+            { id: "abrir_pacote", desc: "Abrir um pacote de cartas", meta: 1 }
+        ];
+
+        // A TRILHA AGORA TERMINA NA CARTA PROMO
+        const PREMIOS_TRILHA = [
+            { tipo: 'moedas', valor: 10 },
+            { tipo: 'moedas', valor: 20 },
+            { tipo: 'moedas', valor: 30 },
+            { tipo: 'moedas', valor: 40 },
+            { tipo: 'roleta', valor: '?' },
+            { tipo: 'moedas', valor: 60 },
+            { tipo: 'carta_promo', valor: '?' }
         ];
 
         window.mostrarToast = function(mensagem) {
@@ -136,6 +260,14 @@
             return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
         }
 
+        function obterDiferencaDias(dataAntiga, dataNova) {
+            if (!dataAntiga) return 2; 
+            const d1 = new Date(dataAntiga + 'T06:00:00'); 
+            const d2 = new Date(dataNova + 'T06:00:00');
+            const diffTime = Math.abs(d2 - d1);
+            return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        }
+
         function calcularXPMaximo(nivel) {
             if (nivel >= 1 && nivel <= 5) return 200;
             if (nivel >= 6 && nivel <= 15) return 750;
@@ -143,23 +275,189 @@
             return 3000;
         }
 
-        function sortearMissoesDiarias() {
-            // Embaralha o array
-            const embaralhado = [...POOL_MISSOES].sort(() => 0.5 - Math.random());
-            // Pega as 5 primeiras
-            const sorteadas = embaralhado.slice(0, 5);
+        // ==========================================
+        // SISTEMA DE TRILHA 7 DIAS (COM REGRAS DE RESET)
+        // ==========================================
+        async function processarTrilhaDiaria() {
+            let loginDiario = dadosJogador.loginDiario || { ultimaColeta: null, diasSeguidos: 0 };
+            const hoje = obterGameDay();
+
+            if (loginDiario.ultimaColeta && loginDiario.ultimaColeta !== hoje) {
+                let diasPerdidos = obterDiferencaDias(loginDiario.ultimaColeta, hoje);
+                
+                // Se ficou mais de 1 dia sem logar, perde a ofensiva
+                if (diasPerdidos > 1) {
+                    loginDiario.diasSeguidos = 0; 
+                }
+                // Se ontem ele completou os 7 dias, hoje a trilha limpa e começa do zero
+                else if (loginDiario.diasSeguidos >= 7) {
+                    loginDiario.diasSeguidos = 0;
+                }
+            }
             
-            // Monta o objeto com progresso
+            dadosJogador.loginDiario = loginDiario;
+            renderizarTrilha();
+        }
+
+        function renderizarTrilha() {
+            const container = document.getElementById('trilha-container');
+            container.innerHTML = "";
+            const hoje = obterGameDay();
+            const diasCompletos = dadosJogador.loginDiario.diasSeguidos;
+            const coletadoHoje = dadosJogador.loginDiario.ultimaColeta === hoje;
+
+            PREMIOS_TRILHA.forEach((premio, index) => {
+                let estado = 'futuro'; 
+                if (index < diasCompletos) estado = 'feito'; 
+                if (index === diasCompletos && !coletadoHoje) estado = 'hoje'; 
+                if (index === diasCompletos && coletadoHoje) estado = 'futuro';
+
+                const divDia = document.createElement('div');
+                divDia.className = "flex flex-col items-center gap-0.5 cursor-pointer transform transition-transform hover:scale-105 active:scale-95 w-[14%]";
+                
+                let htmlDia = `<span class="text-[#51237a] font-black text-[9px] sm:text-[10px] whitespace-nowrap">Dia ${index + 1}</span>`;
+                let boxClass = "w-full aspect-square rounded-xl flex items-center justify-center shadow-md relative overflow-hidden ";
+                let boxContent = "";
+
+                if (estado === 'feito') {
+                    boxClass += "bg-[#51237a]";
+                    boxContent = `<img src="check.png" class="w-5 h-5 sm:w-6 sm:h-6 object-contain">`;
+                } else if (estado === 'hoje') {
+                    boxClass += "bg-gradient-to-br from-[#4ade80] to-[#16a34a] shadow-[0_0_10px_#4ade80] border-2 border-white";
+                    if (premio.tipo === 'roleta' || premio.tipo === 'carta_promo') {
+                        boxContent = `<img src="surpresa.png" class="w-6 h-6 sm:w-8 sm:h-8 object-contain">`;
+                    } else {
+                        boxContent = `<span class="text-white font-black text-[11px] sm:text-xs tracking-tighter">${premio.valor}</span><img src="moedas1.png" class="w-3 h-3 sm:w-4 sm:h-4 ml-0.5">`;
+                    }
+                    divDia.onclick = () => window.coletarRecompensaTrilha();
+                } else {
+                    boxClass += "bg-[#966eb8]";
+                    if (premio.tipo === 'roleta' || premio.tipo === 'carta_promo') {
+                        boxContent = `<img src="surpresa.png" class="w-5 h-5 sm:w-6 sm:h-6 opacity-80 object-contain">`;
+                    } else {
+                        boxContent = `<span class="text-white font-black text-[11px] sm:text-xs tracking-tighter opacity-90">${premio.valor}</span><img src="moedas1.png" class="w-3 h-3 sm:w-4 sm:h-4 ml-0.5 opacity-90">`;
+                    }
+                }
+
+                divDia.innerHTML = htmlDia + `<div class="${boxClass}">${boxContent}</div>`;
+                container.appendChild(divDia);
+            });
+        }
+
+        window.coletarRecompensaTrilha = async function() {
+            const hoje = obterGameDay();
+            let dSeguidos = dadosJogador.loginDiario.diasSeguidos;
+            const premioAtual = PREMIOS_TRILHA[dSeguidos];
+
+            if (dadosJogador.loginDiario.ultimaColeta === hoje) return;
+
+            // Abrir Roleta do Dia 5
+            if (premioAtual.tipo === 'roleta') {
+                document.getElementById('modal-roleta').classList.remove('hidden');
+                return;
+            }
+
+            let atualizacao = {};
+            let msgToast = "";
+
+            if (premioAtual.tipo === 'moedas') {
+                atualizacao = { moedas: increment(premioAtual.valor) };
+                dadosJogador.moedas += premioAtual.valor;
+                document.getElementById('player-coins').innerText = dadosJogador.moedas;
+                msgToast = `Dia ${dSeguidos + 1} Resgatado!<br><span class="text-xs">+${premioAtual.valor} <img src="moedas1.png" class="inline w-4 h-4 align-text-bottom"></span>`;
+            
+            } else if (premioAtual.tipo === 'carta_promo') {
+                // Injeta a carta configurada direto na coleção do jogador
+                atualizacao = { [`colecao.${CARTA_PROMO_ATUAL}`]: increment(1) };
+                
+                // Puxa a imagem original da carta lá do seu arquivo cartas.js para ficar perfeita no modal
+                const infoPromo = INFO_CARTAS[CARTA_PROMO_ATUAL];
+                if(infoPromo) {
+                    document.getElementById('img-carta-promo').src = infoPromo.imagem;
+                }
+            }
+
+            dadosJogador.loginDiario.diasSeguidos++;
+            dadosJogador.loginDiario.ultimaColeta = hoje;
+            atualizacao.loginDiario = dadosJogador.loginDiario;
+
+            try {
+                await setDoc(dbUserRef, atualizacao, { merge: true });
+                renderizarTrilha();
+                if (msgToast) window.mostrarToast(msgToast);
+
+                // Abre a tela de Recompensa Épica somente se for o dia da Promo
+                if (premioAtual.tipo === 'carta_promo') {
+                    document.getElementById('modal-promo').classList.remove('hidden');
+                }
+            } catch (e) { console.error("Erro", e); }
+        };
+
+        // ==========================================
+        // ROLETA DO 5º DIA
+        // ==========================================
+        window.acionarRoleta = async function() {
+            if(roletaGirando) return;
+            roletaGirando = true;
+            
+            const btn = document.getElementById('btn-girar-roleta');
+            btn.classList.add('opacity-50', 'pointer-events-none');
+            const roleta = document.getElementById('roleta-wheel');
+
+            const PREMIOS_ROLETA = [
+                { tipo: 'moedas', valor: 50, db: 'moedas' },
+                { tipo: 'frag', valor: 100, db: 'fragmentos' },
+                { tipo: 'pacote', valor: 1, db: 'inventario.pacotePremium' },
+                { tipo: 'moedas', valor: 50, db: 'moedas' },
+                { tipo: 'frag', valor: 100, db: 'fragmentos' }
+            ];
+
+            const indexSorteado = Math.floor(Math.random() * 5);
+            const offsetDoMeioDaFatia = (indexSorteado * 72) + 36;
+            const degRotacao = (5 * 360) + (360 - offsetDoMeioDaFatia);
+
+            roleta.style.transform = `rotate(${degRotacao}deg)`;
+
+            setTimeout(async () => {
+                const premioGanhado = PREMIOS_ROLETA[indexSorteado];
+                const hoje = obterGameDay();
+                
+                let atualizacao = { [premioGanhado.db]: increment(premioGanhado.valor) };
+
+                dadosJogador.loginDiario.diasSeguidos++;
+                dadosJogador.loginDiario.ultimaColeta = hoje;
+                atualizacao.loginDiario = dadosJogador.loginDiario;
+
+                try {
+                    await setDoc(dbUserRef, atualizacao, { merge: true });
+                    
+                    let msg = "";
+                    if(premioGanhado.tipo === 'moedas') {
+                        dadosJogador.moedas += premioGanhado.valor;
+                        document.getElementById('player-coins').innerText = dadosJogador.moedas;
+                        msg = `Sorte Grande!<br><span class="text-xs">Você ganhou ${premioGanhado.valor} Moedas!</span>`;
+                    } else if(premioGanhado.tipo === 'frag') {
+                        msg = `Ótimo!<br><span class="text-xs">Você ganhou ${premioGanhado.valor} Fragmentos!</span>`;
+                    } else {
+                        msg = `🎰 PRÊMIO MÁXIMO!<br><span class="text-xs">Você tirou o Pacote Premium!</span>`;
+                    }
+
+                    document.getElementById('modal-roleta').classList.add('hidden');
+                    renderizarTrilha();
+                    window.mostrarToast(msg);
+                } catch(e) { console.error(e); }
+            }, 4200); 
+        };
+
+        // ==========================================
+        // SISTEMA DE MISSÕES DIÁRIAS 
+        // ==========================================
+        function sortearMissoesDiarias() {
+            const embaralhado = [...POOL_MISSOES].sort(() => 0.5 - Math.random());
+            const sorteadas = embaralhado.slice(0, 5);
             return sorteadas.map(m => {
-                // Se a missão sorteada for de login, já entra com progresso 1 (pois ele acabou de abrir o jogo)
                 let progressoInicial = (m.id === "login") ? 1 : 0;
-                return {
-                    id: m.id,
-                    desc: m.desc,
-                    meta: m.meta,
-                    progresso: progressoInicial,
-                    resgatada: false
-                };
+                return { id: m.id, desc: m.desc, meta: m.meta, progresso: progressoInicial, resgatada: false };
             });
         }
 
@@ -167,18 +465,11 @@
             const hoje = obterGameDay();
             let pacoteMissoes = dadosJogador.missoesDiarias || {};
 
-            // Se for um novo dia ou o jogador nunca teve missões, a gente sorteia
             if (pacoteMissoes.dataReset !== hoje || !pacoteMissoes.lista || pacoteMissoes.lista.length !== 5) {
-                pacoteMissoes = {
-                    dataReset: hoje,
-                    lista: sortearMissoesDiarias()
-                };
-                
-                // Salva no Firebase
+                pacoteMissoes = { dataReset: hoje, lista: sortearMissoesDiarias() };
                 await setDoc(dbUserRef, { missoesDiarias: pacoteMissoes }, { merge: true });
                 dadosJogador.missoesDiarias = pacoteMissoes;
             }
-
             renderizarMissoes();
         }
 
@@ -192,8 +483,6 @@
                 item.className = "bg-gray-800 border-2 border-[#bc7bd4] rounded-xl p-3 flex items-center justify-between shadow-sm gap-3";
 
                 const concluida = missao.progresso >= missao.meta;
-                
-                // Textos
                 let htmlInfo = `
                     <div class="flex flex-col flex-grow">
                         <span class="text-white font-black text-sm">${missao.desc}</span>
@@ -204,7 +493,6 @@
                     </div>
                 `;
 
-                // Botão
                 let htmlBotao = "";
                 if (missao.resgatada) {
                     htmlBotao = `<button disabled class="bg-[#7a32a8] text-[#dca3e8] font-black text-xs py-2 px-3 rounded-lg opacity-60">CONCLUÍDO</button>`;
@@ -219,20 +507,17 @@
             });
         }
 
-        // Função Global para ser chamada no HTML
         window.resgatarMissao = async function(index) {
             const missao = dadosJogador.missoesDiarias.lista[index];
-            
             if (missao.progresso < missao.meta || missao.resgatada) return;
 
-            // Altera localmente para atualizar a tela na hora
             missao.resgatada = true;
             renderizarMissoes();
 
             let nivelAtual = dadosJogador.nivel || 1;
             let xpAtual = dadosJogador.xp || 0;
-            let novoXp = xpAtual + 30; // 30 XP da recompensa
-            let bonusMoedas = 10;      // 10 Moedas da recompensa
+            let novoXp = xpAtual + 30; 
+            let bonusMoedas = 10;      
             
             let subiuNivel = false;
             let pacotesBasicos = 0;
@@ -242,12 +527,11 @@
 
             let xpMaximo = calcularXPMaximo(nivelAtual);
 
-            // Matemática de Level UP
             while (novoXp >= xpMaximo && nivelAtual < 30) {
                 novoXp -= xpMaximo;
                 nivelAtual++;
                 subiuNivel = true;
-                bonusMoedas += 30; // Bonus por subir de nível
+                bonusMoedas += 30; 
                 pacotesBasicos++;
                 
                 let textoRecompensaNotif = "1 Pacote Básico e 30 Moedas";
@@ -270,27 +554,17 @@
                 xpMaximo = calcularXPMaximo(nivelAtual);
             }
 
-            // Prepara pacote de atualização do Banco
-            let docAtualizacao = {
-                missoesDiarias: dadosJogador.missoesDiarias,
-                xp: novoXp,
-                nivel: nivelAtual,
-                moedas: increment(bonusMoedas)
-            };
+            let docAtualizacao = { missoesDiarias: dadosJogador.missoesDiarias, xp: novoXp, nivel: nivelAtual, moedas: increment(bonusMoedas) };
 
             if (subiuNivel) {
                 let invUpdates = {};
                 if (pacotesBasicos > 0) invUpdates.pacoteBasico = increment(pacotesBasicos);
                 if (pacotesPremium > 0) invUpdates.pacotePremium = increment(pacotesPremium);
                 if (Object.keys(invUpdates).length > 0) docAtualizacao.inventario = invUpdates;
-                
-                if (notificacoesNovas.length > 0) {
-                    docAtualizacao.notificacoes = arrayUnion(...notificacoesNovas);
-                }
+                if (notificacoesNovas.length > 0) docAtualizacao.notificacoes = arrayUnion(...notificacoesNovas);
             }
 
             try {
-                // Atualiza o banco e as variáveis locais
                 await setDoc(dbUserRef, docAtualizacao, { merge: true });
                 dadosJogador.xp = novoXp;
                 dadosJogador.nivel = nivelAtual;
@@ -298,15 +572,11 @@
                 
                 document.getElementById('player-coins').innerText = dadosJogador.moedas;
 
-                // Avisos na tela
                 window.mostrarToast(`Missão Resgatada!<br><span class="text-xs">+30 XP e +10 <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`);
-                if (subiuNivel) {
-                    setTimeout(() => window.mostrarToast(msgLevelUpPopup), 1000);
-                }
-
+                if (subiuNivel) setTimeout(() => window.mostrarToast(msgLevelUpPopup), 1000);
             } catch (error) {
                 console.error("Erro ao resgatar missão:", error);
-                missao.resgatada = false; // Reverte se der erro de internet
+                missao.resgatada = false; 
                 renderizarMissoes();
             }
         };
@@ -320,7 +590,7 @@
                     dadosJogador = snap.data();
                     document.getElementById('player-coins').innerText = dadosJogador.moedas || 0;
                     
-                    // Dispara a lógica de verificação/sorteio
+                    processarTrilhaDiaria();
                     inicializarMissoes();
                 }
             } else {

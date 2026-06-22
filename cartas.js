@@ -162,7 +162,8 @@ export const INFO_CARTAS = {
 
    
     "092": { nome: "Dado a Conjuntura", raridade: "Épica", expansao: "poi", pontos: 7, aura: 89, fofura: 18, diversao: 90, aleatoriedade: 14, imagem: "cartas/092.png" }, 
-    "093": { nome: "Preenchimento Labial", raridade: "Épica", expansao: "poi", pontos: 7, aura: 84, fofura: 91, diversao: 82, aleatoriedade: 85, imagem: "cartas/093.png" }
+    "093": { nome: "Preenchimento Labial", raridade: "Épica", expansao: "poi", pontos: 7, aura: 84, fofura: 91, diversao: 82, aleatoriedade: 85, imagem: "cartas/093.png" },
+    "094": { nome: "A Pele Que Habito", raridade: "Rara", expansao: "promo", pontos: 3, aura: 78, fofura: 10, diversao: 10, aleatoriedade: 79, imagem: "cartas/094.png" }
 
 
 };

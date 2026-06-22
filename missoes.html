@@ -172,13 +172,13 @@
     <div id="modal-promo" class="hidden fixed inset-0 bg-black/95 z-[110] flex flex-col items-center justify-center p-4 backdrop-blur-xl transition-opacity">
         <div class="absolute inset-0 bg-[radial-gradient(circle,rgba(250,204,21,0.2)_0%,rgba(0,0,0,0)_70%)] animate-pulse"></div>
         
-        <h2 class="text-yellow-400 font-black text-3xl mb-2 text-center drop-shadow-[0_0_15px_rgba(250,204,21,0.8)] uppercase tracking-widest z-10 animate-bounce mt-10">Recompensa Épica!</h2>
+        <h2 class="text-yellow-400 font-black text-3xl mb-2 text-center drop-shadow-[0_0_15px_rgba(250,204,21,0.8)] uppercase tracking-widest z-10 animate-bounce mt-10">Recompensa Promocional!</h2>
         <p class="text-white font-bold text-sm mb-8 z-10 text-center">Você completou 7 dias e ganhou a Carta Promo!</p>
         
         <!-- A imagem da carta com efeito de brilho -->
         <div class="relative z-10 transform transition-transform hover:scale-105 duration-500 mb-8">
             <div class="absolute inset-0 bg-yellow-400 blur-2xl opacity-50 rounded-lg animate-pulse"></div>
-            <img id="img-carta-promo" src="fundo_carta.png" alt="Carta Promo" class="w-[70%] max-w-[250px] mx-auto object-contain drop-shadow-[0_0_30px_rgba(250,204,21,0.8)] rounded-xl border-4 border-yellow-400 shadow-2xl relative z-20">
+            <img id="img-carta-promo" src="fundo_carta.png" alt="Carta Promo" class="w-[70%] max-w-[250px] mx-auto object-contain drop-shadow-[0_0_30px_rgba(250,204,21,0.8)] rounded-xl shadow-2xl relative z-20">
         </div>
 
         <button onclick="document.getElementById('modal-promo').classList.add('hidden')" class="z-10 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-black font-black text-sm py-4 px-8 rounded-full shadow-[0_0_20px_rgba(250,204,21,0.6)] transition-transform hover:scale-105 active:scale-95 uppercase tracking-widest border-2 border-yellow-200">
@@ -190,7 +190,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         
         // IMPORTAMOS AS CARTAS PARA PUXAR A IMAGEM DE ALTA RESOLUÇÃO PARA O MODAL
         import { INFO_CARTAS } from './cartas.js';
@@ -382,7 +382,7 @@
             atualizacao.loginDiario = dadosJogador.loginDiario;
 
             try {
-                await setDoc(dbUserRef, atualizacao, { merge: true });
+                await updateDoc(dbUserRef, atualizacao);
                 renderizarTrilha();
                 if (msgToast) window.mostrarToast(msgToast);
 
@@ -429,7 +429,7 @@
                 atualizacao.loginDiario = dadosJogador.loginDiario;
 
                 try {
-                    await setDoc(dbUserRef, atualizacao, { merge: true });
+                    await updateDoc(dbUserRef, atualizacao);
                     
                     let msg = "";
                     if(premioGanhado.tipo === 'moedas') {

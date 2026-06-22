@@ -475,7 +475,7 @@
 
                 if (pacoteMissoes.dataReset === hoje && pacoteMissoes.lista) {
                     pacoteMissoes.lista.forEach(m => {
-                        if (m.id === "reciclar" && m.progresso < m.meta) {
+                        if (["reciclar", "reciclar_2"].includes(m.id) && m.progresso < m.meta) {
                             m.progresso++;
                             atualizouMissao = true;
                             msgMissaoProgresso = `🎯 Progresso: ${m.desc}`;

@@ -356,15 +356,41 @@
             containerRevelacao.classList.remove('anim-pop'); // Remove qualquer animação travada
             containerRevelacao.style.opacity = '0'; // Esconde o container até a nova carta estar pronta
 
-            // O código agora sabe identificar os 4 tipos de pacote
+        // --- FASE 1: INICIA A REVELAÇÃO CARTA POR CARTA ---
+        window.abrirPacote = async function(tipo) {
+            if (abrindoPacote) return;
+            
             const campo = tipo === 'basico' ? 'pacoteBasico' : (tipo === 'premium' ? 'pacotePremium' : (tipo === 'expansao' ? 'pacoteExpansao' : 'pacoteGratis'));
             let qtd = (dadosJogador.inventario && dadosJogador.inventario[campo]) || 0;
             
             if (qtd <= 0) {
                 window.mostrarToast("Pacote esgotado!");
-                abrindoPacote = false;
                 return;
             }
+
+            // Tranca o cadeado IMEDIATAMENTE
+            abrindoPacote = true;
+
+            // NOVA TRAVA DE SEGURANÇA: Desconta o pacote no banco ANTES de mostrar as cartas
+            try {
+                await updateDoc(dbUserRef, {
+                    [`inventario.${campo}`]: increment(-1)
+                });
+                dadosJogador.inventario[campo] -= 1; // Atualiza a variável local
+                carregarInventario(); // Recarrega a tela de trás pra atualizar o número
+            } catch (error) {
+                console.error("Erro ao descontar pacote:", error);
+                window.mostrarToast("Erro de conexão ao abrir pacote.");
+                abrindoPacote = false;
+                return; // Se estiver sem internet, o pacote nem abre e ele não perde.
+            }
+
+            // 🧹 LIMPEZA DO "FANTASMA" DO PACOTE ANTERIOR
+            const imgRevelacao = document.getElementById('img-revelacao');
+            const containerRevelacao = document.getElementById('container-revelacao');
+            imgRevelacao.src = ""; 
+            containerRevelacao.classList.remove('anim-pop'); 
+            containerRevelacao.style.opacity = '0'; 
 
             tipoPacoteTemp = tipo;
             cartasSorteadaTemp = [];
@@ -534,12 +560,23 @@
                     xpMaximo = calcularXPMaximo(nivelAtual);
                 }
 
-                let deltaBasico = (campo === 'pacoteBasico' ? -1 : 0) + pacotesBasicosGanhos;
-                let deltaPremium = (campo === 'pacotePremium' ? -1 : 0) + pacotesPremiumGanhos;
-                let deltaGratis = (campo === 'pacoteGratis' ? -1 : 0);
-                let deltaExpansao = (campo === 'pacoteExpansao' ? -1 : 0);
+                // O -1 foi removido, agora só somamos se ele ganhar pacotes bônus por subir de nível!
+                let deltaBasico = pacotesBasicosGanhos;
+                let deltaPremium = pacotesPremiumGanhos;
 
                 let updates = {
+                    "estatisticas.pacotesAbertos": increment(1),
+                    "estatisticas.totalCartas": increment(5),
+                    "badges": badgesJogador,
+                    "xp": novoXp,
+                    "nivel": nivelAtual,
+                    "moedas": increment(bonusMoedas)
+                };
+
+                if (deltaBasico !== 0) updates["inventario.pacoteBasico"] = increment(deltaBasico);
+                if (deltaPremium !== 0) updates["inventario.pacotePremium"] = increment(deltaPremium);
+                
+                // Removidas as linhas de deltaGratis e deltaExpansao daqui, pois não recebem bônus de level up.
                     "estatisticas.pacotesAbertos": increment(1),
                     "estatisticas.totalCartas": increment(5),
                     "badges": badgesJogador,

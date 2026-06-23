@@ -717,5 +717,39 @@
             }
         }, 60000);
     </script>
+    <!-- ========================================== -->
+    <!-- ASSINATURA SONORA  -->
+    <!-- ========================================== -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Verifica se o som JÁ tocou nesta sessão
+            if (!sessionStorage.getItem('introTocada')) {
+                
+                const introAudio = new Audio('intro.mpeg');
+                introAudio.volume = 0.6; // Volume em 60% para não dar susto no jogador
+                
+                const tentarTocarIntro = () => {
+                    introAudio.play().then(() => {
+                        // Se deu certo, marca no sistema que já tocou para não repetir
+                        sessionStorage.setItem('introTocada', 'true');
+                        // Remove a armadilha de clique da tela
+                        document.removeEventListener('click', tentarTocarIntro);
+                        document.removeEventListener('touchstart', tentarTocarIntro);
+                    }).catch(err => {
+                        // Se o navegador bloqueou por falta de interação, ele ignora silenciosamente
+                        // e espera o jogador dar o primeiro clique em qualquer lugar da tela.
+                        console.log("Aguardando interação para tocar a Intro...");
+                    });
+                };
+
+                // Tenta tocar imediatamente (pode funcionar dependendo de como ele fez o login)
+                tentarTocarIntro();
+
+                // Armadilha: Se o autoplay for bloqueado, toca no 1º clique que ele der (em qualquer botão)
+                document.addEventListener('click', tentarTocarIntro);
+                document.addEventListener('touchstart', tentarTocarIntro);
+            }
+        });
+    </script>
 </body>
 </html>

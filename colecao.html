@@ -600,6 +600,30 @@
 
                 if (docSnap.exists()) {
                     const dados = docSnap.data();
+
+                    try {
+                        const hoje = obterGameDay();
+                        let pacoteMissoes = dados.missoesDiarias || {};
+                        let atualizouMissao = false;
+                        let msgMissaoProgresso = "";
+
+                        if (pacoteMissoes.dataReset === hoje && pacoteMissoes.lista) {
+                            pacoteMissoes.lista.forEach(m => {
+                                if (m.id === "abrir_colecao" && m.progresso < m.meta) {
+                                    m.progresso++;
+                                    atualizouMissao = true;
+                                    msgMissaoProgresso = `🎯 Progresso: ${m.desc}`;
+                                }
+                            });
+                        }
+
+                        if (atualizouMissao) {
+                            await updateDoc(dbUserRef, { missoesDiarias: pacoteMissoes });
+                            window.mostrarToast(msgMissaoProgresso);
+                        }
+                    } catch (e) {
+                        console.error("Erro ao atualizar missão abrir_colecao:", e);
+                    }
                     
                     document.getElementById('player-coins').innerText = dados.moedas || 0;
                     

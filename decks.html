@@ -287,13 +287,15 @@
 
             // Cálculos das Estatísticas
             const stats = deck.estatisticas || {
-                partidasSolo: 0, vitoriasSolo: 0, empatesSolo: 0, pontosSoloTotal: 0, recordeSolo: 0,
+                partidasSolo: 0, vitoriasSolo: 0, empatesSolo: 0, totalPontosSolo: 0, recordePontosSolo: 0,
                 partidasDuo: 0, vitoriasDuo: 0
             };
+            const pontosSoloTotal = stats.totalPontosSolo ?? stats.pontosSoloTotal ?? 0;
+            const recordeSolo = stats.recordePontosSolo ?? stats.recordeSolo ?? 0;
 
             const winRateSolo = stats.partidasSolo > 0 ? Math.round((stats.vitoriasSolo / stats.partidasSolo) * 100) : 0;
             const winRateDuo = stats.partidasDuo > 0 ? Math.round((stats.vitoriasDuo / stats.partidasDuo) * 100) : 0;
-            const mediaSolo = stats.partidasSolo > 0 ? Math.round(stats.pontosSoloTotal / stats.partidasSolo) : 0;
+            const mediaSolo = stats.partidasSolo > 0 ? Math.round(pontosSoloTotal / stats.partidasSolo) : 0;
 
             document.getElementById('stat-wr-solo').innerText = `${winRateSolo}%`;
             document.getElementById('stat-wr-duo').innerText = `${winRateDuo}%`;
@@ -301,7 +303,7 @@
             document.getElementById('stat-partidas-solo').innerText = stats.partidasSolo || 0;
             document.getElementById('stat-partidas-duo').innerText = stats.partidasDuo || 0;
             document.getElementById('stat-empates-solo').innerText = stats.empatesSolo || 0;
-            document.getElementById('stat-recorde-solo').innerText = stats.recordeSolo || 0;
+            document.getElementById('stat-recorde-solo').innerText = recordeSolo || 0;
 
             document.getElementById('modal-estatisticas-deck').classList.remove('hidden');
         };

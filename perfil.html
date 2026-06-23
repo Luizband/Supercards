@@ -86,17 +86,10 @@
             <!-- NOME, MOEDAS E XP (Direita) -->
             <div class="flex flex-col flex-grow gap-2 justify-center">
                 
-                <!-- Linha Nome + Moedas -->
+                <!-- Linha Nome -->
                 <div class="flex items-center gap-2 w-full">
-                    <!-- NOME -->
-                    <div class="bg-[#dca3e8] rounded-full px-3 py-2 flex items-center justify-center shadow-md flex-grow overflow-hidden">
-                        <span id="perfil-nome" class="text-[#7a32a8] font-black text-base tracking-wide uppercase truncate max-w-[130px]">JOGADOR</span>
-                    </div>
-                    
-                    <!-- MOEDAS -->
-                    <div class="bg-[#dca3e8] rounded-full px-3 py-2 flex items-center justify-center gap-1 shadow-md flex-shrink-0">
-                        <span id="perfil-moedas" class="text-[#7a32a8] font-black text-sm">0</span>
-                        <img src="moedas.png" class="w-4 h-4 object-contain">
+                    <div class="bg-[#dca3e8] rounded-full px-3 py-2 flex items-center justify-center shadow-md w-full overflow-hidden">
+                        <span id="perfil-nome" class="text-[#7a32a8] font-black text-base tracking-wide uppercase truncate">JOGADOR</span>
                     </div>
                 </div>
                 
@@ -111,6 +104,30 @@
         </header>
         
         <main class="flex flex-col gap-4 flex-grow overflow-y-auto no-scrollbar pb-24 mt-2">
+
+            <div class="grid grid-cols-3 gap-3 w-full">
+                <div class="flex flex-col items-center">
+                    <div class="bg-[#dca3e8] w-full aspect-square rounded-[24px] flex flex-col items-center justify-center p-3 shadow-xl border-4 border-[#bc7bd4]/60">
+                        <img src="moedas.png" class="w-[42%] h-[42%] object-contain drop-shadow-lg mb-1.5">
+                        <span id="perfil-moedas" class="text-[#7a32a8] font-black text-lg leading-none">0</span>
+                    </div>
+                    <span class="text-[#dca3e8] font-black text-[10px] mt-2 uppercase tracking-wide drop-shadow-md text-center">Moedas</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="bg-[#dca3e8] w-full aspect-square rounded-[24px] flex flex-col items-center justify-center p-3 shadow-xl border-4 border-[#bc7bd4]/60">
+                        <img src="fragmento.png" class="w-[42%] h-[42%] object-contain drop-shadow-lg mb-1.5">
+                        <span id="perfil-fragmentos" class="text-[#7a32a8] font-black text-lg leading-none">0</span>
+                    </div>
+                    <span class="text-[#dca3e8] font-black text-[10px] mt-2 uppercase tracking-wide drop-shadow-md text-center">Fragmentos</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="bg-[#dca3e8] w-full aspect-square rounded-[24px] flex flex-col items-center justify-center p-3 shadow-xl border-4 border-[#bc7bd4]/60">
+                        <img src="vs.png" class="w-[42%] h-[42%] object-contain drop-shadow-lg mb-1.5">
+                        <span id="perfil-batalhas" class="text-[#7a32a8] font-black text-lg leading-none">0</span>
+                    </div>
+                    <span class="text-[#dca3e8] font-black text-[10px] mt-2 uppercase tracking-wide drop-shadow-md text-center leading-tight">Batalhas<br>Vencidas</span>
+                </div>
+            </div>
             
             <div class="bg-[#dca3e8] rounded-[2rem] p-5 shadow-xl">
                 <h2 class="text-[#7a32a8] font-black text-xl text-center mb-4 uppercase drop-shadow-sm">Badges</h2>
@@ -134,13 +151,25 @@
                         <span>Cartas na Coleção:</span> <span id="stat-cartas">0</span>
                     </li>
                     <li class="flex justify-between border-b border-[#bc7bd4] pb-1">
+                        <span>Cartas Únicas:</span> <span id="stat-cartas-unicas">0/94</span>
+                    </li>
+                    <li class="flex justify-between border-b border-[#bc7bd4] pb-1">
                         <span>Cartas Recicladas:</span> <span id="stat-recicladas">0</span>
                     </li>
                     <li class="flex justify-between border-b border-[#bc7bd4] pb-1">
-                        <span>Batalhas Vencidas:</span> <span id="stat-batalhas">0</span>
+                        <span>Moedas Gastas:</span> <span id="stat-moedas-gastas">0</span>
+                    </li>
+                    <li class="flex justify-between border-b border-[#bc7bd4] pb-1">
+                        <span>Trocas Feitas:</span> <span id="stat-trocas">0</span>
+                    </li>
+                    <li class="flex justify-between border-b border-[#bc7bd4] pb-1">
+                        <span>Dias Seguidos:</span> <span id="stat-dias-seguidos">0</span>
+                    </li>
+                    <li class="flex justify-between border-b border-[#bc7bd4] pb-1">
+                        <span>Amigos:</span> <span id="stat-amigos">0</span>
                     </li>
                     <li class="flex justify-between">
-                        <span>Trocas Feitas:</span> <span id="stat-trocas">0</span>
+                        <span>Badges:</span> <span id="stat-badges">0/14</span>
                     </li>
                 </ul>
             </div>
@@ -237,6 +266,9 @@
             }, 3000);
         };
 
+        const TOTAL_CARTAS = 94;
+        const TOTAL_BADGES = Object.keys(INFO_BADGES).length;
+
         function calcularXPMaximo(nivel) {
             if (nivel >= 1 && nivel <= 5) return 200;
             if (nivel >= 6 && nivel <= 15) return 750;
@@ -255,6 +287,7 @@
                     
                     document.getElementById('perfil-nome').innerText = user.displayName?.toUpperCase() || "JOGADOR";
                     document.getElementById('perfil-moedas').innerText = dados.moedas || 0;
+                    document.getElementById('perfil-fragmentos').innerText = dados.fragmentos || 0;
                     
                     const nivel = dados.nivel || 1;
                     const xpAtual = dados.xp || 0;
@@ -276,25 +309,35 @@
                     // --- MATEMÁTICA REAL DAS CARTAS ---
                     // O jogo ignora o stats.totalCartas e soma a coleção real do jogador
                     let totalCartasVerdadeiro = 0;
+                    let cartasUnicas = 0;
                     if (dados.colecao) {
                         for (let idCarta in dados.colecao) {
                             // Só soma se for maior que zero (ignora os bugs negativos do passado)
                             if (dados.colecao[idCarta] > 0) {
                                 totalCartasVerdadeiro += dados.colecao[idCarta];
+                                cartasUnicas++;
                             }
                         }
                     }
 
+                    const numAmigos = (dados.amigos || []).length;
+                    const badgesConquistadas = dados.badges || {};
+                    const numBadges = Object.keys(badgesConquistadas).length;
+
                     document.getElementById('stat-pacotes').innerText = stats.pacotesAbertos || 0;
-                    document.getElementById('stat-cartas').innerText = totalCartasVerdadeiro; // Usa a soma verdadeira
+                    document.getElementById('stat-cartas').innerText = totalCartasVerdadeiro;
+                    document.getElementById('stat-cartas-unicas').innerText = `${cartasUnicas}/${TOTAL_CARTAS}`;
                     document.getElementById('stat-recicladas').innerText = stats.cartasRecicladas || 0;
-                    document.getElementById('stat-batalhas').innerText = stats.batalhasVencidas || 0;
-                    document.getElementById('stat-trocas').innerText = stats.trocasFeitas || 0;;
+                    document.getElementById('stat-moedas-gastas').innerText = stats.moedasGastas || 0;
+                    document.getElementById('perfil-batalhas').innerText = stats.batalhasVencidas || 0;
+                    document.getElementById('stat-trocas').innerText = stats.trocasFeitas || 0;
+                    document.getElementById('stat-dias-seguidos').innerText = stats.diasSeguidos || 0;
+                    document.getElementById('stat-amigos').innerText = numAmigos;
+                    document.getElementById('stat-badges').innerText = `${numBadges}/${TOTAL_BADGES}`;
 
                     const gridBadges = document.getElementById('grid-badges');
                     const msgSemBadges = document.getElementById('mensagem-sem-badges');
                     
-                    const badgesConquistadas = dados.badges || {}; 
                     const chavesBadges = Object.keys(badgesConquistadas);
 
                     if (chavesBadges.length === 0) {

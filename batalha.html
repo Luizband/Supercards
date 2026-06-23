@@ -94,50 +94,34 @@
                 <button onclick="abrirModalRegras()" class="bg-[#7a32a8] text-white font-black rounded-full w-7 h-7 flex items-center justify-center shadow-md border-2 border-[#bc7bd4] hover:scale-105 transition-transform pb-0.5">?</button>
             </div>
 
-            <div class="w-full max-w-[280px] flex-shrink-0 flex flex-col items-center mb-6">
-                
-                <div id="carrossel-modos" onscroll="atualizarPontinhos(this)" class="flex overflow-x-auto gap-4 w-full no-scrollbar snap-x snap-mandatory scroll-smooth pb-2 pt-2 mb-2">
-                    
-                    <div onclick="buscarPartida()" class="flex flex-col items-center group cursor-pointer snap-start flex-shrink-0" style="width: calc(50% - 8px);">
-                        <div class="bg-[#dca3e8] w-full aspect-square rounded-[24px] flex items-center justify-center p-4 shadow-xl hover:scale-105 transition-transform border-4 border-transparent hover:border-[#8b3dff]/50">
-                            <img src="vs.png" class="w-full h-full object-contain drop-shadow-lg">
-                        </div>
-                        <span class="text-[#dca3e8] font-black text-sm mt-3 drop-shadow-md uppercase tracking-wide text-center leading-tight">Buscar<br>Partida Solo</span>
+            <div class="w-full max-w-[280px] flex-shrink-0 grid grid-cols-2 gap-4 mb-6">
+                <div onclick="buscarPartida()" class="flex flex-col items-center group cursor-pointer">
+                    <div class="bg-[#dca3e8] w-full aspect-square rounded-[24px] flex items-center justify-center p-4 shadow-xl hover:scale-105 transition-transform border-4 border-transparent hover:border-[#8b3dff]/50">
+                        <img src="vs.png" class="w-full h-full object-contain drop-shadow-lg">
                     </div>
-
-                    <div onclick="abrirModalDuo()" class="flex flex-col items-center group cursor-pointer snap-start flex-shrink-0" style="width: calc(50% - 8px);">
-                        <div class="bg-[#dca3e8] w-full aspect-square rounded-[24px] flex items-center justify-center p-4 shadow-xl hover:scale-105 transition-transform border-4 border-transparent hover:border-[#8b3dff]/50 relative">
-                            <img src="duo.png" class="w-[80%] h-[80%] object-contain drop-shadow-lg opacity-90">
-                        </div>
-                        <span class="text-[#dca3e8] font-black text-sm mt-3 drop-shadow-md uppercase tracking-wide text-center leading-tight">Arena<br>DUO</span>
-                    </div>
-
-                    <div onclick="window.location.href='torneios.html'" class="flex flex-col items-center group cursor-pointer snap-start flex-shrink-0" style="width: calc(50% - 8px);">
-                        <div class="bg-[#dca3e8] w-full aspect-square rounded-[24px] flex items-center justify-center p-4 shadow-xl hover:scale-105 transition-transform border-4 border-transparent hover:border-[#8b3dff]/50 relative">
-                            <img src="logotorneio.png" class="w-[80%] h-[80%] object-contain drop-shadow-lg opacity-90">
-                        </div>
-                        <span class="text-[#dca3e8] font-black text-sm mt-3 drop-shadow-md uppercase tracking-wide text-center leading-tight">Torneios<br>&nbsp;</span>
-                    </div>
-
-                    <div onclick="window.location.href='decks.html'" class="flex flex-col items-center group cursor-pointer snap-start flex-shrink-0" style="width: calc(50% - 8px);">
-                        <div class="bg-[#dca3e8] w-full aspect-square rounded-[24px] flex items-center justify-center p-4 shadow-xl hover:scale-105 transition-transform border-4 border-transparent hover:border-[#8b3dff]/50 relative">
-                            <img src="colecao.png" class="w-[80%] h-[80%] object-contain drop-shadow-lg opacity-90">
-                        </div>
-                        <span class="text-[#dca3e8] font-black text-sm mt-3 drop-shadow-md uppercase tracking-wide text-center leading-tight">Meus<br>Decks</span>
-                    </div>
-
+                    <span class="text-[#dca3e8] font-black text-sm mt-3 drop-shadow-md uppercase tracking-wide text-center leading-tight">Buscar<br>Partida Solo</span>
                 </div>
 
-                <div class="bg-black/20 border border-[#bc7bd4]/30 rounded-full px-4 py-1.5 flex items-center gap-5 shadow-inner">
-                    <button onclick="document.getElementById('carrossel-modos').scrollBy({left: -150, behavior: 'smooth'})" class="text-[#dca3e8] hover:text-white active:scale-90 transition-transform text-[10px]">◀</button>
-                    <div class="flex gap-1.5 pointer-events-none">
-                        <div id="ponto-1" class="w-1.5 h-1.5 bg-[#dca3e8] rounded-full shadow-md transition-colors duration-300"></div>
-                        <div id="ponto-2" class="w-1.5 h-1.5 bg-[#dca3e8]/30 rounded-full shadow-md transition-colors duration-300"></div>
-                        <div id="ponto-3" class="w-1.5 h-1.5 bg-[#dca3e8]/30 rounded-full shadow-md transition-colors duration-300"></div>
+                <div onclick="abrirModalDuo()" class="flex flex-col items-center group cursor-pointer">
+                    <div class="bg-[#dca3e8] w-full aspect-square rounded-[24px] flex items-center justify-center p-4 shadow-xl hover:scale-105 transition-transform border-4 border-transparent hover:border-[#8b3dff]/50">
+                        <img src="duo.png" class="w-[80%] h-[80%] object-contain drop-shadow-lg opacity-90">
                     </div>
-                    <button onclick="document.getElementById('carrossel-modos').scrollBy({left: 150, behavior: 'smooth'})" class="text-[#dca3e8] hover:text-white active:scale-90 transition-transform text-[10px]">▶</button>
+                    <span class="text-[#dca3e8] font-black text-sm mt-3 drop-shadow-md uppercase tracking-wide text-center leading-tight">Arena<br>DUO</span>
                 </div>
 
+                <div onclick="window.location.href='torneios.html'" class="flex flex-col items-center group cursor-pointer">
+                    <div class="bg-[#dca3e8] w-full aspect-square rounded-[24px] flex items-center justify-center p-4 shadow-xl hover:scale-105 transition-transform border-4 border-transparent hover:border-[#8b3dff]/50">
+                        <img src="logotorneio.png" class="w-[80%] h-[80%] object-contain drop-shadow-lg opacity-90">
+                    </div>
+                    <span class="text-[#dca3e8] font-black text-sm mt-3 drop-shadow-md uppercase tracking-wide text-center leading-tight">Torneios</span>
+                </div>
+
+                <div onclick="window.location.href='decks.html'" class="flex flex-col items-center group cursor-pointer">
+                    <div class="bg-[#dca3e8] w-full aspect-square rounded-[24px] flex items-center justify-center p-4 shadow-xl hover:scale-105 transition-transform border-4 border-transparent hover:border-[#8b3dff]/50">
+                        <img src="colecao.png" class="w-[80%] h-[80%] object-contain drop-shadow-lg opacity-90">
+                    </div>
+                    <span class="text-[#dca3e8] font-black text-sm mt-3 drop-shadow-md uppercase tracking-wide text-center leading-tight">Meus<br>Decks</span>
+                </div>
             </div>
             
             <div onclick="abrirModalDesafio()" class="flex items-center justify-center bg-[#7a32a8] hover:bg-purple-600 w-full max-w-[280px] rounded-full py-3 shadow-lg border-2 border-[#bc7bd4] cursor-pointer transition-transform hover:scale-105 mb-8 relative">
@@ -392,29 +376,6 @@
         
         window.fecharModalRegrasDuo = function() {
             document.getElementById('modal-regras-duo').classList.add('hidden');
-        };
-
-       // ===============================================
-        // ANIMAÇÃO DOS INDICADORES DO CARROSSEL
-        // ===============================================
-        window.atualizarPontinhos = function(carrossel) {
-            const p1 = document.getElementById('ponto-1');
-            const p2 = document.getElementById('ponto-2');
-            const p3 = document.getElementById('ponto-3');
-            
-            const scroll = carrossel.scrollLeft;
-
-            p1.className = "w-1.5 h-1.5 bg-[#dca3e8]/30 rounded-full shadow-md transition-colors duration-300";
-            p2.className = "w-1.5 h-1.5 bg-[#dca3e8]/30 rounded-full shadow-md transition-colors duration-300";
-            p3.className = "w-1.5 h-1.5 bg-[#dca3e8]/30 rounded-full shadow-md transition-colors duration-300";
-
-            if (scroll > 200) {
-                p3.className = "w-1.5 h-1.5 bg-[#dca3e8] rounded-full shadow-md transition-colors duration-300";
-            } else if (scroll > 50) {
-                p2.className = "w-1.5 h-1.5 bg-[#dca3e8] rounded-full shadow-md transition-colors duration-300";
-            } else {
-                p1.className = "w-1.5 h-1.5 bg-[#dca3e8] rounded-full shadow-md transition-colors duration-300";
-            }
         };
 
         // ===============================================

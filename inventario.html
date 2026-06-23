@@ -362,6 +362,34 @@
                     [`inventario.${campo}`]: increment(-1)
                 });
                 dadosJogador.inventario[campo] -= 1; // Atualiza local para a tela
+
+                try {
+                    const hoje = obterGameDay();
+                    const snap = await getDoc(dbUserRef);
+                    const dados = snap.exists() ? snap.data() : {};
+                    let pacoteMissoes = dados.missoesDiarias || {};
+                    let atualizouMissao = false;
+                    let msgMissaoProgresso = "";
+
+                    if (pacoteMissoes.dataReset === hoje && pacoteMissoes.lista) {
+                        pacoteMissoes.lista.forEach(m => {
+                            if (m.id === "abrir_pacote" && m.progresso < m.meta) {
+                                m.progresso++;
+                                atualizouMissao = true;
+                                msgMissaoProgresso = `🎯 Progresso: ${m.desc}`;
+                            }
+                        });
+                    }
+
+                    if (atualizouMissao) {
+                        await updateDoc(dbUserRef, { missoesDiarias: pacoteMissoes });
+                        dadosJogador.missoesDiarias = pacoteMissoes;
+                        window.mostrarToast(msgMissaoProgresso);
+                    }
+                } catch (e) {
+                    console.error("Erro ao atualizar missão abrir_pacote:", e);
+                }
+
                 carregarInventario(); // Recarrega a tela de fundo na hora
             } catch (error) {
                 console.error("Erro ao descontar pacote:", error);
@@ -482,21 +510,6 @@
                     });
                 }
 
-                let pacoteMissoes = dadosJogador.missoesDiarias || {};
-                const hoje = obterGameDay();
-                let atualizouMissao = false;
-                let msgMissaoProgresso = "";
-
-                if (pacoteMissoes.dataReset === hoje && pacoteMissoes.lista) {
-                    pacoteMissoes.lista.forEach(m => {
-                        if (m.id === "abrir_pacote" && m.progresso < m.meta) {
-                            m.progresso++;
-                            atualizouMissao = true;
-                            msgMissaoProgresso = `🎯 Progresso: ${m.desc}`;
-                        }
-                    });
-                }
-
                 let xpAtual = dadosJogador.xp || 0;
                 let nivelAtual = dadosJogador.nivel || 1;
                 let subiuNivel = false;
@@ -560,7 +573,6 @@
                     updates[`colecao.${id}`] = increment(contagemCartas[id]);
                 }
 
-                if (atualizouMissao) updates.missoesDiarias = pacoteMissoes;
                 if (notificacoesNovas.length > 0) updates.notificacoes = arrayUnion(...notificacoesNovas);
 
                 await updateDoc(dbUserRef, updates);
@@ -568,10 +580,6 @@
                 carregarInventario();
 
                 let delay = 500;
-                if (atualizouMissao) {
-                    setTimeout(() => window.mostrarToast(msgMissaoProgresso), delay);
-                    delay += 1000;
-                }
                 if (ganhouBadge) {
                     setTimeout(() => window.mostrarToast(`🏆 NOVA CONQUISTA!<br><span class="text-xs font-normal">Badge: Pacotinhos! (Abriu 30 pacotes).</span><br><span class="text-sm">Recompensa: +50 XP e +50 <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`), delay);
                     delay += 1500;

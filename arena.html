@@ -581,16 +581,19 @@
                         
                         if (deckId && uData.decks && uData.decks[deckId]) {
                             const deckStats = uData.decks[deckId].estatisticas || {};
-                            let recordeAtual = deckStats.recordePontosSolo || 0;
+                            
+                            // FILTRO ANTI-NaN: Força os pontos a serem números matemáticos puros
+                            let pontosValidos = parseInt(myP) || 0; 
+                            let recordeAtual = parseInt(deckStats.recordePontosSolo) || 0;
                             
                             let updates = {
                                 [`decks.${deckId}.estatisticas.partidasSolo`]: increment(1),
-                                [`decks.${deckId}.estatisticas.totalPontosSolo`]: increment(myP)
+                                [`decks.${deckId}.estatisticas.totalPontosSolo`]: increment(pontosValidos)
                             };
 
                             if (vitoria) updates[`decks.${deckId}.estatisticas.vitoriasSolo`] = increment(1);
                             if (isEmpate) updates[`decks.${deckId}.estatisticas.empatesSolo`] = increment(1);
-                            if (myP > recordeAtual) updates[`decks.${deckId}.estatisticas.recordePontosSolo`] = myP;
+                            if (pontosValidos > recordeAtual) updates[`decks.${deckId}.estatisticas.recordePontosSolo`] = pontosValidos;
 
                             await updateDoc(doc(db, "users", currentUserUid), updates);
                         }

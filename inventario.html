@@ -181,7 +181,11 @@
         const bancoPOI = { 'Comum': [], 'Rara': [], 'Lendária': [], 'Épica': [] };
         const bancoGeral = { 'Comum': [], 'Rara': [], 'Lendária': [], 'Épica': [] };
 
-        for (const [id, carta] of Object.entries(INFO_CARTAS)) {
+        // 🛑 FILTRO ABSOLUTO: Arranca a 094 da lista ANTES mesmo de o jogo começar a separar as cartas
+        const cartasPermitidasParaPacote = Object.entries(INFO_CARTAS).filter(([id]) => id !== "094");
+
+        // Agora o jogo só distribui para os bancos as cartas que passaram pelo filtro acima
+        for (const [id, carta] of cartasPermitidasParaPacote) {
             let numId = parseInt(id); 
             if (numId <= 52) {
                 if (bancoBase[carta.raridade]) bancoBase[carta.raridade].push(id);

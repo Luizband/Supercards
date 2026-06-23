@@ -302,7 +302,9 @@
             let p1Score = myScore; let p2Score = botScore;
             
             await window.registrarResultadoTorneio(currentUserUid, p1Score, p2Score);
-            await window.concederRecompensasArena(true); 
+            await window.concederRecompensasArena(true);
+
+            
             
             try{ await deleteDoc(doc(db, "partidas", salaId)); }catch(e){}
             window.location.href = 'torneios.html';
@@ -567,6 +569,38 @@
 
                 // Concede XP e Moedas Padrão
                 await window.concederRecompensasArena(vitoria);
+
+                // ==========================================
+                // ATUALIZAÇÃO DE ESTATÍSTICAS DO DECK (SOLO)
+                // ==========================================
+                try {
+                    const userSnap = await getDoc(doc(db, "users", currentUserUid));
+                    if (userSnap.exists()) {
+                        const uData = userSnap.data();
+                        const deckId = uData.deckPadrao; 
+                        
+                        if (deckId && uData.decks && uData.decks[deckId]) {
+                            const deckStats = uData.decks[deckId].estatisticas || {};
+                            let recordeAtual = deckStats.recordePontosSolo || 0;
+                            
+                            // Usando increment para garantir segurança absoluta contra lag
+                            let updates = {
+                                [`decks.${deckId}.estatisticas.partidasSolo`]: increment(1),
+                                [`decks.${deckId}.estatisticas.totalPontosSolo`]: increment(myP)
+                            };
+
+                            if (vitoria) updates[`decks.${deckId}.estatisticas.vitoriasSolo`] = increment(1);
+                            if (isEmpate) updates[`decks.${deckId}.estatisticas.empatesSolo`] = increment(1);
+                            
+                            // O recorde não pode usar increment, ele precisa da lógica de substituição
+                            if (myP > recordeAtual) updates[`decks.${deckId}.estatisticas.recordePontosSolo`] = myP;
+
+                            await updateDoc(doc(db, "users", currentUserUid), updates);
+                        }
+                    }
+                } catch (e) {
+                    console.error("Erro ao atualizar estatísticas do deck:", e);
+                }
 
                 // SE FOR UMA PARTIDA OFICIAL DO TORNEIO (E SÓ SE FOR), REGISTRA OS PONTOS
                 if (window.isTorneio && isHost) {

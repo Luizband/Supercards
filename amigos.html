@@ -141,8 +141,16 @@
         <div id="modal-perfil-amigo" class="hidden fixed inset-0 bg-black/90 z-[150] flex flex-col items-center justify-center p-4 backdrop-blur-md pointer-events-auto">
             <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-[2rem] w-full max-w-sm shadow-2xl flex flex-col items-center p-6 relative">
                 
+                <!-- Botão de Fechar Original -->
                 <button onclick="fecharModalPerfil()" class="absolute top-4 right-5 text-[#7a32a8] font-black text-2xl hover:text-purple-600 transition-colors z-50">X</button>
 
+                <!-- NOVO BOTÃO: Ver Decks do Amigo (Baseado na sua imagem) -->
+                <button onclick="window.abrirListaDecksAmigo()" class="absolute top-4 left-5 w-12 h-12 rounded-full bg-gradient-to-b from-[#67d353] to-[#3ca027] border-[3px] border-[#a0f0a8] shadow-[0_4px_10px_rgba(0,0,0,0.4)] flex items-center justify-center hover:scale-105 transition-transform z-50">
+                    <img src="baralho01.png" class="w-7 h-7 object-contain drop-shadow-md opacity-90">
+                </button>
+
+
+                
                 <div class="flex flex-col items-center mb-6 mt-2 relative">
                     <div class="bg-[#bc7bd4] w-28 h-28 rounded-full border-4 border-[#7a32a8] flex items-center justify-center overflow-hidden shadow-lg mb-3">
                         <img id="modal-amigo-foto" src="fundo_carta.png" class="w-full h-full object-cover">
@@ -168,6 +176,70 @@
                         </div>
                 </div>
 
+            </div>
+        </div>
+
+        <!-- MODAL 1: LISTA DE DECKS DO AMIGO -->
+        <div id="modal-lista-decks-amigo" class="hidden fixed inset-0 bg-black/90 z-[200] flex flex-col items-center justify-center p-4 backdrop-blur-md pointer-events-auto">
+            <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-[2rem] p-6 w-full max-w-sm shadow-2xl flex flex-col relative max-h-[85vh]">
+                <button onclick="document.getElementById('modal-lista-decks-amigo').classList.add('hidden')" class="absolute top-4 right-5 text-[#7a32a8] font-black text-2xl hover:text-purple-600 transition-colors z-50">X</button>
+                <h2 id="titulo-lista-decks-amigo" class="text-[#7a32a8] font-black text-xl text-center uppercase tracking-wider mb-6 truncate pr-8">DECKS</h2>
+                
+                <div id="grid-decks-amigo" class="grid grid-cols-3 gap-x-4 gap-y-6 w-full px-2 overflow-y-auto no-scrollbar pb-4">
+                    <!-- JS vai injetar a grade aqui -->
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL 2: ESTATÍSTICAS DO DECK ESPIONADO (Igual ao seu decks.html, mas sem botões) -->
+        <div id="modal-stats-deck-amigo" class="hidden fixed inset-0 bg-black/95 z-[250] flex flex-col items-center justify-center p-4 backdrop-blur-sm pointer-events-auto">
+            <div class="bg-[#dca3e8] border-4 border-[#bc7bd4] rounded-[2rem] p-6 w-full max-w-sm shadow-2xl flex flex-col relative">
+                <button onclick="document.getElementById('modal-stats-deck-amigo').classList.add('hidden')" class="absolute top-4 right-5 text-[#7a32a8] font-black text-2xl hover:text-purple-600 transition-colors">X</button>
+                
+                <h2 id="modal-amigo-stats-titulo" class="text-[#7a32a8] font-black text-xl text-center uppercase tracking-wider mb-2 pr-6 pl-6 truncate">NOME DO DECK</h2>
+                
+                <div class="flex flex-row gap-4 items-start w-full mt-4 mb-2">
+                    <div class="flex flex-col items-center gap-2 w-[35%] flex-shrink-0">
+                        <div class="bg-[#dca3e8] rounded-[20px] aspect-square w-full p-3 shadow-inner border-[3px] border-[#7a32a8] flex items-center justify-center">
+                            <img id="modal-amigo-stats-icone" src="baralho01.png" class="w-full h-full object-contain drop-shadow-md">
+                        </div>
+                        <span class="text-[#7a32a8] font-black text-sm uppercase mt-1 tracking-widest">Tipo</span>
+                        <div id="modal-amigo-stats-tipo" class="bg-[#7a32a8] text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-md">
+                            Competitivo
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col w-[65%] gap-2 justify-center mt-1 pr-1">
+                        <div class="flex justify-between items-end border-b border-[#7a32a8]/10 pb-0.5">
+                            <span class="text-[#7a32a8] font-bold text-xs tracking-wide">Win Rate Solo:</span> 
+                            <span id="stat-amigo-wr-solo" class="text-[#4c1666] font-black text-[13px]">--%</span>
+                        </div>
+                        <div class="flex justify-between items-end border-b border-[#7a32a8]/10 pb-0.5">
+                            <span class="text-[#7a32a8] font-bold text-xs tracking-wide">Win Rate DUO:</span> 
+                            <span id="stat-amigo-wr-duo" class="text-[#4c1666] font-black text-[13px]">--%</span>
+                        </div>
+                        <div class="flex justify-between items-end border-b border-[#7a32a8]/10 pb-0.5">
+                            <span class="text-[#7a32a8] font-bold text-xs tracking-wide">Média de pontos:</span> 
+                            <span id="stat-amigo-media-solo" class="text-[#4c1666] font-black text-[13px]">--</span>
+                        </div>
+                        <div class="flex justify-between items-end border-b border-[#7a32a8]/10 pb-0.5">
+                            <span class="text-[#7a32a8] font-bold text-xs tracking-wide">Partidas Solo:</span> 
+                            <span id="stat-amigo-partidas-solo" class="text-[#4c1666] font-black text-[13px]">--</span>
+                        </div>
+                        <div class="flex justify-between items-end border-b border-[#7a32a8]/10 pb-0.5">
+                            <span class="text-[#7a32a8] font-bold text-xs tracking-wide">Partidas DUO:</span> 
+                            <span id="stat-amigo-partidas-duo" class="text-[#4c1666] font-black text-[13px]">--</span>
+                        </div>
+                        <div class="flex justify-between items-end border-b border-[#7a32a8]/10 pb-0.5">
+                            <span class="text-[#7a32a8] font-bold text-xs tracking-wide">Empates solo:</span> 
+                            <span id="stat-amigo-empates-solo" class="text-[#4c1666] font-black text-[13px]">--</span>
+                        </div>
+                        <div class="flex justify-between items-end pb-0.5">
+                            <span class="text-[#7a32a8] font-bold text-xs tracking-wide">Recorde de pts:</span> 
+                            <span id="stat-amigo-recorde-solo" class="text-[#4c1666] font-black text-[13px]">--</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -462,6 +534,9 @@
                 const snap = await getDoc(doc(db, "users", uidAmigo));
                 if (snap.exists()) {
                     const dados = snap.data();
+
+                    window.amigoVisualizadoNome = (dados.nomeDisplay || dados.nome || "JOGADOR").toUpperCase();
+                    window.amigoVisualizadoDecks = dados.decks || {};
                     
                     document.getElementById('modal-amigo-foto').src = dados.fotoPerfil || "fundo_carta.png";
                     document.getElementById('modal-amigo-nome').innerText = (dados.nomeDisplay || dados.nome || "JOGADOR").toUpperCase();
@@ -516,6 +591,71 @@
 
         window.fecharModalPerfil = function() {
             document.getElementById('modal-perfil-amigo').classList.add('hidden');
+        };
+
+        window.abrirListaDecksAmigo = function() {
+            const container = document.getElementById('grid-decks-amigo');
+            document.getElementById('titulo-lista-decks-amigo').innerText = `DECKS DE ${window.amigoVisualizadoNome}`;
+            container.innerHTML = "";
+
+            const decks = window.amigoVisualizadoDecks || {};
+            const chaves = Object.keys(decks);
+
+            if (chaves.length === 0) {
+                container.innerHTML = `<span class="col-span-3 text-center text-[#7a32a8] font-black mt-10">Este jogador não possui decks.</span>`;
+            } else {
+                chaves.forEach(id => {
+                    const deck = decks[id];
+                    
+                    const div = document.createElement('div');
+                    div.className = "flex flex-col items-center relative cursor-pointer transform hover:scale-105 transition-transform";
+                    div.onclick = () => window.abrirStatsDeckAmigo(id);
+                    
+                    // Sem selo "Selecionado" e Sem selo "Incompleto"
+                    div.innerHTML = `
+                        <div class="bg-[#dca3e8] w-full aspect-square rounded-[20px] flex items-center justify-center p-3 shadow-lg border-4 border-transparent hover:border-[#8b3dff]/50">
+                            <img src="${deck.icone || 'baralho01.png'}" class="w-[85%] h-[85%] object-contain drop-shadow-md pointer-events-none">
+                        </div>
+                        <span class="text-[#dca3e8] font-black text-[10px] mt-2 drop-shadow-md uppercase text-center w-full truncate px-1">${deck.nome}</span>
+                    `;
+                    container.appendChild(div);
+                });
+            }
+            document.getElementById('modal-lista-decks-amigo').classList.remove('hidden');
+        };
+
+        window.abrirStatsDeckAmigo = function(deckId) {
+            const deck = window.amigoVisualizadoDecks[deckId];
+            if (!deck) return;
+
+            document.getElementById('modal-amigo-stats-titulo').innerText = deck.nome;
+            document.getElementById('modal-amigo-stats-icone').src = deck.icone || 'baralho01.png';
+            document.getElementById('modal-amigo-stats-tipo').innerText = deck.tipo || "Competitivo";
+
+            const stats = deck.estatisticas || {};
+            
+            // A Matemática segura (Blindagem do parseInt)
+            const pSolo = parseInt(stats.partidasSolo) || 0;
+            const vSolo = parseInt(stats.vitoriasSolo) || 0;
+            const pDuo = parseInt(stats.partidasDuo) || 0;
+            const vDuo = parseInt(stats.vitoriasDuo) || 0;
+            const empSolo = parseInt(stats.empatesSolo) || 0;
+            const ptsSolo = parseInt(stats.totalPontosSolo) || parseInt(stats.pontosSoloTotal) || 0;
+            const recorde = parseInt(stats.recordePontosSolo) || parseInt(stats.recordeSolo) || 0;
+
+            const wrSolo = pSolo > 0 ? Math.round((vSolo / pSolo) * 100) : 0;
+            const wrDuo = pDuo > 0 ? Math.round((vDuo / pDuo) * 100) : 0;
+            const mediaSolo = pSolo > 0 ? Math.round(ptsSolo / pSolo) : 0;
+
+            document.getElementById('stat-amigo-wr-solo').innerText = `${wrSolo}%`;
+            document.getElementById('stat-amigo-wr-duo').innerText = `${wrDuo}%`;
+            document.getElementById('stat-amigo-media-solo').innerText = mediaSolo;
+            document.getElementById('stat-amigo-partidas-solo').innerText = pSolo;
+            document.getElementById('stat-amigo-partidas-duo').innerText = pDuo;
+            document.getElementById('stat-amigo-empates-solo').innerText = empSolo;
+            document.getElementById('stat-amigo-recorde-solo').innerText = recorde;
+
+            document.getElementById('modal-stats-deck-amigo').classList.remove('hidden');
         };
 
         // ==========================================

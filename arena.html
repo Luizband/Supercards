@@ -583,7 +583,6 @@
                             const deckStats = uData.decks[deckId].estatisticas || {};
                             let recordeAtual = deckStats.recordePontosSolo || 0;
                             
-                            // Usando increment para garantir segurança absoluta contra lag
                             let updates = {
                                 [`decks.${deckId}.estatisticas.partidasSolo`]: increment(1),
                                 [`decks.${deckId}.estatisticas.totalPontosSolo`]: increment(myP)
@@ -591,8 +590,6 @@
 
                             if (vitoria) updates[`decks.${deckId}.estatisticas.vitoriasSolo`] = increment(1);
                             if (isEmpate) updates[`decks.${deckId}.estatisticas.empatesSolo`] = increment(1);
-                            
-                            // O recorde não pode usar increment, ele precisa da lógica de substituição
                             if (myP > recordeAtual) updates[`decks.${deckId}.estatisticas.recordePontosSolo`] = myP;
 
                             await updateDoc(doc(db, "users", currentUserUid), updates);

@@ -48,25 +48,6 @@
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
-        /* Efeito de tremedeira para o modo exclusão */
-        .shake-danger {
-            animation: shake 0.5s infinite;
-            border-color: #ef4444 !important;
-        }
-        @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            10% { transform: translate(-1px, -2px) rotate(-1deg); }
-            20% { transform: translate(-3px, 0px) rotate(1deg); }
-            30% { transform: translate(3px, 2px) rotate(0deg); }
-            40% { transform: translate(1px, -1px) rotate(1deg); }
-            50% { transform: translate(-1px, 2px) rotate(-1deg); }
-            60% { transform: translate(-3px, 1px) rotate(0deg); }
-            70% { transform: translate(3px, 1px) rotate(-1deg); }
-            80% { transform: translate(-1px, -1px) rotate(1deg); }
-            90% { transform: translate(1px, 2px) rotate(0deg); }
-            100% { transform: translate(1px, -2px) rotate(-1deg); }
-        }
     </style>
 </head>
 <body class="fixed inset-0 px-4 pt-8 flex justify-center overflow-hidden w-screen">
@@ -77,31 +58,21 @@
         
         <h1 class="text-[#dca3e8] font-black text-2xl text-center mb-8 drop-shadow-md uppercase tracking-wider">Decks</h1>
 
-        <!-- GRADE DE DECKS -->
         <main class="flex-grow overflow-y-auto no-scrollbar pb-40">
             <div id="grid-decks" class="grid grid-cols-3 gap-x-4 gap-y-6 w-full px-2 pt-4">
-                <!-- Os decks serão injetados aqui pelo JavaScript -->
-            </div>
+                </div>
             
             <div id="msg-sem-decks" class="hidden text-center text-[#dca3e8] font-bold mt-10">
                 Você ainda não possui nenhum deck.
             </div>
         </main>
 
-        <!-- BOTÕES CRIAR, EDITAR E EXCLUIR -->
-        <div class="absolute bottom-28 left-0 w-full flex justify-center gap-2 z-40 px-2">
-            <button onclick="abrirModalCriar()" class="flex-1 bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-3 rounded-full shadow-lg border-2 border-[#bc7bd4] uppercase text-xs tracking-wide transition-transform hover:scale-105">
-                Criar
-            </button>
-            <button id="btn-toggle-editar" onclick="toggleModoEdicao()" class="flex-1 bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-3 rounded-full shadow-lg border-2 border-[#bc7bd4] uppercase text-xs tracking-wide transition-transform hover:scale-105">
-                Editar
-            </button>
-            <button id="btn-toggle-excluir" onclick="toggleModoExclusao()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-black py-3 rounded-full shadow-lg border-2 border-red-400 uppercase text-xs tracking-wide transition-transform hover:scale-105">
-                Excluir
+        <div class="absolute bottom-28 left-0 w-full flex justify-center z-40 px-2">
+            <button onclick="abrirModalCriar()" class="w-[80%] max-w-[250px] bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-4 rounded-full shadow-lg border-2 border-[#bc7bd4] uppercase text-sm tracking-widest transition-transform hover:scale-105">
+                Criar Novo Deck
             </button>
         </div>
 
-        <!-- FOOTER RETORNAR -->
         <footer class="fixed bottom-8 left-1/2 transform -translate-x-1/2 w-full flex justify-center z-[100] pointer-events-none" style="padding-bottom: env(safe-area-inset-bottom);">
             <button onclick="window.location.href='batalha.html'" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-2.5 px-12 rounded-full shadow-2xl transition-transform hover:-translate-y-1 pointer-events-auto border-2 border-[#dca3e8] uppercase text-sm tracking-wider">
                 Retornar
@@ -110,7 +81,70 @@
 
     </div>
 
-    <!-- MODAL DE CRIAÇÃO DE DECK -->
+    <div id="modal-estatisticas-deck" class="hidden fixed inset-0 bg-black/80 z-[250] flex flex-col items-center justify-center p-4 backdrop-blur-sm pointer-events-auto">
+        <div class="bg-[#ebdcf2] rounded-[30px] p-6 w-full max-w-sm shadow-2xl flex flex-col gap-4 relative border-4 border-transparent">
+            
+            <button onclick="fecharModalEstatisticas()" class="absolute top-4 right-5 text-[#7a32a8] font-black text-2xl hover:text-purple-600 transition-colors">X</button>
+            
+            <h2 id="modal-stats-titulo" class="text-[#7a32a8] font-black text-xl text-center uppercase tracking-wider mb-2 pr-6 pl-6 truncate">NOME DO DECK</h2>
+            
+            <div class="flex flex-row gap-4 items-start w-full">
+                <div class="flex flex-col items-center gap-2 w-[35%] flex-shrink-0">
+                    <div class="bg-[#dca3e8] rounded-[20px] aspect-square w-full p-3 shadow-inner border-[3px] border-[#7a32a8] flex items-center justify-center">
+                        <img id="modal-stats-icone" src="baralho01.png" class="w-full h-full object-contain drop-shadow-md">
+                    </div>
+                    <span class="text-[#7a32a8] font-black text-sm uppercase mt-1 tracking-widest">Tipo</span>
+                    <div id="modal-stats-tipo" class="bg-[#7a32a8] text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-md">
+                        Competitivo
+                    </div>
+                </div>
+                
+                <div class="flex flex-col w-[65%] gap-2 justify-center mt-1 pr-1">
+                    <div class="flex justify-between items-end border-b border-[#7a32a8]/10 pb-0.5">
+                        <span class="text-[#7a32a8] font-bold text-xs tracking-wide">Win Rate Solo:</span> 
+                        <span id="stat-wr-solo" class="text-[#4c1666] font-black text-[13px]">--%</span>
+                    </div>
+                    <div class="flex justify-between items-end border-b border-[#7a32a8]/10 pb-0.5">
+                        <span class="text-[#7a32a8] font-bold text-xs tracking-wide">Win Rate DUO:</span> 
+                        <span id="stat-wr-duo" class="text-[#4c1666] font-black text-[13px]">--%</span>
+                    </div>
+                    <div class="flex justify-between items-end border-b border-[#7a32a8]/10 pb-0.5">
+                        <span class="text-[#7a32a8] font-bold text-xs tracking-wide">Média de pontos solo:</span> 
+                        <span id="stat-media-solo" class="text-[#4c1666] font-black text-[13px]">--</span>
+                    </div>
+                    <div class="flex justify-between items-end border-b border-[#7a32a8]/10 pb-0.5">
+                        <span class="text-[#7a32a8] font-bold text-xs tracking-wide">Nº de Partidas Solo:</span> 
+                        <span id="stat-partidas-solo" class="text-[#4c1666] font-black text-[13px]">--</span>
+                    </div>
+                    <div class="flex justify-between items-end border-b border-[#7a32a8]/10 pb-0.5">
+                        <span class="text-[#7a32a8] font-bold text-xs tracking-wide">Nº de Partidas DUO:</span> 
+                        <span id="stat-partidas-duo" class="text-[#4c1666] font-black text-[13px]">--</span>
+                    </div>
+                    <div class="flex justify-between items-end border-b border-[#7a32a8]/10 pb-0.5">
+                        <span class="text-[#7a32a8] font-bold text-xs tracking-wide">Nº de empates solo:</span> 
+                        <span id="stat-empates-solo" class="text-[#4c1666] font-black text-[13px]">--</span>
+                    </div>
+                    <div class="flex justify-between items-end pb-0.5">
+                        <span class="text-[#7a32a8] font-bold text-xs tracking-wide">Recorde de pts solo:</span> 
+                        <span id="stat-recorde-solo" class="text-[#4c1666] font-black text-[13px]">--</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex w-full justify-between gap-2 mt-4">
+                <button onclick="acaoDeckEditar()" class="flex-1 py-3 bg-[#7a32a8] hover:bg-purple-600 text-white font-black text-xs rounded-[14px] shadow-md uppercase transition-transform hover:scale-105 tracking-wider">
+                    Editar
+                </button>
+                <button id="btn-acao-selecionar" onclick="acaoDeckSelecionar()" class="flex-1 py-3 bg-[#7a32a8] hover:bg-purple-600 text-white font-black text-xs rounded-[14px] shadow-md uppercase transition-transform hover:scale-105 tracking-wider">
+                    Selecionar
+                </button>
+                <button onclick="acaoDeckExcluir()" class="flex-1 py-3 bg-[#e83f3f] hover:bg-red-700 text-white font-black text-xs rounded-[14px] shadow-md uppercase transition-transform hover:scale-105 tracking-wider">
+                    Excluir
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="modal-criar" class="hidden fixed inset-0 bg-black/80 z-[200] flex flex-col items-center justify-center p-4 backdrop-blur-sm pointer-events-auto">
         <div class="bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-6 w-full max-w-sm shadow-2xl flex flex-col items-center gap-5 relative">
             <button onclick="fecharModalCriar()" class="absolute top-2 right-4 text-[#7a32a8] font-black text-xl hover:text-purple-600 transition-colors">X</button>
@@ -140,8 +174,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE CONFIRMAÇÃO DE EXCLUSÃO -->
-    <div id="modal-excluir" class="hidden fixed inset-0 bg-black/80 z-[200] flex flex-col items-center justify-center p-4 backdrop-blur-sm pointer-events-auto">
+    <div id="modal-excluir" class="hidden fixed inset-0 bg-black/80 z-[300] flex flex-col items-center justify-center p-4 backdrop-blur-sm pointer-events-auto">
         <div class="bg-[#dca3e8] border-4 border-red-600 rounded-2xl p-6 w-full max-w-xs shadow-2xl flex flex-col items-center gap-4">
             <h2 class="text-red-600 font-black text-lg text-center uppercase tracking-wider mb-2">Excluir Deck?</h2>
             <p class="text-[#7a32a8] font-bold text-sm text-center mb-2">Esta ação não pode ser desfeita.</p>
@@ -150,7 +183,7 @@
                 <button onclick="fecharModalExcluir()" class="flex-1 py-3 bg-gray-500 hover:bg-gray-600 text-white font-black text-xs rounded-full shadow-md uppercase">
                     Cancelar
                 </button>
-                <button id="btn-confirmar-exclusao" class="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white font-black text-xs rounded-full shadow-md uppercase">
+                <button id="btn-confirmar-exclusao" class="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white font-black text-xs rounded-full shadow-md uppercase transition-transform hover:scale-105">
                     Excluir
                 </button>
             </div>
@@ -179,10 +212,7 @@
         let meusDecks = {};
         let deckPadrao = "";
         
-        let modoExclusao = false;
-        let modoEdicao = false;
-        
-        let deckParaExcluir = null;
+        let deckAtivoParaModal = null; // Armazena qual deck foi clicado
         let iconeSelecionado = null;
 
         window.mostrarToast = function(mensagem) {
@@ -207,10 +237,6 @@
                 el.classList.add('border-transparent');
             });
             document.getElementById('modal-criar').classList.remove('hidden');
-            
-            // Desativa outros modos se estiverem ativos
-            if (modoExclusao) toggleModoExclusao();
-            if (modoEdicao) toggleModoEdicao();
         };
 
         window.fecharModalCriar = function() {
@@ -235,72 +261,95 @@
             window.location.href = `construtor.html?nome=${encodeURIComponent(nome)}&icone=${iconeSelecionado}`;
         };
 
-        // --- LÓGICA DA TELA DE DECKS ---
-        window.toggleModoExclusao = function() {
-            modoExclusao = !modoExclusao;
-            if (modoExclusao && modoEdicao) toggleModoEdicao(); // Desliga a edição se ligar a exclusão
+        // --- LÓGICA DO MODAL DE ESTATÍSTICAS E AÇÕES ---
+        window.interagirComDeck = function(id) {
+            deckAtivoParaModal = id;
+            const deck = meusDecks[id];
             
-            const btn = document.getElementById('btn-toggle-excluir');
-            if (modoExclusao) {
-                btn.classList.replace('bg-red-600', 'bg-gray-800');
-                btn.classList.replace('border-red-400', 'border-gray-500');
-                btn.innerText = "CANCELAR";
-                window.mostrarToast("Modo Exclusão: Clique em um deck para apagar.");
-            } else {
-                btn.classList.replace('bg-gray-800', 'bg-red-600');
-                btn.classList.replace('border-gray-500', 'border-red-400');
-                btn.innerText = "EXCLUIR";
-            }
-            renderizarDecks();
-        };
-
-        window.toggleModoEdicao = function() {
-            modoEdicao = !modoEdicao;
-            if (modoEdicao && modoExclusao) toggleModoExclusao(); // Desliga a exclusão se ligar a edição
+            // Preenche o Visual
+            document.getElementById('modal-stats-titulo').innerText = deck.nome;
+            document.getElementById('modal-stats-icone').src = deck.icone || 'baralho01.png';
             
-            const btn = document.getElementById('btn-toggle-editar');
-            if (modoEdicao) {
-                btn.classList.replace('bg-[#7a32a8]', 'bg-blue-600');
-                btn.classList.replace('border-[#bc7bd4]', 'border-blue-400');
-                btn.innerText = "CANCELAR";
-                window.mostrarToast("Modo Edição: Clique em um deck para alterá-lo.");
+            // Futuramente poderemos ler 'deck.tipo' aqui, por enquanto é Competitivo.
+            document.getElementById('modal-stats-tipo').innerText = (deck.tipo || "Competitivo");
+
+            // Lógica de desativar o botão Selecionar se estiver incompleto
+            const btnSelecionar = document.getElementById('btn-acao-selecionar');
+            if (deck.isInvalid) {
+                btnSelecionar.classList.replace('bg-[#7a32a8]', 'bg-gray-500');
+                btnSelecionar.classList.replace('hover:bg-purple-600', 'hover:bg-gray-600');
+                btnSelecionar.classList.add('opacity-50', 'cursor-not-allowed');
             } else {
-                btn.classList.replace('bg-blue-600', 'bg-[#7a32a8]');
-                btn.classList.replace('border-blue-400', 'border-[#bc7bd4]');
-                btn.innerText = "EDITAR";
+                btnSelecionar.classList.replace('bg-gray-500', 'bg-[#7a32a8]');
+                btnSelecionar.classList.replace('hover:bg-gray-600', 'hover:bg-purple-600');
+                btnSelecionar.classList.remove('opacity-50', 'cursor-not-allowed');
             }
-            renderizarDecks();
+
+            // Cálculos das Estatísticas
+            const stats = deck.estatisticas || {
+                partidasSolo: 0, vitoriasSolo: 0, empatesSolo: 0, pontosSoloTotal: 0, recordeSolo: 0,
+                partidasDuo: 0, vitoriasDuo: 0
+            };
+
+            const winRateSolo = stats.partidasSolo > 0 ? Math.round((stats.vitoriasSolo / stats.partidasSolo) * 100) : 0;
+            const winRateDuo = stats.partidasDuo > 0 ? Math.round((stats.vitoriasDuo / stats.partidasDuo) * 100) : 0;
+            const mediaSolo = stats.partidasSolo > 0 ? Math.round(stats.pontosSoloTotal / stats.partidasSolo) : 0;
+
+            document.getElementById('stat-wr-solo').innerText = `${winRateSolo}%`;
+            document.getElementById('stat-wr-duo').innerText = `${winRateDuo}%`;
+            document.getElementById('stat-media-solo').innerText = mediaSolo;
+            document.getElementById('stat-partidas-solo').innerText = stats.partidasSolo || 0;
+            document.getElementById('stat-partidas-duo').innerText = stats.partidasDuo || 0;
+            document.getElementById('stat-empates-solo').innerText = stats.empatesSolo || 0;
+            document.getElementById('stat-recorde-solo').innerText = stats.recordeSolo || 0;
+
+            document.getElementById('modal-estatisticas-deck').classList.remove('hidden');
         };
 
-        window.interagirComDeck = async function(id) {
-            if (modoExclusao) {
-                deckParaExcluir = id;
-                document.getElementById('modal-excluir').classList.remove('hidden');
-            } else if (modoEdicao) {
-                window.location.href = `construtor.html?editar=${id}`;
-            } else {
-                // Modo Normal: Define como Padrão
-                const deckInfo = meusDecks[id];
-                
-                // VERIFICA SE O DECK É VÁLIDO ANTES DE DEFINIR COMO PADRÃO
-                if (deckInfo.isInvalid) {
-                    return window.mostrarToast("Este deck está incompleto! Faltam cartas na sua coleção. Edite-o primeiro.");
-                }
+        window.fecharModalEstatisticas = function() {
+            document.getElementById('modal-estatisticas-deck').classList.add('hidden');
+            deckAtivoParaModal = null;
+        };
 
-                if (deckPadrao === id) return;
-                
-                try {
-                    const userRef = doc(db, "users", currentUserUid);
-                    await updateDoc(userRef, { deckPadrao: id });
-                    deckPadrao = id;
-                    renderizarDecks();
-                    window.mostrarToast("Deck definido como padrão para Batalhas!");
-                } catch (error) {
-                    window.mostrarToast("Erro ao definir deck padrão.");
-                }
+        // Ações dentro do modal
+        window.acaoDeckEditar = function() {
+            if(!deckAtivoParaModal) return;
+            window.location.href = `construtor.html?editar=${deckAtivoParaModal}`;
+        };
+
+        window.acaoDeckSelecionar = async function() {
+            if(!deckAtivoParaModal) return;
+            
+            const deckInfo = meusDecks[deckAtivoParaModal];
+            if (deckInfo.isInvalid) {
+                return window.mostrarToast("Este deck está incompleto! Faltam cartas na sua coleção. Edite-o primeiro.");
+            }
+
+            if (deckPadrao === deckAtivoParaModal) {
+                fecharModalEstatisticas();
+                return window.mostrarToast("Este deck já é o seu selecionado!");
+            }
+            
+            try {
+                const userRef = doc(db, "users", currentUserUid);
+                await updateDoc(userRef, { deckPadrao: deckAtivoParaModal });
+                deckPadrao = deckAtivoParaModal;
+                fecharModalEstatisticas();
+                renderizarDecks();
+                window.mostrarToast("Deck definido como selecionado para as Batalhas!");
+            } catch (error) {
+                window.mostrarToast("Erro ao definir deck selecionado.");
             }
         };
-        
+
+        window.acaoDeckExcluir = function() {
+            if(!deckAtivoParaModal) return;
+            deckParaExcluir = deckAtivoParaModal; // Repassa a variável
+            fecharModalEstatisticas(); // Esconde as stats
+            document.getElementById('modal-excluir').classList.remove('hidden'); // Mostra confirmação
+        };
+
+        // Modal de Exclusão (Finalização)
         window.fecharModalExcluir = function() {
             document.getElementById('modal-excluir').classList.add('hidden');
             deckParaExcluir = null;
@@ -311,7 +360,6 @@
             
             try {
                 const userRef = doc(db, "users", currentUserUid);
-                
                 const atualizacao = {};
                 atualizacao[`decks.${deckParaExcluir}`] = deleteField();
                 
@@ -327,16 +375,12 @@
                 renderizarDecks();
                 window.mostrarToast("Deck excluído!");
                 
-                if (Object.keys(meusDecks).length === 0) {
-                    toggleModoExclusao();
-                }
-
             } catch (error) {
                 window.mostrarToast("Erro ao excluir deck.");
             }
         });
 
-        // --- NOVA FUNÇÃO DE RENDERIZAÇÃO COM VERIFICAÇÃO DE VALIDADE ---
+        // --- RENDERIZAÇÃO PRINCIPAL DOS DECKS NA TELA ---
         function renderizarDecks() {
             const grid = document.getElementById('grid-decks');
             const msgVazio = document.getElementById('msg-sem-decks');
@@ -357,55 +401,43 @@
                     let cartasValidas = 0;
                     let contagemDeck = {};
                     
-                    // Conta quantas cópias de cada carta o deck pede
                     (deck.cartas || []).forEach(cartaId => {
                         contagemDeck[cartaId] = (contagemDeck[cartaId] || 0) + 1;
                     });
 
-                    // Verifica se o jogador tem a quantidade exigida na coleção
                     for (let cartaId in contagemDeck) {
                         const qtdNecessaria = contagemDeck[cartaId];
-                        const qtdPossuida = window.colecaoGlobal[cartaId] || 0; // Usando a variável global que vamos criar abaixo
+                        const qtdPossuida = window.colecaoGlobal[cartaId] || 0; 
                         
-                        if (qtdPossuida >= qtdNecessaria) {
-                            cartasValidas += qtdNecessaria;
-                        } else {
-                            // Se ele tem 1 na coleção, mas o deck pede 2, soma só 1 como válida
-                            cartasValidas += qtdPossuida; 
-                        }
+                        if (qtdPossuida >= qtdNecessaria) cartasValidas += qtdNecessaria;
+                        else cartasValidas += qtdPossuida; 
                     }
 
-                    // Se não tiver as 20 cartas válidas, marca o deck como inválido
                     deck.isInvalid = (cartasValidas < 20);
-
-                    // FIM DA VALIDAÇÃO
                     
                     let classesCaixa = "bg-[#dca3e8] w-full aspect-square rounded-[20px] flex items-center justify-center p-3 shadow-lg border-4 transition-all relative";
                     let textoIndicador = "";
 
-                    if (modoExclusao) {
-                        classesCaixa += " shake-danger bg-red-200 cursor-pointer border-red-500";
-                    } else if (modoEdicao) {
-                        classesCaixa += " animate-pulse bg-blue-200 cursor-pointer border-blue-500";
-                    } else if (deck.isInvalid && !modoExclusao && !modoEdicao) {
+                    if (deck.isInvalid) {
                          // VISUAL DE DECK INVÁLIDO
-                         classesCaixa += " border-red-500 bg-red-300 opacity-80 cursor-not-allowed";
+                         classesCaixa += " border-red-500 bg-red-300 opacity-80";
                          textoIndicador = `<div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-white z-10 shadow-sm animate-pulse">Incompleto</div>`;
                     } else if (isPadrao) {
+                        // VISUAL DE DECK SELECIONADO
                         classesCaixa += " border-[#8b3dff] cursor-pointer ring-4 ring-[#8b3dff]/30";
-                        textoIndicador = `<div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#8b3dff] text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-white z-10 shadow-sm">Padrão</div>`;
+                        textoIndicador = `<div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#8b3dff] text-white text-[9px] font-black px-3 py-0.5 rounded-full uppercase tracking-widest border border-white z-10 shadow-sm">Selecionado</div>`;
                     } else {
                         classesCaixa += " border-transparent hover:border-[#8b3dff]/50 cursor-pointer";
                     }
 
                     const div = document.createElement('div');
-                    div.className = "flex flex-col items-center relative";
+                    div.className = "flex flex-col items-center relative cursor-pointer transform hover:scale-105 transition-transform";
                     div.onclick = () => interagirComDeck(id);
                     
                     div.innerHTML = `
                         <div class="${classesCaixa}">
                             ${textoIndicador}
-                            <img src="${deck.icone || 'baralho01.png'}" class="w-[85%] h-[85%] object-contain drop-shadow-md">
+                            <img src="${deck.icone || 'baralho01.png'}" class="w-[85%] h-[85%] object-contain drop-shadow-md pointer-events-none">
                         </div>
                         <span class="text-[#dca3e8] font-black text-[10px] mt-2 drop-shadow-md uppercase text-center w-full truncate px-1">${deck.nome}</span>
                     `;
@@ -415,7 +447,7 @@
             }
         }
         
-        window.colecaoGlobal = {}; // Adicione esta linha global
+        window.colecaoGlobal = {}; 
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -427,7 +459,7 @@
                     const dados = docSnap.data();
                     meusDecks = dados.decks || {};
                     deckPadrao = dados.deckPadrao || "";
-                    window.colecaoGlobal = dados.colecao || {}; // Salva a coleção para validação
+                    window.colecaoGlobal = dados.colecao || {}; 
                     
                     renderizarDecks();
                 }

@@ -704,6 +704,32 @@
                 
                 document.getElementById('modal-resultado-final').classList.remove('hidden');
                 await window.concederRecompensasArena(vitoria);
+
+                // ==========================================
+                // ATUALIZAÇÃO DE ESTATÍSTICAS DO DECK (DUO)
+                // ==========================================
+                try {
+                    const isEmpate = myP === oppP;
+                    const userSnap = await getDoc(doc(db, "users", currentUserUid));
+                    
+                    if (userSnap.exists()) {
+                        const uData = userSnap.data();
+                        const deckId = uData.deckPadrao; 
+                        
+                        if (deckId && uData.decks && uData.decks[deckId]) {
+                            let updates = {
+                                [`decks.${deckId}.estatisticas.partidasDuo`]: increment(1)
+                            };
+
+                            if (vitoria) updates[`decks.${deckId}.estatisticas.vitoriasDuo`] = increment(1);
+                            if (isEmpate) updates[`decks.${deckId}.estatisticas.empatesDuo`] = increment(1);
+
+                            await updateDoc(doc(db, "users", currentUserUid), updates);
+                        }
+                    }
+                } catch (e) {
+                    console.error("Erro ao atualizar estatísticas do deck no DUO:", e);
+                }
             }
         };
 

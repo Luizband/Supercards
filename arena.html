@@ -319,7 +319,7 @@
                         let ms = d.missoesDiarias || {}; let aM = false;
                         
                         (ms.lista || []).forEach(m => { 
-                            if(["batalhar","jogar_batalha","jogar"].includes(m.id) && m.progresso < m.meta) { m.progresso++; aM = true; } 
+                            if(["batalhar","jogar_batalha","jogar", "batalhar_3"].includes(m.id) && m.progresso < m.meta) { m.progresso++; aM = true; }
                             if(vitoria && ["ganhar_partida","vencer_batalha","vencer"].includes(m.id) && m.progresso < m.meta) { m.progresso++; aM = true; } 
                         });
                         if(aM) ups.missoesDiarias = ms;

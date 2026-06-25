@@ -132,11 +132,14 @@
                     <span id="texto-atributo">---</span>
                 </div>
                 
-                <!-- Placar Centralizado -->
-                <div id="placar-ao-vivo" class="hidden absolute left-1/2 transform -translate-x-1/2 flex items-center gap-3 md:gap-4 bg-black/80 px-5 py-2 rounded-full border border-white/20 shadow-xl">
-                    <span id="placar-aliado" class="text-[#4ade80] font-black text-base md:text-lg drop-shadow-[0_0_8px_#4ade80]">0</span>
-                    <span class="text-white/50 font-black text-[10px]">VS</span>
-                    <span id="placar-inimigo" class="text-red-500 font-black text-base md:text-lg drop-shadow-[0_0_8px_#ef4444]">0</span>
+                <div id="container-placar" class="absolute left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-1">
+                    <div id="placar-ao-vivo" class="hidden flex items-center gap-3 md:gap-4 bg-black/80 px-5 py-2 rounded-full border border-white/20 shadow-xl">
+                        <span id="placar-aliado" class="text-[#4ade80] font-black text-base md:text-lg drop-shadow-[0_0_8px_#4ade80]">0</span>
+                        <span class="text-white/50 font-black text-[10px]">VS</span>
+                        <span id="placar-inimigo" class="text-red-500 font-black text-base md:text-lg drop-shadow-[0_0_8px_#ef4444]">0</span>
+                    </div>
+                    <div id="dica-placar" class="hidden text-white text-[9px] md:text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-md">
+                    </div>
                 </div>
 
                 <!-- Botões da Direita -->
@@ -163,8 +166,8 @@
 
             <!-- BANNER GIGANTE DE FIM DE TURNO -->
             <div id="banner-turno" class="hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[80] w-full flex justify-center pointer-events-none transition-all duration-500">
-                <div class="bg-black/95 border-y-4 border-[#dca3e8] py-4 px-10 shadow-[0_0_50px_rgba(0,0,0,1)] w-full text-center">
-                    <h1 id="texto-banner-turno" class="text-3xl md:text-4xl font-black uppercase tracking-widest drop-shadow-lg text-white">---</h1>
+                <div class="bg-black/95 border-y-4 border-[#dca3e8] py-2 px-10 shadow-[0_0_50px_rgba(0,0,0,1)] w-full text-center">
+                    <h1 id="texto-banner-turno" class="text-xl md:text-2xl font-black uppercase tracking-widest drop-shadow-lg text-white">---</h1>
                 </div>
             </div>
 
@@ -244,8 +247,8 @@
         <div id="recompensas-final" class="hidden bg-[#dca3e8] border-4 border-[#7a32a8] rounded-2xl p-4 w-full max-w-sm flex flex-col items-center gap-2 mb-6 shadow-2xl">
             <span class="text-[#7a32a8] font-black text-sm tracking-widest uppercase">Recompensas 2x2</span>
             <div class="flex w-full justify-around mt-1">
-                <span class="text-black font-black text-base">+20 XP</span>
-                <span class="text-black font-black text-base flex items-center gap-1">+20 <img src="moedas.png" class="w-5 h-5 object-contain"></span>
+                <span id="txt-recompensa-xp" class="text-black font-black text-base">+40 XP</span>
+                <span id="txt-recompensa-moeda" class="text-black font-black text-base flex items-center gap-1">+40 <img src="moedas.png" class="w-5 h-5 object-contain"></span>
             </div>
         </div>
         <button onclick="window.location.href='batalha.html'" class="bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-4 px-16 rounded-full shadow-lg border-2 border-white tracking-widest text-lg transition-transform active:scale-95">FINALIZAR</button>
@@ -433,6 +436,24 @@
 
             document.getElementById('placar-aliado').innerText = somaAliado;
             document.getElementById('placar-inimigo').innerText = somaInimigo;
+            
+            // --- NOVA LÓGICA DA DICA DE PONTOS ---
+            const dicaPlacar = document.getElementById('dica-placar');
+            if(dadosSala.atributoRodada && dadosSala.quemJoga === minhaRole && !dadosSala.mesa[minhaRole]) {
+                let diff = somaInimigo - somaAliado;
+                if (diff >= 0) {
+                    dicaPlacar.innerText = `Jogue ${diff} para empatar ou ${diff + 1} para vencer`;
+                    dicaPlacar.className = "bg-yellow-600/90 text-white text-[9px] md:text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-md animate-pulse";
+                } else {
+                    dicaPlacar.innerText = `Sua dupla está vencendo o turno!`;
+                    dicaPlacar.className = "bg-green-600/90 text-white text-[9px] md:text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-md";
+                }
+                dicaPlacar.classList.remove('hidden');
+            } else {
+                dicaPlacar.classList.add('hidden');
+            }
+            // ------------------------------------
+
             document.getElementById('deck-count').innerText = dadosSala[minhaRole].deck?.length || 0;
 
             const gavetaDiv = document.getElementById('cartas-da-gaveta');
@@ -618,28 +639,33 @@
                         });
                         if(aM) ups.missoesDiarias = ms;
 
+                        // --- NOVA LÓGICA DE GANHOS 40 e 10 ---
+                        let xpB = vitoria ? 40 : 10;
+                        let moB = vitoria ? 40 : 10;
+
                         if (vitoria) {
                             ups['estatisticas.batalhasVencidas'] = increment(1); 
                             let va = (d.estatisticas?.batalhasVencidas || 0) + 1;
-                            let xpB = 20; let moB = 20;
                             
                             if (va >= 30 && (!d.badges || !d.badges['badge-005'])) { 
                                 ups['badges.badge-005'] = true; xpB += 50; moB += 50; localStorage.setItem('novaBadge', 'Guerreiro'); 
                             }
-                            
-                            let nA = d.nivel || 1; let nx = (d.xp || 0) + xpB; let sub = false; let pb = 0; let pp = 0;
-                            let mx = (nA <= 5) ? 200 : (nA <= 15 ? 750 : (nA <= 25 ? 1600 : 3000));
-                            while (nx >= mx && nA < 30) {
-                                nx -= mx; nA++; sub = true; moB += 30; pb++;
-                                if ([10, 20, 30].includes(nA)) pp++;
-                                mx = (nA <= 5) ? 200 : (nA <= 15 ? 750 : (nA <= 25 ? 1600 : 3000));
-                            }
-                            
-                            ups.xp = nx; ups.nivel = nA; ups.moedas = increment(moB);
-                            if(pb > 0) ups['inventario.pacoteBasico'] = increment(pb); 
-                            if(pp > 0) ups['inventario.pacotePremium'] = increment(pp);
-                            if(sub) localStorage.setItem('novoLevel', nA);
                         }
+                        
+                        let nA = d.nivel || 1; let nx = (d.xp || 0) + xpB; let sub = false; let pb = 0; let pp = 0;
+                        let mx = (nA <= 5) ? 200 : (nA <= 15 ? 750 : (nA <= 25 ? 1600 : 3000));
+                        while (nx >= mx && nA < 30) {
+                            nx -= mx; nA++; sub = true; moB += 30; pb++;
+                            if ([10, 20, 30].includes(nA)) pp++;
+                            mx = (nA <= 5) ? 200 : (nA <= 15 ? 750 : (nA <= 25 ? 1600 : 3000));
+                        }
+                        
+                        ups.xp = nx; ups.nivel = nA; ups.moedas = increment(moB);
+                        if(vitoria && pb > 0) ups['inventario.pacoteBasico'] = increment(pb); 
+                        if(vitoria && pp > 0) ups['inventario.pacotePremium'] = increment(pp);
+                        if(sub) localStorage.setItem('novoLevel', nA);
+                        // -------------------------------------
+
                         if(Object.keys(ups).length > 0) await updateDoc(doc(db, "users", currentUserUid), ups);
                     }
                 } catch(e) { console.error("Erro ao salvar recompensas:", e); }
@@ -691,15 +717,21 @@
                 if (vitoria) {
                     document.getElementById('texto-vitoria').innerText = "VITÓRIA!";
                     document.getElementById('texto-vitoria').className = "text-5xl font-black text-[#4ade80] uppercase tracking-widest mb-2 drop-shadow-[0_0_20px_#4ade80] text-center";
+                    document.getElementById('txt-recompensa-xp').innerText = "+40 XP";
+                    document.getElementById('txt-recompensa-moeda').innerHTML = '+40 <img src="moedas.png" class="w-5 h-5 object-contain">';
                     document.getElementById('recompensas-final').classList.remove('hidden');
                 } else if (oppP > myP) {
                     document.getElementById('texto-vitoria').innerText = "DERROTA";
                     document.getElementById('texto-vitoria').className = "text-5xl font-black text-red-500 uppercase tracking-widest mb-2 drop-shadow-[0_0_20px_#ef4444] text-center";
-                    document.getElementById('recompensas-final').classList.add('hidden');
+                    document.getElementById('txt-recompensa-xp').innerText = "+10 XP";
+                    document.getElementById('txt-recompensa-moeda').innerHTML = '+10 <img src="moedas.png" class="w-5 h-5 object-contain">';
+                    document.getElementById('recompensas-final').classList.remove('hidden');
                 } else {
                     document.getElementById('texto-vitoria').innerText = "EMPATE";
                     document.getElementById('texto-vitoria').className = "text-5xl font-black text-yellow-400 uppercase tracking-widest mb-2 drop-shadow-[0_0_20px_#facc15] text-center";
-                    document.getElementById('recompensas-final').classList.add('hidden');
+                    document.getElementById('txt-recompensa-xp').innerText = "+10 XP";
+                    document.getElementById('txt-recompensa-moeda').innerHTML = '+10 <img src="moedas.png" class="w-5 h-5 object-contain">';
+                    document.getElementById('recompensas-final').classList.remove('hidden');
                 }
                 
                 document.getElementById('modal-resultado-final').classList.remove('hidden');
@@ -793,15 +825,22 @@
 
                             if (minhaEquipeVenceu) {
                                 txtBanner.innerText = "VITÓRIA DA SUA DUPLA!";
-                                txtBanner.className = "text-3xl md:text-4xl font-black uppercase tracking-widest drop-shadow-[0_0_15px_#4ade80] text-[#4ade80]";
+                                txtBanner.className = "text-xl md:text-2xl font-black uppercase tracking-widest drop-shadow-[0_0_15px_#4ade80] text-[#4ade80]";
                             } else if (inimigoVenceu) {
                                 txtBanner.innerText = "A DUPLA RIVAL VENCEU O TURNO!";
-                                txtBanner.className = "text-3xl md:text-4xl font-black uppercase tracking-widest drop-shadow-[0_0_15px_#ef4444] text-red-500";
+                                txtBanner.className = "text-xl md:text-2xl font-black uppercase tracking-widest drop-shadow-[0_0_15px_#ef4444] text-red-500";
                             } else {
                                 txtBanner.innerText = "EMPATE NO TURNO!";
-                                txtBanner.className = "text-3xl md:text-4xl font-black uppercase tracking-widest drop-shadow-[0_0_15px_#fbbf24] text-yellow-400";
+                                txtBanner.className = "text-xl md:text-2xl font-black uppercase tracking-widest drop-shadow-[0_0_15px_#fbbf24] text-yellow-400";
                             }
-                            banner.classList.remove('hidden');
+                            
+                            // Atraso de 1.5 segundos para não tampar a visão das cartas rápido demais
+                            setTimeout(() => {
+                                if (dadosSala.statusTurno === 'exibindo_resultado') { 
+                                    banner.classList.remove('hidden');
+                                }
+                            }, 1500);
+
                         } else {
                             if(banner) banner.classList.add('hidden');
                         }

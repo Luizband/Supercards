@@ -125,6 +125,19 @@
             </div>
         </header>
 
+        <!-- ========================================== -->
+        <!-- CONTADOR DE EVENTO / TEMPORADA             -->
+        <!-- ========================================== -->
+        <div class="w-full flex justify-center mb-6 z-10 relative mt-[-10px]">
+            <div class="bg-[#dca3e8] border-2 border-[#bc7bd4] rounded-full pl-2 pr-3 py-1.5 shadow-md flex items-center gap-2 transform transition-transform hover:scale-105">
+                
+                <img src="logobrasileirao.png" class="h-5 w-auto object-contain drop-shadow-md">
+                
+                <span id="countdown-timer" class="text-white bg-[#7a32a8] px-3 py-0.5 rounded-full font-black text-[11px] shadow-inner border border-[#bc7bd4]">--d --h --m</span>
+                
+            </div>
+        </div>
+
         <main class="grid grid-cols-2 gap-x-4 gap-y-8 flex-grow content-center mb-32">
             
             <div onclick="window.location.href='colecao.html'" class="flex flex-col items-center group cursor-pointer">
@@ -749,6 +762,47 @@
                 document.addEventListener('click', tentarTocarIntro);
                 document.addEventListener('touchstart', tentarTocarIntro);
             }
+        });
+    </script>
+    <!-- ========================================== -->
+    <!-- SCRIPT DO CONTADOR DE TEMPO                -->
+    <!-- ========================================== -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Data alvo: Domingo, 28 de Junho de 2026, às 16:00:00 (Horário de Brasília)
+            const dataAlvo = new Date("2026-06-28T16:00:00-03:00").getTime();
+            const timerElement = document.getElementById('countdown-timer');
+
+            if (!timerElement) return;
+
+            const atualizarTimer = () => {
+                const agora = new Date().getTime();
+                const diferenca = dataAlvo - agora;
+
+                // Se o tempo já acabou
+                if (diferenca <= 0) {
+                    timerElement.innerText = "ENCERRADO!";
+                    timerElement.classList.replace('bg-[#7a32a8]', 'bg-red-600');
+                    return;
+                }
+
+                // Cálculo da matemática do tempo
+                const dias = Math.floor(diferenca / (1000 * 60 * 60 * 24));
+                const horas = Math.floor((diferenca % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutos = Math.floor((diferenca % (1000 * 60 * 60)) / (1000 * 60));
+
+                // Formatação para ter sempre 2 dígitos (ex: 03d 05h 09m)
+                const d = String(dias).padStart(2, '0');
+                const h = String(horas).padStart(2, '0');
+                const m = String(minutos).padStart(2, '0');
+
+                timerElement.innerText = `${d}d ${h}h ${m}m`;
+            };
+
+            // Atualiza na hora para não piscar vazio
+            atualizarTimer();
+            // Inicia o "motor" que roda a cada 1 minuto (60.000 ms)
+            setInterval(atualizarTimer, 60000);
         });
     </script>
 </body>

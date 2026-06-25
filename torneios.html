@@ -145,8 +145,24 @@
         window.rodadaExibida = 0;
         window.redirecionandoArena = false; // Trava para não abrir a janela duas vezes
 
-        window.abrirModalTorneio = () => document.getElementById('modal-torneio').classList.remove('hidden');
-        window.fecharModalTorneio = () => document.getElementById('modal-torneio').classList.add('hidden');
+        // 🎵 Carrega a música do Brasileirão na memória (com volume em 50% para não estourar os ouvidos)
+        const musicaBrasileirao = new Audio('brasileirao.mp3');
+        musicaBrasileirao.volume = 0.5;
+
+        window.abrirModalTorneio = () => {
+            document.getElementById('modal-torneio').classList.remove('hidden');
+            
+            // Zera o tempo da música e dá o play
+            musicaBrasileirao.currentTime = 0;
+            musicaBrasileirao.play().catch(erro => console.log("O navegador bloqueou o áudio automático:", erro));
+        };
+
+        window.fecharModalTorneio = () => {
+            document.getElementById('modal-torneio').classList.add('hidden');
+            
+            // Pausa a música ao fechar o modal para não ficar tocando no fundo
+            musicaBrasileirao.pause();
+        };
 
         window.mudarAbaTorneio = function(aba) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));

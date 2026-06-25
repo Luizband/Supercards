@@ -133,8 +133,8 @@
             </div>
             
             <!-- BOTÃO GUARDAR (Escondido até o fim da revelação) -->
-            <button id="btn-guardar-colecao" onclick="window.guardarNaColecao()" class="hidden mt-8 bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-3 px-10 rounded-full shadow-lg transition-transform hover:scale-105 uppercase text-sm border-2 border-[#bc7bd4]">
-                Guardar na Coleção
+            <button id="btn-guardar-colecao" onclick="window.fecharModalPacote()" class="hidden mt-8 bg-[#7a32a8] hover:bg-purple-600 text-white font-black py-3 px-10 rounded-full shadow-lg transition-transform hover:scale-105 uppercase text-sm border-2 border-[#bc7bd4]">
+                Fechar
             </button>
         </div>
 
@@ -168,6 +168,7 @@
         let cartasSorteadaTemp = [];
         let tipoPacoteTemp = '';
         let indiceRevelacao = 0;
+        let toastsPacotePendentes = [];
 
         // Cores de brilho por raridade
         const CORES_RARIDADE = {
@@ -300,6 +301,170 @@
             }
         }
 
+        function prepararUpdatesAberturaPacote(dados, cartasIds, campoPacote) {
+            const hoje = obterGameDay();
+            let pacoteMissoes = dados.missoesDiarias || {};
+            let atualizouMissao = false;
+            let msgMissaoProgresso = "";
+
+            if (pacoteMissoes.dataReset === hoje && pacoteMissoes.lista) {
+                pacoteMissoes.lista.forEach(m => {
+                    if (m.id === "abrir_pacote" && m.progresso < m.meta) {
+                        m.progresso++;
+                        atualizouMissao = true;
+                        msgMissaoProgresso = `🎯 Progresso: ${m.desc}`;
+                    }
+                });
+            }
+
+            let pacotesAbertosAtuais = (dados.estatisticas?.pacotesAbertos || 0) + 1;
+            let badgesJogador = { ...(dados.badges || {}) };
+            let ganhouBadge = false;
+            let notificacoesNovas = [];
+
+            if (pacotesAbertosAtuais >= 30 && !badgesJogador["badge-008"]) {
+                badgesJogador["badge-008"] = true;
+                ganhouBadge = true;
+                notificacoesNovas.push({
+                    id: "notif_" + Date.now() + "_badge008",
+                    titulo: "🏆 Conquista: Pacotinhos!",
+                    texto: "Você abriu 30 pacotes de cartas!\nRecompensas: 50 XP e 50 Moedas.",
+                    lida: false,
+                    data: new Date().toISOString()
+                });
+            }
+
+            let xpAtual = dados.xp || 0;
+            let nivelAtual = dados.nivel || 1;
+            let subiuNivel = false;
+            let msgLevelUp = "";
+            let bonusXp = ganhouBadge ? 50 : 0;
+            let bonusMoedas = ganhouBadge ? 50 : 0;
+            let novoXp = xpAtual + bonusXp;
+            let pacotesBasicosGanhos = 0;
+            let pacotesPremiumGanhos = 0;
+
+            let xpMaximo = calcularXPMaximo(nivelAtual);
+            while (novoXp >= xpMaximo && nivelAtual < 30) {
+                novoXp -= xpMaximo;
+                nivelAtual++;
+                subiuNivel = true;
+                bonusMoedas += 30;
+                pacotesBasicosGanhos++;
+
+                let textoRecompensaNotif = "1 Pacote Básico e 30 Moedas";
+                if (nivelAtual === 10 || nivelAtual === 20 || nivelAtual === 30) {
+                    pacotesPremiumGanhos++;
+                    textoRecompensaNotif = "1 Pacote Básico, 1 Pacote Premium e 30 Moedas";
+                    msgLevelUp = `🎉 LEVEL UP! Nível ${nivelAtual} alcançado!<br><span class="text-xs">Recompensas: 1 Pacote Básico, 1 Pacote Premium e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom"></span>`;
+                } else {
+                    msgLevelUp = `🎉 LEVEL UP! Nível ${nivelAtual} alcançado!<br><span class="text-xs">Recompensas: 1 Pacote Básico e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom"></span>`;
+                }
+
+                notificacoesNovas.push({
+                    id: "notif_" + Date.now() + "_nivel" + nivelAtual,
+                    titulo: `🎉 Level Up: Nível ${nivelAtual}`,
+                    texto: `Parabéns! Você alcançou o Nível ${nivelAtual}.\nRecompensas recebidas: ${textoRecompensaNotif}.`,
+                    lida: false,
+                    data: new Date().toISOString()
+                });
+                xpMaximo = calcularXPMaximo(nivelAtual);
+            }
+
+            let deltaBasico = pacotesBasicosGanhos + (campoPacote === 'pacoteBasico' ? -1 : 0);
+            let deltaPremium = pacotesPremiumGanhos + (campoPacote === 'pacotePremium' ? -1 : 0);
+            let deltaExpansao = campoPacote === 'pacoteExpansao' ? -1 : 0;
+            let deltaGratis = campoPacote === 'pacoteGratis' ? -1 : 0;
+
+            let updates = {
+                "estatisticas.pacotesAbertos": increment(1),
+                "estatisticas.totalCartas": increment(5),
+                "badges": badgesJogador,
+                "xp": novoXp,
+                "nivel": nivelAtual,
+                "moedas": increment(bonusMoedas)
+            };
+
+            if (deltaBasico !== 0) updates["inventario.pacoteBasico"] = increment(deltaBasico);
+            if (deltaPremium !== 0) updates["inventario.pacotePremium"] = increment(deltaPremium);
+            if (deltaExpansao !== 0) updates["inventario.pacoteExpansao"] = increment(deltaExpansao);
+            if (deltaGratis !== 0) updates["inventario.pacoteGratis"] = increment(deltaGratis);
+
+            let contagemCartas = {};
+            cartasIds.forEach(id => {
+                contagemCartas[id] = (contagemCartas[id] || 0) + 1;
+            });
+            for (let id in contagemCartas) {
+                updates[`colecao.${id}`] = increment(contagemCartas[id]);
+            }
+
+            if (notificacoesNovas.length > 0) updates.notificacoes = arrayUnion(...notificacoesNovas);
+            if (atualizouMissao) updates.missoesDiarias = pacoteMissoes;
+
+            return {
+                updates,
+                efeitos: {
+                    ganhouBadge,
+                    subiuNivel,
+                    msgLevelUp,
+                    msgMissaoProgresso,
+                    atualizouMissao,
+                    pacoteMissoes,
+                    novoXp,
+                    nivelAtual,
+                    bonusMoedas,
+                    pacotesBasicosGanhos,
+                    pacotesPremiumGanhos,
+                    contagemCartas,
+                    badgesJogador
+                }
+            };
+        }
+
+        function aplicarEfeitosLocais(campoPacote, efeitos) {
+            if (!dadosJogador.inventario) dadosJogador.inventario = {};
+            dadosJogador.inventario[campoPacote] = Math.max(0, (dadosJogador.inventario[campoPacote] || 0) - 1);
+            if (efeitos.pacotesBasicosGanhos) {
+                dadosJogador.inventario.pacoteBasico = (dadosJogador.inventario.pacoteBasico || 0) + efeitos.pacotesBasicosGanhos;
+            }
+            if (efeitos.pacotesPremiumGanhos) {
+                dadosJogador.inventario.pacotePremium = (dadosJogador.inventario.pacotePremium || 0) + efeitos.pacotesPremiumGanhos;
+            }
+
+            if (!dadosJogador.colecao) dadosJogador.colecao = {};
+            for (let id in efeitos.contagemCartas) {
+                dadosJogador.colecao[id] = (dadosJogador.colecao[id] || 0) + efeitos.contagemCartas[id];
+            }
+
+            if (!dadosJogador.estatisticas) dadosJogador.estatisticas = {};
+            dadosJogador.estatisticas.pacotesAbertos = (dadosJogador.estatisticas.pacotesAbertos || 0) + 1;
+            dadosJogador.estatisticas.totalCartas = (dadosJogador.estatisticas.totalCartas || 0) + 5;
+
+            dadosJogador.badges = efeitos.badgesJogador;
+            dadosJogador.xp = efeitos.novoXp;
+            dadosJogador.nivel = efeitos.nivelAtual;
+            dadosJogador.moedas = (dadosJogador.moedas || 0) + efeitos.bonusMoedas;
+            if (efeitos.atualizouMissao) dadosJogador.missoesDiarias = efeitos.pacoteMissoes;
+        }
+
+        function montarToastsPacote(efeitos) {
+            const toasts = [];
+            if (efeitos.msgMissaoProgresso) toasts.push(efeitos.msgMissaoProgresso);
+            if (efeitos.ganhouBadge) {
+                toasts.push(`🏆 NOVA CONQUISTA!<br><span class="text-xs font-normal">Badge: Pacotinhos! (Abriu 30 pacotes).</span><br><span class="text-sm">Recompensa: +50 XP e +50 <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`);
+            }
+            if (efeitos.subiuNivel) toasts.push(efeitos.msgLevelUp);
+            return toasts;
+        }
+
+        function exibirToastsPacote(toasts, delayInicial = 500) {
+            let delay = delayInicial;
+            toasts.forEach(msg => {
+                setTimeout(() => window.mostrarToast(msg), delay);
+                delay += 1500;
+            });
+        }
+
         function sortearCarta(tipoPacote, isSlot1) {
             const roll = Math.random() * 100;
             let raridade = 'Comum';
@@ -345,7 +510,7 @@
             return lista[Math.floor(Math.random() * lista.length)];
         }
 
-        // --- FASE 1: INICIA A REVELAÇÃO CARTA POR CARTA ---
+        // --- FASE 1: DESCONTA PACOTE, SALVA CARTAS NA COLEÇÃO E INICIA REVELAÇÃO ---
         window.abrirPacote = async function(tipo) {
             if (abrindoPacote) return;
             
@@ -357,78 +522,57 @@
                 return;
             }
 
-            // TRANCA O CADEADO IMEDIATAMENTE
             abrindoPacote = true;
-
-            // SEGURANÇA: Desconta o pacote no banco ANTES de mostrar as cartas
-            try {
-                await updateDoc(dbUserRef, {
-                    [`inventario.${campo}`]: increment(-1)
-                });
-                dadosJogador.inventario[campo] -= 1; // Atualiza local para a tela
-
-                try {
-                    const hoje = obterGameDay();
-                    const snap = await getDoc(dbUserRef);
-                    const dados = snap.exists() ? snap.data() : {};
-                    let pacoteMissoes = dados.missoesDiarias || {};
-                    let atualizouMissao = false;
-                    let msgMissaoProgresso = "";
-
-                    if (pacoteMissoes.dataReset === hoje && pacoteMissoes.lista) {
-                        pacoteMissoes.lista.forEach(m => {
-                            if (m.id === "abrir_pacote" && m.progresso < m.meta) {
-                                m.progresso++;
-                                atualizouMissao = true;
-                                msgMissaoProgresso = `🎯 Progresso: ${m.desc}`;
-                            }
-                        });
-                    }
-
-                    if (atualizouMissao) {
-                        await updateDoc(dbUserRef, { missoesDiarias: pacoteMissoes });
-                        dadosJogador.missoesDiarias = pacoteMissoes;
-                        window.mostrarToast(msgMissaoProgresso);
-                    }
-                } catch (e) {
-                    console.error("Erro ao atualizar missão abrir_pacote:", e);
-                }
-
-                carregarInventario(); // Recarrega a tela de fundo na hora
-            } catch (error) {
-                console.error("Erro ao descontar pacote:", error);
-                window.mostrarToast("Erro de conexão ao abrir pacote.");
-                abrindoPacote = false;
-                return; // Impede abrir se não houver internet para descontar
-            }
-
-            // 🧹 LIMPEZA DO "FANTASMA" DO PACOTE ANTERIOR
-            const imgRevelacao = document.getElementById('img-revelacao');
-            const containerRevelacao = document.getElementById('container-revelacao');
-            imgRevelacao.src = ""; 
-            containerRevelacao.classList.remove('anim-pop'); 
-            containerRevelacao.style.opacity = '0'; 
+            toastsPacotePendentes = [];
 
             tipoPacoteTemp = tipo;
             cartasSorteadaTemp = [];
             indiceRevelacao = 0;
 
-            for(let i = 0; i < 5; i++) {
-                const idSorteado = sortearCarta(tipo, i === 0);
-                cartasSorteadaTemp.push(idSorteado);
-                
-                const imgPreload = new Image();
-                imgPreload.src = INFO_CARTAS[idSorteado].imagem;
+            for (let i = 0; i < 5; i++) {
+                cartasSorteadaTemp.push(sortearCarta(tipo, i === 0));
             }
+
+            try {
+                const snap = await getDoc(dbUserRef);
+                const dados = snap.exists() ? snap.data() : {};
+                const { updates, efeitos } = prepararUpdatesAberturaPacote(dados, cartasSorteadaTemp, campo);
+                await updateDoc(dbUserRef, updates);
+
+                aplicarEfeitosLocais(campo, efeitos);
+                toastsPacotePendentes = montarToastsPacote(efeitos);
+
+                document.getElementById('player-coins').innerText = dadosJogador.moedas || 0;
+                atualizarVisualBarraXP(dadosJogador.xp || 0, dadosJogador.nivel || 1);
+                await carregarInventario();
+            } catch (error) {
+                console.error("Erro ao abrir pacote:", error);
+                window.mostrarToast("Erro de conexão ao abrir pacote.");
+                abrindoPacote = false;
+                cartasSorteadaTemp = [];
+                return;
+            }
+
+            cartasSorteadaTemp.forEach(id => {
+                const imgPreload = new Image();
+                imgPreload.src = INFO_CARTAS[id].imagem;
+            });
+
+            const imgRevelacao = document.getElementById('img-revelacao');
+            const containerRevelacao = document.getElementById('container-revelacao');
+            imgRevelacao.src = "";
+            containerRevelacao.classList.remove('anim-pop');
+            containerRevelacao.style.opacity = '0';
 
             document.getElementById('grid-novas-cartas').classList.add('hidden');
             document.getElementById('btn-guardar-colecao').classList.add('hidden');
             document.getElementById('titulo-abrir-pacote').innerText = "Toque para revelar";
-            
+
             containerRevelacao.classList.remove('hidden');
             containerRevelacao.dataset.bloqueado = "false";
             document.getElementById('modal-abrir-pacote').classList.remove('hidden');
 
+            exibirToastsPacote(toastsPacotePendentes);
             window.mostrarProximaCarta(true);
         };
 
@@ -491,116 +635,12 @@
             }, tempoEspera);
         };
 
-        // --- FASE 2: SALVA NO BANCO E CALCULA AS BADGES/MISSÕES ---
-        window.guardarNaColecao = async function() {
-            document.getElementById('btn-guardar-colecao').classList.add('hidden'); 
-            window.mostrarToast("Guardando na coleção... ⏳");
-
-            try {
-                let pacotesAbertosAtuais = (dadosJogador.estatisticas?.pacotesAbertos || 0) + 1;
-                let badgesJogador = dadosJogador.badges || {};
-                let ganhouBadge = false;
-                let notificacoesNovas = [];
-
-                if (pacotesAbertosAtuais >= 30 && !badgesJogador["badge-008"]) {
-                    badgesJogador["badge-008"] = true;
-                    ganhouBadge = true;
-                    notificacoesNovas.push({
-                        id: "notif_" + Date.now() + "_badge008",
-                        titulo: "🏆 Conquista: Pacotinhos!",
-                        texto: "Você abriu 30 pacotes de cartas!\nRecompensas: 50 XP e 50 Moedas.",
-                        lida: false,
-                        data: new Date().toISOString()
-                    });
-                }
-
-                let xpAtual = dadosJogador.xp || 0;
-                let nivelAtual = dadosJogador.nivel || 1;
-                let subiuNivel = false;
-                let msgLevelUp = "";
-                let bonusXp = ganhouBadge ? 50 : 0;
-                let bonusMoedas = ganhouBadge ? 50 : 0;
-                let novoXp = xpAtual + bonusXp;
-                let pacotesBasicosGanhos = 0;
-                let pacotesPremiumGanhos = 0;
-
-                let xpMaximo = calcularXPMaximo(nivelAtual);
-                while (novoXp >= xpMaximo && nivelAtual < 30) {
-                    novoXp -= xpMaximo;
-                    nivelAtual++;
-                    subiuNivel = true;
-                    bonusMoedas += 30;
-                    pacotesBasicosGanhos++;
-
-                    let textoRecompensaNotif = "1 Pacote Básico e 30 Moedas";
-                    if (nivelAtual === 10 || nivelAtual === 20 || nivelAtual === 30) {
-                        pacotesPremiumGanhos++;
-                        textoRecompensaNotif = "1 Pacote Básico, 1 Pacote Premium e 30 Moedas";
-                        msgLevelUp = `🎉 LEVEL UP! Nível ${nivelAtual} alcançado!<br><span class="text-xs">Recompensas: 1 Pacote Básico, 1 Pacote Premium e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom"></span>`;
-                    } else {
-                        msgLevelUp = `🎉 LEVEL UP! Nível ${nivelAtual} alcançado!<br><span class="text-xs">Recompensas: 1 Pacote Básico e 30 <img src="moedas.png" class="inline w-4 h-4 ml-0.5 align-text-bottom"></span>`;
-                    }
-
-                    notificacoesNovas.push({
-                        id: "notif_" + Date.now() + "_nivel" + nivelAtual,
-                        titulo: `🎉 Level Up: Nível ${nivelAtual}`,
-                        texto: `Parabéns! Você alcançou o Nível ${nivelAtual}.\nRecompensas recebidas: ${textoRecompensaNotif}.`,
-                        lida: false,
-                        data: new Date().toISOString()
-                    });
-                    xpMaximo = calcularXPMaximo(nivelAtual);
-                }
-
-                // Removemos o -1 daqui! O pacote já foi pago na hora que abriu.
-                // Agora só soma se ele ganhou pacote bônus de level up.
-                let deltaBasico = pacotesBasicosGanhos;
-                let deltaPremium = pacotesPremiumGanhos;
-
-                let updates = {
-                    "estatisticas.pacotesAbertos": increment(1),
-                    "estatisticas.totalCartas": increment(5),
-                    "badges": badgesJogador,
-                    "xp": novoXp,
-                    "nivel": nivelAtual,
-                    "moedas": increment(bonusMoedas)
-                };
-
-                if (deltaBasico !== 0) updates["inventario.pacoteBasico"] = increment(deltaBasico);
-                if (deltaPremium !== 0) updates["inventario.pacotePremium"] = increment(deltaPremium);
-
-                let contagemCartas = {};
-                cartasSorteadaTemp.forEach(id => {
-                    contagemCartas[id] = (contagemCartas[id] || 0) + 1;
-                });
-
-                for (let id in contagemCartas) {
-                    updates[`colecao.${id}`] = increment(contagemCartas[id]);
-                }
-
-                if (notificacoesNovas.length > 0) updates.notificacoes = arrayUnion(...notificacoesNovas);
-
-                await updateDoc(dbUserRef, updates);
-                document.getElementById('modal-abrir-pacote').classList.add('hidden');
-                carregarInventario();
-
-                let delay = 500;
-                if (ganhouBadge) {
-                    setTimeout(() => window.mostrarToast(`🏆 NOVA CONQUISTA!<br><span class="text-xs font-normal">Badge: Pacotinhos! (Abriu 30 pacotes).</span><br><span class="text-sm">Recompensa: +50 XP e +50 <img src="moedas.png" class="inline w-4 h-4 align-text-bottom"></span>`), delay);
-                    delay += 1500;
-                }
-                if (subiuNivel) {
-                    setTimeout(() => window.mostrarToast(msgLevelUp), delay);
-                }
-
-                // TUDO CERTO, DESTRANCA O CADEADO!
-                abrindoPacote = false;
-
-            } catch (e) {
-                console.error(e);
-                window.mostrarToast("Erro ao guardar as cartas no banco.");
-                document.getElementById('btn-guardar-colecao').classList.remove('hidden'); 
-                abrindoPacote = false;
-            }
+        // --- FECHA O MODAL (cartas já estão na coleção desde o clique em ABRIR) ---
+        window.fecharModalPacote = function() {
+            document.getElementById('btn-guardar-colecao').classList.add('hidden');
+            document.getElementById('modal-abrir-pacote').classList.add('hidden');
+            abrindoPacote = false;
+            toastsPacotePendentes = [];
         };
 
         onAuthStateChanged(auth, (user) => {

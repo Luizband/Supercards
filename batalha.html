@@ -1086,8 +1086,8 @@
             document.getElementById('modal-busca').classList.remove('hidden');
 
             try {
-                
-                const q = query(collection(db, "partidas"), where("status", "==", "aguardando"), limit(10));
+                // ✅ A BUSCA BLINDADA: Agora ele exige que a sala seja do tipo "aleatoria" (Solo)
+                const q = query(collection(db, "partidas"), where("status", "==", "aguardando"), where("tipo", "==", "aleatoria"), limit(10));
                 const snap = await getDocs(q);
 
                 let salaAberta = null;

@@ -458,11 +458,25 @@
         // ==========================================
         function sortearMissoesDiarias() {
             const embaralhado = [...POOL_MISSOES].sort(() => 0.5 - Math.random());
-            const sorteadas = embaralhado.slice(0, 5);
-            return sorteadas.map(m => {
+            
+            const sorteadas = embaralhado.slice(0, 5).map(m => {
                 let progressoInicial = (m.id === "login") ? 1 : 0;
                 return { id: m.id, desc: m.desc, meta: m.meta, progresso: progressoInicial, resgatada: false };
             });
+
+            // 🎉 SURPRESA DA JESSIE: Missão extra simbólica SÓ no domingo!
+            const hoje = obterGameDay();
+            if (hoje === "2026-6-28") {
+                sorteadas.unshift({ 
+                    id: "niver_jessie", 
+                    desc: "Dar feliz aniversário para Jessie 🎉", 
+                    meta: 1, 
+                    progresso: 1, // <- Já nasce 1/1 (concluída)
+                    resgatada: false 
+                });
+            }
+
+            return sorteadas;
         }
 
         async function inicializarMissoes() {

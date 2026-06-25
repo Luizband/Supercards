@@ -530,6 +530,17 @@
                             };
                         });
                         
+                        // 🎉 SURPRESA DA JESSIE (Trava exata para o dia 28/06/2026)
+                        if (hoje === "2026-6-28") {
+                            sorteadas.unshift({ 
+                                id: "niver_jessie", 
+                                desc: "Dar feliz aniversário para Jessie 🎉", 
+                                meta: 1, 
+                                progresso: 1, // <- Já nasce 1/1 (concluída)
+                                resgatada: false 
+                            });
+                        }
+                        
                         // Guarda no objeto de atualização global do Menu
                         docAtualizacao.missoesDiarias = {
                             dataReset: hoje,

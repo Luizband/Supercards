@@ -133,7 +133,7 @@
                 
                 <img src="logobrasileirao.png" class="h-5 w-auto object-contain drop-shadow-md">
                 
-                <span id="countdown-timer" class="text-white bg-[#7a32a8] px-3 py-0.5 rounded-full font-black text-[11px] shadow-inner border border-[#bc7bd4]">--d --h --m</span>
+                <span id="countdown-timer" class="text-white bg-[#7a32a8] px-3 py-0.5 rounded-full font-black text-[11px] shadow-inner border border-[#bc7bd4]">--d --h --m --s</span>
                 
             </div>
         </div>
@@ -790,19 +790,21 @@
                 const dias = Math.floor(diferenca / (1000 * 60 * 60 * 24));
                 const horas = Math.floor((diferenca % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 const minutos = Math.floor((diferenca % (1000 * 60 * 60)) / (1000 * 60));
+                const segundos = Math.floor((diferenca % (1000 * 60)) / 1000); // <-- CÁLCULO DOS SEGUNDOS
 
-                // Formatação para ter sempre 2 dígitos (ex: 03d 05h 09m)
+                // Formatação para ter sempre 2 dígitos (ex: 03d 05h 09m 02s)
                 const d = String(dias).padStart(2, '0');
                 const h = String(horas).padStart(2, '0');
                 const m = String(minutos).padStart(2, '0');
+                const s = String(segundos).padStart(2, '0');
 
-                timerElement.innerText = `${d}d ${h}h ${m}m`;
+                timerElement.innerText = `${d}d ${h}h ${m}m ${s}s`;
             };
 
             // Atualiza na hora para não piscar vazio
             atualizarTimer();
-            // Inicia o "motor" que roda a cada 1 minuto (60.000 ms)
-            setInterval(atualizarTimer, 60000);
+            // Inicia o "motor" que roda a cada 1 segundo (1.000 ms)
+            setInterval(atualizarTimer, 1000);
         });
     </script>
 </body>

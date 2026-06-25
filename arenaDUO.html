@@ -138,8 +138,6 @@
                         <span class="text-white/50 font-black text-[10px]">VS</span>
                         <span id="placar-inimigo" class="text-red-500 font-black text-base md:text-lg drop-shadow-[0_0_8px_#ef4444]">0</span>
                     </div>
-                    <div id="dica-placar" class="hidden text-white text-[9px] md:text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-md">
-                    </div>
                 </div>
 
                 <!-- Botões da Direita -->
@@ -180,6 +178,11 @@
                 <div id="mesa-combate" class="flex justify-center items-center gap-3 md:gap-5 w-full px-10">
                     <!-- JS Injeta Aqui -->
                 </div>
+            </div>
+
+            <!-- DICA DO PLACAR (MOVIDA PARA O RODAPÉ) -->
+            <div class="absolute bottom-5 md:bottom-7 left-1/2 transform -translate-x-1/2 z-30 pointer-events-none w-[90%] flex justify-center">
+                <div id="dica-placar" class="hidden"></div>
             </div>
 
             <!-- GATILHO DA GAVETA -->
@@ -443,10 +446,11 @@
                 let diff = somaInimigo - somaAliado;
                 if (diff >= 0) {
                     dicaPlacar.innerText = `Jogue ${diff} para empatar ou ${diff + 1} para vencer`;
-                    dicaPlacar.className = "bg-yellow-600/90 text-white text-[9px] md:text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-md animate-pulse";
+                    // Aumentei um pouco a fonte e o espaçamento para preencher melhor o rodapé
+                    dicaPlacar.className = "bg-yellow-600/90 text-white text-[10px] md:text-xs font-black px-6 py-2.5 rounded-full uppercase tracking-widest shadow-2xl border-2 border-yellow-400 animate-pulse text-center whitespace-nowrap drop-shadow-lg";
                 } else {
                     dicaPlacar.innerText = `Sua dupla está vencendo o turno!`;
-                    dicaPlacar.className = "bg-green-600/90 text-white text-[9px] md:text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-md";
+                    dicaPlacar.className = "bg-green-600/90 text-white text-[10px] md:text-xs font-black px-6 py-2.5 rounded-full uppercase tracking-widest shadow-2xl border-2 border-green-400 text-center whitespace-nowrap drop-shadow-lg";
                 }
                 dicaPlacar.classList.remove('hidden');
             } else {

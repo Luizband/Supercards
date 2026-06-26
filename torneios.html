@@ -668,7 +668,20 @@
 
                 const qtdJogadores = (mesa.fila || []).length;
                 const podeEntrar = mesa.aberta;
-                const btnCor = podeEntrar ? "bg-green-600 hover:bg-green-500 border-green-400" : "bg-gray-600 border-gray-500";
+                const isEmJogo = mesa.emJogo === true; // Verifica se a mesa tá rodando
+                
+                let btnCor = "bg-gray-600 border-gray-500";
+                let btnTexto = "FECHADA";
+                let btnDisabled = true;
+
+                if (isEmJogo) {
+                    btnCor = "bg-red-600 border-red-500";
+                    btnTexto = "EM JOGO";
+                } else if (podeEntrar) {
+                    btnCor = "bg-green-600 hover:bg-green-500 border-green-400";
+                    btnTexto = "ENTRAR";
+                    btnDisabled = false;
+                }
                 
                 container.innerHTML += `
                     <div class="flex items-center gap-3 bg-gray-900 p-2.5 rounded-lg border border-[#bc7bd4]/30 shadow-sm">
@@ -676,8 +689,8 @@
                             <span class="text-white font-black text-sm uppercase truncate">${mesa.nome || 'Mesa'}</span>
                         </div>
                         <div class="flex items-center gap-3">
-                            <button onclick="window.abrirLobbyBJ('${id}')" class="${btnCor} text-white font-black text-[9px] px-3 py-2 rounded-lg border uppercase shadow-md transition-transform active:scale-95 shrink-0" ${!podeEntrar ? 'disabled' : ''}>
-                                ENTRAR
+                            <button onclick="window.abrirLobbyBJ('${id}')" class="${btnCor} text-white font-black text-[9px] px-3 py-2 rounded-lg border uppercase shadow-md transition-transform active:scale-95 shrink-0" ${btnDisabled ? 'disabled' : ''}>
+                                ${btnTexto}
                             </button>
                             <span class="text-green-400 font-black text-sm w-8 text-center">${qtdJogadores}/${mesa.maxJogadores}</span>
                         </div>
@@ -696,7 +709,8 @@
             const mesa = window.salasBlackjackGlobais[window.mesaBJSelecionada];
             if(!mesa) return;
 
-            if(mesa.partidaPronta && mesa.fila.includes(currentUserUid)) {
+            // SE A PARTIDA ESTIVER PRONTA E VOCÊ ESTAVA NO ÚLTIMO GRUPO
+            if(mesa.partidaPronta && mesa.ultimoGrupo && mesa.ultimoGrupo.includes(currentUserUid)) {
                 window.location.href = `superblackjackcards.html?sala=${mesa.partidaPronta}`;
                 return;
             }
@@ -812,11 +826,13 @@
                     idMesaOrigem: mesa.id
                 });
 
+               // Atualiza o lobby com a sala, salva o grupo e TRANCA A MESA
                 await updateDoc(doc(db, "salas_blackjack", mesa.id), {
                     partidaPronta: novaSalaId,
-                    fila: [] 
+                    ultimoGrupo: mesa.fila,
+                    emJogo: true
+                    // REMOVEMOS O fila: [] DAQUI! A fila só será esvaziada no final da partida.
                 });
-
             } catch(e) {
                 console.error("Erro ao criar partida", e);
                 window.criandoPartidaBJ = false;

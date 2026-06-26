@@ -749,7 +749,18 @@
             // Verifica se o som JÁ tocou nesta sessão
             if (!sessionStorage.getItem('introTocada')) {
                 
-                const introAudio = new Audio('intro.mpeg');
+                // 1. Criamos a lista com o nome de todos os arquivos de áudio
+                const listaIntros = [
+                    'intros/intro01.mp3',
+                    'intros/intro02.mp3',
+                    'intros/intro03.mp3'
+                ];
+                
+                // 2. O JavaScript sorteia um número aleatório para escolher uma intro da lista
+                const introSorteada = listaIntros[Math.floor(Math.random() * listaIntros.length)];
+                
+                // 3. Carrega apenas a intro que foi sorteada no passo anterior
+                const introAudio = new Audio(introSorteada);
                 introAudio.volume = 0.6; // Volume em 60% para não dar susto no jogador
                 
                 const tentarTocarIntro = () => {

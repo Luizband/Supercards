@@ -54,7 +54,7 @@
                 <img src="blackjack.png" alt="Superblackjackcards" class="h-[80%] object-contain drop-shadow-xl z-10" onerror="this.src='fundo_carta.png'">
                 
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-0"></div>
-                <span class="absolute top-2 right-2 bg-green-500 text-black text-[10px] font-black px-2 py-1 rounded uppercase shadow-md z-20 animate-pulse">AO VIVO</span>
+                <span id="badge-status-bj" class="absolute top-2 right-2 bg-green-500 text-black text-[10px] font-black px-2 py-1 rounded uppercase shadow-md z-20 animate-pulse">AO VIVO</span>
             </div>
 
             <div class="p-4 flex flex-col gap-2">
@@ -481,6 +481,25 @@
 
             // Monitora Fragmentos pro Blackjack
             onSnapshot(doc(db, "users", currentUserUid), (snap) => { if(snap.exists()) meusFragmentos = snap.data().fragmentos || 0; });
+
+            // Monitora o Status Global do Blackjack
+            onSnapshot(doc(db, "salas_blackjack", "statusGlobal"), (snap) => {
+                const badge = document.getElementById('badge-status-bj');
+                
+                if (snap.exists() && snap.data().online === false) {
+                    window.isBlackjackOnline = false;
+                    if(badge) {
+                        badge.className = "absolute top-2 right-2 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded uppercase shadow-md z-20 animate-pulse";
+                        badge.innerText = "OFFLINE";
+                    }
+                } else {
+                    window.isBlackjackOnline = true;
+                    if(badge) {
+                        badge.className = "absolute top-2 right-2 bg-green-500 text-black text-[10px] font-black px-2 py-1 rounded uppercase shadow-md z-20 animate-pulse";
+                        badge.innerText = "AO VIVO";
+                    }
+                }
+            });
             
             // Se ele voltar para a tela de torneio, destrava o redirecionamento
             window.redirecionandoArena = false;
@@ -620,7 +639,14 @@
         let unsubscribeBlackjack = null;
         let meusFragmentos = 0;
 
+        window.isBlackjackOnline = true; // Variável global de controle
+
         window.abrirModalBlackjack = () => {
+            if (!window.isBlackjackOnline) {
+                alert("O Superblackjackcards está temporariamente OFFLINE para manutenção!");
+                return;
+            }
+            
             document.getElementById('modal-blackjack').classList.remove('hidden');
             if(audioBJ) {
                 audioBJ.currentTime = 0;

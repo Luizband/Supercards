@@ -47,17 +47,22 @@
                 <button class="w-full mt-3 bg-[#7a32a8] text-white font-black text-xs py-3 rounded-xl uppercase tracking-widest shadow-lg border border-[#bc7bd4]">Ver Detalhes / Jogar</button>
             </div>
         </div>
-        <!-- CARD SUPERBLACKJACK -->
-        <div class="bg-[#0f2d20] rounded-2xl border-4 border-emerald-600 shadow-[0_0_20px_rgba(5,150,105,0.2)] overflow-hidden flex flex-col relative group cursor-pointer mt-4" onclick="abrirModalBlackjack()">
-            <div class="h-32 bg-black flex items-center justify-center border-b-2 border-emerald-800 relative overflow-hidden">
-                <img src="blackjack.png" alt="Superblackjackcards" class="w-full h-full object-cover opacity-80 z-10 hover:scale-105 transition-transform" onerror="this.src='fundo_carta.png'">
-                <div class="absolute inset-0 bg-gradient-to-t from-[#0f2d20] to-transparent z-10"></div>
-                <span class="absolute top-2 right-2 bg-emerald-500 text-black text-[10px] font-black px-2 py-1 rounded uppercase shadow-md z-20 animate-pulse">AO VIVO</span>
+        <!-- CARD SUPERBLACKJACK (ESTILO BRASILEIRÃO) -->
+        <div class="bg-gray-800 rounded-2xl border-4 border-[#bc7bd4] shadow-[0_0_20px_rgba(188,123,212,0.2)] overflow-hidden flex flex-col relative group cursor-pointer mt-4" onclick="abrirModalBlackjack()">
+            
+            <div class="h-32 bg-gray-900 flex items-center justify-center border-b-2 border-gray-700 relative overflow-hidden">
+                <img src="blackjack.png" alt="Superblackjackcards" class="h-[80%] object-contain drop-shadow-xl z-10" onerror="this.src='fundo_carta.png'">
+                
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-0"></div>
+                <span class="absolute top-2 right-2 bg-green-500 text-black text-[10px] font-black px-2 py-1 rounded uppercase shadow-md z-20 animate-pulse">AO VIVO</span>
             </div>
-            <div class="p-4 flex flex-col gap-2 relative z-20">
-                <h2 class="text-emerald-400 font-black text-lg uppercase tracking-wide">Superblackjackcards</h2>
-                <p class="text-gray-400 text-[10px] font-bold uppercase mt-1">Sobreviva ao 21. Aposte fragmentos e ganhe prêmios exclusivos!</p>
-                <button class="w-full mt-3 bg-emerald-700 text-white font-black text-xs py-3 rounded-xl uppercase tracking-widest shadow-lg border border-emerald-500">Acessar Mesas</button>
+
+            <div class="p-4 flex flex-col gap-2">
+                <h2 class="text-white font-black text-lg uppercase tracking-wide">Superblackjackcards</h2>
+                
+                <p class="text-gray-400 text-[10px] font-bold uppercase mt-1 leading-relaxed">Sobreviva ao 21. Aposte fragmentos e ganhe prêmios exclusivos nas mesas!</p>
+
+                <button class="w-full mt-3 bg-[#7a32a8] text-white font-black text-xs py-3 rounded-xl uppercase tracking-widest shadow-lg border border-[#bc7bd4]">Acessar Mesas</button>
             </div>
         </div>
     </main>

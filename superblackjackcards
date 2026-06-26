@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Supercards - Superblackjackcards</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #0f2d20;
+            background-image: radial-gradient(circle at center, #1b4d3e 0%, #0b1f16 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overscroll-behavior: none;
+        }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Brilho do Turno Atual */
+        .glow-turno { box-shadow: 0 0 15px 4px #fbbf24 !important; transition: box-shadow 0.3s ease; }
+
+        /* Efeito de Leque de Cartas Sobrepostas (Mostrando Lado Esquerdo) */
+        .card-fan-item {
+            margin-left: -70px;
+            transition: transform 0.2s ease, z-index 0s;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.5);
+        }
+        .card-fan-item:first-child {
+            margin-left: 0;
+        }
+        .card-fan-item:hover {
+            transform: translateY(-20px) scale(1.05);
+            z-index: 100 !important;
+        }
+
+        /* Animação das Gavetas e Cartas da Mão */
+        .hover-carta-mao { transition: transform 0.2s ease; }
+        .hover-carta-mao:hover { transform: translateY(-15px) scale(1.10); }
+
+        /* Trava de Rotação */
+        #aviso-retrato { display: none; }
+        @media (orientation: portrait) {
+            #main-arena { display: none !important; }
+            #aviso-retrato { display: flex; }
+        }
+        
+        #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; width: 90%; max-width: 350px; pointer-events: none; display: flex; flex-direction: column; gap: 10px; }
+        .toast-msg { background: #4ade80; color: #0f2d20; border: 3px solid #1b4d3e; padding: 8px 16px; border-radius: 9999px; box-shadow: 0 10px 15px rgba(0,0,0,0.3); text-align: center; font-weight: 900; font-size: 0.75rem; animation: slideDown 0.3s ease-out forwards; pointer-events: auto; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Efeitos Visuais de Impacto (21 e Explosão) */
+        @keyframes flashVitoria {
+            0% { background-color: rgba(251, 191, 36, 0); }
+            50% { background-color: rgba(251, 191, 36, 0.6); }
+            100% { background-color: rgba(251, 191, 36, 0); }
+        }
+        .flash-21 { animation: flashVitoria 0.8s ease-out; }
+
+        @keyframes flashDerrota {
+            0% { background-color: rgba(239, 68, 68, 0); }
+            50% { background-color: rgba(239, 68, 68, 0.6); }
+            100% { background-color: rgba(239, 68, 68, 0); }
+        }
+        .flash-fail { animation: flashDerrota 0.8s ease-out; }
+    </style>
+</head>
+<body class="fixed inset-0 overflow-hidden w-full h-full text-white select-none bg-[#0b1f16]">
+
+    <div id="toast-container"></div>
+    <div id="flash-overlay" class="absolute inset-0 pointer-events-none z-[200]"></div>
+
+    <!-- AVISO DE ROTAÇÃO -->
+    <div id="aviso-retrato" class="w-full h-full bg-black/95 flex-col items-center justify-center p-6 text-center z-[9999] absolute inset-0">
+        <span class="text-6xl mb-4">🔄</span>
+        <h1 class="text-2xl font-black text-[#4ade80] uppercase tracking-widest mb-2">Vire o Celular</h1>
+        <p class="text-sm text-gray-300 font-bold">O modo Superblackjackcards só pode ser jogado na horizontal.</p>
+    </div>
+
+    <div id="main-arena" class="w-full h-full flex relative backdrop-blur-sm">
+
+        <!-- CANTO ESQUERDO: LISTA DE JOGADORES (DEGRADE MAIS ESCURO) -->
+        <div class="w-[26%] md:w-[22%] h-full flex flex-col justify-between p-2 md:p-3 bg-gradient-to-r from-black/90 via-black/75 to-transparent border-r border-white/5 z-10 shadow-2xl overflow-y-auto no-scrollbar">
+            <div class="flex flex-col gap-3 w-full">
+                <h2 class="text-[10px] md:text-xs font-black text-[#4ade80] tracking-wider uppercase opacity-80 px-2 mt-1">Sobreviventes</h2>
+                
+                <!-- CONTAINER DINÂMICO PARA ATÉ 6 JOGADORES -->
+                <div id="lista-jogadores" class="flex flex-col gap-3 w-full">
+                    <!-- JS vai injetar os slots aqui dinamicamente -->
+                </div>
+            </div>
+
+            <!-- INFOS DA SALA / BOTÃO DE DESISTIR -->
+            <div class="pt-4 border-t border-white/10 w-full flex flex-col gap-2">
+                <button onclick="document.getElementById('modal-desistir').classList.remove('hidden')" class="w-full bg-red-600/30 hover:bg-red-600 text-red-200 hover:text-white font-black text-[9px] md:text-[10px] py-2 rounded-lg shadow-md border border-red-500/30 uppercase tracking-widest transition-colors active:scale-95">
+                    Abandonar
+                </button>
+            </div>
+        </div>
+
+        <!-- LADO DIREITO: CAMPO DE BLACKJACK E GAVETA -->
+        <div class="w-[74%] md:w-[78%] h-full relative overflow-hidden z-10 flex flex-col">
+            
+            <!-- PAINEL SUPERIOR -->
+            <div class="w-full px-4 md:px-6 py-3 flex justify-between items-center z-40 relative">
+                <!-- Status da Rodada -->
+                <div class="bg-black/60 px-4 py-1.5 rounded-full border border-white/10 text-[9px] md:text-[10px] uppercase font-bold tracking-wider text-gray-300">
+                    Modo: <span class="text-[#4ade80] font-black">Superblackjackcards</span>
+                </div>
+
+                <!-- Botões de Ação e Reação -->
+                <div class="flex gap-2 relative">
+                    <div id="menu-reacoes" class="hidden absolute top-[110%] right-0 w-max bg-[#1b4d3e] p-3 rounded-xl grid grid-cols-4 gap-2 shadow-2xl border-2 border-[#4ade80]/30 z-50">
+                        <button onclick="dispararReacaoLocal('💣')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">💣</button>
+                        <button onclick="dispararReacaoLocal('🖕')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">🖕</button>
+                        <button onclick="dispararReacaoLocal('👀')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">👀</button>
+                        <button onclick="dispararReacaoLocal('💖')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">💖</button>
+                        <button onclick="dispararReacaoLocal('💀')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">💀</button>
+                        <button onclick="dispararReacaoLocal('🤬')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">🤬</button>
+                        <button onclick="dispararReacaoLocal('🤣')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">🤣</button>
+                        <button onclick="dispararReacaoLocal('😭')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">😭</button>
+                    </div>
+                    
+                    <button onclick="document.getElementById('menu-reacoes').classList.toggle('hidden')" class="bg-[#1b4d3e] text-[#4ade80] font-black text-[9px] md:text-[10px] px-4 py-2 rounded-lg shadow-md border border-[#4ade80]/50 uppercase tracking-wider hover:bg-white hover:text-[#0f2d20] transition-colors">
+                        Reação
+                    </button>
+                </div>
+            </div>
+
+            <!-- BANNER GIGANTE DE EVENTOS (21 / ESTOURO / VITÓRIA) -->
+            <div id="banner-alerta" class="hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[180] w-full flex justify-center pointer-events-none transition-all duration-300">
+                <div id="banner-corpo" class="bg-black/95 border-y-4 border-[#4ade80] py-5 px-10 shadow-[0_0_60px_rgba(0,0,0,0.9)] w-full text-center">
+                    <h1 id="texto-banner" class="text-3xl md:text-5xl font-black uppercase tracking-widest drop-shadow-lg text-white">---</h1>
+                </div>
+            </div>
+
+            <!-- O CENTRO DA MESA (A CONTAGEM DO BLACKJACK E AS CARTAS SOBREPOSTAS) -->
+            <div class="flex-grow flex flex-col items-center justify-center relative w-full pb-20">
+                
+                <!-- Placar Coletivo Central -->
+                <div class="mb-4 text-center z-20">
+                    <span class="text-gray-400 font-bold text-[10px] md:text-xs uppercase tracking-widest block mb-1">Total Coletivo</span>
+                    <div id="contador-mesa" class="text-6xl md:text-7xl font-black text-white bg-black/50 px-8 py-2 rounded-3xl border border-white/10 shadow-2xl min-w-[140px] inline-block tracking-tight drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)]">
+                        0
+                    </div>
+                </div>
+
+                <!-- Deck do Croupier (Montante Central) -->
+                <div class="absolute bottom-6 left-6 flex flex-col items-center justify-center bg-black/60 border border-white/10 rounded-lg p-1 w-12 h-16 shadow-xl z-20">
+                    <span id="deck-count" class="text-white font-black text-xl z-10 drop-shadow-[0_2px_2px_rgba(0,0,0,1)]">80</span>
+                    <img src="fundo_carta.png" class="absolute inset-0 w-full h-full object-cover opacity-30 rounded-lg">
+                </div>
+
+                <!-- PILHA DE CARTAS JOGADAS (SOBREPOSTAS MOSTRANDO O LADO ESQUERDO) -->
+                <div class="w-full flex justify-center items-center px-12 h-[160px] md:h-[200px]">
+                    <div id="mesa-cartas-acumuladas" class="flex justify-center items-center pl-[70px]">
+                        <!-- JS injetará as cartas aqui utilizando a classe .card-fan-item -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- GATILHO DA GAVETA (MINHAS CARTAS DA MÃO) -->
+            <div onclick="toggleGaveta()" class="absolute right-0 bottom-6 bg-[#1b4d3e] text-[#4ade80] font-black py-3 px-4 rounded-l-xl cursor-pointer shadow-[-5px_0_20px_rgba(0,0,0,0.5)] z-40 border-y border-l border-[#4ade80]/30 flex items-center gap-2 hover:bg-white hover:text-[#0f2d20] transition-all">
+                <span class="text-lg leading-none">◀</span>
+                <span class="text-[10px] md:text-xs uppercase tracking-widest whitespace-nowrap">Minhas Cartas (3)</span>
+            </div>
+
+            <!-- OVERLAY ESCURO PARA QUANDO A GAVETA ABRIR -->
+            <div id="overlay-gaveta" onclick="toggleGaveta()" class="fixed inset-0 bg-black/50 z-[50] hidden backdrop-blur-sm transition-opacity"></div>
+
+            <!-- A GAVETA COM AS 3 CARTAS DA MÃO DO JOGADOR -->
+            <div id="gaveta-mao" class="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-[110%] transition-transform duration-300 z-[60] bg-black/95 border-l-2 border-y-2 border-[#4ade80]/50 rounded-l-3xl p-4 md:p-6 shadow-[-10px_0_30px_rgba(0,0,0,0.8)] max-w-[95%] md:max-w-[85%] flex flex-col items-center">
+                <div class="flex justify-between items-center w-full mb-3 px-2">
+                    <h2 class="text-[#4ade80] font-black text-sm md:text-base tracking-widest uppercase">Sua Mão (Selecione 1)</h2>
+                    <button onclick="toggleGaveta()" class="text-gray-400 hover:text-white font-black text-3xl transition-colors leading-none active:scale-90">&times;</button>
+                </div>
+                <div id="cartas-da-gaveta" class="flex items-center gap-4 w-full overflow-x-auto no-scrollbar py-2 px-2">
+                    <!-- JS vai injetar exatamente as 3 cartas aqui dinamicamente -->
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODAL DE SELEÇÃO DE ALVO (QUANDO CRAVA 21) -->
+    <div id="modal-abate" class="hidden fixed inset-0 bg-black/90 z-[250] flex flex-col items-center justify-center p-4 backdrop-blur-md">
+        <h1 class="text-3xl md:text-4xl font-black text-yellow-400 uppercase tracking-widest mb-2 drop-shadow-[0_0_20px_rgba(250,204,21,0.5)] text-center">Cravou 21!</h1>
+        <p class="text-gray-300 text-xs md:text-sm font-bold max-w-md text-center mb-6">Você atingiu exatamente 21 pontos. Selecione um oponente vivo para subtrair 1 coração.</p>
+        
+        <div id="grid-alvos-abate" class="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-xl w-full px-4">
+            <!-- JS vai listar os oponentes vivos para o clique -->
+        </div>
+    </div>
+
+    <!-- MODAL DE DERROTA / TELA ESCURECIDA (ELIMINADO) -->
+    <div id="modal-eliminado" class="hidden fixed inset-0 bg-black/95 z-[300] flex flex-col items-center justify-center p-4 backdrop-blur-lg">
+        <span class="text-6xl mb-4">💀</span>
+        <h1 class="text-4xl font-black text-red-500 uppercase tracking-widest mb-2 text-center drop-shadow-[0_0_15px_rgba(239,68,68,0.4)]">Você Foi Eliminado!</h1>
+        <p class="text-gray-400 text-sm font-bold mb-6 text-center">Seus corações acabaram. Fique de olho na mesa para ver quem será o sobrevivente.</p>
+        <button onclick="window.location.href='batalha.html'" class="bg-gray-800 hover:bg-gray-700 text-white font-black py-3 px-12 rounded-full shadow-lg border border-white/20 tracking-widest uppercase text-sm transition-transform active:scale-95">Sair da Mesa</button>
+    </div>
+
+    <!-- MODAL DE VITÓRIA FINAL -->
+    <div id="modal-vitoria-final" class="hidden fixed inset-0 bg-black/95 z-[300] flex flex-col items-center justify-center p-4 backdrop-blur-lg">
+        <span class="text-6xl mb-4">👑</span>
+        <h1 class="text-5xl font-black text-yellow-400 uppercase tracking-widest mb-2 text-center drop-shadow-[0_0_25px_rgba(250,204,21,0.6)]">VITÓRIA!</h1>
+        <p class="text-gray-300 text-sm font-bold mb-6 text-center">Você foi o último sobrevivente restante na mesa!</p>
+        <button onclick="window.location.href='batalha.html'" class="bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-black font-black py-4 px-16 rounded-full shadow-2xl tracking-widest text-base transition-transform active:scale-95">FINALIZAR</button>
+    </div>
+
+    <!-- MODAL DE CONFIRMAÇÃO DE DESISTÊNCIA -->
+    <div id="modal-desistir" class="hidden fixed inset-0 bg-black/80 z-[400] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-[#1b4d3e] border-2 border-[#4ade80]/30 rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl relative">
+            <h2 class="text-red-400 font-black text-xl mb-2 uppercase">Abandonar a Mesa?</h2>
+            <p class="text-gray-200 font-bold text-xs mb-6">Ao sair, você perderá a partida e abandonará seus corações restantes.</p>
+            <div class="flex justify-center gap-4">
+                <button onclick="document.getElementById('modal-desistir').classList.add('hidden')" class="flex-1 bg-gray-700 text-white font-black py-3 rounded-full shadow-md uppercase text-sm border border-gray-600">Ficar</button>
+                <button onclick="window.location.href='batalha.html'" class="flex-1 bg-red-600 text-white font-black py-3 rounded-full shadow-md uppercase text-sm border border-red-700">Sair</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ELEMENTOS DE ÁUDIO -->
+    <audio id="audio-inicio" src="audios/blackjack/inicio.mp3" preload="auto"></audio>
+    <audio id="audio-21" src="audios/blackjack/21.mp3" preload="auto"></audio>
+    <audio id="audio-estourou" src="audios/blackjack/estourou.mp3" preload="auto"></audio>
+    <audio id="audio-eliminacao" src="audios/blackjack/eliminacao.mp3" preload="auto"></audio>
+    <audio id="audio-parabens" src="audios/blackjack/parabéns.mp3" preload="auto"></audio>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, increment, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { INFO_CARTAS } from './cartas.js';
+
+        const app = initializeApp({
+          apiKey: "AIzaSyCU3lFTgfrDMaD9jwR7X7ivYPmGQh4VE1g",
+          authDomain: "supercards-tcg.firebaseapp.com",
+          projectId: "supercards-tcg",
+          storageBucket: "supercards-tcg.firebasestorage.app",
+          messagingSenderId: "862316380615",
+          appId: "1:862316380615:web:b3f28056ebc967673999e2"
+        });
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUserUid = null;
+        let salaId = null;
+        let dadosSala = null;
+        
+        // Mapeamento dos Áudios
+        const sfxInicio = document.getElementById('audio-inicio');
+        const sfx21 = document.getElementById('audio-21');
+        const sfxEstourou = document.getElementById('audio-estourou');
+        const sfxEliminacao = document.getElementById('audio-eliminacao');
+        const sfxParabens = document.getElementById('audio-parabens');
+
+        // Flags para evitar que audios de "evento único" fiquem repetindo
+        let flagInicioTocado = false;
+        let flagEliminadoTocado = false;
+        let flagVitoriaTocada = false;
+
+        window.toggleGaveta = function() {
+            document.getElementById('gaveta-mao').classList.toggle('translate-x-[110%]');
+            document.getElementById('overlay-gaveta').classList.toggle('hidden');
+        };
+
+        window.mostrarToast = function(msg) {
+            const c = document.getElementById('toast-container');
+            const t = document.createElement('div'); t.className = 'toast-msg'; t.innerHTML = msg;
+            c.appendChild(t); setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 500); }, 3000); 
+        };
+
+        window.dispararReacaoLocal = function(emoji) {
+            document.getElementById('menu-reacoes').classList.add('hidden');
+            if(!salaId) return;
+            updateDoc(doc(db, "salas_21", salaId), { ultimaReacao: { uid: currentUserUid, emoji: emoji, ts: Date.now() } });
+        };
+
+        function gerarHtmlCoracoes(quantidadeVidas) {
+            let html = '';
+            for(let i = 1; i <= 3; i++) {
+                let imgSource = (i <= quantidadeVidas) ? 'coracao.png' : 'coracao0.png';
+                html += `<img src="${imgSource}" class="w-3.5 h-3.5 object-contain transition-all duration-300">`;
+            }
+            return html;
+        }
+
+        // Função Exclusiva para disparar a tela de vitória
+        window.dispararVitoria = function() {
+            document.getElementById('modal-vitoria-final').classList.remove('hidden');
+            if(!flagVitoriaTocada) {
+                if(sfxParabens) sfxParabens.play().catch(e => console.log("Áudio bloqueado:", e));
+                flagVitoriaTocada = true;
+            }
+        };
+
+        function renderizarInterfaceBlackjack() {
+            if(!dadosSala) return;
+
+            // Dispara som de inicio de partida assim que renderizar a primeira vez
+            if(!flagInicioTocado) {
+                if(sfxInicio) sfxInicio.play().catch(e => console.log("Autoplay bloqueado pelo navegador (requer clique prévio)"));
+                flagInicioTocado = true;
+            }
+
+            const txtContador = document.getElementById('contador-mesa');
+            txtContador.innerText = dadosSala.mesaTotal || 0;
+            
+            if(dadosSala.mesaTotal >= 19) {
+                txtContador.className = "text-6xl md:text-7xl font-black text-red-500 bg-black/60 px-8 py-2 rounded-3xl border border-red-500/50 shadow-[0_0_20px_rgba(239,68,68,0.4)] inline-block tracking-tight animate-pulse";
+            } else if(dadosSala.mesaTotal >= 12) {
+                txtContador.className = "text-6xl md:text-7xl font-black text-yellow-400 bg-black/50 px-8 py-2 rounded-3xl border border-yellow-500/30 shadow-2xl inline-block tracking-tight";
+            } else {
+                txtContador.className = "text-6xl md:text-7xl font-black text-white bg-black/50 px-8 py-2 rounded-3xl border border-white/10 shadow-2xl inline-block tracking-tight";
+            }
+
+            document.getElementById('deck-count').innerText = dadosSala.baralhoCentral?.length || 0;
+
+            const listaDiv = document.getElementById('lista-jogadores');
+            listaDiv.innerHTML = '';
+
+            dadosSala.filaTurno.forEach((uid, index) => {
+                const jog = dadosSala.jogadores[uid];
+                if(!jog) return;
+
+                const isVezDesteJogador = (dadosSala.vezAtual === index);
+                const borderClass = isVezDesteJogador ? 'border-amber-400 bg-amber-500/10 glow-turno' : 'border-white/10 bg-black/40';
+                const opacityClass = (jog.status === 'morto') ? 'opacity-40 grayscale' : '';
+                const tagVoce = (uid === currentUserUid) ? `<span class="text-[7px] text-[#4ade80] font-black tracking-widest ml-1 bg-[#4ade80]/10 px-1 rounded">VOCÊ</span>` : '';
+
+                listaDiv.innerHTML += `
+                    <div class="flex flex-col gap-1 border rounded-xl p-2 relative transition-all duration-300 ${borderClass} ${opacityClass}">
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-full bg-gray-800 border ${isVezDesteJogador ? 'border-amber-400' : 'border-[#4ade80]'} overflow-hidden flex-shrink-0 relative">
+                                <span id="emoji-player-${uid}" class="hidden absolute inset-0 flex items-center justify-center text-xl z-50 drop-shadow-md pointer-events-none"></span>
+                                <img src="${jog.foto || 'fundo_carta.png'}" class="w-full h-full object-cover">
+                            </div>
+                            <div class="flex flex-col overflow-hidden w-full">
+                                <span class="text-white font-black text-[10px] md:text-[11px] uppercase truncate flex items-center">${jog.nome} ${tagVoce}</span>
+                                <div class="flex gap-0.5 items-center mt-0.5">
+                                    ${gerarHtmlCoracoes(jog.coracoes)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            const campoCartas = document.getElementById('mesa-cartas-acumuladas');
+            campoCartas.innerHTML = '';
+            
+            const cartasNaMesa = dadosSala.cartasMesaAcumuladas || [];
+            if(cartasNaMesa.length === 0) {
+                campoCartas.innerHTML = `
+                    <div class="w-[110px] md:w-[130px] aspect-[2.5/3.5] border-2 border-dashed border-white/20 rounded-xl flex items-center justify-center text-center p-4 bg-black/10 ml-[-70px]">
+                        <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Mesa Limpa</span>
+                    </div>`;
+            } else {
+                cartasNaMesa.forEach((cartaId, idx) => {
+                    const info = INFO_CARTAS[cartaId] || { miniatura: 'fundo_carta.png' };
+                    campoCartas.innerHTML += `
+                        <div class="card-fan-item w-[110px] md:w-[130px] aspect-[2.5/3.5] bg-gray-900 rounded-xl border border-white/20 relative flex-shrink-0" style="z-index: ${idx + 1}">
+                            <img src="${info.miniatura || info.imagem}" class="w-full h-full object-cover rounded-xl" onerror="this.src='fundo_carta.png'">
+                        </div>`;
+                });
+            }
+
+            const gavetaDiv = document.getElementById('cartas-da-gaveta');
+            gavetaDiv.innerHTML = '';
+            
+            const meuJogador = dadosSala.jogadores[currentUserUid];
+            if(meuJogador && meuJogador.mao) {
+                meuJogador.mao.forEach(cartaId => {
+                    const info = INFO_CARTAS[cartaId] || { miniatura: 'fundo_carta.png' };
+                    gavetaDiv.innerHTML += `
+                        <div onclick="jogarCartaOficial('${cartaId}')" class="w-[110px] md:w-[130px] aspect-[2.5/3.5] bg-gray-800 rounded-xl shadow-2xl border-2 border-transparent hover:border-[#4ade80] cursor-pointer hover-carta-mao flex-shrink-0">
+                            <img src="${info.miniatura || info.imagem}" class="w-full h-full object-cover rounded-lg" onerror="this.src='fundo_carta.png'">
+                        </div>`;
+                });
+            }
+
+            // Monitoramento de eliminação do jogador local
+            if(meuJogador && meuJogador.status === 'morto') {
+                document.getElementById('modal-eliminado').classList.remove('hidden');
+                if(!flagEliminadoTocado) {
+                    if(sfxEliminacao) sfxEliminacao.play().catch(e => console.log("Áudio bloqueado:", e));
+                    flagEliminadoTocado = true;
+                }
+            }
+        }
+
+        window.dispararAnimacaoImpacto = function(tipo, mensagem) {
+            const overlay = document.getElementById('flash-overlay');
+            const banner = document.getElementById('banner-alerta');
+            const texto = document.getElementById('texto-banner');
+            const corpo = document.getElementById('banner-corpo');
+
+            texto.innerText = mensagem;
+            
+            if(tipo === '21') {
+                corpo.className = "bg-black/95 border-y-4 border-yellow-400 py-5 px-10 shadow-[0_0_60px_rgba(250,204,21,0.5)] w-full text-center";
+                texto.className = "text-3xl md:text-5xl font-black uppercase tracking-widest drop-shadow-[0_0_15px_#facc15] text-yellow-400";
+                overlay.classList.add('flash-21');
+                if(sfx21) sfx21.play().catch(e => console.log("Áudio bloqueado pelo navegador"));
+            } else if(tipo === 'fail') {
+                corpo.className = "bg-black/95 border-y-4 border-red-500 py-5 px-10 shadow-[0_0_60px_rgba(239,68,68,0.5)] w-full text-center";
+                texto.className = "text-3xl md:text-5xl font-black uppercase tracking-widest drop-shadow-[0_0_15px_#ef4444] text-red-500";
+                overlay.classList.add('flash-fail');
+                if(sfxEstourou) sfxEstourou.play().catch(e => console.log("Áudio bloqueado pelo navegador"));
+            }
+
+            banner.classList.remove('hidden');
+
+            setTimeout(() => {
+                banner.classList.add('hidden');
+                overlay.classList.remove('flash-21', 'flash-fail');
+            }, 1200);
+        };
+
+        window.jogarCartaOficial = async function(cartaId) {
+            if(!salaId || !dadosSala) return;
+            
+            const uidDaVez = dadosSala.filaTurno[dadosSala.vezAtual];
+            if(uidDaVez !== currentUserUid) {
+                window.mostrarToast("Espere a sua vez na fila!");
+                return;
+            }
+
+            if(dadosSala.aguardandoAlvo) {
+                window.mostrarToast("Aguardando seleção do alvo!");
+                return;
+            }
+
+            const pontosDaCarta = INFO_CARTAS[cartaId]?.pontos || 1;
+            toggleGaveta();
+
+            window.mostrarToast(`Jogando carta de valor: ${pontosDaCarta}`);
+            
+            let simuladoTotal = (dadosSala.mesaTotal || 0) + pontosDaCarta;
+            if (simuladoTotal === 21) {
+                window.dispararAnimacaoImpacto('21', "EXATOS 21! SELECIONE UM ALVO!");
+            } else if (simuladoTotal > 21) {
+                window.dispararAnimacaoImpacto('fail', "ESTOUROU! VOCÊ PERDEU 1 CORAÇÃO!");
+            }
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUserUid = user.uid;
+                salaId = new URLSearchParams(window.location.search).get('sala');
+                
+                if (!salaId) return window.location.href = 'batalha.html';
+
+                onSnapshot(doc(db, "salas_21", salaId), (docSnap) => {
+                    if (!docSnap.exists()) return window.location.href = 'batalha.html';
+                    dadosSala = docSnap.data();
+
+                    if (dadosSala.status === 'abandonada') {
+                        alert(`🛑 SALA FECHADA!\n Um jogador abandonou.`);
+                        window.location.href = 'batalha.html';
+                        return;
+                    }
+
+                    renderizarInterfaceBlackjack();
+
+                    if (window.ultimoTsReacao !== dadosSala.ultimaReacao?.ts) {
+                        window.ultimoTsReacao = dadosSala.ultimaReacao?.ts;
+                        if(dadosSala.ultimaReacao) {
+                            const uidAlvo = dadosSala.ultimaReacao.uid;
+                            const emojiEl = document.getElementById(`emoji-player-${uidAlvo}`);
+                            if(emojiEl) {
+                                emojiEl.innerText = dadosSala.ultimaReacao.emoji;
+                                emojiEl.className = "absolute inset-0 flex items-center justify-center text-xl z-50 animate-bounce";
+                                setTimeout(() => { emojiEl.className = "hidden"; }, 3500);
+                            }
+                        }
+                    }
+                });
+            } else { window.location.href = "index.html"; }
+        });
+    </script>
+</body>
+</html>

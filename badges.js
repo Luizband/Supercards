@@ -69,5 +69,10 @@ export const INFO_BADGES = {
         nome: "Hora do banho",
         descricao: "Completou as cartas 038, 076, 077, 089 e 090.",
         imagem: "badges/badge-014.png" 
+    },
+    "badge-015": {
+        nome: "The Best",
+        descricao: "Ficou no Top Um mensal",
+        imagem: "badges/badge-015.png"
     }
 };

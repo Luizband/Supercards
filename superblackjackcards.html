@@ -496,21 +496,27 @@
                             window.pagamentoRealizado = true; // Trava para não cobrar duas vezes
 
                             let updates = {
-                                // Todo mundo perde os fragmentos da entrada
                                 fragmentos: increment(-dadosSala.custoOriginal)
                             };
 
-                            // Se EU for o vencedor, adiciono o prêmio no meu banco
+                            // Se EU for o vencedor, adiciono o prêmio no meu banco E DESTRANCO A MESA LÁ FORA
                             if (currentUserUid === dadosSala.vencedorFinal) {
-                                const premioNum = parseInt(dadosSala.premioTexto); // Ex: "200" vira 200
+                                const premioNum = parseInt(dadosSala.premioTexto); 
                                 
-                                // Se for número e a imagem for moeda
                                 if (!isNaN(premioNum) && dadosSala.premioImg.includes('moeda')) {
                                     updates.moedas = increment(premioNum);
-                                } 
-                                // Se for o ID de uma carta (Ex: "046")
-                                else if (isNaN(premioNum)) {
+                                } else if (isNaN(premioNum)) {
                                     updates[`colecao.${dadosSala.premioTexto}`] = increment(1);
+                                }
+
+                                // MÁGICA: Limpa a mesa lá no lobby pros próximos jogarem
+                                if (dadosSala.idMesaOrigem) {
+                                    await updateDoc(doc(db, "salas_blackjack", dadosSala.idMesaOrigem), {
+                                        emJogo: false,
+                                        partidaPronta: null,
+                                        ultimoGrupo: [],
+                                        fila: [] // SÓ AGORA A FILA É ESVAZIADA DE FATO!
+                                    });
                                 }
                             }
 

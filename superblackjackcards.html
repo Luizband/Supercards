@@ -713,15 +713,24 @@
                                 fragmentos: increment(-dadosSala.custoOriginal)
                             };
 
+                            // Se EU for o vencedor, adiciono o prêmio e destranco a mesa no lobby!
                             if (currentUserUid === dadosSala.vencedorFinal) {
-                                const premioNum = parseInt(dadosSala.premioTexto); 
+                                const premioTxt = dadosSala.premioTexto; 
                                 
-                                if (!isNaN(premioNum) && dadosSala.premioImg.includes('moeda')) {
-                                    updates.moedas = increment(premioNum);
-                                } else if (isNaN(premioNum)) {
-                                    updates[`colecao.${dadosSala.premioTexto}`] = increment(1);
+                                // 1. É MOEDA? (Se é número e a imagem tem "moeda" no nome)
+                                if (!isNaN(parseInt(premioTxt)) && dadosSala.premioImg.includes('moeda')) {
+                                    updates.moedas = increment(parseInt(premioTxt));
+                                } 
+                                // 2. É PACOTE? (Se o texto tem a palavra "pacote" -> Ex: pacoteBasico)
+                                else if (premioTxt.includes('pacote')) {
+                                    updates[`inventario.${premioTxt}`] = increment(1);
+                                } 
+                                // 3. É CARTA! (Se não for nenhum dos dois, assume que é ID de carta -> Ex: 046)
+                                else {
+                                    updates[`colecao.${premioTxt}`] = increment(1);
                                 }
 
+                                // Mágica que destranca a mesa lá fora
                                 if (dadosSala.idMesaOrigem) {
                                     await updateDoc(doc(db, "salas_blackjack", dadosSala.idMesaOrigem), {
                                         emJogo: false,

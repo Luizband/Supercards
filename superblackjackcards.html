@@ -285,7 +285,6 @@
             return html;
         }
 
-        // Função Exclusiva para disparar a tela de vitória
         window.dispararVitoria = function() {
             document.getElementById('modal-vitoria-final').classList.remove('hidden');
             if(!flagVitoriaTocada) {
@@ -294,10 +293,57 @@
             }
         };
 
+        // =======================================================
+        // MOTOR DO JOGO: GERAÇÃO DO DECK FIXO DO BLACKJACK
+        // =======================================================
+        function gerarBaralhoSuperBlackjack() {
+            let cartasBaixas = []; // 1 e 2
+            let cartasMedias = []; // 3 e 4
+            let cartasAltas = [];  // 5
+            let cartasBombas = []; // 7
+
+            for (const [id, carta] of Object.entries(INFO_CARTAS)) {
+                if (id === "094") continue; // Ignora promocional
+                if (carta.pontos === 1 || carta.pontos === 2) cartasBaixas.push(id);
+                else if (carta.pontos === 3 || carta.pontos === 4) cartasMedias.push(id);
+                else if (carta.pontos === 5) cartasAltas.push(id);
+                else if (carta.pontos === 7) cartasBombas.push(id);
+            }
+
+            // 1. Pega apenas 15 cartas fracas sortidas (Escassez extrema)
+            cartasBaixas.sort(() => Math.random() - 0.5);
+            let baralho = cartasBaixas.slice(0, 15);
+
+            // 2. Coloca todas as médias 1x
+            baralho.push(...cartasMedias);
+
+            // 3. Duplica as de 5 pontos
+            cartasAltas.forEach(id => { baralho.push(id, id); });
+
+            // 4. Triplica as de 7 pontos (Bombas)
+            cartasBombas.forEach(id => { baralho.push(id, id, id); });
+
+            // Reembaralha o pacote completo
+            return baralho.sort(() => Math.random() - 0.5);
+        }
+
+        // FUNÇÃO AUXILIAR: PASSAR A VEZ (Pula quem estiver morto)
+        function obterProximoTurno(vezAtual, filaTurno, jogadores) {
+            let proximaVez = (vezAtual + 1) % filaTurno.length;
+            let limitador = 0; 
+            while (jogadores[filaTurno[proximaVez]].status === 'morto' && limitador < filaTurno.length) {
+                proximaVez = (proximaVez + 1) % filaTurno.length;
+                limitador++;
+            }
+            return proximaVez;
+        }
+
+        // =======================================================
+        // INTERFACE VISUAL
+        // =======================================================
         function renderizarInterfaceBlackjack() {
             if(!dadosSala) return;
 
-            // Dispara som de inicio de partida assim que renderizar a primeira vez
             if(!flagInicioTocado) {
                 if(sfxInicio) sfxInicio.play().catch(e => console.log("Autoplay bloqueado pelo navegador (requer clique prévio)"));
                 flagInicioTocado = true;
@@ -379,8 +425,29 @@
                 });
             }
 
-            // Monitoramento de eliminação do jogador local
-            if(meuJogador && meuJogador.status === 'morto') {
+            // Exibe a tela de Seleção de Alvo do Abate
+            if (dadosSala.aguardandoAlvo && dadosSala.filaTurno[dadosSala.vezAtual] === currentUserUid) {
+                const grid = document.getElementById('grid-alvos-abate');
+                grid.innerHTML = '';
+                dadosSala.filaTurno.forEach(uid => {
+                    // Só lista quem não é você e quem ainda tá vivo
+                    if (uid !== currentUserUid && dadosSala.jogadores[uid].status !== 'morto') {
+                        const jog = dadosSala.jogadores[uid];
+                        grid.innerHTML += `
+                            <div onclick="abaterAlvo('${uid}')" class="flex flex-col items-center p-3 bg-gray-900 border-2 border-red-500/50 hover:border-red-500 rounded-xl cursor-pointer hover:bg-red-900/40 transition-colors shadow-lg">
+                                <img src="${jog.foto || 'fundo_carta.png'}" class="w-12 h-12 rounded-full border-2 border-red-400 mb-2 object-cover">
+                                <span class="text-white font-black text-[10px] uppercase truncate w-full text-center">${jog.nome}</span>
+                                <div class="flex gap-1 mt-1">${gerarHtmlCoracoes(jog.coracoes)}</div>
+                            </div>
+                        `;
+                    }
+                });
+                document.getElementById('modal-abate').classList.remove('hidden');
+            } else {
+                document.getElementById('modal-abate').classList.add('hidden');
+            }
+
+            if(meuJogador && meuJogador.status === 'morto' && dadosSala.status !== 'finalizada') {
                 document.getElementById('modal-eliminado').classList.remove('hidden');
                 if(!flagEliminadoTocado) {
                     if(sfxEliminacao) sfxEliminacao.play().catch(e => console.log("Áudio bloqueado:", e));
@@ -407,6 +474,11 @@
                 texto.className = "text-3xl md:text-5xl font-black uppercase tracking-widest drop-shadow-[0_0_15px_#ef4444] text-red-500";
                 overlay.classList.add('flash-fail');
                 if(sfxEstourou) sfxEstourou.play().catch(e => console.log("Áudio bloqueado pelo navegador"));
+            } else if(tipo === 'abate') {
+                corpo.className = "bg-black/95 border-y-4 border-red-500 py-5 px-10 shadow-[0_0_60px_rgba(239,68,68,0.5)] w-full text-center";
+                texto.className = "text-3xl md:text-5xl font-black uppercase tracking-widest drop-shadow-[0_0_15px_#ef4444] text-red-500";
+                overlay.classList.add('flash-fail'); // Reutiliza flash vermelho pra explosão e dano
+                if(sfxEliminacao) sfxEliminacao.play().catch(e => console.log("Áudio bloqueado pelo navegador"));
             }
 
             banner.classList.remove('hidden');
@@ -417,41 +489,102 @@
             }, 1200);
         };
 
+        // =======================================================
+        // O MOTOR: LÓGICA DE JOGAR A CARTA PRO FIREBASE
+        // =======================================================
         window.jogarCartaOficial = async function(cartaId) {
             if(!salaId || !dadosSala) return;
             
             const uidDaVez = dadosSala.filaTurno[dadosSala.vezAtual];
-            if(uidDaVez !== currentUserUid) {
-                window.mostrarToast("Espere a sua vez na fila!");
-                return;
-            }
+            if(uidDaVez !== currentUserUid) return window.mostrarToast("Espere a sua vez na fila!");
+            if(dadosSala.aguardandoAlvo) return window.mostrarToast("Aguardando finalização do abate!");
 
-            if(dadosSala.aguardandoAlvo) {
-                window.mostrarToast("Aguardando seleção do alvo!");
-                return;
-            }
+            toggleGaveta(); // Recolhe a UI
 
             const pontosDaCarta = INFO_CARTAS[cartaId]?.pontos || 1;
-            toggleGaveta();
-
-            window.mostrarToast(`Jogando carta de valor: ${pontosDaCarta}`);
+            let novoTotal = (dadosSala.mesaTotal || 0) + pontosDaCarta;
             
-            let simuladoTotal = (dadosSala.mesaTotal || 0) + pontosDaCarta;
-            if (simuladoTotal === 21) {
-                window.dispararAnimacaoImpacto('21', "EXATOS 21! SELECIONE UM ALVO!");
-            } else if (simuladoTotal > 21) {
-                window.dispararAnimacaoImpacto('fail', "ESTOUROU! VOCÊ PERDEU 1 CORAÇÃO!");
+            // Tira da mão do jogador e prepara puxada
+            let novaMao = dadosSala.jogadores[currentUserUid].mao.filter(id => id !== cartaId);
+            let novoBaralho = [...(dadosSala.baralhoCentral || [])];
+            let cartasMesaAcumuladas = [...(dadosSala.cartasMesaAcumuladas || [])];
+            
+            cartasMesaAcumuladas.push(cartaId); // Acumula no centro
+            if (novoBaralho.length > 0) novaMao.push(novoBaralho.shift()); // Repõe 1
+
+            let updates = {
+                [`jogadores.${currentUserUid}.mao`]: novaMao,
+                baralhoCentral: novoBaralho,
+                cartasMesaAcumuladas: cartasMesaAcumuladas
+            };
+
+            if (novoTotal < 21) {
+                // Jogo segue normal
+                updates.mesaTotal = novoTotal;
+                updates.vezAtual = obterProximoTurno(dadosSala.vezAtual, dadosSala.filaTurno, dadosSala.jogadores);
+            } 
+            else if (novoTotal > 21) {
+                // ESTOUROU
+                let coracoesRestantes = dadosSala.jogadores[currentUserUid].coracoes - 1;
+                updates[`jogadores.${currentUserUid}.coracoes`] = coracoesRestantes;
+                if (coracoesRestantes <= 0) updates[`jogadores.${currentUserUid}.status`] = 'morto';
+                
+                // Pega tudo da mesa e retorna pro baralho, e embaralha de novo
+                let baralhoReconstruido = novoBaralho.concat(cartasMesaAcumuladas);
+                baralhoReconstruido.sort(() => Math.random() - 0.5);
+                
+                updates.baralhoCentral = baralhoReconstruido;
+                updates.cartasMesaAcumuladas = [];
+                updates.mesaTotal = 0;
+                updates.vezAtual = obterProximoTurno(dadosSala.vezAtual, dadosSala.filaTurno, dadosSala.jogadores);
+                
+                updates.eventoRecente = { tipo: 'fail', msg: `${dadosSala.jogadores[currentUserUid].nome} ESTOUROU!`, ts: Date.now() };
+            } 
+            else if (novoTotal === 21) {
+                // MODO ASSASSINO (Trava a vez até o cara escolher o alvo)
+                updates.mesaTotal = 21;
+                updates.aguardandoAlvo = true;
+                updates.eventoRecente = { tipo: '21', msg: `${dadosSala.jogadores[currentUserUid].nome} CRAVOU 21!`, ts: Date.now() };
             }
+
+            await updateDoc(doc(db, "salas_21", salaId), updates);
+        };
+
+        // GATILHO: QUANDO O CARA CLICA NO INIMIGO PARA TIRAR A VIDA DELE
+        window.abaterAlvo = async function(alvoUid) {
+            if(!salaId || !dadosSala) return;
+            
+            let coracoesRestantes = dadosSala.jogadores[alvoUid].coracoes - 1;
+            let updates = {
+                [`jogadores.${alvoUid}.coracoes`]: coracoesRestantes
+            };
+            
+            if (coracoesRestantes <= 0) updates[`jogadores.${alvoUid}.status`] = 'morto';
+
+            // Recolhe tudo, zera a mesa e volta a rodar
+            let novoBaralho = [...(dadosSala.baralhoCentral || []), ...(dadosSala.cartasMesaAcumuladas || [])];
+            novoBaralho.sort(() => Math.random() - 0.5);
+            
+            updates.baralhoCentral = novoBaralho;
+            updates.cartasMesaAcumuladas = [];
+            updates.mesaTotal = 0;
+            updates.aguardandoAlvo = false;
+            updates.vezAtual = obterProximoTurno(dadosSala.vezAtual, dadosSala.filaTurno, dadosSala.jogadores);
+            
+            updates.eventoRecente = { tipo: 'abate', msg: `${dadosSala.jogadores[alvoUid].nome} PERDEU 1 ❤️!`, ts: Date.now() };
+
+            document.getElementById('modal-abate').classList.add('hidden');
+            await updateDoc(doc(db, "salas_21", salaId), updates);
         };
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUserUid = user.uid;
+                // CORREÇÃO DO URLSearchParams
                 salaId = new URLSearchParams(window.location.search).get('sala');
                 
                 if (!salaId) return window.location.href = 'batalha.html';
 
-                // COPIE E SUBSTITUA O onSnapshot INTEIRO EM SUPERBLACKJACK.HTML
                 onSnapshot(doc(db, "salas_21", salaId), async (docSnap) => {
                     if (!docSnap.exists()) return window.location.href = 'batalha.html';
                     dadosSala = docSnap.data();
@@ -462,9 +595,34 @@
                         return;
                     }
 
+                    // =======================================================
+                    // O CROUPIER (INICIALIZAÇÃO DO JOGO)
+                    // =======================================================
+                    // Se não tiver baralho no banco, o jogador "host" (índice 0) cria o baralho e dá as cartas!
+                    if (!dadosSala.baralhoCentral && dadosSala.filaTurno[0] === currentUserUid) {
+                        let baralhoInicial = gerarBaralhoSuperBlackjack();
+                        let initUpdates = { baralhoCentral: baralhoInicial, cartasMesaAcumuladas: [] };
+                        
+                        // Dá 3 cartas pra cada
+                        dadosSala.filaTurno.forEach(uid => {
+                            initUpdates[`jogadores.${uid}.mao`] = baralhoInicial.splice(0, 3);
+                        });
+                        
+                        await updateDoc(doc(db, "salas_21", salaId), initUpdates);
+                        return; // Pula essa iteração pro Firebase carregar a mão recém-criada
+                    }
+
                     renderizarInterfaceBlackjack();
 
-                    // --- NOVA LÓGICA DE FIM DE JOGO E COBRANÇA ---
+                    // =======================================================
+                    // EVENTOS GLOBAIS (Verifica se alguém estourou ou cravou)
+                    // =======================================================
+                    if (dadosSala.eventoRecente && window.ultimoTsEvento !== dadosSala.eventoRecente.ts) {
+                        window.ultimoTsEvento = dadosSala.eventoRecente.ts;
+                        window.dispararAnimacaoImpacto(dadosSala.eventoRecente.tipo, dadosSala.eventoRecente.msg);
+                    }
+
+                    // --- LÓGICA DE FIM DE JOGO E COBRANÇA ---
                     // 1. Conta quantos jogadores ainda estão vivos
                     const jogadoresVivos = dadosSala.filaTurno.filter(uid => dadosSala.jogadores[uid].status !== 'morto');
                     
@@ -472,7 +630,7 @@
                     if (jogadoresVivos.length === 1 && dadosSala.status !== 'finalizada') {
                         const uidVencedor = jogadoresVivos[0];
                         
-                        // O vencedor atualiza o status da mesa para finalizada (evita que todos atualizem juntos)
+                        // O vencedor atualiza o status da mesa para finalizada
                         if (currentUserUid === uidVencedor) {
                             await updateDoc(doc(db, "salas_21", salaId), {
                                 status: 'finalizada',
@@ -484,22 +642,20 @@
                     // 3. O Jogo acabou! Hora de cobrar os fragmentos de todo mundo e pagar o vencedor
                     if (dadosSala.status === 'finalizada') {
                         
-                        // Abre o modal correto para quem ganhou ou perdeu
                         if (currentUserUid === dadosSala.vencedorFinal) {
                             window.dispararVitoria();
                         } else {
                             document.getElementById('modal-eliminado').classList.remove('hidden');
                         }
 
-                        // Executa a transação financeira no banco do jogador UMA ÚNICA VEZ
                         if (!window.pagamentoRealizado) {
-                            window.pagamentoRealizado = true; // Trava para não cobrar duas vezes
+                            window.pagamentoRealizado = true;
 
                             let updates = {
                                 fragmentos: increment(-dadosSala.custoOriginal)
                             };
 
-                            // Se EU for o vencedor, adiciono o prêmio no meu banco E DESTRANCO A MESA LÁ FORA
+                            // Se EU for o vencedor, adiciono o prêmio e destranco a mesa no lobby!
                             if (currentUserUid === dadosSala.vencedorFinal) {
                                 const premioNum = parseInt(dadosSala.premioTexto); 
                                 
@@ -509,20 +665,18 @@
                                     updates[`colecao.${dadosSala.premioTexto}`] = increment(1);
                                 }
 
-                                // MÁGICA: Limpa a mesa lá no lobby pros próximos jogarem
                                 if (dadosSala.idMesaOrigem) {
                                     await updateDoc(doc(db, "salas_blackjack", dadosSala.idMesaOrigem), {
                                         emJogo: false,
                                         partidaPronta: null,
                                         ultimoGrupo: [],
-                                        fila: [] // SÓ AGORA A FILA É ESVAZIADA DE FATO!
+                                        fila: []
                                     });
                                 }
                             }
 
-                            // Aplica a alteração direto no Firebase do Jogador
                             await updateDoc(doc(db, "users", currentUserUid), updates);
-                            console.log("Transação finalizada: Fragmentos cobrados.");
+                            console.log("Transação finalizada: Fragmentos cobrados e mesa destrancada.");
                         }
                     }
 

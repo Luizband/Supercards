@@ -752,9 +752,18 @@
                 return;
             }
 
-            document.getElementById('lobby-bj-titulo').innerText = mesa.nome;
-            document.getElementById('lobby-bj-premio-txt').innerText = mesa.premioTexto;
-            document.getElementById('lobby-bj-premio-img').src = mesa.premioImg;
+            // Dicionário de Nomes Padrão para não dar Undefined
+            const nomesExibicao = {
+                'iniciantes': 'Mesa Iniciantes',
+                'tigrinho': 'Mesa do Tigrinho',
+                'galera': 'Mesa da Galera',
+                'malucos': 'Mesa dos Malucos'
+            };
+
+            // Aplica os valores ou o plano B se estiver vazio
+            document.getElementById('lobby-bj-titulo').innerText = nomesExibicao[window.mesaBJSelecionada] || mesa.nome || 'MESA DE APOSTAS';
+            document.getElementById('lobby-bj-premio-txt').innerText = mesa.premioTexto || 'SEM PRÊMIO';
+            document.getElementById('lobby-bj-premio-img').src = mesa.premioImg || 'moedas2.png';
 
             const listaJogadores = document.getElementById('lobby-bj-jogadores');
             listaJogadores.innerHTML = '';

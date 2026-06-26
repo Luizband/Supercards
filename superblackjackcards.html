@@ -254,10 +254,10 @@
         const sfxEliminacao = document.getElementById('audio-eliminacao');
         const sfxParabens = document.getElementById('audio-parabens');
 
-        // Flags para evitar que audios de "evento único" fiquem repetindo
         let flagInicioTocado = false;
         let flagEliminadoTocado = false;
         let flagVitoriaTocada = false;
+        window.pagamentoRealizado = false;
 
         window.toggleGaveta = function() {
             document.getElementById('gaveta-mao').classList.toggle('translate-x-[110%]');
@@ -294,74 +294,80 @@
         };
 
         // =======================================================
-        // MOTOR DO JOGO: GERAÇÃO DO DECK FIXO DO BLACKJACK
+        // GERAÇÃO DO DECK FIXO DO BLACKJACK
         // =======================================================
         function gerarBaralhoSuperBlackjack() {
-            let cartasBaixas = []; // 1 e 2
-            let cartasMedias = []; // 3 e 4
-            let cartasAltas = [];  // 5
-            let cartasBombas = []; // 7
-
+            let cartasBaixas = []; let cartasMedias = []; let cartasAltas = []; let cartasBombas = [];
             for (const [id, carta] of Object.entries(INFO_CARTAS)) {
-                if (id === "094") continue; // Ignora promocional
+                if (id === "094") continue;
                 if (carta.pontos === 1 || carta.pontos === 2) cartasBaixas.push(id);
                 else if (carta.pontos === 3 || carta.pontos === 4) cartasMedias.push(id);
                 else if (carta.pontos === 5) cartasAltas.push(id);
                 else if (carta.pontos === 7) cartasBombas.push(id);
             }
 
-            // 1. Pega apenas 15 cartas fracas sortidas (Escassez extrema)
             cartasBaixas.sort(() => Math.random() - 0.5);
             let baralho = cartasBaixas.slice(0, 15);
-
-            // 2. Coloca todas as médias 1x
             baralho.push(...cartasMedias);
-
-            // 3. Duplica as de 5 pontos
             cartasAltas.forEach(id => { baralho.push(id, id); });
-
-            // 4. Triplica as de 7 pontos (Bombas)
             cartasBombas.forEach(id => { baralho.push(id, id, id); });
 
-            // Reembaralha o pacote completo
             return baralho.sort(() => Math.random() - 0.5);
         }
 
-        // FUNÇÃO AUXILIAR: PASSAR A VEZ (Pula quem estiver morto)
-        function obterProximoTurno(vezAtual, filaTurno, jogadores) {
-            let proximaVez = (vezAtual + 1) % filaTurno.length;
-            let limitador = 0; 
-            while (jogadores[filaTurno[proximaVez]].status === 'morto' && limitador < filaTurno.length) {
+        // =======================================================
+        // LÓGICA DE TURNOS CÍCLICOS
+        // =======================================================
+        function obterProximoTurno(indiceReferencia, filaTurno, jogadoresTemp) {
+            let proximaVez = (indiceReferencia + 1) % filaTurno.length;
+            let limiteSeguranca = 0; 
+            // Pula quem está morto
+            while (jogadoresTemp[filaTurno[proximaVez]].status === 'morto' && limiteSeguranca < filaTurno.length) {
                 proximaVez = (proximaVez + 1) % filaTurno.length;
-                limitador++;
+                limiteSeguranca++;
             }
             return proximaVez;
         }
 
         // =======================================================
-        // INTERFACE VISUAL
+        // RENDERIZAÇÃO E INTERFACE
         // =======================================================
         function renderizarInterfaceBlackjack() {
             if(!dadosSala) return;
 
             if(!flagInicioTocado) {
-                if(sfxInicio) sfxInicio.play().catch(e => console.log("Autoplay bloqueado pelo navegador (requer clique prévio)"));
+                if(sfxInicio) sfxInicio.play().catch(e => console.log("Autoplay bloqueado pelo navegador"));
                 flagInicioTocado = true;
             }
 
-            const txtContador = document.getElementById('contador-mesa');
-            txtContador.innerText = dadosSala.mesaTotal || 0;
-            
-            if(dadosSala.mesaTotal >= 19) {
-                txtContador.className = "text-6xl md:text-7xl font-black text-red-500 bg-black/60 px-8 py-2 rounded-3xl border border-red-500/50 shadow-[0_0_20px_rgba(239,68,68,0.4)] inline-block tracking-tight animate-pulse";
-            } else if(dadosSala.mesaTotal >= 12) {
-                txtContador.className = "text-6xl md:text-7xl font-black text-yellow-400 bg-black/50 px-8 py-2 rounded-3xl border border-yellow-500/30 shadow-2xl inline-block tracking-tight";
+            // MENSAGEM DO ASSASSINO
+            const msgStatus = document.getElementById('mensagem-status');
+            if (dadosSala.aguardandoAlvo) {
+                const assassinoNome = dadosSala.jogadores[dadosSala.filaTurno[dadosSala.vezAtual]].nome;
+                if(msgStatus) {
+                    msgStatus.innerText = `${assassinoNome} ESTÁ DECIDINDO QUEM VAI APUNHALAR PELAS COSTAS...`;
+                    msgStatus.classList.remove('hidden');
+                }
             } else {
-                txtContador.className = "text-6xl md:text-7xl font-black text-white bg-black/50 px-8 py-2 rounded-3xl border border-white/10 shadow-2xl inline-block tracking-tight";
+                if(msgStatus) msgStatus.classList.add('hidden');
+            }
+
+            // CONTADOR DA MESA
+            const txtContador = document.getElementById('contador-mesa');
+            if(txtContador) {
+                txtContador.innerText = dadosSala.mesaTotal || 0;
+                if(dadosSala.mesaTotal >= 19) {
+                    txtContador.className = "text-5xl md:text-6xl font-black text-red-500 bg-black/60 px-6 py-2 rounded-2xl border border-red-500/50 shadow-[0_0_20px_rgba(239,68,68,0.4)] inline-block tracking-tight animate-pulse";
+                } else if(dadosSala.mesaTotal >= 12) {
+                    txtContador.className = "text-5xl md:text-6xl font-black text-yellow-400 bg-black/50 px-6 py-2 rounded-2xl border border-yellow-500/30 shadow-2xl inline-block tracking-tight";
+                } else {
+                    txtContador.className = "text-5xl md:text-6xl font-black text-white bg-black/50 px-6 py-2 rounded-2xl border border-white/10 shadow-2xl inline-block tracking-tight";
+                }
             }
 
             document.getElementById('deck-count').innerText = dadosSala.baralhoCentral?.length || 0;
 
+            // AVATARES E EMOJIS (No estilo Arena DUO)
             const listaDiv = document.getElementById('lista-jogadores');
             listaDiv.innerHTML = '';
 
@@ -375,10 +381,11 @@
                 const tagVoce = (uid === currentUserUid) ? `<span class="text-[7px] text-[#4ade80] font-black tracking-widest ml-1 bg-[#4ade80]/10 px-1 rounded">VOCÊ</span>` : '';
 
                 listaDiv.innerHTML += `
-                    <div class="flex flex-col gap-1 border rounded-xl p-2 relative transition-all duration-300 ${borderClass} ${opacityClass}">
-                        <div class="flex items-center gap-2">
+                    <div class="flex flex-col gap-1 border rounded-xl p-2 transition-all duration-300 ${borderClass} ${opacityClass}">
+                        <div class="flex items-center gap-2 relative">
+                            <span id="emoji-player-${uid}" class="hidden absolute -top-8 left-3 transform -translate-x-1/2 text-3xl md:text-4xl z-[100] drop-shadow-lg pointer-events-none transition-all duration-300"></span>
+                            
                             <div class="w-7 h-7 rounded-full bg-gray-800 border ${isVezDesteJogador ? 'border-amber-400' : 'border-[#4ade80]'} overflow-hidden flex-shrink-0 relative">
-                                <span id="emoji-player-${uid}" class="hidden absolute inset-0 flex items-center justify-center text-xl z-50 drop-shadow-md pointer-events-none"></span>
                                 <img src="${jog.foto || 'fundo_carta.png'}" class="w-full h-full object-cover">
                             </div>
                             <div class="flex flex-col overflow-hidden w-full">
@@ -392,6 +399,7 @@
                 `;
             });
 
+            // CARTAS NO CENTRO DA MESA
             const campoCartas = document.getElementById('mesa-cartas-acumuladas');
             campoCartas.innerHTML = '';
             
@@ -425,12 +433,11 @@
                 });
             }
 
-            // Exibe a tela de Seleção de Alvo do Abate
+            // MODO ABATE - MODAL
             if (dadosSala.aguardandoAlvo && dadosSala.filaTurno[dadosSala.vezAtual] === currentUserUid) {
                 const grid = document.getElementById('grid-alvos-abate');
                 grid.innerHTML = '';
                 dadosSala.filaTurno.forEach(uid => {
-                    // Só lista quem não é você e quem ainda tá vivo
                     if (uid !== currentUserUid && dadosSala.jogadores[uid].status !== 'morto') {
                         const jog = dadosSala.jogadores[uid];
                         grid.innerHTML += `
@@ -447,6 +454,7 @@
                 document.getElementById('modal-abate').classList.add('hidden');
             }
 
+            // MODAL ELIMINADO LOCAl
             if(meuJogador && meuJogador.status === 'morto' && dadosSala.status !== 'finalizada') {
                 document.getElementById('modal-eliminado').classList.remove('hidden');
                 if(!flagEliminadoTocado) {
@@ -477,12 +485,11 @@
             } else if(tipo === 'abate') {
                 corpo.className = "bg-black/95 border-y-4 border-red-500 py-5 px-10 shadow-[0_0_60px_rgba(239,68,68,0.5)] w-full text-center";
                 texto.className = "text-3xl md:text-5xl font-black uppercase tracking-widest drop-shadow-[0_0_15px_#ef4444] text-red-500";
-                overlay.classList.add('flash-fail'); // Reutiliza flash vermelho pra explosão e dano
+                overlay.classList.add('flash-fail'); 
                 if(sfxEliminacao) sfxEliminacao.play().catch(e => console.log("Áudio bloqueado pelo navegador"));
             }
 
             banner.classList.remove('hidden');
-
             setTimeout(() => {
                 banner.classList.add('hidden');
                 overlay.classList.remove('flash-21', 'flash-fail');
@@ -490,7 +497,7 @@
         };
 
         // =======================================================
-        // O MOTOR: LÓGICA DE JOGAR A CARTA PRO FIREBASE
+        // O MOTOR: LÓGICA DA JOGADA
         // =======================================================
         window.jogarCartaOficial = async function(cartaId) {
             if(!salaId || !dadosSala) return;
@@ -499,18 +506,17 @@
             if(uidDaVez !== currentUserUid) return window.mostrarToast("Espere a sua vez na fila!");
             if(dadosSala.aguardandoAlvo) return window.mostrarToast("Aguardando finalização do abate!");
 
-            toggleGaveta(); // Recolhe a UI
+            toggleGaveta();
 
             const pontosDaCarta = INFO_CARTAS[cartaId]?.pontos || 1;
             let novoTotal = (dadosSala.mesaTotal || 0) + pontosDaCarta;
             
-            // Tira da mão do jogador e prepara puxada
             let novaMao = dadosSala.jogadores[currentUserUid].mao.filter(id => id !== cartaId);
             let novoBaralho = [...(dadosSala.baralhoCentral || [])];
             let cartasMesaAcumuladas = [...(dadosSala.cartasMesaAcumuladas || [])];
             
-            cartasMesaAcumuladas.push(cartaId); // Acumula no centro
-            if (novoBaralho.length > 0) novaMao.push(novoBaralho.shift()); // Repõe 1
+            cartasMesaAcumuladas.push(cartaId); 
+            if (novoBaralho.length > 0) novaMao.push(novoBaralho.shift()); 
 
             let updates = {
                 [`jogadores.${currentUserUid}.mao`]: novaMao,
@@ -519,29 +525,37 @@
             };
 
             if (novoTotal < 21) {
-                // Jogo segue normal
+                // TUDO CERTO, PASSA PRO PRÓXIMO DA FILA
                 updates.mesaTotal = novoTotal;
                 updates.vezAtual = obterProximoTurno(dadosSala.vezAtual, dadosSala.filaTurno, dadosSala.jogadores);
             } 
             else if (novoTotal > 21) {
-                // ESTOUROU
-                let coracoesRestantes = dadosSala.jogadores[currentUserUid].coracoes - 1;
-                updates[`jogadores.${currentUserUid}.coracoes`] = coracoesRestantes;
-                if (coracoesRestantes <= 0) updates[`jogadores.${currentUserUid}.status`] = 'morto';
+                // ESTOUROU - Reseta a rodada e avança o primeiroDaRodada
+                let jogadoresTemp = JSON.parse(JSON.stringify(dadosSala.jogadores));
+                jogadoresTemp[currentUserUid].coracoes -= 1;
                 
-                // Pega tudo da mesa e retorna pro baralho, e embaralha de novo
+                updates[`jogadores.${currentUserUid}.coracoes`] = jogadoresTemp[currentUserUid].coracoes;
+                if (jogadoresTemp[currentUserUid].coracoes <= 0) {
+                    updates[`jogadores.${currentUserUid}.status`] = 'morto';
+                    jogadoresTemp[currentUserUid].status = 'morto';
+                }
+                
                 let baralhoReconstruido = novoBaralho.concat(cartasMesaAcumuladas);
                 baralhoReconstruido.sort(() => Math.random() - 0.5);
                 
                 updates.baralhoCentral = baralhoReconstruido;
                 updates.cartasMesaAcumuladas = [];
                 updates.mesaTotal = 0;
-                updates.vezAtual = obterProximoTurno(dadosSala.vezAtual, dadosSala.filaTurno, dadosSala.jogadores);
+                
+                // CÁLCULO CÍCLICO: Quem abre a próxima rodada é o próximo do antigo primeiroDaRodada
+                let proximoAIniciar = obterProximoTurno(dadosSala.primeiroDaRodada, dadosSala.filaTurno, jogadoresTemp);
+                updates.primeiroDaRodada = proximoAIniciar;
+                updates.vezAtual = proximoAIniciar;
                 
                 updates.eventoRecente = { tipo: 'fail', msg: `${dadosSala.jogadores[currentUserUid].nome} ESTOUROU!`, ts: Date.now() };
             } 
             else if (novoTotal === 21) {
-                // MODO ASSASSINO (Trava a vez até o cara escolher o alvo)
+                // MODO ABATE
                 updates.mesaTotal = 21;
                 updates.aguardandoAlvo = true;
                 updates.eventoRecente = { tipo: '21', msg: `${dadosSala.jogadores[currentUserUid].nome} CRAVOU 21!`, ts: Date.now() };
@@ -550,18 +564,22 @@
             await updateDoc(doc(db, "salas_21", salaId), updates);
         };
 
-        // GATILHO: QUANDO O CARA CLICA NO INIMIGO PARA TIRAR A VIDA DELE
+        // GATILHO DO ABATE
         window.abaterAlvo = async function(alvoUid) {
             if(!salaId || !dadosSala) return;
             
-            let coracoesRestantes = dadosSala.jogadores[alvoUid].coracoes - 1;
+            let jogadoresTemp = JSON.parse(JSON.stringify(dadosSala.jogadores));
+            jogadoresTemp[alvoUid].coracoes -= 1;
+            
             let updates = {
-                [`jogadores.${alvoUid}.coracoes`]: coracoesRestantes
+                [`jogadores.${alvoUid}.coracoes`]: jogadoresTemp[alvoUid].coracoes
             };
             
-            if (coracoesRestantes <= 0) updates[`jogadores.${alvoUid}.status`] = 'morto';
+            if (jogadoresTemp[alvoUid].coracoes <= 0) {
+                updates[`jogadores.${alvoUid}.status`] = 'morto';
+                jogadoresTemp[alvoUid].status = 'morto';
+            }
 
-            // Recolhe tudo, zera a mesa e volta a rodar
             let novoBaralho = [...(dadosSala.baralhoCentral || []), ...(dadosSala.cartasMesaAcumuladas || [])];
             novoBaralho.sort(() => Math.random() - 0.5);
             
@@ -569,7 +587,11 @@
             updates.cartasMesaAcumuladas = [];
             updates.mesaTotal = 0;
             updates.aguardandoAlvo = false;
-            updates.vezAtual = obterProximoTurno(dadosSala.vezAtual, dadosSala.filaTurno, dadosSala.jogadores);
+            
+            // CÁLCULO CÍCLICO: Passa o bastão da rodada
+            let proximoAIniciar = obterProximoTurno(dadosSala.primeiroDaRodada, dadosSala.filaTurno, jogadoresTemp);
+            updates.primeiroDaRodada = proximoAIniciar;
+            updates.vezAtual = proximoAIniciar;
             
             updates.eventoRecente = { tipo: 'abate', msg: `${dadosSala.jogadores[alvoUid].nome} PERDEU 1 ❤️!`, ts: Date.now() };
 
@@ -580,7 +602,6 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUserUid = user.uid;
-                // CORREÇÃO DO URLSearchParams
                 salaId = new URLSearchParams(window.location.search).get('sala');
                 
                 if (!salaId) return window.location.href = 'batalha.html';
@@ -596,41 +617,49 @@
                     }
 
                     // =======================================================
-                    // O CROUPIER (INICIALIZAÇÃO DO JOGO)
+                    // O CROUPIER (SORTEIO DE QUEM COMEÇA O JOGO)
                     // =======================================================
-                    // Se não tiver baralho no banco, o jogador "host" (índice 0) cria o baralho e dá as cartas!
                     if (!dadosSala.baralhoCentral && dadosSala.filaTurno[0] === currentUserUid) {
                         let baralhoInicial = gerarBaralhoSuperBlackjack();
-                        let initUpdates = { baralhoCentral: baralhoInicial, cartasMesaAcumuladas: [] };
                         
-                        // Dá 3 cartas pra cada
+                        // Sorteia o primeiro a jogar totalmente aleatório!
+                        let randomStart = Math.floor(Math.random() * dadosSala.filaTurno.length);
+                        
+                        let initUpdates = { 
+                            baralhoCentral: baralhoInicial, 
+                            cartasMesaAcumuladas: [],
+                            vezAtual: randomStart,
+                            primeiroDaRodada: randomStart // Grava ele como o 1º da Rodada 1
+                        };
+                        
                         dadosSala.filaTurno.forEach(uid => {
                             initUpdates[`jogadores.${uid}.mao`] = baralhoInicial.splice(0, 3);
                         });
                         
                         await updateDoc(doc(db, "salas_21", salaId), initUpdates);
-                        return; // Pula essa iteração pro Firebase carregar a mão recém-criada
+                        return;
                     }
 
                     renderizarInterfaceBlackjack();
 
-                    // =======================================================
-                    // EVENTOS GLOBAIS (Verifica se alguém estourou ou cravou)
-                    // =======================================================
                     if (dadosSala.eventoRecente && window.ultimoTsEvento !== dadosSala.eventoRecente.ts) {
                         window.ultimoTsEvento = dadosSala.eventoRecente.ts;
                         window.dispararAnimacaoImpacto(dadosSala.eventoRecente.tipo, dadosSala.eventoRecente.msg);
                     }
 
-                    // --- LÓGICA DE FIM DE JOGO E COBRANÇA ---
-                    // 1. Conta quantos jogadores ainda estão vivos
+                    // --- COBRANÇA EM TEMPO REAL PARA ELIMINADOS ---
+                    const meuJogador = dadosSala.jogadores[currentUserUid];
+                    if (meuJogador && meuJogador.status === 'morto' && !window.pagamentoRealizado) {
+                        window.pagamentoRealizado = true;
+                        // Cobra imediatamente no background se ele morrer. Se abandonar vivo, não entra aqui.
+                        updateDoc(doc(db, "users", currentUserUid), { fragmentos: increment(-dadosSala.custoOriginal) }).catch(e => console.log(e));
+                    }
+
+                    // --- LÓGICA DE FIM DE JOGO ---
                     const jogadoresVivos = dadosSala.filaTurno.filter(uid => dadosSala.jogadores[uid].status !== 'morto');
                     
-                    // 2. Se sobrou apenas 1 jogador e a sala ainda não foi dada como finalizada
                     if (jogadoresVivos.length === 1 && dadosSala.status !== 'finalizada') {
                         const uidVencedor = jogadoresVivos[0];
-                        
-                        // O vencedor atualiza o status da mesa para finalizada
                         if (currentUserUid === uidVencedor) {
                             await updateDoc(doc(db, "salas_21", salaId), {
                                 status: 'finalizada',
@@ -639,7 +668,6 @@
                         }
                     }
 
-                    // 3. O Jogo acabou! Hora de cobrar os fragmentos de todo mundo e pagar o vencedor
                     if (dadosSala.status === 'finalizada') {
                         
                         if (currentUserUid === dadosSala.vencedorFinal) {
@@ -648,6 +676,7 @@
                             document.getElementById('modal-eliminado').classList.remove('hidden');
                         }
 
+                        // COBRANÇA E PREMIAÇÃO DO VENCEDOR (E perdedores que por milagre ficaram até o fim sem morrer)
                         if (!window.pagamentoRealizado) {
                             window.pagamentoRealizado = true;
 
@@ -655,7 +684,6 @@
                                 fragmentos: increment(-dadosSala.custoOriginal)
                             };
 
-                            // Se EU for o vencedor, adiciono o prêmio e destranco a mesa no lobby!
                             if (currentUserUid === dadosSala.vencedorFinal) {
                                 const premioNum = parseInt(dadosSala.premioTexto); 
                                 
@@ -676,11 +704,10 @@
                             }
 
                             await updateDoc(doc(db, "users", currentUserUid), updates);
-                            console.log("Transação finalizada: Fragmentos cobrados e mesa destrancada.");
                         }
                     }
 
-                    // Monitoramento de Reações Flutuantes
+                    // Monitoramento de Reações (Com animação e classe idêntica à Arena DUO)
                     if (window.ultimoTsReacao !== dadosSala.ultimaReacao?.ts) {
                         window.ultimoTsReacao = dadosSala.ultimaReacao?.ts;
                         if(dadosSala.ultimaReacao) {
@@ -688,8 +715,12 @@
                             const emojiEl = document.getElementById(`emoji-player-${uidAlvo}`);
                             if(emojiEl) {
                                 emojiEl.innerText = dadosSala.ultimaReacao.emoji;
-                                emojiEl.className = "absolute inset-0 flex items-center justify-center text-xl z-50 animate-bounce";
-                                setTimeout(() => { emojiEl.className = "hidden"; }, 3500);
+                                emojiEl.classList.remove('hidden');
+                                emojiEl.classList.add('animate-bounce');
+                                setTimeout(() => { 
+                                    emojiEl.classList.add('hidden'); 
+                                    emojiEl.classList.remove('animate-bounce'); 
+                                }, 3500);
                             }
                         }
                     }

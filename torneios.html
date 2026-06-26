@@ -745,6 +745,11 @@
             const mesa = window.salasBlackjackGlobais[window.mesaBJSelecionada];
             if(!mesa) return;
 
+            if(mesa.partidaPronta && mesa.ultimoGrupo && mesa.ultimoGrupo.includes(currentUserUid)) {
+                window.location.href = `superblackjackcards.html?sala=${mesa.partidaPronta}`;
+                return;
+            }
+
             document.getElementById('lobby-bj-titulo').innerText = mesa.nome;
             document.getElementById('lobby-bj-premio-txt').innerText = mesa.premioTexto;
             document.getElementById('lobby-bj-premio-img').src = mesa.premioImg;

@@ -100,8 +100,8 @@
         <!-- LADO DIREITO: CAMPO DE BLACKJACK E GAVETA -->
         <div class="w-[74%] md:w-[78%] h-full relative overflow-hidden z-10 flex flex-col">
             
-            <div class="w-full px-4 md:px-6 py-3 flex justify-center items-center z-40 relative h-14 pointer-events-none">
-                <div id="mensagem-status" class="hidden absolute left-1/2 transform -translate-x-1/2 bg-red-900/80 px-6 py-2 rounded-full border-2 border-red-500 text-[10px] md:text-xs uppercase font-black tracking-widest text-white animate-pulse text-center shadow-[0_0_15px_rgba(239,68,68,0.5)] whitespace-nowrap pointer-events-auto">
+            <div class="w-full px-4 md:px-6 flex justify-center items-center z-40 relative pointer-events-none">
+                <div id="mensagem-status" class="hidden absolute top-10 left-1/2 transform -translate-x-1/2 bg-red-900/80 px-6 py-2 rounded-full border-2 border-red-500 text-[10px] md:text-xs uppercase font-black tracking-widest text-white animate-pulse text-center shadow-[0_0_15px_rgba(239,68,68,0.5)] whitespace-nowrap pointer-events-auto">
                     ---
                 </div>
             </div>
@@ -116,22 +116,19 @@
             <!-- O CENTRO DA MESA (A CONTAGEM DO BLACKJACK E AS CARTAS SOBREPOSTAS) -->
             <div class="flex-grow flex flex-col items-center justify-center relative w-full pb-20">
                 
-                <!-- Placar Coletivo Central -->
+                <!-- Placar Coletivo Central (Menor e sem o título) -->
                 <div class="mb-4 text-center z-20">
-                    <span class="text-gray-400 font-bold text-[10px] md:text-xs uppercase tracking-widest block mb-1">Total Coletivo</span>
-                    <div id="contador-mesa" class="text-6xl md:text-7xl font-black text-white bg-black/50 px-8 py-2 rounded-3xl border border-white/10 shadow-2xl min-w-[140px] inline-block tracking-tight drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)]">
+                    <div id="contador-mesa" class="text-4xl font-black text-white bg-black/50 px-5 py-2 rounded-2xl border border-white/10 shadow-2xl min-w-[80px] inline-block tracking-tight drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)]">
                         0
                     </div>
                 </div>
 
-                <!-- Deck do Croupier (Montante Central) -->
-                <div class="absolute bottom-6 left-6 flex flex-col items-center justify-center bg-black/60 border border-white/10 rounded-lg p-1 w-12 h-16 shadow-xl z-20">
+                <div class="absolute bottom-14 left-6 flex flex-col items-center justify-center bg-black/60 border border-white/10 rounded-lg p-1 w-12 h-16 shadow-xl z-20">
                     <span id="deck-count" class="text-white font-black text-xl z-10 drop-shadow-[0_2px_2px_rgba(0,0,0,1)]">80</span>
                     <img src="fundo_carta.png" class="absolute inset-0 w-full h-full object-cover opacity-30 rounded-lg">
                 </div>
 
-                <!-- REAÇÕES (Colado do lado direito do Montante de Cartas) -->
-                <div class="absolute bottom-6 left-24 flex gap-2 z-50">
+                <div class="absolute bottom-14 left-24 flex gap-2 z-50">
                     <div id="menu-reacoes" class="hidden absolute bottom-[110%] left-0 w-max bg-[#1b4d3e] p-3 rounded-xl grid grid-cols-4 gap-2 shadow-2xl border-2 border-[#4ade80]/30 z-50">
                         <button onclick="dispararReacaoLocal('💣')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">💣</button>
                         <button onclick="dispararReacaoLocal('🖕')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">🖕</button>
@@ -413,11 +410,11 @@
             if(txtContador) {
                 txtContador.innerText = dadosSala.mesaTotal || 0;
                 if(dadosSala.mesaTotal >= 19) {
-                    txtContador.className = "text-5xl md:text-6xl font-black text-red-500 bg-black/60 px-6 py-2 rounded-2xl border border-red-500/50 shadow-[0_0_20px_rgba(239,68,68,0.4)] inline-block tracking-tight animate-pulse";
+                txtContador.className = "text-4xl font-black text-red-500 bg-black/60 px-5 py-2 rounded-2xl border border-red-500/50 shadow-[0_0_20px_rgba(239,68,68,0.4)] inline-block tracking-tight animate-pulse mt-2";
                 } else if(dadosSala.mesaTotal >= 12) {
-                    txtContador.className = "text-5xl md:text-6xl font-black text-yellow-400 bg-black/50 px-6 py-2 rounded-2xl border border-yellow-500/30 shadow-2xl inline-block tracking-tight";
+                    txtContador.className = "text-4xl font-black text-yellow-400 bg-black/50 px-5 py-2 rounded-2xl border border-yellow-500/30 shadow-2xl inline-block tracking-tight mt-2";
                 } else {
-                    txtContador.className = "text-5xl md:text-6xl font-black text-white bg-black/50 px-6 py-2 rounded-2xl border border-white/10 shadow-2xl inline-block tracking-tight";
+                    txtContador.className = "text-4xl font-black text-white bg-black/50 px-5 py-2 rounded-2xl border border-white/10 shadow-2xl inline-block tracking-tight mt-2";
                 }
             }
 

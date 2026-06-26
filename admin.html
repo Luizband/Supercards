@@ -158,10 +158,16 @@
                 </div>
             </div>
         </div>
-        <div class="bg-gray-900 p-4 sm:p-5 rounded-xl border-2 border-emerald-700 flex flex-col gap-4">
-            <div>
-                <h2 class="font-black text-lg text-emerald-400 flex items-center gap-2">🃏 Controle do Superblackjack</h2>
-                <p class="text-xs text-gray-400 mt-1">Abra/Feche as salas, defina a entrada e a premiação (Ex: 200 moedas ou ID de uma carta).</p>
+        <!-- PAINEL SUPERblackjackCARDS. -->
+        <div class="bg-gray-900 p-4 rounded-xl border border-gray-700 w-full">
+            <h3 class="text-lg font-bold text-purple-400 mb-2">Salas Superblackjack</h3>
+            
+            <div class="mb-5 p-3 bg-black/50 rounded-lg border border-gray-700 flex justify-between items-center shadow-inner">
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Status Geral:</span>
+                <div class="flex gap-2">
+                    <button onclick="mudarStatusGlobalBJ(true)" class="bg-green-600 hover:bg-green-500 text-white text-[10px] font-black px-3 py-2 rounded shadow border border-green-400 uppercase transition-transform active:scale-95">Online</button>
+                    <button onclick="mudarStatusGlobalBJ(false)" class="bg-red-600 hover:bg-red-500 text-white text-[10px] font-black px-3 py-2 rounded shadow border border-red-400 uppercase transition-transform active:scale-95">Offline</button>
+                </div>
             </div>
             
             <div class="flex flex-col sm:flex-row gap-3">
@@ -590,6 +596,17 @@
             }, { merge: true });
 
             alert(aberta ? "✅ Mesa ABERTA e salva com sucesso!" : "🛑 Mesa FECHADA!");
+        };
+
+        window.mudarStatusGlobalBJ = async (isOnline) => {
+            try {
+                // Cria um documento separado só para guardar o status global do modo
+                await setDoc(doc(db, "salas_blackjack", "statusGlobal"), { online: isOnline }, { merge: true });
+                alert(`Modo Blackjack alterado para: ${isOnline ? 'ONLINE' : 'OFFLINE'}`);
+            } catch(e) {
+                console.error(e);
+                alert("Erro ao mudar status global.");
+            }
         };
 
         window.limparFilaBJ = async () => {

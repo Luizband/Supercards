@@ -668,15 +668,25 @@
 
                 const qtdJogadores = (mesa.fila || []).length;
                 const podeEntrar = mesa.aberta;
-                const isEmJogo = mesa.emJogo === true; // Verifica se a mesa tá rodando
+                const isEmJogo = mesa.emJogo === true;
+                
+                // MÁGICA DO RECONECTAR: Verifica se o jogador faz parte do grupo que está jogando nesta mesa
+                const souDestaPartida = isEmJogo && mesa.ultimoGrupo && mesa.ultimoGrupo.includes(currentUserUid);
                 
                 let btnCor = "bg-gray-600 border-gray-500";
                 let btnTexto = "FECHADA";
                 let btnDisabled = true;
+                let btnAcao = `window.abrirLobbyBJ('${id}')`; // Ação padrão é abrir o lobby
 
-                if (isEmJogo) {
-                    btnCor = "bg-red-600 border-red-500";
+                if (souDestaPartida) {
+                    btnCor = "bg-blue-600 hover:bg-blue-500 border-blue-400 animate-pulse";
+                    btnTexto = "RECONECTAR";
+                    btnDisabled = false;
+                    btnAcao = `window.location.href='superblackjackcards.html?sala=${mesa.partidaPronta}'`; // Vai direto pro jogo
+                } else if (isEmJogo) {
+                    btnCor = "bg-red-600 border-red-500 cursor-not-allowed";
                     btnTexto = "EM JOGO";
+                    btnDisabled = true;
                 } else if (podeEntrar) {
                     btnCor = "bg-green-600 hover:bg-green-500 border-green-400";
                     btnTexto = "ENTRAR";
@@ -689,7 +699,7 @@
                             <span class="text-white font-black text-sm uppercase truncate">${mesa.nome || 'Mesa'}</span>
                         </div>
                         <div class="flex items-center gap-3">
-                            <button onclick="window.abrirLobbyBJ('${id}')" class="${btnCor} text-white font-black text-[9px] px-3 py-2 rounded-lg border uppercase shadow-md transition-transform active:scale-95 shrink-0" ${btnDisabled ? 'disabled' : ''}>
+                            <button onclick="${btnAcao}" class="${btnCor} text-white font-black text-[9px] px-3 py-2 rounded-lg border uppercase shadow-md transition-transform active:scale-95 shrink-0" ${btnDisabled ? 'disabled' : ''}>
                                 ${btnTexto}
                             </button>
                             <span class="text-green-400 font-black text-sm w-8 text-center">${qtdJogadores}/${mesa.maxJogadores}</span>
@@ -708,12 +718,6 @@
         async function renderizarLobbyBJ() {
             const mesa = window.salasBlackjackGlobais[window.mesaBJSelecionada];
             if(!mesa) return;
-
-            // SE A PARTIDA ESTIVER PRONTA E VOCÊ ESTAVA NO ÚLTIMO GRUPO
-            if(mesa.partidaPronta && mesa.ultimoGrupo && mesa.ultimoGrupo.includes(currentUserUid)) {
-                window.location.href = `superblackjackcards.html?sala=${mesa.partidaPronta}`;
-                return;
-            }
 
             document.getElementById('lobby-bj-titulo').innerText = mesa.nome;
             document.getElementById('lobby-bj-premio-txt').innerText = mesa.premioTexto;

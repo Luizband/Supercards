@@ -47,6 +47,7 @@
                 <button class="w-full mt-3 bg-[#7a32a8] text-white font-black text-xs py-3 rounded-xl uppercase tracking-widest shadow-lg border border-[#bc7bd4]">Ver Detalhes / Jogar</button>
             </div>
         </div>
+        <!-- CARD SUPERBLACKJACK -->
         <div class="bg-[#0f2d20] rounded-2xl border-4 border-emerald-600 shadow-[0_0_20px_rgba(5,150,105,0.2)] overflow-hidden flex flex-col relative group cursor-pointer mt-4" onclick="abrirModalBlackjack()">
             <div class="h-32 bg-black flex items-center justify-center border-b-2 border-emerald-800 relative overflow-hidden">
                 <img src="blackjack.png" alt="Superblackjackcards" class="w-full h-full object-cover opacity-80 z-10 hover:scale-105 transition-transform" onerror="this.src='fundo_carta.png'">
@@ -134,8 +135,10 @@
         </div>
     </div>
 
+    <!-- Áudio Blackjack -->
     <audio id="audio-blackjack" src="audios/blackjack/blackjack.mp3" preload="auto"></audio>
 
+    <!-- MODAL PRINCIPAL: REGRAS E LISTA DE MESAS -->
     <div id="modal-blackjack" class="hidden fixed inset-0 bg-black/90 z-[100] flex flex-col items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-[#e4dcf1] border-4 border-transparent rounded-3xl w-full max-w-sm shadow-2xl relative flex flex-col max-h-[85vh]">
             <button onclick="fecharModalBlackjack()" class="absolute -top-4 -right-2 text-[#7a32a8] font-black text-2xl w-8 h-8 z-50 hover:scale-110 transition-transform">X</button>
@@ -148,6 +151,7 @@
                     <button id="btn-tab-bj-regras" onclick="mudarAbaBJ('regras')" class="text-gray-400 font-black text-xs uppercase px-4 pb-1 border-b-4 border-transparent">Regras</button>
                 </div>
 
+                <!-- ABA DE REGRAS -->
                 <div id="aba-bj-regras" class="hidden text-center text-[#7a32a8] font-bold text-sm space-y-4 px-2">
                     <p>O objetivo é sobreviver. A mesa tem um valor central.</p>
                     <p>Jogue uma carta da sua mão. Se a soma da mesa passar de 21, você perde um ❤️!</p>
@@ -155,36 +159,35 @@
                     <p>Vence o último sobrevivente na mesa.</p>
                 </div>
 
+                <!-- ABA DE SALAS -->
                 <div id="aba-bj-salas" class="flex flex-col gap-3">
-                    <div id="lista-mesas-bj" class="flex flex-col gap-3">
-                        </div>
+                    <div id="lista-mesas-bj" class="flex flex-col gap-3"></div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- MODAL LOBBY DA MESA -->
     <div id="modal-bj-lobby" class="hidden fixed inset-0 bg-black/90 z-[150] flex flex-col items-center justify-center p-4 backdrop-blur-md">
         <div class="bg-[#e4dcf1] rounded-[2rem] w-full max-w-sm shadow-2xl relative flex flex-col p-6 items-center">
             <button onclick="sairDaFilaBJ()" class="absolute top-4 right-5 text-[#7a32a8] font-black text-2xl hover:scale-110 transition-transform">X</button>
             
-            <h2 id="lobby-bj-titulo" class="text-[#7a32a8] font-black text-2xl text-center mb-6 px-4">Mesa dos iniciantes</h2>
+            <h2 id="lobby-bj-titulo" class="text-[#7a32a8] font-black text-2xl text-center mb-6 px-4">Mesa</h2>
             
-            <div id="lobby-bj-jogadores" class="w-full flex flex-col gap-2 mb-4">
-                </div>
+            <div id="lobby-bj-jogadores" class="w-full flex flex-col gap-2 mb-4"></div>
 
-            <!-- Botão de Entrar / Status (O TEXTO AGORA NASCE VAZIO E O JS PREENCHE) -->
             <button id="btn-bj-entrar" onclick="entrarNaFilaBJ()" class="w-full bg-[#4ade80] text-white font-black text-[11px] py-4 rounded-full uppercase tracking-wider shadow-md mb-8 hover:bg-[#22c55e] transition-colors mt-2">
-                CARREGANDO CUSTO...
+                CARREGANDO...
             </button>
 
+            <!-- Prêmio -->
             <div class="bg-[#7a32a8] rounded-3xl py-4 px-8 flex flex-col items-center shadow-lg min-w-[150px]">
                 <span class="text-[#e4dcf1] font-black uppercase text-xs mb-1">PRÊMIO</span>
                 <div class="flex items-center gap-2">
-                    <span id="lobby-bj-premio-txt" class="text-white font-black text-3xl tracking-tighter">200</span>
+                    <span id="lobby-bj-premio-txt" class="text-white font-black text-3xl tracking-tighter">-</span>
                     <img id="lobby-bj-premio-img" src="moedas2.png" class="w-8 h-8 object-contain">
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -467,10 +470,8 @@
             if (!user) return window.location.href = "index.html";
             currentUserUid = user.uid;
 
-            // Monitora Fragmentos em Tempo Real para o Blackjack
-            onSnapshot(doc(db, "users", currentUserUid), (snap) => {
-                if(snap.exists()) meusFragmentos = snap.data().fragmentos || 0;
-            });
+            // Monitora Fragmentos pro Blackjack
+            onSnapshot(doc(db, "users", currentUserUid), (snap) => { if(snap.exists()) meusFragmentos = snap.data().fragmentos || 0; });
             
             // Se ele voltar para a tela de torneio, destrava o redirecionamento
             window.redirecionandoArena = false;
@@ -617,7 +618,6 @@
                 audioBJ.play().catch(e => console.log("Áudio bloqueado:", e));
             }
 
-            // Escuta as mesas em tempo real do Firebase
             if(!unsubscribeBlackjack) {
                 unsubscribeBlackjack = onSnapshot(collection(db, "salas_blackjack"), (snap) => {
                     snap.forEach(doc => {
@@ -647,8 +647,6 @@
         function renderizarListaMesasBJ() {
             const container = document.getElementById('lista-mesas-bj');
             container.innerHTML = '';
-            
-            // Ordem manual para ficar bonito
             const ordem = ['iniciantes', 'tigrinho', 'galera', 'malucos'];
             
             ordem.forEach(id => {
@@ -659,12 +657,11 @@
                 const podeEntrar = mesa.aberta;
                 const btnCor = podeEntrar ? "bg-[#4ade80] hover:bg-[#22c55e]" : "bg-gray-400";
                 
-                // Design visual idêntico à Foto 2
                 container.innerHTML += `
                     <div class="bg-[#7a32a8] rounded-full flex items-center justify-between p-2 pl-6 relative shadow-sm">
                         <span class="text-white font-black text-sm w-[50%]">${mesa.nome || 'Mesa'}</span>
                         <div class="flex items-center gap-3">
-                            <button onclick="abrirLobbyBJ('${id}')" class="${btnCor} text-white font-black text-[10px] px-4 py-2 rounded-full uppercase transition-colors" ${!podeEntrar ? 'disabled' : ''}>
+                            <button onclick="window.abrirLobbyBJ('${id}')" class="${btnCor} text-white font-black text-[10px] px-4 py-2 rounded-full uppercase transition-colors" ${!podeEntrar ? 'disabled' : ''}>
                                 ENTRAR
                             </button>
                             <span class="text-white font-black text-sm w-10 text-center">${qtdJogadores}/${mesa.maxJogadores}</span>
@@ -684,24 +681,20 @@
             const mesa = window.salasBlackjackGlobais[window.mesaBJSelecionada];
             if(!mesa) return;
 
-            // Se a partida foi criada, puxa todo mundo da fila para a arena!
             if(mesa.partidaPronta && mesa.fila.includes(currentUserUid)) {
-                // Redireciona para o modo blackjack
                 window.location.href = `superblackjack.html?sala=${mesa.partidaPronta}`;
                 return;
             }
 
-            document.getElementById('lobby-bj-titulo').innerText = mesa.nome;
-            document.getElementById('lobby-bj-premio-txt').innerText = mesa.premioTexto;
-            document.getElementById('lobby-bj-premio-img').src = mesa.premioImg;
+            document.getElementById('lobby-bj-titulo').innerText = mesa.nome || 'Mesa';
+            document.getElementById('lobby-bj-premio-txt').innerText = mesa.premioTexto || '-';
+            document.getElementById('lobby-bj-premio-img').src = mesa.premioImg || 'moedas2.png';
 
             const listaJogadores = document.getElementById('lobby-bj-jogadores');
             listaJogadores.innerHTML = '';
             
-            // Requisita os nomes de quem está na fila para a dictNomes global
             await preencherDictNomes(mesa.fila || []);
 
-            // Monta as linhas baseadas no máximo de jogadores da mesa (Foto 1)
             for(let i=0; i < mesa.maxJogadores; i++) {
                 const uid = mesa.fila[i];
                 if(uid) {
@@ -723,7 +716,6 @@
                 }
             }
 
-            // Gerencia o Botão de Ação
             const btn = document.getElementById('btn-bj-entrar');
             const estouNaFila = mesa.fila.includes(currentUserUid);
 
@@ -732,7 +724,6 @@
                 btn.className = "w-full bg-red-500 text-white font-black text-[11px] py-4 rounded-full uppercase tracking-wider shadow-md mb-8 hover:bg-red-600 mt-2";
                 btn.onclick = window.sairDaFilaBJ;
                 
-                // MATCHMAKING: Se a fila encheu e EU sou o Host (Índice 0), eu crio a sala e puxo todo mundo
                 if(mesa.fila.length === mesa.maxJogadores && mesa.fila[0] === currentUserUid) {
                     btn.innerText = "INICIANDO PARTIDA...";
                     btn.disabled = true;
@@ -746,7 +737,7 @@
                 }
 
             } else {
-                btn.innerText = `ENTRAR NA MESA - ${mesa.custo} FRAGMENTOS`;
+                btn.innerText = `ENTRAR NA MESA - ${mesa.custo || 0} FRAGMENTOS`;
                 btn.className = "w-full bg-[#4ade80] text-white font-black text-[11px] py-4 rounded-full uppercase tracking-wider shadow-md mb-8 hover:bg-[#22c55e] mt-2";
                 btn.disabled = false;
                 btn.onclick = window.entrarNaFilaBJ;
@@ -759,7 +750,6 @@
                 alert(`Você precisa de ${mesa.custo} fragmentos para entrar nesta mesa!`);
                 return;
             }
-            // O Desconto do fragmento ocorrerá quando a partida for iniciada lá na lógica do jogo
             try {
                 await updateDoc(doc(db, "salas_blackjack", window.mesaBJSelecionada), {
                     fila: arrayUnion(currentUserUid)
@@ -769,10 +759,9 @@
 
         window.sairDaFilaBJ = async () => {
             document.getElementById('modal-bj-lobby').classList.add('hidden');
-            window.mesaBJSelecionada = null; // Reseta seleção local
+            window.mesaBJSelecionada = null; 
             
-            if(!window.mesaBJSelecionada && currentUserUid) {
-                // Sai da fila de TODAS as mesas por segurança para não prender a vaga
+            if(currentUserUid) {
                 Object.keys(window.salasBlackjackGlobais).forEach(async (id) => {
                     if(window.salasBlackjackGlobais[id].fila.includes(currentUserUid)) {
                         await updateDoc(doc(db, "salas_blackjack", id), { fila: arrayRemove(currentUserUid) });
@@ -781,7 +770,6 @@
             }
         };
 
-        // Função do Host que gera a partida (SUBSTITUA A ATUAL POR ESTA)
         async function criarPartidaBlackjack(mesa) {
             try {
                 const novaSalaId = "bj_" + Date.now();
@@ -799,8 +787,8 @@
                     jogadores: dictJogadores,
                     vezAtual: 0,
                     custoOriginal: mesa.custo,
-                    premioTexto: mesa.premioTexto, // Leva o prêmio para o jogo ler no final
-                    premioImg: mesa.premioImg,     // Leva a imagem do prêmio
+                    premioTexto: mesa.premioTexto,
+                    premioImg: mesa.premioImg,
                     idMesaOrigem: mesa.id
                 });
 
@@ -814,6 +802,7 @@
                 window.criandoPartidaBJ = false;
             }
         }
+        // ==========================================
     </script>
     
 </body>

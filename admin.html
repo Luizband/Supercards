@@ -158,6 +158,34 @@
                 </div>
             </div>
         </div>
+        <div class="bg-gray-900 p-4 sm:p-5 rounded-xl border-2 border-emerald-700 flex flex-col gap-4">
+            <div>
+                <h2 class="font-black text-lg text-emerald-400 flex items-center gap-2">🃏 Controle do Superblackjack</h2>
+                <p class="text-xs text-gray-400 mt-1">Abra/Feche as salas, defina a entrada e a premiação (Ex: 200 moedas ou ID de uma carta).</p>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row gap-3">
+                <select id="select-mesa-bj" onchange="carregarDadosMesaBJ()" class="bg-gray-800 p-3 rounded-lg border border-gray-600 focus:border-emerald-500 outline-none font-bold text-white w-full sm:w-1/3">
+                    <option value="" disabled selected>Escolha a Mesa...</option>
+                    <option value="iniciantes">Mesa dos Iniciantes (3 Jog.)</option>
+                    <option value="tigrinho">Mesa do Tigrinho (4 Jog.)</option>
+                    <option value="galera">Mesa Galeraa (6 Jog.)</option>
+                    <option value="malucos">Mesa dos Malucos (6 Jog.)</option>
+                </select>
+                
+                <div class="grid grid-cols-2 gap-2 w-full">
+                    <input id="bj-custo" type="number" placeholder="Custo Frag." class="bg-gray-800 p-3 rounded-lg border border-gray-600 text-white font-bold text-sm">
+                    <input id="bj-premio-txt" type="text" placeholder="Texto do Prêmio (Ex: 200)" class="bg-gray-800 p-3 rounded-lg border border-gray-600 text-white font-bold text-sm">
+                    <input id="bj-premio-img" type="text" placeholder="Imagem (Ex: moedas2.png)" class="bg-gray-800 p-3 rounded-lg border border-gray-600 text-white font-bold text-sm col-span-2">
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-2 mt-2">
+                <button onclick="salvarMesaBJ(true)" class="flex-1 bg-emerald-600 hover:bg-emerald-500 py-3 rounded font-black uppercase text-xs shadow-lg transition-transform active:scale-95">Salvar & ABRIR</button>
+                <button onclick="salvarMesaBJ(false)" class="flex-1 bg-gray-600 hover:bg-gray-500 py-3 rounded font-black uppercase text-xs shadow-lg transition-transform active:scale-95">FECHAR Mesa</button>
+                <button onclick="limparFilaBJ()" class="w-full sm:w-auto bg-red-700 hover:bg-red-600 px-4 py-3 rounded font-black uppercase text-xs shadow-lg">Esvaziar Fila Presa</button>
+            </div>
+        </div>
     </div>
 
     <script type="module">
@@ -514,6 +542,60 @@
                 }, { merge: true });
                 alert("✅ A Mensagem foi desativada!");
             } catch(e) { console.error(e); }
+        };
+
+        // ==========================================
+        // SISTEMA DE CONTROLE DO BLACKJACK
+        // ==========================================
+        window.mesaBJAtual = null;
+        
+        window.carregarDadosMesaBJ = async () => {
+            const idMesa = document.getElementById('select-mesa-bj').value;
+            if(!idMesa) return;
+            window.mesaBJAtual = idMesa;
+            
+            const snap = await getDoc(doc(db, "salas_blackjack", idMesa));
+            if(snap.exists()) {
+                const d = snap.data();
+                document.getElementById('bj-custo').value = d.custo || 0;
+                document.getElementById('bj-premio-txt').value = d.premioTexto || '';
+                document.getElementById('bj-premio-img').value = d.premioImg || 'moedas2.png';
+            } else {
+                // Se a mesa não existir no banco, cria os valores padrão
+                document.getElementById('bj-custo').value = 0;
+                document.getElementById('bj-premio-txt').value = '';
+                document.getElementById('bj-premio-img').value = 'moedas2.png';
+            }
+        };
+
+        window.salvarMesaBJ = async (aberta) => {
+            if(!window.mesaBJAtual) return alert("Selecione uma mesa primeiro!");
+            
+            const custo = Number(document.getElementById('bj-custo').value) || 0;
+            const premioTxt = document.getElementById('bj-premio-txt').value.trim();
+            const premioImg = document.getElementById('bj-premio-img').value.trim();
+            
+            // Define a lotação máxima por nome da mesa
+            let maxJogadores = 3;
+            if(window.mesaBJAtual === 'tigrinho') maxJogadores = 4;
+            if(window.mesaBJAtual === 'galera' || window.mesaBJAtual === 'malucos') maxJogadores = 6;
+
+            await setDoc(doc(db, "salas_blackjack", window.mesaBJAtual), {
+                aberta: aberta,
+                custo: custo,
+                premioTexto: premioTxt,
+                premioImg: premioImg,
+                maxJogadores: maxJogadores,
+                fila: [] // Zera a fila ao salvar configurações
+            }, { merge: true });
+
+            alert(aberta ? "✅ Mesa ABERTA e salva com sucesso!" : "🛑 Mesa FECHADA!");
+        };
+
+        window.limparFilaBJ = async () => {
+            if(!window.mesaBJAtual) return alert("Selecione uma mesa primeiro!");
+            await updateDoc(doc(db, "salas_blackjack", window.mesaBJAtual), { fila: [], partidaPronta: null });
+            alert("🧹 Fila esvaziada!");
         };
 
     </script>

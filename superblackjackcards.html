@@ -318,27 +318,59 @@
         };
 
         // =======================================================
-        // GERAÇÃO DO DECK FIXO DO BLACKJACK
+        // MOTOR DO JOGO: GERAÇÃO DO DECK COM QUANTIDADES FIXAS
         // =======================================================
         function gerarBaralhoSuperBlackjack() {
-            let cartasBaixas = []; let cartasMedias = []; let cartasAltas = []; let cartasBombas = [];
+            // Cria as gavetas para separar as cartas do seu banco de dados
+            let pool = {1: [], 2: [], 3: [], 4: [], 5: [], 7: []};
+            
             for (const [id, carta] of Object.entries(INFO_CARTAS)) {
-                if (id === "094") continue;
-                if (carta.pontos === 1 || carta.pontos === 2) cartasBaixas.push(id);
-                else if (carta.pontos === 3 || carta.pontos === 4) cartasMedias.push(id);
-                else if (carta.pontos === 5) cartasAltas.push(id);
-                else if (carta.pontos === 7) cartasBombas.push(id);
+                if (id === "094") continue; // Ignora a promocional
+                if (pool[carta.pontos] !== undefined) {
+                    pool[carta.pontos].push(id);
+                }
             }
 
-            cartasBaixas.sort(() => Math.random() - 0.5);
-            let baralho = cartasBaixas.slice(0, 15);
-            baralho.push(...cartasMedias);
-            cartasAltas.forEach(id => { baralho.push(id, id); });
-            cartasBombas.forEach(id => { baralho.push(id, id, id); });
+            // =======================================================
+            // ⚙️ PAINEL DE CONTROLO: QUANTIDADE EXATA DE CADA CARTA!
+            // Altere estes números como quiser. O sistema vai respeitá-los rigorosamente.
+            // =======================================================
+            const qtdDesejada = {
+                1: 8,   // Exatamente 8 cartas de 1 ponto
+                2: 7,   // Exatamente 7 cartas de 2 pontos
+                3: 14,  // Exatamente 14 cartas de 3 pontos
+                4: 14,  // Exatamente 14 cartas de 4 pontos
+                5: 22,  // Exatamente 22 cartas de 5 pontos
+                7: 12   // Exatamente 12 cartas de 7 pontos
+            };
+            
+            let baralho = [];
 
-            return baralho.sort(() => Math.random() - 0.5);
+            // Puxa a quantidade exata para cada pontuação
+            for (let pts of [1, 2, 3, 4, 5, 7]) {
+                let disponiveis = pool[pts];
+                
+                // Se por acaso não existir nenhuma carta desta pontuação no banco, salta
+                if (disponiveis.length === 0) continue; 
+                
+                // Baralha as opções do banco para não puxar sempre as mesmas
+                disponiveis.sort(() => Math.random() - 0.5); 
+                
+                let count = 0;
+                let index = 0;
+                
+                // Vai adicionando até bater o número fixo que definiu ali em cima
+                while(count < qtdDesejada[pts]) {
+                    // O "%" garante que, se acabarem as cartas originais, ele recomeça a duplicar até bater a meta
+                    baralho.push(disponiveis[index % disponiveis.length]); 
+                    index++;
+                    count++;
+                }
+            }
+
+            // Baralha o deck final (que terá a soma exata dos números acima) e entrega à mesa
+            return baralho.sort(() => Math.random() - 0.5); 
         }
-
         // =======================================================
         // LÓGICA DE TURNOS CÍCLICOS
         // =======================================================

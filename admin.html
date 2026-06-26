@@ -594,8 +594,8 @@
 
         window.limparFilaBJ = async () => {
             if(!window.mesaBJAtual) return alert("Selecione uma mesa primeiro!");
-            await updateDoc(doc(db, "salas_blackjack", window.mesaBJAtual), { fila: [], partidaPronta: null });
-            alert("🧹 Fila esvaziada!");
+            await updateDoc(doc(db, "salas_blackjack", window.mesaBJAtual), { fila: [], partidaPronta: null, ultimoGrupo: [], emJogo: false });
+            alert("🧹 Fila esvaziada e Mesa Destrancada!");
         };
 
     </script>

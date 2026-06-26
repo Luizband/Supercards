@@ -143,55 +143,59 @@
     <!-- Áudio Blackjack -->
     <audio id="audio-blackjack" src="audios/blackjack/blackjack.mp3" preload="auto"></audio>
 
-    <!-- MODAL PRINCIPAL: REGRAS E LISTA DE MESAS -->
     <div id="modal-blackjack" class="hidden fixed inset-0 bg-black/90 z-[100] flex flex-col items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-[#e4dcf1] border-4 border-transparent rounded-3xl w-full max-w-sm shadow-2xl relative flex flex-col max-h-[85vh]">
-            <button onclick="fecharModalBlackjack()" class="absolute -top-4 -right-2 text-[#7a32a8] font-black text-2xl w-8 h-8 z-50 hover:scale-110 transition-transform">X</button>
+        <div class="bg-gray-800 border-4 border-[#7a32a8] rounded-2xl w-full max-w-sm shadow-2xl relative flex flex-col max-h-[85vh]">
             
-            <div class="p-5 overflow-y-auto no-scrollbar flex-grow">
-                <h2 class="text-[#7a32a8] font-black text-2xl text-center uppercase mb-6">Mesas</h2>
+            <button onclick="fecharModalBlackjack()" class="absolute -top-4 -right-2 bg-red-600 text-white font-black w-8 h-8 rounded-full border-2 border-white z-50 transition-transform hover:scale-110">X</button>
+            
+            <div class="p-6 overflow-y-auto no-scrollbar flex-grow">
+                <img src="blackjack.png" alt="Superblackjackcards" class="h-16 mx-auto object-contain drop-shadow-xl mb-4" onerror="this.src='fundo_carta.png'">
+                <h2 class="text-[#dca3e8] font-black text-xl text-center uppercase tracking-widest mb-4">Salas de Apostas</h2>
                 
-                <div class="flex justify-center mb-6">
-                    <button id="btn-tab-bj-salas" onclick="mudarAbaBJ('salas')" class="text-[#7a32a8] font-black text-xs uppercase px-4 pb-1 border-b-4 border-[#7a32a8]">Salas</button>
-                    <button id="btn-tab-bj-regras" onclick="mudarAbaBJ('regras')" class="text-gray-400 font-black text-xs uppercase px-4 pb-1 border-b-4 border-transparent">Regras</button>
+                <div class="flex justify-around mb-4 border-b border-gray-600 pb-2 overflow-x-auto no-scrollbar">
+                    <button id="btn-tab-bj-salas" onclick="mudarAbaBJ('salas')" class="text-white font-black text-[10px] uppercase border-b-2 border-[#bc7bd4] pb-1 mx-1 shrink-0">Salas</button>
+                    <button id="btn-tab-bj-regras" onclick="mudarAbaBJ('regras')" class="text-gray-500 font-bold text-[10px] uppercase border-b-2 border-transparent pb-1 mx-1 shrink-0">Regras</button>
                 </div>
 
-                <!-- ABA DE REGRAS -->
-                <div id="aba-bj-regras" class="hidden text-center text-[#7a32a8] font-bold text-sm space-y-4 px-2">
-                    <p>O objetivo é sobreviver. A mesa tem um valor central.</p>
-                    <p>Jogue uma carta da sua mão. Se a soma da mesa passar de 21, você perde um ❤️!</p>
-                    <p>Se você cravar exatos <span class="text-red-600 font-black">21</span>, ganha o direito de arrancar um coração de qualquer oponente!</p>
-                    <p>Vence o último sobrevivente na mesa.</p>
+                <div id="aba-bj-regras" class="hidden flex flex-col text-sm font-bold">
+                    <div class="bg-gray-900 p-4 rounded-lg border border-gray-700 text-xs font-normal text-gray-300 leading-relaxed text-justify space-y-3">
+                        <p>O objetivo é sobreviver. A mesa possui um valor central invisível no início.</p>
+                        <p>Jogue uma carta da sua mão. Se a soma da mesa passar de 21, você <span class="text-red-400 font-bold">estoura</span> e perde um ❤️!</p>
+                        <p>Se você cravar exatos <span class="text-yellow-400 font-bold">21</span>, ganha o direito de arrancar um coração de qualquer oponente vivo!</p>
+                        <p class="text-center font-black text-[#dca3e8] mt-2 border-t border-gray-700 pt-3">Vence o último sobrevivente na mesa.</p>
+                    </div>
                 </div>
 
-                <!-- ABA DE SALAS -->
-                <div id="aba-bj-salas" class="flex flex-col gap-3">
+                <div id="aba-bj-salas" class="flex flex-col gap-2 overflow-y-auto no-scrollbar max-h-64">
                     <div id="lista-mesas-bj" class="flex flex-col gap-3"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL LOBBY DA MESA -->
-    <div id="modal-bj-lobby" class="hidden fixed inset-0 bg-black/90 z-[150] flex flex-col items-center justify-center p-4 backdrop-blur-md">
-        <div class="bg-[#e4dcf1] rounded-[2rem] w-full max-w-sm shadow-2xl relative flex flex-col p-6 items-center">
-            <button onclick="sairDaFilaBJ()" class="absolute top-4 right-5 text-[#7a32a8] font-black text-2xl hover:scale-110 transition-transform">X</button>
+    <div id="modal-bj-lobby" class="hidden fixed inset-0 bg-black/90 z-[150] flex flex-col items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-gray-800 border-4 border-[#7a32a8] rounded-2xl w-full max-w-sm shadow-2xl relative flex flex-col max-h-[85vh]">
             
-            <h2 id="lobby-bj-titulo" class="text-[#7a32a8] font-black text-2xl text-center mb-6 px-4">Mesa</h2>
+            <button onclick="sairDaFilaBJ()" class="absolute -top-4 -right-2 bg-red-600 text-white font-black w-8 h-8 rounded-full border-2 border-white z-50 transition-transform hover:scale-110">X</button>
             
-            <div id="lobby-bj-jogadores" class="w-full flex flex-col gap-2 mb-4"></div>
+            <div class="p-6 overflow-y-auto no-scrollbar flex-grow flex flex-col items-center">
+                <img src="blackjack.png" alt="Superblackjackcards" class="h-12 mx-auto object-contain drop-shadow-xl mb-3" onerror="this.src='fundo_carta.png'">
+                <h2 id="lobby-bj-titulo" class="text-[#dca3e8] font-black text-xl text-center uppercase tracking-widest mb-6">Mesa</h2>
+                
+                <div id="lobby-bj-jogadores" class="w-full flex flex-col gap-3 mb-6"></div>
 
-            <button id="btn-bj-entrar" onclick="entrarNaFilaBJ()" class="w-full bg-[#4ade80] text-white font-black text-[11px] py-4 rounded-full uppercase tracking-wider shadow-md mb-8 hover:bg-[#22c55e] transition-colors mt-2">
-                CARREGANDO...
-            </button>
+                <button id="btn-bj-entrar" onclick="entrarNaFilaBJ()" class="w-full bg-green-600 hover:bg-green-500 text-white font-black text-[11px] py-4 rounded-xl uppercase tracking-wider shadow-lg border-2 border-green-400 transition-colors mb-6">
+                    CARREGANDO CUSTO...
+                </button>
 
-            <!-- Prêmio -->
-            <div class="bg-[#7a32a8] rounded-3xl py-4 px-8 flex flex-col items-center shadow-lg min-w-[150px]">
-                <span class="text-[#e4dcf1] font-black uppercase text-xs mb-1">PRÊMIO</span>
-                <div class="flex items-center gap-2">
-                    <span id="lobby-bj-premio-txt" class="text-white font-black text-3xl tracking-tighter">-</span>
-                    <img id="lobby-bj-premio-img" src="moedas2.png" class="w-8 h-8 object-contain">
+                <div class="bg-gray-900 border-2 border-yellow-500/50 rounded-3xl py-4 px-8 flex flex-col items-center shadow-[0_0_15px_rgba(234,179,8,0.15)] min-w-[180px]">
+                    <span class="text-yellow-400 font-black uppercase text-[10px] tracking-widest mb-1">Prêmio da Mesa</span>
+                    <div class="flex items-center gap-2">
+                        <span id="lobby-bj-premio-txt" class="text-white font-black text-3xl tracking-tighter">-</span>
+                        <img id="lobby-bj-premio-img" src="moedas2.png" alt="Prêmio" class="w-8 h-8 object-contain drop-shadow-md">
+                    </div>
                 </div>
+
             </div>
         </div>
     </div>
@@ -642,16 +646,20 @@
         window.mudarAbaBJ = (aba) => {
             document.getElementById('aba-bj-salas').classList.add('hidden');
             document.getElementById('aba-bj-regras').classList.add('hidden');
-            document.getElementById('btn-tab-bj-salas').className = "text-gray-400 font-black text-xs uppercase px-4 pb-1 border-b-4 border-transparent";
-            document.getElementById('btn-tab-bj-regras').className = "text-gray-400 font-black text-xs uppercase px-4 pb-1 border-b-4 border-transparent";
+            
+            // Botões Inativos
+            document.getElementById('btn-tab-bj-salas').className = "text-gray-500 font-bold text-[10px] uppercase border-b-2 border-transparent pb-1 mx-1 shrink-0";
+            document.getElementById('btn-tab-bj-regras').className = "text-gray-500 font-bold text-[10px] uppercase border-b-2 border-transparent pb-1 mx-1 shrink-0";
 
+            // Botão Ativo
             document.getElementById(`aba-bj-${aba}`).classList.remove('hidden');
-            document.getElementById(`btn-tab-bj-${aba}`).className = "text-[#7a32a8] font-black text-xs uppercase px-4 pb-1 border-b-4 border-[#7a32a8]";
+            document.getElementById(`btn-tab-bj-${aba}`).className = "text-white font-black text-[10px] uppercase border-b-2 border-[#bc7bd4] pb-1 mx-1 shrink-0";
         };
 
         function renderizarListaMesasBJ() {
             const container = document.getElementById('lista-mesas-bj');
             container.innerHTML = '';
+            
             const ordem = ['iniciantes', 'tigrinho', 'galera', 'malucos'];
             
             ordem.forEach(id => {
@@ -660,16 +668,18 @@
 
                 const qtdJogadores = (mesa.fila || []).length;
                 const podeEntrar = mesa.aberta;
-                const btnCor = podeEntrar ? "bg-[#4ade80] hover:bg-[#22c55e]" : "bg-gray-400";
+                const btnCor = podeEntrar ? "bg-green-600 hover:bg-green-500 border-green-400" : "bg-gray-600 border-gray-500";
                 
                 container.innerHTML += `
-                    <div class="bg-[#7a32a8] rounded-full flex items-center justify-between p-2 pl-6 relative shadow-sm">
-                        <span class="text-white font-black text-sm w-[50%]">${mesa.nome || 'Mesa'}</span>
+                    <div class="flex items-center gap-3 bg-gray-900 p-2.5 rounded-lg border border-[#bc7bd4]/30 shadow-sm">
+                        <div class="flex flex-col flex-grow overflow-hidden">
+                            <span class="text-white font-black text-sm uppercase truncate">${mesa.nome || 'Mesa'}</span>
+                        </div>
                         <div class="flex items-center gap-3">
-                            <button onclick="window.abrirLobbyBJ('${id}')" class="${btnCor} text-white font-black text-[10px] px-4 py-2 rounded-full uppercase transition-colors" ${!podeEntrar ? 'disabled' : ''}>
+                            <button onclick="window.abrirLobbyBJ('${id}')" class="${btnCor} text-white font-black text-[9px] px-3 py-2 rounded-lg border uppercase shadow-md transition-transform active:scale-95 shrink-0" ${!podeEntrar ? 'disabled' : ''}>
                                 ENTRAR
                             </button>
-                            <span class="text-white font-black text-sm w-10 text-center">${qtdJogadores}/${mesa.maxJogadores}</span>
+                            <span class="text-green-400 font-black text-sm w-8 text-center">${qtdJogadores}/${mesa.maxJogadores}</span>
                         </div>
                     </div>`;
             });
@@ -691,9 +701,9 @@
                 return;
             }
 
-            document.getElementById('lobby-bj-titulo').innerText = mesa.nome || 'Mesa';
-            document.getElementById('lobby-bj-premio-txt').innerText = mesa.premioTexto || '-';
-            document.getElementById('lobby-bj-premio-img').src = mesa.premioImg || 'moedas2.png';
+            document.getElementById('lobby-bj-titulo').innerText = mesa.nome;
+            document.getElementById('lobby-bj-premio-txt').innerText = mesa.premioTexto;
+            document.getElementById('lobby-bj-premio-img').src = mesa.premioImg;
 
             const listaJogadores = document.getElementById('lobby-bj-jogadores');
             listaJogadores.innerHTML = '';
@@ -703,20 +713,25 @@
             for(let i=0; i < mesa.maxJogadores; i++) {
                 const uid = mesa.fila[i];
                 if(uid) {
-                    const info = dictNomes[uid] || {nome: "JOGADOR", foto: "fundo_carta.png"};
+                    const info = dictNomes[uid] || {nome: "JOGADOR", foto: "fundo_carta.png", nivel: 1};
                     listaJogadores.innerHTML += `
-                        <div class="bg-[#7a32a8] rounded-full flex items-center justify-between pr-4 relative h-12 shadow-md">
-                            <div class="w-12 h-12 bg-[#c9a6d8] rounded-full flex items-center justify-center absolute left-0 border-2 border-[#7a32a8] overflow-hidden">
+                        <div class="flex items-center gap-3 bg-gray-900 p-2.5 rounded-lg border border-[#bc7bd4]/30 shadow-sm">
+                            <div class="w-10 h-10 rounded-full border-2 border-[#dca3e8] overflow-hidden flex-shrink-0 bg-black">
                                 <img src="${info.foto}" class="w-full h-full object-cover">
                             </div>
-                            <span class="text-white font-black ml-16 truncate max-w-[150px] uppercase">${info.nome}</span>
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                            <div class="flex flex-col flex-grow">
+                                <span class="text-white font-black text-xs uppercase">${info.nome}</span>
+                                <span class="text-green-400 font-bold text-[10px]">Pronto ✔️</span>
+                            </div>
                         </div>`;
                 } else {
                     listaJogadores.innerHTML += `
-                        <div class="bg-gray-300 rounded-full flex items-center justify-between pr-4 relative h-12 opacity-50">
-                            <div class="w-12 h-12 bg-gray-400 rounded-full absolute left-0"></div>
-                            <span class="text-gray-500 font-black ml-16 uppercase text-xs tracking-widest">Aguardando...</span>
+                        <div class="flex items-center gap-3 bg-gray-800 p-2.5 rounded-lg border border-gray-700 shadow-sm opacity-60">
+                            <div class="w-10 h-10 rounded-full border-2 border-gray-600 overflow-hidden flex-shrink-0 bg-gray-900"></div>
+                            <div class="flex flex-col flex-grow">
+                                <span class="text-gray-500 font-black text-xs uppercase">Vaga Livre</span>
+                                <span class="text-gray-600 font-bold text-[10px]">Aguardando...</span>
+                            </div>
                         </div>`;
                 }
             }
@@ -725,8 +740,8 @@
             const estouNaFila = mesa.fila.includes(currentUserUid);
 
             if(estouNaFila) {
-                btn.innerText = "Saindo da Mesa..."; 
-                btn.className = "w-full bg-red-500 text-white font-black text-[11px] py-4 rounded-full uppercase tracking-wider shadow-md mb-8 hover:bg-red-600 mt-2";
+                btn.innerText = "SAIR DA FILA"; 
+                btn.className = "w-full bg-red-600 hover:bg-red-500 text-white font-black py-4 rounded-xl shadow-lg border-2 border-red-400 uppercase tracking-widest transition-transform active:scale-95 text-sm mb-6";
                 btn.onclick = window.sairDaFilaBJ;
                 
                 if(mesa.fila.length === mesa.maxJogadores && mesa.fila[0] === currentUserUid) {
@@ -742,13 +757,13 @@
                 }
 
             } else {
-                btn.innerText = `ENTRAR NA MESA - ${mesa.custo || 0} FRAGMENTOS`;
-                btn.className = "w-full bg-[#4ade80] text-white font-black text-[11px] py-4 rounded-full uppercase tracking-wider shadow-md mb-8 hover:bg-[#22c55e] mt-2";
+                btn.innerText = `PAGAR ${mesa.custo || 0} FRAG. E ENTRAR`;
+                btn.className = "w-full bg-green-600 hover:bg-green-500 text-white font-black py-4 rounded-xl shadow-lg border-2 border-green-400 uppercase tracking-widest transition-transform active:scale-95 text-sm mb-6";
                 btn.disabled = false;
                 btn.onclick = window.entrarNaFilaBJ;
             }
         }
-
+        
         window.entrarNaFilaBJ = async () => {
             const mesa = window.salasBlackjackGlobais[window.mesaBJSelecionada];
             if(meusFragmentos < mesa.custo) {

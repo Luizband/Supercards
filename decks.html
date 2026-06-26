@@ -213,6 +213,7 @@
         let deckPadrao = "";
         
         let deckAtivoParaModal = null; // Armazena qual deck foi clicado
+        let deckParaExcluir = null;
         let iconeSelecionado = null;
 
         window.mostrarToast = function(mensagem) {
@@ -378,6 +379,7 @@
                 window.mostrarToast("Deck excluído!");
                 
             } catch (error) {
+                console.error("Erro ao excluir deck:", error);
                 window.mostrarToast("Erro ao excluir deck.");
             }
         });

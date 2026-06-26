@@ -100,27 +100,9 @@
         <!-- LADO DIREITO: CAMPO DE BLACKJACK E GAVETA -->
         <div class="w-[74%] md:w-[78%] h-full relative overflow-hidden z-10 flex flex-col">
             
-            <div class="w-full px-4 md:px-6 py-3 flex justify-end items-center z-40 relative h-14">
-                
-                <div id="mensagem-status" class="hidden absolute left-1/2 transform -translate-x-1/2 bg-red-900/80 px-6 py-2 rounded-full border-2 border-red-500 text-[10px] md:text-xs uppercase font-black tracking-widest text-white animate-pulse text-center shadow-[0_0_15px_rgba(239,68,68,0.5)] whitespace-nowrap">
+            <div class="w-full px-4 md:px-6 py-3 flex justify-center items-center z-40 relative h-14 pointer-events-none">
+                <div id="mensagem-status" class="hidden absolute left-1/2 transform -translate-x-1/2 bg-red-900/80 px-6 py-2 rounded-full border-2 border-red-500 text-[10px] md:text-xs uppercase font-black tracking-widest text-white animate-pulse text-center shadow-[0_0_15px_rgba(239,68,68,0.5)] whitespace-nowrap pointer-events-auto">
                     ---
-                </div>
-
-                <div class="flex gap-2 relative">
-                    <div id="menu-reacoes" class="hidden absolute top-[110%] right-0 w-max bg-[#1b4d3e] p-3 rounded-xl grid grid-cols-4 gap-2 shadow-2xl border-2 border-[#4ade80]/30 z-50">
-                        <button onclick="dispararReacaoLocal('💣')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">💣</button>
-                        <button onclick="dispararReacaoLocal('🖕')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">🖕</button>
-                        <button onclick="dispararReacaoLocal('👀')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">👀</button>
-                        <button onclick="dispararReacaoLocal('💖')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">💖</button>
-                        <button onclick="dispararReacaoLocal('💀')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">💀</button>
-                        <button onclick="dispararReacaoLocal('🤬')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">🤬</button>
-                        <button onclick="dispararReacaoLocal('🤣')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">🤣</button>
-                        <button onclick="dispararReacaoLocal('😭')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">😭</button>
-                    </div>
-                    
-                    <button onclick="document.getElementById('menu-reacoes').classList.toggle('hidden')" class="bg-[#1b4d3e] text-[#4ade80] font-black text-[9px] md:text-[10px] px-4 py-2 rounded-lg shadow-md border border-[#4ade80]/50 uppercase tracking-wider hover:bg-white hover:text-[#0f2d20] transition-colors">
-                        Reação
-                    </button>
                 </div>
             </div>
 
@@ -148,9 +130,27 @@
                     <img src="fundo_carta.png" class="absolute inset-0 w-full h-full object-cover opacity-30 rounded-lg">
                 </div>
 
+                <!-- REAÇÕES (Colado do lado direito do Montante de Cartas) -->
+                <div class="absolute bottom-6 left-24 flex gap-2 z-50">
+                    <div id="menu-reacoes" class="hidden absolute bottom-[110%] left-0 w-max bg-[#1b4d3e] p-3 rounded-xl grid grid-cols-4 gap-2 shadow-2xl border-2 border-[#4ade80]/30 z-50">
+                        <button onclick="dispararReacaoLocal('💣')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">💣</button>
+                        <button onclick="dispararReacaoLocal('🖕')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">🖕</button>
+                        <button onclick="dispararReacaoLocal('👀')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">👀</button>
+                        <button onclick="dispararReacaoLocal('💖')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">💖</button>
+                        <button onclick="dispararReacaoLocal('💀')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">💀</button>
+                        <button onclick="dispararReacaoLocal('🤬')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">🤬</button>
+                        <button onclick="dispararReacaoLocal('🤣')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">🤣</button>
+                        <button onclick="dispararReacaoLocal('😭')" class="w-10 h-10 flex items-center justify-center text-3xl hover:scale-125 transition-transform">😭</button>
+                    </div>
+                    
+                    <button onclick="document.getElementById('menu-reacoes').classList.toggle('hidden')" class="bg-[#1b4d3e] text-[#4ade80] font-black text-[9px] md:text-[10px] px-4 py-2 rounded-lg shadow-md border border-[#4ade80]/50 uppercase tracking-wider hover:bg-white hover:text-[#0f2d20] transition-colors">
+                        Reação
+                    </button>
+                </div>
+
                 <!-- PILHA DE CARTAS JOGADAS (SOBREPOSTAS MOSTRANDO O LADO ESQUERDO) -->
                 <div class="w-full flex justify-center items-center px-12 h-[160px] md:h-[200px]">
-                    <div id="mesa-cartas-acumuladas" class="flex justify-center items-center pl-[70px]">
+                    <div id="mesa-cartas-acumuladas" class="flex flex-row items-center relative pl-4 md:pl-0 -translate-x-8 md:-translate-x-12">
                         <!-- JS injetará as cartas aqui utilizando a classe .card-fan-item -->
                     </div>
                 </div>

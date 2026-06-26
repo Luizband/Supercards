@@ -212,7 +212,7 @@
             <p class="text-gray-200 font-bold text-xs mb-6">Ao sair, você perderá a partida e abandonará seus corações restantes.</p>
             <div class="flex justify-center gap-4">
                 <button onclick="document.getElementById('modal-desistir').classList.add('hidden')" class="flex-1 bg-gray-700 text-white font-black py-3 rounded-full shadow-md uppercase text-sm border border-gray-600">Ficar</button>
-                <button onclick="window.location.href='batalha.html'" class="flex-1 bg-red-600 text-white font-black py-3 rounded-full shadow-md uppercase text-sm border border-red-700">Sair</button>
+                <button onclick="confirmarDesistencia()" class="flex-1 bg-red-600 text-white font-black py-3 rounded-full shadow-md uppercase text-sm border border-red-700">Sair</button>
             </div>
         </div>
     </div>
@@ -289,6 +289,32 @@
                 if(sfxParabens) sfxParabens.play().catch(e => console.log("Áudio bloqueado:", e));
                 flagVitoriaTocada = true;
             }
+        };
+
+        // =======================================================
+        // LÓGICA DE ABANDONO VOLUNTÁRIO
+        // =======================================================
+        window.confirmarDesistencia = async function() {
+            if(!salaId || !dadosSala) return;
+            document.getElementById('modal-desistir').classList.add('hidden');
+            
+            // 1. Quebra a partida no Firebase informando quem foi
+            await updateDoc(doc(db, "salas_21", salaId), {
+                status: 'abandonada',
+                quemAbandonou: dadosSala.jogadores[currentUserUid].nome
+            });
+
+            // 2. MÁGICA: Destranca a mesa lá no Lobby pros outros poderem jogar de novo
+            if (dadosSala.idMesaOrigem) {
+                await updateDoc(doc(db, "salas_blackjack", dadosSala.idMesaOrigem), {
+                    emJogo: false,
+                    partidaPronta: null,
+                    ultimoGrupo: [],
+                    fila: []
+                });
+            }
+            
+            window.location.href = 'batalha.html';
         };
 
         // =======================================================
@@ -614,7 +640,7 @@
                     dadosSala = docSnap.data();
 
                     if (dadosSala.status === 'abandonada') {
-                        alert(`🛑 SALA FECHADA!\n Um jogador abandonou.`);
+                        alert(`🛑 PARTIDA CANCELADA!\n\nO jogador ${dadosSala.quemAbandonou || 'desconhecido'} abandonou a mesa.\nNenhum fragmento foi cobrado.`);
                         window.location.href = 'batalha.html';
                         return;
                     }

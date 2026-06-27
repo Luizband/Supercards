@@ -637,13 +637,26 @@
                 // === LEÃO DE CHÁCARA DO TORNEIO (Invisível para partidas casuais) ===
                 let tAdv = localStorage.getItem("torneioAdversario");
                 let tId = localStorage.getItem("torneioId");
+                let tRodada = localStorage.getItem("torneioRodada");
+                let tInstancia = localStorage.getItem("torneioInstancia");
                 
                 if (tAdv && tId) {
                     window.isTorneio = true; window.torneioId = tId; window.torneioOpp = tAdv;
+                    
+                    // Limpa a memória para não bugar o próximo jogo
                     localStorage.removeItem("torneioAdversario"); localStorage.removeItem("torneioId");
-
+                    localStorage.removeItem("torneioRodada"); localStorage.removeItem("torneioInstancia");
+                
+                    // Recria a Sala Blindada exatamente como no torneios.html
                     let ids = [currentUserUid, tAdv].sort();
-                    salaId = `tourney_${tId}_${ids[0]}_${ids[1]}`;
+                    
+                    // Se por acaso os dados novos falharem, ele usa o formato antigo para não quebrar
+                    if (tRodada && tInstancia) {
+                        salaId = `tourney_${tId}_${tInstancia}_rodada${tRodada}_${ids[0]}_${ids[1]}`;
+                    } else {
+                        salaId = `tourney_${tId}_${ids[0]}_${ids[1]}`;
+                    }
+                    
                     window.history.replaceState({}, document.title, `arena.html?sala=${salaId}`);
                     
                     try {

@@ -61,7 +61,7 @@
                 <p class="text-xs text-gray-400 mt-1">Simula resultados entre IA.</p>
             </div>
             <div class="flex flex-wrap gap-2 w-full sm:w-auto justify-stretch sm:justify-end">
-                <button onclick="injetarBots()" class="flex-1 sm:flex-none bg-cyan-600 hover:bg-cyan-500 px-3 py-2 rounded font-black uppercase text-[10px] sm:text-xs shadow-lg">Injetar 6</button>
+                <button onclick="injetarBots()" class="flex-1 sm:flex-none bg-cyan-600 hover:bg-cyan-500 px-3 py-2 rounded font-black uppercase text-[10px] sm:text-xs shadow-lg">Injetar 8</button>
                 <button onclick="simularBots()" class="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-500 px-3 py-2 rounded font-black uppercase text-[10px] sm:text-xs shadow-lg">Simular</button>
                 <button onclick="resetarTorneio()" class="w-full sm:w-auto bg-red-700 hover:bg-red-600 px-3 py-2 rounded font-black uppercase text-[10px] sm:text-xs shadow-lg mt-1 sm:mt-0">Resetar</button>
             </div>
@@ -227,9 +227,9 @@
         // GESTÃO DOS BOTS E TESTES
         // ==========================================
         window.injetarBots = async () => {
-            if(!confirm("Criar 6 Bots e inscrevê-los no Brasileirão agora?")) return;
+            if(!confirm("Criar 8 Bots e inscrevê-los no Brasileirão agora?")) return;
             try {
-                for(let i=1; i<=6; i++) {
+                for(let i=1; i<=8; i++) { // Alterado para 8 bots (para fechar 10 com suas 2 contas)
                     const botId = `bot_0${i}`;
                     await setDoc(doc(db, "users", botId), {
                         nome: `BOT TESTADOR 0${i}`, nomeDisplay: `BOT 0${i}`,
@@ -239,7 +239,7 @@
                         inscritos: arrayUnion(botId)
                     });
                 }
-                alert("✅ 6 Bots Injetados com sucesso! Inscreva suas 2 contas e inicie o torneio.");
+                alert("✅ 8 Bots Injetados com sucesso! Inscreva suas 2 contas e inicie o torneio.");
             } catch(e) { console.error(e); alert("Erro ao injetar bots."); }
         };
 
@@ -299,7 +299,7 @@
         window.resetarTorneio = async () => {
              if(!confirm("🚨 ATENÇÃO! Isso vai apagar a tabela e resetar o Brasileirão inteiro. Certeza?")) return;
              await setDoc(doc(db, "torneios", "brasileirao_01"), {
-                 nome: "Brasileirão Supercards", status: "aberto", inscritos: [], maxInscritos: 8
+                 nome: "Brasileirão Supercards", status: "aberto", inscritos: [], maxInscritos: 10
              });
              alert("✅ Torneio Resetado!");
         };
@@ -315,8 +315,8 @@
                 const dados = docTorneio.data();
                 const inscritos = dados.inscritos || [];
 
-                if (inscritos.length !== 8) {
-                    alert(`O torneio precisa de exatamente 8 inscritos (Você + 7 Bots), mas atualmente tem ${inscritos.length}.`);
+                if (inscritos.length !== 10) {
+                    alert(`O torneio precisa de exatamente 10 inscritos (Você + Bots), mas atualmente tem ${inscritos.length}.`);
                     throw new Error("Número de jogadores inválido");
                 }
 

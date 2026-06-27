@@ -425,7 +425,11 @@
                     } else {
                         // LÓGICA DA SALA DE ESPERA (HUMANO VS HUMANO)
                         const ids = [currentUserUid, idAdv].sort();
-                        const salaId = `tourney_${ID_TORNEIO}_${ids[0]}_${ids[1]}`;
+                        
+                        // 1. Gera a Impressão Digital (apenas números da data) e cria o ID de Sala Blindado
+                        const instanciaUnica = dados.iniciadoEm ? dados.iniciadoEm.replace(/[^0-9]/g, '') : 'padrao';
+                        const salaId = `tourney_${ID_TORNEIO}_${instanciaUnica}_rodada${rodadaAtualReal}_${ids[0]}_${ids[1]}`;
+                        
                         const prontos = (dados.lobbies && dados.lobbies[salaId]) || [];
                         
                         if (prontos.includes(currentUserUid) && prontos.includes(idAdv)) {
@@ -437,10 +441,12 @@
                                 setTimeout(() => {
                                     localStorage.setItem("torneioAdversario", idAdv);
                                     localStorage.setItem("torneioId", ID_TORNEIO);
+                                    localStorage.setItem("torneioRodada", rodadaAtualReal);
+                                    localStorage.setItem("torneioInstancia", instanciaUnica);
                                     window.location.href = "arena.html";
                                 }, 1500);
                             }
-                        } 
+                        }
                         else if (prontos.includes(currentUserUid)) {
                             // SÓ EU CLIQUEI (ESPERANDO O OUTRO)
                             actionBtn = `<button onclick="window.cancelarPronto('${salaId}')" class="mt-3 w-full bg-yellow-600 hover:bg-yellow-500 py-3 rounded-lg text-white font-black text-xs uppercase shadow-lg border-2 border-yellow-400 animate-pulse">⏳ ESPERANDO ADVERSÁRIO (CANCELAR)</button>`;

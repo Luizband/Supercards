@@ -40,7 +40,7 @@
                     </div>
                     <div class="flex flex-col items-end">
                         <span class="text-gray-400 text-[10px] font-bold uppercase">Inscritos</span>
-                        <span id="contador-inscritos-card" class="text-green-400 text-sm font-black">0 / 8</span>
+                        <span id="contador-inscritos-card" class="text-green-400 text-sm font-black">0 / 10</span>
                     </div>
                 </div>
 
@@ -85,11 +85,11 @@
 
                 <div id="conteudo-regras" class="tab-content flex flex-col text-sm font-bold">
                     <div class="bg-gray-900 p-4 rounded-lg border border-gray-700 text-xs font-normal text-gray-300 leading-relaxed text-justify space-y-3">
-                        <p>Você enfrentará todos os outros 7 competidores duas vezes (total de 14 partidas por jogador).</p>
+                        <p>Você enfrentará todos os outros 9 competidores duas vezes (total de 18 partidas por jogador).</p>
                         <p>Uma nova rodada será liberada toda <span class="text-white font-bold">Quarta e Domingo</span>, e quando todas as partidas da rodada anterior forem concluídas.</p>
                         <p>O critério de desempate segue sendo os dados da tabela: primeiro <span class="text-green-400 font-bold">Vitórias</span>, seguido de <span class="text-yellow-400 font-bold">Saldo de Pontos</span>. As vitórias rendem <span class="text-green-400 font-bold">3 pontos</span> na tabela e os empates rendem <span class="text-yellow-400 font-bold">1 ponto</span>.</p>
                         <p>O saldo de pontos é a somatória dos pontos que você conseguiu fazer em cada partida na Arena.</p>
-                        <p class="text-center font-black text-[#dca3e8] mt-2 border-t border-gray-700 pt-3">Ao final da 14ª rodada, declaramos o campeão!</p>
+                       <p class="text-center font-black text-[#dca3e8] mt-2 border-t border-gray-700 pt-3">Ao final da 18ª rodada, declaramos o campeão!</p>
                     </div>
                 </div>
 
@@ -509,17 +509,17 @@
             const torneioRef = doc(db, "torneios", ID_TORNEIO);
             const checkSnap = await getDoc(torneioRef);
             if (!checkSnap.exists()) {
-                await setDoc(torneioRef, { nome: "Brasileirão", status: "aberto", inscritos: [], maxInscritos: 8 });
+                await setDoc(torneioRef, { nome: "Brasileirão", status: "aberto", inscritos: [], maxInscritos: 10 });
             }
-
+            
             onSnapshot(torneioRef, async (docSnap) => {
                 if (!docSnap.exists()) return;
                 
                 const dados = docSnap.data();
                 window.torneioDadosGlobal = dados; 
-
+            
                 const totalInscritos = dados.inscritos ? dados.inscritos.length : 0;
-                const max = dados.maxInscritos || 8;
+                const max = dados.maxInscritos || 10;
                 const jaInscrito = dados.inscritos && dados.inscritos.includes(currentUserUid);
 
                 await renderizarListaInscritos(dados.inscritos || []);

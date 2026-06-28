@@ -505,7 +505,7 @@
                     // --- INICIALIZAÇÃO DE MISSÕES DIÁRIAS ---
                     let pacoteMissoes = dados.missoesDiarias || {};
                     
-                    if (pacoteMissoes.dataReset !== hoje || !pacoteMissoes.lista || pacoteMissoes.lista.length < 5) {
+                    if (pacoteMissoes.dataReset !== hoje || !pacoteMissoes.lista || pacoteMissoes.lista.length !== 5) {
                         
                         // O MESMO POOL DO SEU ARQUIVO DE MISSÕES
                         const POOL_MISSOES = [

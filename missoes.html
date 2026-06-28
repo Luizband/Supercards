@@ -471,7 +471,7 @@
             const hoje = obterGameDay();
             let pacoteMissoes = dadosJogador.missoesDiarias || {};
 
-            if (pacoteMissoes.dataReset !== hoje || !pacoteMissoes.lista || pacoteMissoes.lista.length < 5) {
+            if (pacoteMissoes.dataReset !== hoje || !pacoteMissoes.lista || pacoteMissoes.lista.length !== 5) {
                 pacoteMissoes = { dataReset: hoje, lista: sortearMissoesDiarias() };
                 await setDoc(dbUserRef, { missoesDiarias: pacoteMissoes }, { merge: true });
                 dadosJogador.missoesDiarias = pacoteMissoes;

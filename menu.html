@@ -505,7 +505,7 @@
                     // --- INICIALIZAÇÃO DE MISSÕES DIÁRIAS ---
                     let pacoteMissoes = dados.missoesDiarias || {};
                     
-                    if (pacoteMissoes.dataReset !== hoje || !pacoteMissoes.lista || pacoteMissoes.lista.length !== 5) {
+                    if (pacoteMissoes.dataReset !== hoje || !pacoteMissoes.lista || pacoteMissoes.lista.length < 5) {
                         
                         // O MESMO POOL DO SEU ARQUIVO DE MISSÕES
                         const POOL_MISSOES = [
@@ -519,34 +519,23 @@
                             { id: "abrir_pacote", desc: "Abrir um pacote de cartas", meta: 1 }
                         ];
                         
-                        // Sorteia as 5 missões exatamente como no missoes.html
+                        // Sorteia as 5 missões limpas
                         const sorteadas = [...POOL_MISSOES].sort(() => 0.5 - Math.random()).slice(0, 5).map(m => {
                             return {
                                 id: m.id,
                                 desc: m.desc,
                                 meta: m.meta,
-                                progresso: (m.id === "login") ? 1 : 0, // Já dá o ponto de login
+                                progresso: (m.id === "login") ? 1 : 0, 
                                 resgatada: false
                             };
                         });
-                        
-                        // 🎉 SURPRESA DA JESSIE (Trava exata para o dia 28/06/2026)
-                        if (hoje === "2026-6-28") {
-                            sorteadas.unshift({ 
-                                id: "niver_jessie", 
-                                desc: "Dar feliz aniversário para Jessie 🎉", 
-                                meta: 1, 
-                                progresso: 1, // <- Já nasce 1/1 (concluída)
-                                resgatada: false 
-                            });
-                        }
                         
                         // Guarda no objeto de atualização global do Menu
                         docAtualizacao.missoesDiarias = {
                             dataReset: hoje,
                             lista: sorteadas
                         };
-                        atualizouLogin = true; // Informa o sistema que deve gravar as alterações
+                        atualizouLogin = true; 
                     }
                     // --- FIM DA INICIALIZAÇÃO DE MISSÕES ---
                     

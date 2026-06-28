@@ -464,18 +464,6 @@
                 return { id: m.id, desc: m.desc, meta: m.meta, progresso: progressoInicial, resgatada: false };
             });
 
-            // 🎉 SURPRESA DA JESSIE: Missão extra simbólica SÓ no domingo!
-            const hoje = obterGameDay();
-            if (hoje === "2026-6-28") {
-                sorteadas.unshift({ 
-                    id: "niver_jessie", 
-                    desc: "Dar feliz aniversário para Jessie 🎉", 
-                    meta: 1, 
-                    progresso: 1, // <- Já nasce 1/1 (concluída)
-                    resgatada: false 
-                });
-            }
-
             return sorteadas;
         }
 
@@ -483,7 +471,7 @@
             const hoje = obterGameDay();
             let pacoteMissoes = dadosJogador.missoesDiarias || {};
 
-            if (pacoteMissoes.dataReset !== hoje || !pacoteMissoes.lista || pacoteMissoes.lista.length !== 5) {
+            if (pacoteMissoes.dataReset !== hoje || !pacoteMissoes.lista || pacoteMissoes.lista.length < 5) {
                 pacoteMissoes = { dataReset: hoje, lista: sortearMissoesDiarias() };
                 await setDoc(dbUserRef, { missoesDiarias: pacoteMissoes }, { merge: true });
                 dadosJogador.missoesDiarias = pacoteMissoes;

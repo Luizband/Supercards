@@ -45,6 +45,16 @@
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        /* Animação do Letreiro (Marquee) */
+        @keyframes letreiro {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        .animacao-letreiro {
+            display: inline-block;
+            white-space: nowrap;
+            animation: letreiro 8s linear infinite;
+        }
     </style>
 
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
@@ -128,13 +138,17 @@
         <!-- ========================================== -->
         <!-- CONTADOR DE EVENTO / TEMPORADA             -->
         <!-- ========================================== -->
-        <div class="w-full flex justify-center mb-6 z-10 relative mt-[-10px]">
-            <div class="bg-[#dca3e8] border-2 border-[#bc7bd4] rounded-full pl-2 pr-3 py-1.5 shadow-md flex items-center gap-2 transform transition-transform hover:scale-105">
+        <div class="px-2 py-1 mb-4 w-full cursor-pointer" onclick="window.location.href='torneios.html'">
+            <div class="bg-gray-900 border-2 border-green-500 rounded-full py-3 px-2 overflow-hidden shadow-[0_0_15px_rgba(74,222,128,0.3)] flex items-center w-full relative">
+                <span class="absolute left-4 z-10 bg-gray-900 pr-2 text-lg">🏆</span>
                 
-                <img src="logobrasileirao.png" class="h-5 w-auto object-contain drop-shadow-md">
+                <div class="w-full overflow-hidden ml-8 mr-8">
+                    <span class="animacao-letreiro text-green-400 font-black text-xs md:text-sm uppercase tracking-widest">
+                        Rodada 1 em andamento - Acesse agora e jogue suas partidas!
+                    </span>
+                </div>
                 
-                <span id="countdown-timer" class="text-white bg-[#7a32a8] px-3 py-0.5 rounded-full font-black text-[11px] shadow-inner border border-[#bc7bd4]">--d --h --m --s</span>
-                
+                <span class="absolute right-4 z-10 bg-gray-900 pl-2 text-lg">🔥</span>
             </div>
         </div>
 
@@ -787,7 +801,7 @@
     <!-- ========================================== -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            // Data alvo: Domingo, 28 de Junho de 2026, às 16:00:00 (Horário de Brasília)
+            /*// Data alvo: Domingo, 28 de Junho de 2026, às 16:00:00 (Horário de Brasília)
             const dataAlvo = new Date("2026-06-28T16:00:00-03:00").getTime();
             const timerElement = document.getElementById('countdown-timer');
 
@@ -822,7 +836,7 @@
             // Atualiza na hora para não piscar vazio
             atualizarTimer();
             // Inicia o "motor" que roda a cada 1 segundo (1.000 ms)
-            setInterval(atualizarTimer, 1000);
+            setInterval(atualizarTimer, 1000);*/
         });
     </script>
 </body>

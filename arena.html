@@ -663,9 +663,9 @@
                         const salaSnap = await getDoc(doc(db, "partidas", salaId));
                         if (!salaSnap.exists()) {
                             
-                            // QUEM ABRE A SALA SEMPRE SERÁ O HOST (JOGADOR 1)
-                            let p1Uid = currentUserUid; 
-                            let p2Uid = tAdv;
+                            // DEFINE OS JOGADORES DE FORMA UNIVERSAL E DETERMINÍSTICA
+                            let p1Uid = ids[0];
+                            let p2Uid = ids[1];
                             
                             const mySnap = await getDoc(doc(db, "users", p1Uid));
                             const oppSnap = await getDoc(doc(db, "users", p2Uid));

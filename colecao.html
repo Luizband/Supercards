@@ -22,6 +22,123 @@
             pointer-events: none;
         }
 
+        .carta-em-uso {
+            filter: brightness(0.35) grayscale(50%);
+            pointer-events: none;
+            opacity: 0.85;
+        }
+
+        .carta-lista-item {
+            font-size: 11px;
+            font-weight: 600;
+            line-height: 1.4;
+            padding: 9px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            color: #f3f4f6;
+            background: transparent;
+            cursor: pointer;
+        }
+        .carta-lista-item.carta-bloqueada {
+            color: #9ca3af;
+            opacity: 0.45;
+            filter: grayscale(100%);
+            pointer-events: none;
+        }
+        .carta-lista-item.carta-em-uso {
+            color: #d1d5db;
+            opacity: 0.4;
+            filter: none;
+            pointer-events: none;
+        }
+        .carta-lista-item:not(.carta-bloqueada):not(.carta-em-uso):hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        #grid-cartas {
+            margin-bottom: 4rem;
+        }
+
+        #grid-cartas.modo-lista {
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 2px 0;
+        }
+
+        .view-mode-switch {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .view-mode-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            height: 40px;
+            min-width: 40px;
+            max-width: 40px;
+            padding: 0;
+            border: none;
+            cursor: pointer;
+            overflow: hidden;
+            background: #2a2a2a;
+            color: #94a3b8;
+            border-radius: 9999px;
+            box-sizing: border-box;
+            transition:
+                background-color 0.28s ease,
+                color 0.28s ease,
+                max-width 0.28s ease,
+                padding 0.28s ease,
+                gap 0.28s ease,
+                box-shadow 0.28s ease;
+        }
+        .view-mode-btn svg {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+        .view-mode-btn.active {
+            background: #2563eb;
+            color: #fff;
+            max-width: 112px;
+            padding: 0 14px;
+            gap: 6px;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.45);
+        }
+        .view-mode-label {
+            display: inline-block;
+            max-width: 0;
+            opacity: 0;
+            overflow: hidden;
+            white-space: nowrap;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: lowercase;
+            margin-left: 0;
+            transition:
+                opacity 0.12s ease,
+                max-width 0.28s ease 0.04s,
+                margin 0.28s ease 0.04s;
+        }
+        .view-mode-btn.active .view-mode-label {
+            max-width: 56px;
+            opacity: 1;
+            margin-left: 2px;
+            transition:
+                max-width 0.28s ease,
+                opacity 0.2s ease 0.08s,
+                margin 0.28s ease;
+        }
+        @keyframes viewModePop {
+            0% { transform: scale(0.97); }
+            100% { transform: scale(1); }
+        }
+        .view-mode-btn.view-mode-pop {
+            animation: viewModePop 0.22s ease-out;
+        }
+
         #toast-container {
             position: fixed;
             top: 20px;
@@ -51,6 +168,46 @@
         @keyframes slideDown {
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            inset: 0;
+            background-color: rgba(122, 50, 168, 0.35);
+            border: 2px solid #7a32a8;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .toggle-slider::before {
+            content: "";
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            left: 2px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #7a32a8;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+        }
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: #7a32a8;
+        }
+        .toggle-switch input:checked + .toggle-slider::before {
+            transform: translate(20px, -50%);
+            background: #dca3e8;
         }
     </style>
 </head>
@@ -98,9 +255,50 @@
 
         <!-- CAIXA DA COLEÇÃO -->
         <main class="bg-[#dca3e8] rounded-[2rem] flex flex-col flex-grow p-4 shadow-xl overflow-hidden mb-2 relative">
-            <h1 class="text-[#7a32a8] font-black text-xl text-center mb-4 drop-shadow-sm">COLEÇÃO</h1>
+            <div class="flex items-center justify-between gap-3 mb-3 flex-shrink-0">
+                <h1 class="text-[#7a32a8] font-black text-xl drop-shadow-sm uppercase tracking-wide">COLEÇÃO</h1>
+                <div class="view-mode-switch" id="view-mode-switch">
+                    <button type="button" id="btn-view-lista" class="view-mode-btn" aria-label="Lista">
+                        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                            <rect x="1" y="2" width="4" height="4" rx="0.5"></rect>
+                            <rect x="1" y="7" width="4" height="4" rx="0.5"></rect>
+                            <rect x="1" y="12" width="4" height="2.5" rx="0.5"></rect>
+                            <rect x="7" y="3" width="8" height="2" rx="1"></rect>
+                            <rect x="7" y="8" width="8" height="2" rx="1"></rect>
+                            <rect x="7" y="12.5" width="8" height="2" rx="1"></rect>
+                        </svg>
+                        <span class="view-mode-label">lista</span>
+                    </button>
+                    <button type="button" id="btn-view-grade" class="view-mode-btn active" aria-label="Grade">
+                        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                            <rect x="1" y="1" width="6" height="6" rx="1"></rect>
+                            <rect x="9" y="1" width="6" height="6" rx="1"></rect>
+                            <rect x="1" y="9" width="6" height="6" rx="1"></rect>
+                            <rect x="9" y="9" width="6" height="6" rx="1"></rect>
+                        </svg>
+                        <span class="view-mode-label">grade</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex gap-2 mb-3 flex-shrink-0">
+                <label class="flex items-center justify-between gap-2 bg-[#bc7bd4]/40 border-2 border-[#7a32a8]/30 rounded-full px-3 py-2 flex-1 min-w-0 cursor-pointer select-none">
+                    <span class="text-[#7a32a8] font-black text-[9px] uppercase tracking-wide leading-tight">Filtrar cartas sendo utilizadas</span>
+                    <span class="toggle-switch">
+                        <input type="checkbox" id="filtro-em-decks" checked>
+                        <span class="toggle-slider"></span>
+                    </span>
+                </label>
+                <label id="label-filtro-nao-possuidas" class="flex items-center justify-between gap-2 bg-[#bc7bd4]/40 border-2 border-[#7a32a8]/30 rounded-full px-3 py-2 flex-1 min-w-0 cursor-pointer select-none">
+                    <span class="text-[#7a32a8] font-black text-[9px] uppercase tracking-wide leading-tight">Esconder não possuídas</span>
+                    <span class="toggle-switch">
+                        <input type="checkbox" id="filtro-nao-possuidas">
+                        <span class="toggle-slider"></span>
+                    </span>
+                </label>
+            </div>
             
-            <div id="grid-cartas" class="grid grid-cols-4 gap-2 overflow-y-auto no-scrollbar pb-10">
+            <div id="grid-cartas" class="grid grid-cols-4 gap-2 overflow-y-auto no-scrollbar pb-24 flex-grow min-h-0">
                 <!-- As cartas serão injetadas via JavaScript aqui -->
             </div>
         </main>
@@ -120,16 +318,16 @@
             <img id="modal-imagem" src="" alt="Carta" class="w-[80%] max-w-xs object-contain drop-shadow-2xl mb-6 rounded-lg">
             
             <div class="flex gap-2 w-[80%] max-w-xs justify-center">
+                <button id="btn-reciclar" class="bg-red-600 hover:bg-red-700 text-white font-black text-xs py-2 px-4 rounded-full shadow-md transition-transform hover:scale-105 whitespace-nowrap border-2 border-red-800">
+                    RECICLAR
+                </button>
+
                 <div class="bg-[#dca3e8] text-black font-black text-xs py-2 px-3 rounded-full flex items-center justify-center shadow-md whitespace-nowrap border-2 border-transparent">
                     CÓPIAS: <span id="modal-copias" class="ml-1">0</span>
                 </div>
                 
                 <button id="btn-fechar-modal" class="bg-[#dca3e8] hover:bg-[#bc7bd4] text-black font-black text-xs py-2 px-4 rounded-full shadow-md transition-colors whitespace-nowrap border-2 border-transparent">
                     RETORNAR
-                </button>
-                
-                <button id="btn-reciclar" class="bg-red-600 hover:bg-red-700 text-white font-black text-xs py-2 px-4 rounded-full shadow-md transition-transform hover:scale-105 whitespace-nowrap border-2 border-red-800">
-                    RECICLAR
                 </button>
             </div>
         </div>
@@ -182,6 +380,10 @@
         let dbUserRef = null;
         let colecaoJogador = {}; 
         let cartaAtivaNoModal = null;
+        let filtrarCartasUtilizadas = true;
+        let esconderNaoPossuidas = false;
+        let modoLista = false;
+        let cartasUsadasEmDecks = {};
         const TOTAL_CARTAS = 94;
 
         window.mostrarToast = function(mensagem) {
@@ -221,47 +423,149 @@
             document.getElementById('barra-xp').style.width = `${porcentagem}%`;
         }
 
+        function montarCartasUsadasEmDecks(decks) {
+            cartasUsadasEmDecks = {};
+            Object.values(decks || {}).forEach(deck => {
+                (deck.cartas || []).forEach(id => {
+                    cartasUsadasEmDecks[id] = (cartasUsadasEmDecks[id] || 0) + 1;
+                });
+            });
+        }
+
+        function obterEstadoCarta(idFormatado) {
+            const quantidadeTotal = colecaoJogador[idFormatado] || 0;
+            const quantidadeUsada = cartasUsadasEmDecks[idFormatado] || 0;
+            const quantidadeDisponivel = Math.max(0, quantidadeTotal - quantidadeUsada);
+            const possuiCarta = quantidadeTotal > 0;
+
+            if (!possuiCarta && (esconderNaoPossuidas || modoLista)) return null;
+
+            const info = INFO_CARTAS[idFormatado];
+            let textoQuantidade = '';
+            let emUsoTotal = false;
+
+            if (possuiCarta) {
+                if (filtrarCartasUtilizadas) {
+                    if (quantidadeDisponivel === 0) {
+                        emUsoTotal = true;
+                        textoQuantidade = `0 (${quantidadeTotal})`;
+                    } else if (quantidadeUsada > 0) {
+                        textoQuantidade = `${quantidadeDisponivel} (${quantidadeTotal})`;
+                    } else {
+                        textoQuantidade = `${quantidadeTotal}`;
+                    }
+                } else {
+                    textoQuantidade = `${quantidadeTotal}`;
+                }
+            }
+
+            const podeClicar = possuiCarta && !(filtrarCartasUtilizadas && emUsoTotal);
+
+            return {
+                idFormatado,
+                info,
+                quantidadeTotal,
+                possuiCarta,
+                textoQuantidade,
+                emUsoTotal,
+                podeClicar
+            };
+        }
+
+        function montarTextoLista(info) {
+            return `${info.nome} ${info.raridade} - AUR: ${info.aura}, FOF: ${info.fofura}, DIV: ${info.diversao}, ALE: ${info.aleatoriedade}`;
+        }
+
+        function atualizarBotoesVisualizacao(animar = false) {
+            const btnLista = document.getElementById('btn-view-lista');
+            const btnGrade = document.getElementById('btn-view-grade');
+
+            btnLista.classList.toggle('active', modoLista);
+            btnGrade.classList.toggle('active', !modoLista);
+            document.getElementById('label-filtro-nao-possuidas').classList.toggle('hidden', modoLista);
+
+            if (animar) {
+                const btnAtivo = modoLista ? btnLista : btnGrade;
+                btnLista.classList.remove('view-mode-pop');
+                btnGrade.classList.remove('view-mode-pop');
+                void btnAtivo.offsetWidth;
+                btnAtivo.classList.add('view-mode-pop');
+            }
+        }
+
+        function renderizarItemGrade(estado, grid) {
+            const { idFormatado, info, quantidadeTotal, possuiCarta, textoQuantidade, emUsoTotal, podeClicar } = estado;
+
+            const divCarta = document.createElement('div');
+            divCarta.className = "flex flex-col items-center cursor-pointer transform transition-transform hover:scale-105";
+
+            if (!possuiCarta) {
+                divCarta.classList.add('carta-bloqueada');
+            } else if (filtrarCartasUtilizadas && emUsoTotal) {
+                divCarta.classList.add('carta-em-uso');
+            }
+
+            const imagemExibida = possuiCarta ? (info.miniatura || info.imagem) : "fundo_carta.png";
+
+            divCarta.innerHTML = `
+                <span class="text-black font-black text-[10px] mb-0.5">${idFormatado}</span>
+                <div class="relative bg-gray-800 w-full aspect-[2.5/3.5] flex items-center justify-center rounded-md overflow-hidden shadow-md border-2 border-transparent ${podeClicar ? 'hover:border-[#8b3dff]' : ''}">
+                    <img src="${imagemExibida}" class="w-full h-full object-cover">
+                    ${possuiCarta ? `
+                    <div class="absolute bottom-1 right-1 bg-black/80 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full border border-white/40 shadow-md whitespace-nowrap">
+                        x${textoQuantidade}
+                    </div>` : ''}
+                </div>
+            `;
+
+            if (podeClicar) {
+                divCarta.addEventListener('click', () => abrirModal(idFormatado, info, quantidadeTotal));
+            }
+
+            grid.appendChild(divCarta);
+        }
+
+        function renderizarItemLista(estado, grid) {
+            const { idFormatado, info, quantidadeTotal, possuiCarta, textoQuantidade, emUsoTotal, podeClicar } = estado;
+
+            const divCarta = document.createElement('div');
+            divCarta.className = "carta-lista-item";
+
+            if (!possuiCarta) {
+                divCarta.classList.add('carta-bloqueada');
+            } else if (filtrarCartasUtilizadas && emUsoTotal) {
+                divCarta.classList.add('carta-em-uso');
+            }
+
+            let texto = montarTextoLista(info);
+            if (possuiCarta) texto += ` · x${textoQuantidade}`;
+
+            divCarta.textContent = texto;
+
+            if (podeClicar) {
+                divCarta.addEventListener('click', () => abrirModal(idFormatado, info, quantidadeTotal));
+            }
+
+            grid.appendChild(divCarta);
+        }
+
         function renderizarGridCartas() {
             const grid = document.getElementById('grid-cartas');
-            grid.innerHTML = ""; 
+            grid.innerHTML = "";
+            grid.className = modoLista
+                ? "modo-lista flex flex-col overflow-y-auto no-scrollbar pb-24 flex-grow min-h-0"
+                : "grid grid-cols-4 gap-2 overflow-y-auto no-scrollbar pb-24 flex-grow min-h-0";
 
             for (let i = 1; i <= TOTAL_CARTAS; i++) {
                 const idFormatado = String(i).padStart(3, '0');
-                const info = INFO_CARTAS[idFormatado];
-                const quantidade = colecaoJogador[idFormatado] || 0;
-                const possuiCarta = quantidade > 0;
+                const estado = obterEstadoCarta(idFormatado);
+                if (!estado) continue;
 
-                const divCarta = document.createElement('div');
-                divCarta.className = "flex flex-col items-center cursor-pointer transform transition-transform hover:scale-105";
-                
-                if (!possuiCarta) {
-                    divCarta.classList.add('carta-bloqueada');
+                if (modoLista) {
+                    renderizarItemLista(estado, grid);
+                } else {
+                    renderizarItemGrade(estado, grid);
                 }
-
-                // OTIMIZAÇÃO DE MINIATURA:
-                // Tenta puxar a info.miniatura. Se ela não existir no cartas.js, usa a info.imagem como fallback.
-            
-                const imagemExibida = possuiCarta ? (info.miniatura || info.imagem) : "fundo_carta.png";
-                
-                // Adicionamos 'relative' na div da carta e a badge (bolinha) de quantidade no final
-                divCarta.innerHTML = `
-                    <span class="text-black font-black text-[10px] mb-0.5">${idFormatado}</span>
-                    <div class="relative bg-gray-800 w-full aspect-[2.5/3.5] flex items-center justify-center rounded-md overflow-hidden shadow-md border-2 border-transparent ${possuiCarta ? 'hover:border-[#8b3dff]' : ''}">
-                        <img src="${imagemExibida}" class="w-full h-full object-cover">
-                        
-                        ${possuiCarta ? `
-                        <div class="absolute bottom-1 right-1 bg-black/80 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full border border-white/40 shadow-md">
-                            x${quantidade}
-                        </div>` : ''}
-                    </div>
-                `;
-
-                if (possuiCarta) {
-               
-                    divCarta.addEventListener('click', () => abrirModal(idFormatado, info, quantidade));
-                }
-
-                grid.appendChild(divCarta);
             }
         }
 
@@ -591,6 +895,30 @@
             }
         });
 
+        document.getElementById('filtro-em-decks').addEventListener('change', (e) => {
+            filtrarCartasUtilizadas = e.target.checked;
+            renderizarGridCartas();
+        });
+
+        document.getElementById('filtro-nao-possuidas').addEventListener('change', (e) => {
+            esconderNaoPossuidas = e.target.checked;
+            renderizarGridCartas();
+        });
+
+        document.getElementById('btn-view-lista').addEventListener('click', () => {
+            if (modoLista) return;
+            modoLista = true;
+            atualizarBotoesVisualizacao(true);
+            renderizarGridCartas();
+        });
+
+        document.getElementById('btn-view-grade').addEventListener('click', () => {
+            if (!modoLista) return;
+            modoLista = false;
+            atualizarBotoesVisualizacao(true);
+            renderizarGridCartas();
+        });
+
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('player-name').innerText = user.displayName?.toUpperCase() || "JOGADOR";
@@ -630,6 +958,7 @@
                     atualizarVisualBarraXP(dados.xp || 0, dados.nivel || 1);
                     
                     colecaoJogador = dados.colecao || {};
+                    montarCartasUsadasEmDecks(dados.decks);
                     renderizarGridCartas();
                     
                     if (dados.fotoPerfil) {

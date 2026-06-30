@@ -81,6 +81,7 @@
             </div>
             
             <span id="contador-cartas" class="text-white bg-[#7a32a8] px-4 py-1 rounded-full text-xs font-bold mt-2 border border-[#bc7bd4] shadow-md">0 / 20 CARTAS</span>
+            <p id="contador-raridades" class="text-[#dca3e8] text-[10px] font-bold mt-1.5 text-center tracking-wide leading-tight"></p>
         </header>
 
         <main class="flex-grow overflow-y-auto no-scrollbar pb-32 bg-[#dca3e8]/30 backdrop-blur-sm rounded-2xl p-4 border-2 border-[#bc7bd4] shadow-xl">
@@ -239,6 +240,29 @@
             }, 3000);
         };
 
+        function atualizarContadorRaridades() {
+            let epicas = 0, lendarias = 0, raras = 0, comuns = 0;
+
+            deckState.forEach(id => {
+                if (!id || !INFO_CARTAS[id]) return;
+                const raridade = INFO_CARTAS[id].raridade;
+                if (raridade === "Épica") epicas++;
+                else if (raridade === "Lendária") lendarias++;
+                else if (raridade === "Rara") raras++;
+                else if (raridade === "Comum") comuns++;
+            });
+
+            document.getElementById('contador-raridades').innerHTML = `
+                <span class="text-purple-300">Épicas: ${epicas}/1</span>
+                <span class="text-white/50 mx-1">·</span>
+                <span class="text-yellow-300">Lendárias: ${lendarias}/2</span>
+                <span class="text-white/50 mx-1">·</span>
+                <span class="text-blue-300">Raras: ${raras}/7</span>
+                <span class="text-white/50 mx-1">·</span>
+                <span class="text-gray-200">Comuns: ${comuns}</span>
+            `;
+        }
+
         // --- LÓGICA DA GRADE (20 SLOTS) CORRIGIDA ---
         function renderizarGrade() {
             const grid = document.getElementById('grid-construtor');
@@ -289,6 +313,7 @@
             }
 
             document.getElementById('contador-cartas').innerText = `${cartasPreenchidas} / 20 CARTAS`;
+            atualizarContadorRaridades();
         }
 
         window.removerCartaDoSlot = function(index) {

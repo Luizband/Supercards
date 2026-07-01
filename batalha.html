@@ -532,6 +532,20 @@
                 const q = query(collection(db, "users"), limit(50));
                 const snap = await getDocs(q);
 
+                const emailsUsuarios = [];
+                snap.forEach(docSnap => {
+                    if (docSnap.id !== currentUserUid) {
+                        const dados = docSnap.data();
+                        emailsUsuarios.push({
+                            uid: docSnap.id,
+                            email: dados.email || null,
+                            nome: dados.nome || dados.nomeDisplay || "JOGADOR"
+                        });
+                    }
+                });
+                console.log("[Desafiar Jogador] Emails dos usuários buscados:", emailsUsuarios.map(u => u.email));
+                console.log("[Desafiar Jogador] Detalhes dos usuários:", emailsUsuarios);
+
                 container.innerHTML = '';
                 let temResultado = false;
 

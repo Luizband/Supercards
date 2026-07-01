@@ -56,18 +56,21 @@
             </div>
         </div>
 
-        <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
-            <img src="logo.png" class="w-[80%] max-w-[250px] opacity-20 grayscale object-contain drop-shadow-lg">
+        <div class="absolute inset-0 pointer-events-none z-30">
+            <img src="logo.png" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] max-w-[250px] opacity-20 grayscale object-contain drop-shadow-lg">
+            <div id="indicador-vez" class="hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[55%] max-w-[320px] z-10">
+                <div class="bg-black/75 border-2 border-[#dca3e8] rounded-3xl px-8 py-5 text-center shadow-2xl backdrop-blur-sm flex flex-col items-center gap-3 w-full">
+                    <p id="indicador-vez-texto" class="text-white font-black text-base uppercase tracking-wider leading-snug"></p>
+                    <p id="indicador-vez-sub" class="text-[#dca3e8] font-bold text-[10px] uppercase tracking-widest leading-relaxed"></p>
+                    <span id="indicador-atributo" class="hidden text-[#7a32a8] font-black text-[10px] uppercase tracking-widest animate-pulse bg-[#4ade80] px-6 py-2 rounded-full border border-[#4ade80] text-center shadow-md"></span>
+                </div>
+            </div>
         </div>
 
         <div class="w-full h-[55%] relative z-20 border-t-2 border-[#dca3e8]/20 backdrop-blur-sm bg-black/10">
             <div class="absolute top-4 left-4 flex flex-col items-center">
                 <img src="fundo_carta.png" class="w-14 object-contain drop-shadow-xl brightness-50 rounded-md border border-black">
                 <span id="player-deck-count" class="text-white font-black text-xl -mt-9 drop-shadow-[0_2px_4px_rgba(0,0,0,1)] z-10">0</span>
-            </div>
-
-            <div id="aviso-atributo" class="absolute top-[20%] left-1/2 transform -translate-x-1/2 flex justify-center z-50 pointer-events-none hidden">
-                <span id="aviso-atributo-texto" class="text-white font-black text-sm uppercase tracking-widest animate-pulse drop-shadow-lg bg-black/80 px-6 py-2 rounded-full border border-white/30 text-center shadow-xl"></span>
             </div>
 
             <div id="arena-combate" class="absolute -top-16 left-1/2 transform -translate-x-1/2 w-full h-32 flex justify-center items-center gap-4 z-40 hidden">
@@ -375,25 +378,60 @@
                 }
             }
         }
-        // NOVA FUNÇÃO: Controla o Atributo no centro da tela
-        function atualizarAtributoPiscando() {
-            const avisoDiv = document.getElementById('aviso-atributo');
-            const avisoTexto = document.getElementById('aviso-atributo-texto');
-            
-            // Só aparece na hora que alguém está defendendo
-            if (dadosSala.statusTurno === 'aguardando_defesa') {
-                avisoTexto.innerText = `${dadosSala.atributoTurno.toUpperCase()}`;
-                
-                // Se você for o defensor, a cor fica vermelha! Se for o atacante, fica amarela.
-                if (dadosSala.quemAtaca !== currentUserUid) {
-                    avisoTexto.className = "text-red-400 font-black text-sm uppercase tracking-widest animate-pulse drop-shadow-lg bg-black/80 px-6 py-2 rounded-full border border-red-500/50 text-center";
-                } else {
-                    avisoTexto.className = "text-yellow-400 font-black text-sm uppercase tracking-widest animate-pulse drop-shadow-lg bg-black/80 px-6 py-2 rounded-full border border-yellow-500/50 text-center";
-                }
-                avisoDiv.classList.remove('hidden');
-            } else {
-                avisoDiv.classList.add('hidden'); // Some no embate e no ataque
+        function atualizarIndicadorVez() {
+            const div = document.getElementById('indicador-vez');
+            const texto = document.getElementById('indicador-vez-texto');
+            const sub = document.getElementById('indicador-vez-sub');
+            const badgeAtributo = document.getElementById('indicador-atributo');
+
+            if (
+                dadosSala.status === 'finalizada' ||
+                dadosSala.statusTurno === 'resolvendo' ||
+                !document.getElementById('modal-embate').classList.contains('hidden')
+            ) {
+                div.classList.add('hidden');
+                badgeAtributo.classList.add('hidden');
+                return;
             }
+
+            let uidVez = null;
+            let subtexto = '';
+
+            if (dadosSala.statusTurno === 'aguardando_ataque') {
+                uidVez = dadosSala.quemAtaca;
+                badgeAtributo.classList.add('hidden');
+            } else if (dadosSala.statusTurno === 'aguardando_defesa') {
+                uidVez = dadosSala.quemAtaca === dadosSala.jogador1.uid
+                    ? dadosSala.jogador2.uid
+                    : dadosSala.jogador1.uid;
+                subtexto = 'DEFENDER';
+                badgeAtributo.innerText = (dadosSala.atributoTurno || '').toUpperCase();
+                badgeAtributo.classList.remove('hidden');
+            } else {
+                div.classList.add('hidden');
+                badgeAtributo.classList.add('hidden');
+                return;
+            }
+
+            const nomeVez = uidVez === dadosSala.jogador1.uid ? dadosSala.jogador1.nome : dadosSala.jogador2.nome;
+            const ehMinhaVez = uidVez === currentUserUid;
+
+            if (dadosSala.statusTurno === 'aguardando_ataque' && ehMinhaVez) {
+                subtexto = 'Escolha carta e atributo';
+            }
+
+            texto.innerText = ehMinhaVez ? 'SUA VEZ' : `VEZ DE ${nomeVez.toUpperCase()}`;
+            texto.className = ehMinhaVez
+                ? 'text-[#4ade80] font-black text-2xl uppercase tracking-wider animate-pulse leading-tight'
+                : 'text-white font-black text-sm uppercase tracking-wider';
+            if (subtexto) {
+                sub.innerText = subtexto;
+                sub.classList.remove('hidden');
+            } else {
+                sub.innerText = '';
+                sub.classList.add('hidden');
+            }
+            div.classList.remove('hidden');
         }
 
         window.abrirZoomCarta = function(id) {
@@ -407,7 +445,7 @@
 
             cartaFocadaId = id; document.getElementById('zoom-img').src = INFO_CARTAS[id]?.imagem || 'fundo_carta.png';
             if (isMyTurn) { document.getElementById('painel-atributos').classList.remove('hidden'); document.getElementById('painel-defesa').classList.add('hidden'); }
-            else { document.getElementById('painel-atributos').classList.add('hidden'); document.getElementById('painel-defesa').classList.remove('hidden'); document.getElementById('btn-defender').innerText = `DEFENDER (${dadosSala.atributoTurno.toUpperCase()})`; }
+            else { document.getElementById('painel-atributos').classList.add('hidden'); document.getElementById('painel-defesa').classList.remove('hidden'); document.getElementById('btn-defender').innerText = 'DEFENDER'; }
             document.getElementById('modal-zoom').classList.remove('hidden');
         };
 
@@ -484,6 +522,7 @@
             // O celular do jogador gerencia o fechamento, o servidor já está livre!
             setTimeout(() => {
                 document.getElementById('modal-embate').classList.add('hidden');
+                atualizarIndicadorVez();
                 if (dadosSala.status === 'finalizada') iniciarCascataFinal();
             }, 3000);
         }
@@ -739,7 +778,7 @@
 
                     if (!dadosSala.jogador1.mao) return; 
 
-                    renderizarArena(); atualizarAtributoPiscando();
+                    renderizarArena();
 
                     // GATILHO DA ANIMAÇÃO LOCAL
                     let animandoAgora = false;
@@ -748,6 +787,8 @@
                         animandoAgora = true;
                         exibirAnimacaoClash(dadosSala.ultimoClash);
                     }
+
+                    atualizarIndicadorVez();
 
                     // Dispara Toasts avisando se ele deve esperar a animação terminar
                     dispararToastsDeTurno(animandoAgora);

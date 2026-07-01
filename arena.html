@@ -58,7 +58,14 @@
 
         <div class="absolute inset-0 pointer-events-none z-30">
             <img src="logo.png" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] max-w-[250px] opacity-20 grayscale object-contain drop-shadow-lg">
-            <div id="indicador-vez" class="hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[55%] max-w-[320px] z-10">
+        </div>
+
+        <div id="indicador-centro" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] max-w-[320px] z-40 pointer-events-none">
+            <div id="indicador-vez" class="hidden w-full relative">
+                <div id="resultado-turno" class="hidden absolute bottom-full left-1/2 -translate-x-1/2 w-[110%] text-center mb-4 px-3 py-2">
+                    <p id="resultado-turno-titulo" class="text-[#4ade80] font-black text-2xl uppercase tracking-wider drop-shadow-[0_2px_10px_rgba(0,0,0,1)] leading-tight"></p>
+                    <p id="resultado-turno-detalhe" class="hidden text-[#dca3e8] font-bold text-[10px] uppercase tracking-widest mt-2 leading-relaxed drop-shadow-[0_1px_6px_rgba(0,0,0,1)]"></p>
+                </div>
                 <div class="bg-black/75 border-2 border-[#dca3e8] rounded-3xl px-8 py-5 text-center shadow-2xl backdrop-blur-sm flex flex-col items-center gap-3 w-full">
                     <p id="indicador-vez-texto" class="text-white font-black text-base uppercase tracking-wider leading-snug"></p>
                     <p id="indicador-vez-sub" class="text-[#dca3e8] font-bold text-[10px] uppercase tracking-widest leading-relaxed"></p>
@@ -89,7 +96,7 @@
             
             <div id="painel-atributos" class="grid grid-cols-2 gap-3 w-full max-w-xs hidden">
                 <button onclick="confirmarAcao('aura')" class="bg-blue-600 hover:bg-blue-500 text-white font-black text-xs py-3 rounded-lg shadow-lg border-2 border-blue-400 uppercase tracking-widest">AURA</button>
-                <button onclick="confirmarAcao('fofura')" class="bg-pink-500 hover:bg-pink-400 text-white font-black text-xs py-3 rounded-lg shadow-lg border-2 border-pink-300 uppercase tracking-widest">FOFURA</button>
+                <button onclick="confirmarAcao('fofura')" class="bg-pink-500 hover:bg-pink-400 text-black font-black text-xs py-3 rounded-lg shadow-lg border-2 border-pink-300 uppercase tracking-widest">FOFURA</button>
                 <button onclick="confirmarAcao('diversao')" class="bg-yellow-500 hover:bg-yellow-400 text-black font-black text-xs py-3 rounded-lg shadow-lg border-2 border-yellow-300 uppercase tracking-widest">DIVERSÃO</button>
                 <button onclick="confirmarAcao('aleatoriedade')" class="bg-purple-600 hover:bg-purple-500 text-white font-black text-xs py-3 rounded-lg shadow-lg border-2 border-purple-400 uppercase tracking-widest">ALEATÓRIO</button>
             </div>
@@ -174,11 +181,11 @@
         let salaId = null;
         let dadosSala = null;
         let cartaFocadaId = null;
-        let ultimoEstadoToast = null; 
         let etapaFim = 0, pointsJ1 = 0, pointsJ2 = 0;
         
         // --- NOVAS VARIÁVEIS DE OTIMIZAÇÃO E ANIMAÇÃO ---
         window.turnoAnimadoLocal = -1;
+        window.mostrandoResultadoTurno = false;
         window.ultimaMaoOpp = "";
         window.ultimaMaoMy = "";
 
@@ -357,41 +364,57 @@
             }
         };
 
-        function dispararToastsDeTurno(esperarAnimacao = false) {
-            if (dadosSala.status === 'finalizada') return;
-            let estado = `${dadosSala.turnoAtual}-${dadosSala.statusTurno}`;
-            if (ultimoEstadoToast === estado) return; ultimoEstadoToast = estado;
-
-            const nAtacante = dadosSala.quemAtaca === dadosSala.jogador1.uid ? dadosSala.jogador1.nome : dadosSala.jogador2.nome;
-
-            if (dadosSala.statusTurno === 'aguardando_ataque') {
-                if (esperarAnimacao) {
-                    // Se estiver passando a animação do embate, espera 4.6 segundos para mostrar o aviso
-                    setTimeout(() => {
-                        if (dadosSala.status !== 'finalizada') {
-                            window.mostrarToast(`Vez de ${nAtacante} escolher uma carta e atributo`);
-                        }
-                    }, 3200); 
-                } else {
-                    // Se for o primeiro turno do jogo, mostra na hora
-                    window.mostrarToast(`Vez de ${nAtacante} escolher uma carta e atributo`);
-                }
-            }
+        function esconderResultadoTurno() {
+            window.mostrandoResultadoTurno = false;
+            document.getElementById('resultado-turno').classList.add('hidden');
+            document.getElementById('resultado-turno-detalhe').classList.add('hidden');
         }
+
+        function mostrarResultadoTurno(data) {
+            const titulo = document.getElementById('resultado-turno-titulo');
+            const detalhe = document.getElementById('resultado-turno-detalhe');
+
+            detalhe.classList.add('hidden');
+            detalhe.innerText = '';
+
+            if (data.vencedorTurno === 'anuladas') {
+                titulo.innerText = 'AS CARTAS SE ANULARAM';
+                titulo.className = 'text-white font-black text-2xl uppercase tracking-wider drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] leading-tight';
+            } else if (data.vencedorTurno === 'desempate') {
+                titulo.innerText = `${data.nomeVencedorTurno.toUpperCase()} GANHOU!`;
+                titulo.className = 'text-[#4ade80] font-black text-2xl uppercase tracking-wider drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] leading-tight';
+                detalhe.innerText = `Empate! Venceu no atributo extra (${data.valorDesempate}).`;
+                detalhe.classList.remove('hidden');
+            } else {
+                titulo.innerText = `${data.nomeVencedorTurno.toUpperCase()} GANHOU O TURNO!`;
+                titulo.className = 'text-[#4ade80] font-black text-2xl uppercase tracking-wider drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] leading-tight';
+            }
+
+            window.mostrandoResultadoTurno = true;
+            document.getElementById('resultado-turno').classList.remove('hidden');
+        }
+
         function atualizarIndicadorVez() {
             const div = document.getElementById('indicador-vez');
             const texto = document.getElementById('indicador-vez-texto');
             const sub = document.getElementById('indicador-vez-sub');
             const badgeAtributo = document.getElementById('indicador-atributo');
+            const modalEmbateAberto = !document.getElementById('modal-embate').classList.contains('hidden');
+            const modalZoomAberto = !document.getElementById('modal-zoom').classList.contains('hidden');
 
             if (
                 dadosSala.status === 'finalizada' ||
                 dadosSala.statusTurno === 'resolvendo' ||
-                !document.getElementById('modal-embate').classList.contains('hidden')
+                modalEmbateAberto ||
+                modalZoomAberto
             ) {
                 div.classList.add('hidden');
                 badgeAtributo.classList.add('hidden');
                 return;
+            }
+
+            if (!window.mostrandoResultadoTurno) {
+                esconderResultadoTurno();
             }
 
             let uidVez = null;
@@ -446,10 +469,15 @@
             cartaFocadaId = id; document.getElementById('zoom-img').src = INFO_CARTAS[id]?.imagem || 'fundo_carta.png';
             if (isMyTurn) { document.getElementById('painel-atributos').classList.remove('hidden'); document.getElementById('painel-defesa').classList.add('hidden'); }
             else { document.getElementById('painel-atributos').classList.add('hidden'); document.getElementById('painel-defesa').classList.remove('hidden'); document.getElementById('btn-defender').innerText = 'DEFENDER'; }
+            document.getElementById('indicador-centro').classList.add('hidden');
             document.getElementById('modal-zoom').classList.remove('hidden');
         };
 
-        window.fecharZoomCarta = function() { document.getElementById('modal-zoom').classList.add('hidden'); };
+        window.fecharZoomCarta = function() {
+            document.getElementById('modal-zoom').classList.add('hidden');
+            document.getElementById('indicador-centro').classList.remove('hidden');
+            atualizarIndicadorVez();
+        };
 
         window.confirmarAcao = function(attr) {
             const idAlvo = cartaFocadaId; fecharZoomCarta(); cartaFocadaId = null; 
@@ -464,6 +492,12 @@
         window.confirmarDefesa = function() { window.confirmarAcao(null); };
 
         function exibirAnimacaoClash(data) {
+            if (window.timeoutsResultado) window.timeoutsResultado.forEach(clearTimeout);
+            window.timeoutsResultado = [];
+
+            esconderResultadoTurno();
+            document.getElementById('indicador-centro').classList.remove('hidden');
+            document.getElementById('indicador-vez').classList.add('hidden');
             document.getElementById('embate-atributo-titulo').innerText = `ATRIBUTO: ${data.attr_nome.toUpperCase()}`;
             document.getElementById('clash-p1-name').innerText = dadosSala.jogador1.nome;
             document.getElementById('clash-p1-card').style.backgroundImage = `url('${(INFO_CARTAS[data.id1]||{}).imagem||'fundo_carta.png'}')`;
@@ -508,23 +542,23 @@
             p1.style.animation = 'slideInFromLeft 0.5s forwards'; p2.style.animation = 'slideInFromRight 0.5s forwards';
             vs.style.animation = 'fadeIn 1s 0.5s forwards'; vs.style.opacity = 0;
 
-            setTimeout(() => {
+            window.timeoutsResultado.push(setTimeout(() => {
                 if (data.chaveVencedor === 'jogador1') { p1.classList.add('is-winner'); p2.classList.add('is-loser'); }
                 else if (data.chaveVencedor === 'jogador2') { p2.classList.add('is-winner'); p1.classList.add('is-loser'); }
                 else { p1.classList.add('is-loser'); p2.classList.add('is-loser'); }
-                
-                // Dispara o toast do resultado EXATAMENTE na hora do impacto!
-                if (data.vencedorTurno === 'anuladas') window.mostrarToast(`Empate absoluto! As cartas se ANULARAM.`);
-                else if (data.vencedorTurno === 'desempate') window.mostrarToast(`EMPATE!<br><span class="text-xs font-normal">${data.nomeVencedorTurno} venceu no atributo extra (${data.valorDesempate}).</span>`);
-                else window.mostrarToast(`${data.nomeVencedorTurno} ganhou o turno!`);
-            }, 1500);
+            }, 1500));
 
-            // O celular do jogador gerencia o fechamento, o servidor já está livre!
-            setTimeout(() => {
+            window.timeoutsResultado.push(setTimeout(() => {
                 document.getElementById('modal-embate').classList.add('hidden');
+                mostrarResultadoTurno(data);
+                atualizarIndicadorVez();
+            }, 3000));
+
+            window.timeoutsResultado.push(setTimeout(() => {
+                esconderResultadoTurno();
                 atualizarIndicadorVez();
                 if (dadosSala.status === 'finalizada') iniciarCascataFinal();
-            }, 3000);
+            }, 5500));
         }
 
         async function resolverCombateHost() {
@@ -781,20 +815,15 @@
                     renderizarArena();
 
                     // GATILHO DA ANIMAÇÃO LOCAL
-                    let animandoAgora = false;
                     if (dadosSala.ultimoClash && dadosSala.ultimoClash.turno > window.turnoAnimadoLocal) {
                         window.turnoAnimadoLocal = dadosSala.ultimoClash.turno;
-                        animandoAgora = true;
                         exibirAnimacaoClash(dadosSala.ultimoClash);
                     }
 
                     atualizarIndicadorVez();
 
-                    // Dispara Toasts avisando se ele deve esperar a animação terminar
-                    dispararToastsDeTurno(animandoAgora);
-
                     // Aguarda a tela de clash fechar para abrir a tela de pontos finais
-                    if (dadosSala.status === 'finalizada' && document.getElementById('modal-embate').classList.contains('hidden')) {
+                    if (dadosSala.status === 'finalizada' && document.getElementById('modal-embate').classList.contains('hidden') && !window.mostrandoResultadoTurno) {
                         iniciarCascataFinal();
                     }
 

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock — Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="_mock.css">
+    
+</head>
+<body class="bg-app has-mock-banner">
+    <div class="mock-banner">mock estático · index.html / login · dados fictícios · supercards</div>
+
+    <div class="flex items-center justify-center min-h-screen p-4 pt-8">
+        <div class="bg-[#bd83d4]/20 backdrop-blur-md border border-[#bd83d4]/50 p-6 md:p-8 rounded-3xl shadow-2xl w-full max-w-md flex flex-col items-center">
+            <img src="../logo.png" alt="Supercards" class="w-56 mb-4 drop-shadow-xl">
+            <div class="w-full flex flex-col gap-3">
+                <input type="email" value="reinaldo@email.com" placeholder="Seu E-mail" class="w-full px-4 py-3 rounded-xl bg-white/80 text-purple-900 font-bold" readonly>
+                <input type="password" value="••••••••" placeholder="Sua Senha" class="w-full px-4 py-3 rounded-xl bg-white/80 text-purple-900 font-bold" readonly>
+                <label class="flex items-center gap-2 text-white text-sm font-semibold pl-1">
+                    <input type="checkbox" checked class="w-4 h-4 accent-purple-600"> Lembrar meu e-mail
+                </label>
+                <button class="w-full py-3 mt-1 bg-gradient-to-r from-purple-600 to-green-500 text-white font-black text-lg rounded-xl shadow-lg">ENTRAR</button>
+                <p class="text-center text-white font-semibold mt-2">Ainda não tem conta? <span class="text-green-300 underline">Crie aqui</span></p>
+            </div>
+        </div>
+    </div>
+    <p class="fixed bottom-4 left-0 right-0 text-center text-white/60 text-xs">Variante cadastro: nome, e-mail, senha + botão CRIAR CONTA</p>
+
+</body>
+</html>

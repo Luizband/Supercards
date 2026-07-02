@@ -1,0 +1,45 @@
+/* Mock estático — Supercards (revisão de design) */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.mock-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 99999;
+    background: #f59e0b;
+    color: #1a1a1a;
+    font-size: 10px;
+    font-weight: 800;
+    text-align: center;
+    padding: 4px 8px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+body.has-mock-banner { padding-top: 24px; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.bg-app {
+    background-image: url('../fundotela.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+.bg-arena {
+    background: linear-gradient(180deg, #7a32a8 0%, #4ade80 100%);
+    background-attachment: fixed;
+}
+.card-mock {
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    border: 2px solid #1a1a1a;
+    border-radius: 8px;
+    aspect-ratio: 2.5/3.5;
+}
+.card-mock-back {
+    background: linear-gradient(135deg, #1a1a2e, #0f3460);
+    border: 2px solid #1a1a1a;
+    border-radius: 8px;
+    aspect-ratio: 2.5/3.5;
+}

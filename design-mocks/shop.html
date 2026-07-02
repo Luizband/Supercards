@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock — Loja</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="_mock.css">
+    
+</head>
+<body class="bg-app has-mock-banner">
+    <div class="mock-banner">mock estático · shop.html · dados fictícios · supercards</div>
+
+    <div class="h-[100dvh] p-4 pt-8 flex justify-center overflow-hidden">
+        <div class="w-full max-w-sm flex flex-col h-full">
+            <header class="flex justify-between items-center mb-6 mt-2">
+                <button class="bg-[#dca3e8] rounded-full w-10 h-10 text-[#7a32a8] font-black text-xl">←</button>
+                <h1 class="text-white font-black text-2xl drop-shadow-md">LOJA</h1>
+                <div class="bg-[#dca3e8] rounded-full px-3 py-1.5 flex items-center gap-1"><span class="text-black font-black text-sm">850</span><img src="../moedas.png" class="w-5 h-5" alt=""></div>
+            </header>
+            <main class="flex flex-col gap-4 overflow-y-auto no-scrollbar pb-20">
+                <div class="bg-gradient-to-br from-[#bc7bd4] to-[#7a32a8] rounded-3xl p-4 border-2 border-[#dca3e8] flex flex-col items-center">
+                    <h2 class="text-white font-black text-xl mb-1">Bônus Diário</h2>
+                    <p class="text-[#7a32a8] bg-[#dca3e8] px-3 py-0.5 rounded-full text-xs font-black mb-2">1 Pacote Básico Grátis</p>
+                    <img src="../pacotegratis.png" class="w-20 h-28 object-contain mb-3" alt="">
+                    <div class="bg-[#22c55e] text-white font-black py-2 w-full text-center rounded-full text-sm">PEGAR PACOTE</div>
+                </div>
+                <div class="bg-[#dca3e8] rounded-3xl p-4 flex items-center gap-4 border-4 border-[#bc7bd4]">
+                    <img src="../pacotebasico.png" class="w-16 h-24 object-contain" alt="">
+                    <div class="flex-grow"><h3 class="text-[#7a32a8] font-black uppercase">Pacote Básico</h3><p class="text-[#7a32a8]/80 text-xs font-bold">5 cartas</p><p class="text-[#7a32a8] font-black mt-2">100 <img src="../moedas.png" class="inline w-4 h-4"></p></div>
+                </div>
+                <div class="bg-[#dca3e8] rounded-3xl p-4 flex items-center gap-4 border-4 border-[#bc7bd4]">
+                    <img src="../pacotepremium.png" class="w-16 h-24 object-contain" alt="">
+                    <div class="flex-grow"><h3 class="text-[#7a32a8] font-black uppercase">Pacote Premium</h3><p class="text-[#7a32a8]/80 text-xs font-bold">5 cartas · 1 rara+</p><p class="text-[#7a32a8] font-black mt-2">300 <img src="../moedas.png" class="inline w-4 h-4"></p></div>
+                </div>
+            </main>
+            <a href="index.html" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-[#7a32a8] text-white font-black py-2.5 px-12 rounded-full border-2 border-[#dca3e8] uppercase text-sm">Índice mocks</a>
+        </div>
+    </div>
+
+</body>
+</html>
